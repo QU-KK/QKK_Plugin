@@ -1,0 +1,64 @@
+{
+    "RANDOM": {
+        "title": "Distribution",
+        "bool_path": "ui",
+        "bool_toggle": "show_hide_bf_gn_distribution",
+        "items": [
+            "Density Volume",
+            "Exterior Band Width",
+            "Density Planes",
+            "Seed" 
+        ],
+        "icon": "LIGHTPROBE_VOLUME"
+    }, 
+
+    "GRID": {
+        "title": "Distribution",
+        "bool_path": "ui",
+        "bool_toggle": "show_hide_bf_gn_distribution",
+        "items": [
+            "Exterior Band Width",
+            "Spacing X",
+            "Spacing Y",
+            "Spacing Z"
+        ],
+        "icon": "LIGHTPROBE_VOLUME"
+    }, 
+
+    "planes_settings": {
+        "title": "Planes Settings",
+        "bool_path": "ui",
+        "bool_toggle": "show_hide_bf_gn_planes_settings",
+        "items": [
+            "Resolution Grid",
+            "Size Planes",
+            "ON/OFF Reductor",
+            "Reductor" 
+        ],
+        "icon": "VIEW_ORTHO"
+    },
+
+    "planes_transformation": {
+        "title": "Planes Transformation",
+        "bool_path": "ui",
+        "bool_toggle": "show_hide_bf_gn_planes_transformation",
+        "items": [
+            "Translate Planes",
+            "Rotate Planes",
+            "Random Rot Planes" 
+        ],
+        "icon": "TRANSFORM_ORIGINS"
+    },
+
+    "noise": {
+        "title": "Noise",
+        "bool_path": "ui",
+        "bool_toggle": "show_hide_bf_gn_noise",
+        "items": [
+            "Noise Strenght", 
+            "Scale Noise",
+            "Detail Noise"
+        ],
+        "icon": "MOD_NOISE"
+    }
+}

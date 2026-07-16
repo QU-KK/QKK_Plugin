@@ -1,0 +1,5 @@
+from .main import DYNAMIC_SWITCH_MAIN_PT_ui
+
+DSWITCH_UI = (
+    DYNAMIC_SWITCH_MAIN_PT_ui,
+)

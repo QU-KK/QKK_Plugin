@@ -1,0 +1,201 @@
+添加新待办事项,Add a new todo item
+添加和链接节点,Add and Link Nodes
+添加和链接节点 2,Add and Link Nodes 2
+添加和链接节点 3,Add and Link Nodes 3
+将文件夹添加到模块,Add Folder to Modules
+添加项目,Add Item
+添加文本,Add text
+将文本添加到便签,Add text to the post note
+添加待办事项,Add Todo Item
+插件数据,Addon Data
+插件已安装,Addon Installed
+对齐节点,Align Nodes
+更改 JSON 数据,Change JSON Data
+更改面板名称,Change N Panel Name
+更改节点颜色,Change Node Color
+更改节点标签,Change Node Label
+清理列表重复项,Clean List Duplicate
+清除输出,Clear Output
+云雾,Cloudiness:
+颜色,Color
+颜色选择器,Color Picker
+控制台输出,Console Output
+控制台打印,Console Printer
+复制,Copy
+复制文件,Copy File
+创建文件,Create File
+创建文件夹,Create Folder
+自定义颜色,Custom Color
+自定义偏好设置,Custom Preference
+自定义属性列表,Custom Properties List
+自定义属性类型,Custom Property Type
+删除,Delete
+删除目录,Delete Directory
+删除空文件夹,Delete Empty Folder
+删除文件,Delete File
+删除节点,Delete Node
+描述,Description:
+Discord,Discord
+Discord 格式化,Discord Formatter
+Discord 读取,Discord Read
+显示用户界面,Display UI
+下载文件进度属性,Download File Progress Property
+下载文件进度变量,Download File Progress Variable
+下载压缩文件,Download Zip File
+下载压缩文件进度属性,Download Zip File Progress Property
+下载压缩文件进度变量,Download Zip File Progress Variable
+downloaded_file,downloaded_file
+翻转绘制图像,Draw Image with flip
+复制节点,Duplicate Node
+元素,Element
+输入所选节点的新标签,Enter a new label for the selected node
+枚举切换器,Enum Switcher
+导出打印,Export Prints
+文件存在,File Exists
+文件大小,File Size
+文件创建日期,Files Creation Dates
+图库,Gallery
+获取 JSON 数据,Get JSON Data
+获取字符串索引值,Get string index value
+获取用户的 Python 模块,Get Users Python Modules
+隐藏信息,Hide Info
+隐藏显示视口对象,Hide Show Viewport Objects
+如何找到要交换的元素,How to find the element to swap
+湿度,Humidity:
+索引,Index
+安装 Python 模块,Install Python Modules
+列表中的项目数量,Item Amount In List
+Json 创建模板,Json Create Template
+Json 删除模板,Json Delete Template
+Json 删除模板项,Json Delete Template Items
+Json 获取模板,Json Get Template
+Json 获取顶层,Json Get Top Level
+位置,Location
+位置,Location:
+字符串匹配,Match in String
+数学向上或向下取整,Math Round Up Or Down
+数学正弦、余弦、正切、反正切,"Math Sine, Cosine, Tangent, Arctangent"
+矩阵骨骼,Matrix Bone
+矩阵对象,Matrix Object
+将待办事项向下移动,Move a todo item down
+将待办事项向上移动,Move a todo item up
+移动目录,Move Directory
+移动文件,Move File
+将待办事项向下移动,Move Todo Item Down
+将待办事项向上移动,Move Todo Item Up
+新标签,New Label
+节点,Node
+节点操作,Node Actions
+节点属性,Node Properties
+节点属性,Node Properties:
+对象自定义属性,Object Custom Properties
+打开开发者模式,Open Dev
+打开开发者网站,Open Developers Website
+打开开发者网站 2,Open Developers Website 2
+打开目录,Open Directory
+打开 Tenor,Open Tenor
+打开 Tenor 网站,Open Tenor Website
+打开 Tenor 网站,Open the Tenor website
+打开天气网站,Open Weather Website
+打包并移动压缩文件进度属性,Pack And Move Zip File Progress Property
+打包并移动压缩文件进度变量,Pack And Move Zip File Progress Variable
+页面数量,Page Amount
+页面索引项,Page Index Items
+页面返回项,Page Return Items
+弹出消息,Popup Message
+弹出消息列表,Popup Message List
+便签节点,Post It Node
+便签,Post It Note
+打印 ASCII,Print ASCII
+打印 ASCII 文本,Print ASCII Text
+打印输出,Print Output
+打印当前待办事项的文本并加载到字符串输入中,Print the text of the current todo item and load it into String input
+打印到节点,Print to Node
+打印待办事项文本,Print Todo Item Text
+属性,Properties
+所选节点的属性,Properties of the selected node
+属性未设置！,Property not set!
+快捷操作,Quick Actions
+快捷函数,Quick Function
+快捷面板,Quick Panel
+快速打印,Quick Print
+在线阅读文本,Read Online Text
+刷新图标,Refresh Icons
+移除所有材料,Removal All Materials
+移除待办事项,Remove a todo item
+移除列表重复项,Remove List Duplicate
+移除待办事项,Remove Todo Item
+重命名文件,Rename File
+渲染图像,Render Image
+在字符串中替换加,Replace In String Plus
+运行外部 Python,Run External Python
+选择,Select
+选择一个节点,Select a node
+按类型选择所有,Select All By Type
+选择格式,Select format
+选择节点,Select Node
+选择选项,Select Option
+选择类型,Select type
+显示,Show
+显示附加框,Show Additional Box
+显示框,Show Box
+显示信息,Show Info
+显示或隐藏附加框布局,Show or hide the additional box layout
+显示或隐藏框布局,Show or hide the box layout
+大小,Size
+此向量的大小,Size of this the vector
+字符串移除,String Remove
+字符串转小写,String To lower
+字符串转标题,String To Title
+字符串转大写,String To Upper
+在列表中交换,Swap In List
+切换 3D 视口视图模式,Switch 3Dviewport view mode
+温度,Temperature:
+测试互联网连接,Test Internet Connection
+此节点的颜色,The color of this node
+线程打包并移动压缩文件,Thread Pack and Move Zip File
+线程解压缩文件,Thread unpack Zip File
+线程解压缩文件属性,Thread Unpack Zip File Property
+线程解压缩文件变量,Thread Unpack Zip File Variable
+待办事项,Todo
+类型,type
+卸载 Python 模块,Uninstall Python Modules
+更新,Update
+更新所选待办事项,Update the selected todo item
+更新待办事项,Update Todo Item
+变量未设置！,Variable not set!
+向量容差,Vector Tolerance
+查看节点,View Node
+查看节点属性,View Node Properties
+天气,Weather
+天气云量,Weather Clouds
+天气描述,Weather Description
+天气湿度,Weather Humidity
+天气位置,Weather Location
+天气温度,Weather Temp
+天气风速,Weather Wind
+风速,Wind:
+换行文本,Wrap Text
+SKD_附加功能,SKD_Addon
+SKD_颜色,SKD_Colours
+SKD_控制台,SKD_Console
+SKD_自定义,SKD_Custom
+SKD_Discord,SKD_Discord
+SKD_文件,SKD_Files
+SKD_图标,SKD_Icons
+SKD_界面,SKD_Interface
+SKD_互联网,SKD_Internet
+SKD_Json,SKD_Json
+SKD_列表,SKD_List
+SKD_材料,SkD_Materials
+SKD_数学,SKD_Math
+SKD_矩阵,SKD_Matrix
+SKD_页面,SKD_Page
+SKD_面板,SKD_Panel
+SKD_弹出窗口,SKD_Popups
+SKD_贴纸,SKD_posts
+SKD_Python,SKD_Python
+SKD_渲染,SKD_Renders
+SKD_字符串,SKD_Strings
+SKD_天气,SKD_Weather
+哈啊哈,ace

@@ -1,0 +1,336 @@
+初始化子类，将注解转换为字段。," Initialize subclasses, converting annotations to fields. "
+检查器,Checker
+用作测试 UV 地图的纹理,Used as a texture for testing UV maps
+切换,Toggle
+开启/关闭检查器修改器,Off/On checker modifier
+纹理,Texture
+锁定大小,Lock Size
+获取现有检查器纹理,Get exist checker texture
+获取现有检查器材质,Get exist checker material
+获取现有检查器节点组,Get exist checker node group
+UniV 检查器,UniV Checker
+在分辨率后加上 'x',Has 'x' after resolution
+检查器地图清理,Checker Map Cleanup
+清理纹理、材质、节点和修改器,"Cleanup textures, materials, nodes and modifiers"
+饱和度是可变的,Saturate is mutable
+按组返回平面颜色,Return flat colors by group
+绘制测试,Draw Test
+精确 - 翻转面时的正确线偏移,exact - correct line offset for flipped faces
+零,Zero
+选择退化的 UV（零面积 UV 三角形）,Select degenerate UVs (zero area UV triangles)
+精度,Precision
+翻转,Flipped
+选择翻转的 UV 面,Select flipped UV faces
+未分割,Non-Splitted
+选择应标记接缝并无连接地展开的边,Selects the edges where seams should be marked and unwrapped without connection
+检查非接缝,Check Non-Seam
+使用自动平滑,Use Auto Smooth
+平滑角度,Smooth Angle
+重叠,Overlap
+选择所有相互重叠的 UV 面。\n,Select all UV faces which overlap each other.\n
+检查重叠模式,Check Overlaps Mode
+距离,Distance
+保持岛屿不合并的小偏移。,A small shift to keep the island from merging.
+围绕世界中心按角度（以弧度为单位）旋转面列表,Rotate a list of faces by angle (in radians) around a world center
+围绕支点缩放面列表,Scale a list of faces by pivot
+围绕世界中心缩放面列表,Scale a list of faces by world center
+警告：所有 'bm.faces' 必须未标记,Warning: All 'bm.faces' must be untagged
+警告：需要计算 UV 和 3D 面积,Warning: Need calc uv and 3d area
+计算任何选定岛屿的顶点,Calc any verts selected islands
+计算任何选定岛屿的边,Calc any edges selected islands
+计算任何选定岛屿的边，并标记接缝,"Calc any edges selected islands, with markseam"
+所有 == 标记接缝、角度、标记锐边、平滑角度,"All == mark seam, angle, mark sharp, smooth_angle"
+isl_a = 目标岛屿,isl_a = target island
+警告：标记应该是默认值。最佳阈值 = 0.0005,Warning: Tags should be the default. Optimal Threshold = 0.0005
+对象模式,Object Mode
+网格,Mesh
+窗口,Window
+UV 编辑器,UV Editor
+快捷键配置,Keymaps Config
+快捷键配置\n\n,Keymaps Config\n\n
+模式,Mode
+需要标记和索引, Need tagging and indexing
+警告：需要按边界索引和标记,Warning: Need indexing and tags by boundary
+固定,Pin
+清除,Clear
+预设处理,Presets Processing
+合并,Join
+合并时保留 UV 通道,Join with preserve uv channels
+UV 地图,UV Maps
+临时,temp
+向上,Up
+向下,Down
+添加,Add
+添加缺失项,Add with Missed
+移除,Remove
+移除全部,Remove All
+设为活动,Set Active
+修复 UV,Fix UVs
+修复通道,Fix channels
+纵横比 Y,Aspect Y
+分组并返回仅相同的元素,Groups and returns only identical elements
+纹素,Texel
+UV 映射,UVMap
+标志,Flag
+纹素密度,Texel Density
+单位表面面积在 3D 空间中的纹理像素（纹素）数量。,The number of texture pixels (texels) per unit surface area in 3D space.
+TD 预设,TD Presets
+显示 UV 层,Show UV Layers
+大小,Size
+活动 UV 索引,Active UV index
+活动 UV 渲染索引,Active uv render index
+UV 层,UV Layers
+形状方法,Shape Method
+缩放,Scale
+缩放岛屿以填充单位方形,Scale islands to fill unit square
+旋转,Rotate
+旋转岛屿以改善布局,Rotate islands to improve layout
+旋转方法,Rotation Method
+锁定固定岛屿,Lock Pinned Islands
+约束包含任何固定 UV 的岛屿,Constrain islands containing any pinned UV
+锁定方法,Lock Method
+锁定重叠,Lock Overlaps
+打包到,Pack to
+填充,Padding
+岛屿之间的间距（以像素为单位）。,Space between islands in pixels.\n\n
+调试,Debug
+默认捕捉点,Default Snap Points
+快速捕捉的默认捕捉点,Default Snap Points for QuickSnap
+显示拆分切换 UV 按钮,Show Split ToggleUV Button
+启用 UV 名称控制器,Enable UV name controller
+启用同步边缘接缝 ,Enable sync Border Seam
+显示拉伸 ,Show Stretch
+拉伸类型 ,Stretch Type
+最大选择距离 ,Max Pick Distance
+选择、快速吸附操作的选择距离 ,"Pick Distance for Pick Select, Quick Snap operators"
+快速吸附： ,QuickSnap:
+默认 ,Default
+开/关 ,Off/On
+删除用户 ,Delete User
+解决冲突 ,Resolve Conflicts
+要恢复已删除的快捷键映射，请重新加载插件。但最好使用复选框禁用它们。 ,"To restore deleted keymaps, just reload the addon. But it is better to use the checkboxes to disable them"
+您已安装的插件是免费版本，缺少一些高级操作和选项。 ,"You have the free version of the addon installed, which does not have some advanced operators and options"
+UniV Pro包含以下高级操作： ,which does not have some advanced operators and options
+矫正 - 通过选择的四个边界顶点来拉直岛，三角形和N-Gon也适用。 ,UniV Pro includes such advanced operators as:
+传输 - 交互式地将UV图层从一个对象传输到另一个对象。 ,"Rectify - straightens the island by selected 4 boundary vertices, works also with triangles and N-Gone too."
+按平面选择 [2D 和 3D] - 按角度选择链接的平面面。 ,Transfer - interactively transfers a UV layer from one object to another.
+循环选择 [2D 和 3D] [Ctrl+Alt+滚轮向上] - 边缘循环选择，也适用于三角形和N-Gon。 ,Select by Flat [2D and 3D] - select linked flat faces by angle
+拖动 - 此操作类似于快速吸附操作，但有根本区别： ,"Loop Select [2D and 3D] [Ctrl+Alt+WheelUp] - edge loop select, works also with triangles and N-Gone too."
+    1) 它仅适用于岛屿 ,"Drag - this operator is similar to the QuickSnap operator, but has fundamental differences:"
+    2) 仅移动一个岛屿 ,     1) It works only with islands
+    3) 取消选择所有其他元素并选择所选岛屿。 ,     2) Moves only one island
+    4) 更快的操作，左键单击 + Alt + 拖动移动岛屿，释放左键后操作结束。 ,     3) Unselects all other elements and selects the picked island.
+    5) 可以拉出重叠的翻转岛屿。 ,"     4) Faster manipulation, LMB + Alt + Drag moves the islands, if you release LMB - the operator ends."
+    6) 吸附不是关键和侵入性功能。 ,     5) Can pull out overlapped flipped islands.
+堆叠 - 具有更多高级选项，例如处理对称的UV岛以及处理网格岛。 ,     6) Snapping is not a key and intrusive feature.
+您可以在Discord频道免费获得Pro版。 ,Stack - has more advanced options such as working with symmetrical UV islands as well as working with Mesh islands 
+法线 ,You can get the Pro version for free in the Discord channel.
+基于面法线的投影。 ,Normal
+Shift - 单独 ,Projection by faces normal.\n\nShift - Individual
+裁剪 ,Crop
+将岛屿打包到基础瓦片中，为了性能目的，做到不太严格的精度。 ,"Packs the islands into a base tile, for performance purposes, does so with uncritical inaccuracy"
+2D定位 ,Orient 2D
+单独 ,Individual
+按岛屿网格单独 ,Individual by Island Meshes
+标记接缝 ,Mark Seam
+纠正比例 ,Correct Aspect
+获取来自着色器节点编辑器的活动图像的比例 ,Gets Aspect Correct from the active image from the shader node editor
+盒子 ,Box
+盒子投影 ,Box Projection
+单独缩放 ,Scale Individual
+移动 ,Move
+视图 ,View
+基于视图的投影 ,Projection by View
+相机边界 ,Camera Bounds
+将岛屿打包到基础瓦片中。 ,Packs the islands into a base tile
+使用正交 ,Use Orthographic
+智能 ,Smart
+智能投影 ,Smart Projection
+额外填充 ,Additional Padding
+角度,Angle
+四边形化 ,Quadrify
+将选定的UV对齐到矩形分布 ,Align selected UV to rectangular distribution
+剪切 ,Shear
+减少岛屿内的剪切 ,Reduce shear within islands
+独立缩放 ,Scale Independently
+独立缩放U和V ,Scale U and V independently
+快速吸附 ,Quick Snap
+岛屿模式 ,Island Mode
+放松 ,Relax
+警告：翻转岛屿可能导致不正确的行为 ,Warning: Incorrect behavior with flipped islands
+迭代 ,Iterations
+遗留行为 ,Legacy Behavior
+边缘混合 ,Border Blend
+切割 ,Cut
+切割选定部分 ,Cut selected
+添加 ,Addition
+展开 ,Unwrap
+按角度、锐角、材质、边界进行接缝处理 ,"Seams by angle, sharps, materials, borders"
+选定 ,Selected
+边界,Borders
+材质 ,Mtl
+按权重 ,By Weight
+按锐角 ,By Sharps
+接缝到锐角 ,Seams to Sharps
+自动平滑 ,Auto Smooth
+边界 ,Border
+按边界进行接缝处理 ,Seams by borders\n\n
+所有通道 ,All Channels
+选定岛屿 ,Selected Islands
+链接,Linked
+选择所有与活动UV贴图链接的UV顶点 ,Select all UV vertices linked to the active UV map
+取消选择 ,Deselect
+光标 ,Cursor
+按光标选择 ,Select by Cursor
+面模式 ,Face Mode
+正方形 ,Square
+选择正方形岛屿 ,Select Square Island
+形状 ,Shape
+正方形阈值 ,Square Threshold
+角度边界,Border by Angle
+按角度选择边缘 ,Select border edges by angle
+选择模式 ,Select Mode
+方向 ,Direction
+选择边缘 ,Select border edges
+边界模式 ,Border Mode
+选择拾取 ,Pick Select
+选择 ,Select
+生长 ,Grow
+接缝夹紧 ,Clamp on Seam
+在接缝处对边缘进行夹紧，但如果原始边缘有接缝，则忽略此效果。,"Edge Grow clamp on edges with seam, but if the original edge has seam, this effect is ignored"
+选择与初始选择连接的更多UV顶点 ,Select more UV vertices connected to initial selection\n\n
+选择与初始选择连接的更多顶点 ,Select more vertices connected to initial selection\n\n
+边缘生长 ,Edge Grow
+边缘生长/收缩选择 ,Edge Grow/Shrink Select\n\n
+生长/收缩切换 ,Grow/Shrink toggle
+最大选择角度。如果边缘拓扑包含4个四边形面且没有边界边缘，则忽略此效果。 ,"Max select angle. If edge topology contain 4 quad faces without border edge, this effect is ignored."
+优先考虑锐角 ,Prioritize Sharps
+对标记为锐角的边赋予35%的优先级，当存在超过4个链接边时有效。 ,"Gives 35% priority to an edge that has a Mark Sharp, works if there are more than 4 linked edges."
+按边界选择 ,Boundary by Boundary
+按TD选择 ,Select by TD
+按纹理密度选择 ,Select by Texel Density
+阈值 ,Threshold
+按面积选择 ,Select by Area
+大小模式 ,Size Mode
+低 ,Low
+高 ,High
+堆叠 ,Stacked
+选择完全重叠的岛屿 ,Select exact overlapped islands
+创建一个保存找到的面及其共享角的序列的岛屿 ,Create an island that saves a sequence of found faces and its shared corner
+堆叠 ,Stack
+堆叠到选定的 ,Stack to selected
+在选定之间 ,Between Selected
+直线 ,Straight
+拉直选定的边缘链并放松其余UV岛 ,Straighten selected edge-chain and relax the rest of the UV Island
+拆分UV切换 ,Split UV Toggle
+同步UV切换 ,Sync UV Toggle
+轴 ,Axis
+到光标 ,To Cursor
+就地 ,Inplace
+填充 = 1/纹理大小（1/256 = 0.0039） ,Padding=1/TextureSize (1/256=0.0039)
+填充 ,Fill
+对齐 ,Align
+翻转 ,Flip
+翻转X和翻转Y ,FlipX and FlipY.\n\n
+顺时针旋转和逆时针旋转 ,Rotate CW and Rotate CCW\n\n
+旋转方向 ,Direction of rotation
+排序 ,Sort
+子填充 ,Sub Padding
+面积子组 ,Area Subgroups
+反转 ,Reverse
+定向 ,Orient
+子组类型 ,Subgroup Type
+分布 ,Distribute
+分布 ,Distribute\n\n
+空间 ,Space
+岛屿均匀分布 ,Distribution of islands at equal distances
+打破 ,Break
+主页 ,Home
+将岛屿移动到基础瓷砖而不更改纹理对象 ,Move island to base tile without changes in the textured object\n\n
+将重叠岛屿移动到相邻瓷砖，以避免烘焙时出现伪影,"Moving overlapped islands to an adjacent tile, to avoid artifacts when baking"
+锁定重叠模式 ,Lock Overlaps Mode
+移动较小 ,Shift Smaller
+对小岛屿的移动优先级更高 ,"Sets a higher priority for shifting, for small islands"
+使用修改器 ,Use Modifiers
+通过修改器非破坏性地移动岛屿。要移除修改器，请使用Home操作。 ,"Non-destructively through a modifier shifts islands. To remove a modifier, use the Home operator."
+GN移动 ,GN Shift
+添加移动几何节点修改器。 ,Add Shift Geometry Node Modifier.
+数组 ,Array
+U偏移 ,U Offset
+镜像 ,Mirror
+扭曲 ,Warp
+UniV移动 ,UniV Shift
+随机 ,Random
+随机化选定的UV岛屿或面 ,Randomize selected UV islands or faces
+之间 ,Between
+边界之间 ,Bound Between
+圆形模式 ,Round Mode
+步骤 ,Steps
+在图像边界内错误工作 ,Incorrectly works with Within Image Bounds
+强度 ,Strength
+旋转范围 ,Rotation Range
+旋转步骤 ,Rotation Steps
+缩放因子 ,Scale Factor
+最小缩放 ,Min Scale
+最大缩放 ,Max Scale
+在图像边界内 ,Within Image Bounds
+保持UV面/岛屿在0-1 UV域内。 ,Keep the UV faces/islands within the 0-1 UV domain.
+种子 ,Seed
+旋转到一个最小矩形，垂直或水平。 ,"Rotated to a minimal rectangle, either vertical or horizontal\n\n"
+重力,Gravity
+将选定的UV岛屿或面对齐到世界/重力方向 ,Align selected UV islands or faces to world / gravity directions
+附加角度 ,Additional Angle
+焊接 ,Weld
+焊接选定的UV顶点 ,Weld selected UV vertices\n\n
+按距离 ,By Distance
+焊接方式 ,Weld by
+缝合 ,Stitch
+通过接近缝合选定的UV顶点 ,Stitch selected UV vertices by proximity\n\n
+注意，这不稳定 ,"Attention, it is unstable"
+更新缝隙 ,Update Seams
+重置 ,Reset
+归一化 ,Normalize
+调整 ,Adjust
+根据其在3D空间中的面积，平均未选中岛屿或物体的分离UV岛屿的大小 ,"Average the size of separate UV islands from unselected islands or objects, based on their area in 3D space\n\n"
+反转 ,Invert
+打包 ,Pack
+设置TD ,Set TD
+设置纹素密度 ,Set Texel Density
+自定义纹素 ,Custom Texel
+获取TD,Get TD
+获取纹素密度 ,Get Texel Density
+通过**crn**标签与参数角落链接，带有参数角落且无序 ,Linked to arg corner by **crn** tag with arg corner and unordered
+通过**face**标签与参数角落链接，带有参数角落且无序 ,Linked to arg corner by **face** tag with arg corner and unordered
+通过岛屿索引与参数角落链接 ,Linked to arg corner by island index with arg corner
+通过岛屿索引与参数角落不链接 ,Linked to arg corner by island index without arg corner
+通过面索引与顶点链接，且无参数角落 ,Linked to vertex by face index without arg corner
+通过岛屿索引与顶点链接，且无参数角落 ,Linked to vertex by island index without arg corner
+焊接并选择一个公共边 ,Weld and Selects a common edge
+用于焊接操作类型 ,For Weld OT
+UniV ,UniV
+调用默认 ,INVOKE_DEFAULT
+变换 ,Transform
+杂项 ,Misc
+小型 ,Small
+中型 ,Medium
+大型 ,Large
+检查 ,Inspect
+标记 ,Mark
+投影 ,Project
+全局设置,Global Settings
+打包设置 ,Pack Settings
+锁定方法 ,Lock Method       
+纹素密度 ,TD
+纹素密度预设管理器 ,Texel Density Presets Manager
+需要计算子岛屿 ,Need for calculate sub islands
+self.umeshes在OT类的初始化中保存引用，因此有必要释放内存 ,"self.umeshes save refs in init in OT classes, so it's necessary to free memory"
+获取没有UV但有面的umeshes , Get umeshes without uv but with faces
+获取没有UV和面的唯一umeshes , Get unique umeshes without uv and without faces
+警告：如果bmesh有选定面，则未选定的面可能没有可见面 ,"Warning: if bmesh has selected faces, non-selected might be without visible faces"
+过滤完全选定且可见的与未完全选定的 ,Filter full selected and visible with not full selected
+原地展开正在编辑对象的网格 ,Inplace unwrap the mesh of object being edited
+沿着展开 ,Unwrap Along
+在盘状拓扑上工作不正常，默认展开会完全改变其结构 ,"Doesnt work properly with disk-shaped topologies, which completely change their structure with default unwrap"
+混合因子 ,Blend Factor
+标记接缝内部岛屿 ,Mark Seam Inner Island
+标记有断裂边缘的接缝,Marks seams where there are split edges

@@ -1,0 +1,13 @@
+schema_version = "1.0.0"
+id = "click_to_put"
+version = "1.1.0"
+name = "Click to put"
+tagline = "Click to put"
+maintainer = "QKK"
+type = "add-on"
+website = "https://superhivemarket.com/creators/qkk"
+tags = ["3D View"]
+blender_version_min = "4.2.0"
+license = [
+"SPDX:GPL-2.0-or-later",
+]

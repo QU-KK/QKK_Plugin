@@ -1,0 +1,1304 @@
+S h I f t,Shift
+3D视口,View 3D
+枚举,Enum
+枚举映射（执行）,Enum Map (Execute)
+次数循环（执行）,Loop Repeat (Execute)
+For 循环（执行）,Loop For (Execute)
+If/Else（执行）,If/Else (Execute)
+绘制,Drawing
+布局,Layouts
+子布局,Sublayouts
+事件,Events
+执行,Execute
+可视化编程,Visual Scripting Editor
+从给定参数添加一个插座，并使用给定的添加回调,Adds a socket from the given parameter with the given add callback
+为此节点添加一个输入。此函数本身不进行评估，因为它可能在节点准备就绪之前使用,Adds an input for this node. This function itself doesn't evaluate as it may be used before the node is ready
+为此节点添加一个输出。此函数本身不进行评估，因为它可能在节点准备就绪之前使用,Adds an output for this node. This function itself doesn't evaluate as it may be used before the node is ready
+当父面板更新时调用，更新此节点的设置,"Called when a parent panel is updated, updates this nodes settings"
+检查给定代码是否与当前代码不同。如有必要，它会触发代码更新,Checks if the given code is different from the current code. If required it triggers a code update
+如果存在，编译此节点的根节点,Compiles the root node of this node if it exists
+将插座从当前类型转换为给定的idname,Converts the socket from it's current type to the given idname
+为操作员创建输入,Create inputs for operator
+从给定属性创建一个输入,Creates an input from the given property
+在此节点的节点树中为此节点创建一个节点集合项,Creates an item in the nodes collection of this node tree for this node
+为给定数据路径创建输入,Creates the inputs for the given data path
+逐行绘制此节点的代码,Draws the code for this node line by line on the node
+如果这是一个触发节点，则包含连接节点的代码,Includes connected nodes code in this node if this is a trigger node
+将给定代码按给定的缩进量缩进。当将多行块插入代码时使用,Indents the given code by the given amount of indents. Use this when inserting multiline blocks into code
+内部评估检查是否发生更改并触发编译过程,Internal evaluate to check if changes happened and trigger the compile process
+递归地返回链接到给定节点的所有节点的列表,Recursively returns a list of all nodes linked to the given node
+删除所有操作员输入,Remove all operator inputs
+从此节点树的引用中删除此节点的引用项,Removes the reference item for this node from this node trees references
+返回此节点的uid。请注意，这不是稳定的，随着时间推移会更改！,Returns a uid for this node. Note that this is not stable and will change over time!
+返回段是否可以被索引。段是数据路径的一部分字符串,Returns if a segment can be indexed. A segment is a string part of a data path
+返回此类型节点的集合,Returns the collection for the nodes of this type
+基于给定的输入和数据返回数据路径,Returns the data path based on the given inputs and data
+返回此节点所在的节点树,Returns the node tree this node lives in
+返回应在其中搜索属性组的集合的父级,Returns the parent of the collection the property group should be searched in
+返回应在其中搜索属性的集合的父级,Returns the parent of the collection the property should be searched in
+返回连接到此节点的触发节点,Returns the trigger nodes that are connected to this node
+根据节点颜色设置节点的颜色,Sets the color of the node depending on the node_color
+将所有输入/输出和设置添加到代码片段节点,This adds all in/outputs and settings to the snippet node
+触发与此节点连接的所有受影响程序节点的更新。当节点本身的代码更改时调用,"Triggers an update on all affected, program nodes connected to this node. Called when the code of the node itself changes"
+触发所有节点的更新。每个节点可以检查它是否引用此节点并相应地更新其自身的值,Triggers an update on all nodes. Every node can then check if it has a reference to this node and update it's own values accordingly
+触发动态插座以添加新插座,Triggers dynamic sockets to add new ones
+在节点图拓扑发生变化（添加或删除节点和链接）时更新,Update on node graph topology changes (adding or removing nodes and links)
+从父节点更新此子面板节点的值,Update this subpanels nodes values from the parent node
+在变成子面板时更新编译顺序,Updates the compile order when turned into a subpanel
+当连接节点带有布局类型时，更新此节点的布局类型,Updates the layout type of this node when a connected node with layout type gets removed
+当具有布局类型的节点被删除时，更新此节点的布局类型,Updates the layout type of this node when a node with layout type gets connected
+当选择新父面板时更新节点设置,Updates the nodes settings when a new parent panel is selected
+如果需要，用于覆盖导出的评估,Used to overwrite evaluate for exporting if required
+2D视图缩放,2D View Zoom
+3D视图坐标到2D,3D View Coordinates To 2D
+将用于此函数的固定python名称,A fixed python name that will be used for this function
+动作,Actions
+添加,Add
+使用此快捷方式粘贴的操作员添加一个节点,Add a node with the operator from this shortcut pasted in
+添加集合项,Add Collection Item
+添加项,Add Item
+添加覆盖,Add Override
+添加覆盖输入,Add Override Input
+添加属性,Add Property
+添加到列表,Add To List
+添加到菜单,Add To Menu
+添加到菜单（旧）,Add To Menu (Legacy)
+添加到面板,Add To Panel
+添加到面板（旧）,Add To Panel (Legacy)
+插件信息,Addon Info
+添加属性到此节点,Adds a property to this node
+添加项到此节点,Adds an item to this node
+添加覆盖输入,Adds an override input
+将教程节点添加到您的节点树中,Adds the tutorial node to your node tree
+在删除上一个打印信息之前，将添加到此节点的打印信息数量（0为无限制）,Amount of print messages that will be added to this node before a previous one is removed (0 is unlimited)
+从文件追加,Append From File
+按类型区域,Area By Type
+区域位置,Area Locations
+区域类型,Area Type
+骨架,Armatures
+资产,Asset
+获取路径的资产,Asset to get the path from
+Blender数据,Blender Data
+Blender属性,Blender Property
+BMesh边数据,BMesh Edge Data
+BMesh面数据,BMesh Face Data
+BMesh面到顶点位置,BMesh Faces To Vertex Locations
+BMesh物体数据,BMesh Object Data
+BMesh顶点数据,BMesh Vertex Data
+布尔,Boolean
+布尔运算,Boolean Math
+布尔矢量,Boolean Vector
+框,Box
+框（旧）,Box (Legacy)
+中断,Break
+画笔,Brushes
+按钮,Button
+按钮（旧）,Button (Legacy)
+相机,Cameras
+可以,Can
+小心！这种元素容易崩溃！,Careful! This element is prone to crashes!
+类别,Category
+通过改变变量,Change Variable By
+更改教程步骤,Changes the tutorial step
+章节,Chapters
+选择一个,Choose a
+选择图标,Choose Icon
+钳位,Clamp
+清除打印,Clear Prints
+清除此打印节点的消息,Clear this print nodes messages
+默认情况下关闭面板,Closes the panel by default
+代码,Code
+代码命令式,Code Imperative
+代码导入,Code Import
+代码注册,Code Register
+代码注销,Code Unregister
+集合长度,Collection Length
+集合类型,Collection Type
+集合,Collections
+颜色,Color
+列,Column
+列（旧）,Column (Legacy)
+字符串合并,Combine Strings
+向量合并,Combine Vector
+比较,Compare
+编译索引,Compile Index
+上下文,Context
+弧度/角度转换,Convert Radians/Degrees
+从显示属性的混合数据浏览器中复制Blender快捷键,Copy blender shortcuts from the blend data browser in display property
+复制菜单,Copy Menu
+复制菜单（旧）,Copy Menu (Legacy)
+复制面板,Copy Panel
+复制面板（旧）,Copy Panel (Legacy)
+无法,Couldn
+创建文件夹,Create Folder
+创建线条,Create Line
+创建四边形,Create Quad
+创建三角形,Create Triangle
+Ctrl,Ctrl
+光标,Cursor
+曲线,Curves
+自定义操作项,Custom Operator
+自定义父级,Custom Parent
+数据,Data
+数据路径,Data Path
+数据到图标,Data To Icon
+解码字节字符串,Decode Byte String
+默认关闭,Default Closed
+Esc取消,Default Escape
+定义数据类型,Define Data Type
+度数,Degrees
+描述,Description
+操作项描述,Description of the operator
+描述：,Description:
+方向,Direction
+拖动鼠标以运行操作的方向,Direction to drag the mouse in to run the action
+禁用评估,Disable Evaluation
+显示集合列表,Display Collection List
+显示集合列表（旧）,Display Collection List (Legacy)
+显示枚举项,Display Enum Item
+显示图标,Display Icon
+显示图标（旧）,Display Icon (Legacy)
+显示预览,Display Preview
+显示预览（旧）,Display Preview (Legacy)
+显示属性,Display Property
+显示属性（旧）,Display Property (Legacy)
+显示搜索,Display Search
+显示搜索（旧）,Display Search (Legacy)
+显示Serpens快捷键,Display Serpens Shortcut
+显示Serpens快捷键（旧）,Display Serpens Shortcut (Legacy)
+绘制,Draw
+绘制圆圈,Draw Circle
+绘制线条,Draw Line
+绘制多个,Draw Multiple
+绘制点,Draw Point
+绘制四边形,Draw Quad
+绘制空间,Draw Space
+绘制文本,Draw Text
+绘制三角形,Draw Triangle
+绘制类型,Draw Type
+虚拟按钮,Dummy Button
+编辑属性,Edit Property
+元素,Element
+列表中的元素,Element In List
+编码字节字符串,Encode Byte String
+结束绘制,End Drawing
+结束教程,End Tutorial
+结束教程,Ends the tutorial
+枚举映射（界面）,Enum Map (Interface)
+枚举集到列表,Enum Set To List
+运行脚本时出错！,Error when running script!
+按ESC或右键取消模态,ESC or Rightclick to cancel the modal
+EXEC_DEFAULT,EXEC_DEFAULT
+展开标题,Expand Header
+展开标题以填满整个面板宽度,Expands the header to fill the full panel width
+导出扩展名,Export Extension
+文件导出的扩展名,Extension that the file is exported with
+文件,File
+文件扩展名,File Extensions
+文件路径,Filepaths
+过滤函数应该有一个单一属性输入并返回布尔值（True保留项目，False移除项目）,"Filter function which should have a single property input and return a boolean (True keeps the item, False removes it)"
+过滤,Filter
+从快捷键查找操作项,Find Operator From Shortcut
+按下escape或右键时自动完成模态。如果关闭此选项，你需要自己添加完成模态的方法,Finish the modal automatically when pressing escape or rightclicking. If this is turned off you need to add a way to finish a modal yourself
+固定名称,Fixed Name
+浮点,Float
+浮点向量,Float Vector
+字体,Fonts
+更改顺序后强制编译,Force compile after changing the order
+来自,From
+从属性组,From Property Group
+函数,Function
+函数（执行）,Function (Execute)
+函数（界面）,Function (Interface)
+函数节点树,Function Node Tree
+函数路径,Function Path
+函数返回（执行）,Function Return (Execute)
+函数运行（执行）,Function Run (Execute)
+函数运行（界面）,Function Run (Interface)
+函数运行（界面）（旧）,Function Run (Interface) (Legacy)
+生成动态枚举项,Generate Dynamic Enum Items
+获取属性,Get Attribute
+获取自定义属性,Get Custom Property
+获取数据脚本行,Get Data Scriptline
+获取编辑选择模式,Get Edit Select Mode
+获取属性脚本行,Get Property Scriptline
+获取变量,Get Variable
+草图,Grease Pencils
+网格,Grid
+处理程序,Handler
+处理程序节点树,Handler Node Tree
+具有属性,Has Attribute
+具有自定义属性,Has Custom Property
+祝你有美好的一天，享受音乐！,Have a really nice day and enjoy the music!
+隐藏禁用的输入,Hide Disabled Inputs
+隐藏标题,Hide Header
+隐藏属性,Hide Properties
+隐藏面板标题,Hide the panels header
+隐藏此操作项的属性部分,Hide the properties section of this operator
+隐藏节点的禁用输入,Hides the disabled inputs of this node
+如何找到要删除的元素,How to find the element to delete
+图标,Icon
+图标库,Icon Gallery
+图标库（旧）,Icon Gallery (Legacy)
+图标来源,Icon Source
+标识符,Identifier
+覆盖 Idname,Idname Override
+如果需要按下 Alt 键,If the alt key has to be pressed
+如果需要按下 Ctrl 键,If the ctrl key has to be pressed
+如果需要按下 Shift 键,If the shift key has to be pressed
+如果启用此选项，则模态运行时界面仍可交互,"If this is enabled, the ui is still interactive when the modal is running"
+如果此面板应为子面板,If this panel should be a subpanel
+If/Else（界面）,If/Else (Interface)
+If/Else（界面）（旧）,If/Else (Interface) (Legacy)
+图像文件,Image File
+图像未保存！,Image not saved!
+图像大小,Image Size
+图像,Images
+模式,In Mode
+索引,Index
+索引集合属性,Index Collection Property
+索引列表,Index List
+列表元素的索引,Index Of List Element
+所选属性的索引,Index of the selected property
+索引类型,Index Type
+整数,Integer
+整数向量,Integer Vector
+界面脚本,Interface Script
+界面脚本行,Interface Scriptline
+反转布尔,Invert Boolean
+INVOKE_DEFAULT,INVOKE_DEFAULT
+是否导出,Is Export
+集合中的索引是否存在,Is Index In Collection
+是否物体类型,Is Object Type
+是否子面板,Is Subpanel
+项目,Item
+加入路径,Join Path
+加入字符串,Join Strings
+继续前进！,Keep Going!
+保持交互,Keep Interactive
+保持打开,Keep Open
+更改属性后保持面板打开,Keep the panel open after a property is changed
+键,Key
+标签,Label
+标签（旧）,Label (Legacy)
+最后的 Idname,Last Idname
+变形网格,Lattices
+允许你在模态运行时绘制界面,Lets you draw to the interface while the modal is running
+灯光,Lights
+限制,Limit
+列表,List
+列出 Blend 文件内容,List Blend File Content
+列出目录文件,List Directory Files
+列表长度,List Length
+低保真,LoFi
+For 循环（界面）,Loop For (Interface)
+For 循环（界面）（旧）,Loop For (Interface) (Legacy)
+次数循环（界面）,Loop Repeat (Interface)
+次数循环（界面）（旧）,Loop Repeat (Interface) (Legacy)
+创建枚举项,Make Enum Item
+使路径绝对,Make Path Absolute
+手动停止,Manual Stop
+映射字符串,Map Strings
+材质,Materials
+数学,Math
+菜单,Menu
+菜单节点树,Menu Node Tree
+网格,Meshes
+消息：,Messages:
+隐球体,Metaballs
+方法,Method
+将项目添加到列表的方法,Method to add the item to the list
+模态事件,Modal Event
+模态操作项,Modal Operator
+模态快捷键按下,Modal Shortcut Pressed
+模态视口移动,Modal Viewport Moved
+模式,Mode
+移动集合项目,Move Collection Item
+移动属性,Move Property
+移动教程,Move Tutorial
+移动此属性,Moves this property
+多个偏好设置节点！将只使用一个,Multiple preferences nodes! Only one will be used
+多选,Multiselect
+名称,Name
+命名图标,Named Icon
+新枚举项,New Enum Item
+新属性,New Property
+新随机数,New Random
+下一个,Next
+Ngon 转换为三角形位置,Ngon To Triangle Locations
+未连接集合！,No Collection connected!
+未指定枚举项！,No Enum Item specified!
+未连接属性！,No Property connected!
+节点,Node
+节点组,Node Groups
+节点ID名称,Node Idname
+节点是ID名称,Node Is Idname
+节点名称,Node Name
+节点树,Node Tree
+获取变量的节点树,Node Tree to get the variable from
+选择属性节点的节点树,Node Tree to select the property node from
+不是布尔变量！,Not a boolean variable!
+不是列表变量！,Not a list variable!
+不是字符串、整数或浮点变量！,"Not a string, integer or float variable!"
+没有打印内容！,Nothing printed!
+物体转 BMesh,Object To BMesh
+物体,Objects
+旧 Python 名称,Old Python Name
+旧树名称,Old Tree Name
+旧变量名称,Old Var Name
+在 Blender 关闭时,On Blender Close
+在依赖图更新时,On Depsgraph Update
+在帧更改时,On Frame Change
+在按键时Key,On Keypress
+在加载时,On Load
+在属性更新时,On Property Update
+在重做时,On Redo
+在渲染完成时,On Render Finish
+在渲染开始时,On Render Start
+在保存时,On Save
+在撤消时,On Undo
+仅在使用快捷键打开时显示此面板，而不在界面中显示,Only displays this panel when opened with a shortcut and not in the interface
+仅显示材质、纹理、灯光、世界和线条样式,"Only materials, textures, lights, worlds and line styles can be displayed"
+打开菜单,Open Menu
+打开面板,Open Panel
+打开饼状菜单,Open Pie Menu
+打开偏好设置,Open Preferences
+打开弹出窗口以编辑所选属性,Opens a popup for editing the selected property
+打开弹出窗口以添加覆盖,Opens a popup to add overrides
+操作,Operation
+对输入布尔值执行的操作,Operation to perform on the input booleans
+对输入数据执行的操作,Operation to perform on the input data
+使用输入数据执行的操作,Operation to perform with the input data
+操作项,Operator
+操作项上下文,Operator Context
+顺序,Order
+操作系统键,OS Key
+覆盖,Override
+覆盖上下文,Override Context
+字符串填充,Pad String
+面板,Panel
+面板节点树,Panel Node Tree
+面板宽度,Panel Width
+父级,Parent
+父级类型,Parent Type
+将复制的操作项粘贴到此按钮,Paste a copied operator into this button
+粘贴数据路径,Paste Data Path
+粘贴操作项,Paste Operator
+将复制的数据路径粘贴到此节点,Paste the copied data path into this node
+粘贴的路径,Pasted Path
+路径,Path
+路径信息,Path Info
+选择位置,Pick Location
+选择此位置以将菜单放入,Pick this location to put the menu into
+选择此位置以将面板放入,Pick this location to put the panel into
+选择此位置以将子面板放入,Pick this location to put the subpanel into
+饼状菜单,Pie Menu
+指针属性,Pointer Property
+弹出框,Popover
+弹出框（旧）,Popover (Legacy)
+弹出窗口,Popup
+门户,Portal
+位置,Position
+此界面相对于所选菜单的位置,Position of this interface to the selected menu
+此界面相对于所选面板的位置,Position of this interface to the selected panel
+偏好设置,Preferences
+预选属性,Preselected Property
+上一个,Previous
+打印,Print
+在节点上打印,Print On Node
+进度条,Progress Indicator
+属性,Property
+属性存在,Property Exists
+属性组,Property Group
+属性来源,Property Source
+弧度,Radians
+随机颜色,Random Color
+随机数,Random Number
+读取文本文件,Read Text File
+记录按键,Record Key
+录制,Recording
+记录下一个按下的按键,Records the next pressed key
+刷新视图,Refresh View
+区域,Region
+区域到视图,Region To View
+重新加载脚本,Reload Script
+从选定的源重新加载脚本,Reloads the script from the choosen source
+按此类型移除,Remove by this type
+移除集合项,Remove Collection Item
+从列表中移除,Remove From List
+移除项,Remove Item
+移除属性,Remove Property
+从该节点移除项,Removes an item from this node
+移除执行输入，只返回值,Removes the execute inputs and only gives you the return value
+从该节点移除所选属性,Removes the selected property from this node
+重复按键,Repeat Key
+当按住键时重复动作,Repeat the action when the key is held down
+字符串替换,Replace in String
+报告,Report
+需要执行,Require Execute
+重新注册当前插件代码并存储结果,Reregisters the current addon code and stores results
+重置数据路径,Reset Data Path
+重置门户,Reset Portal
+重置此门户,Reset this portal
+重置变量,Reset Variable
+重置该节点的数据路径,Resets the data path of this node
+返回,Return
+返回模态操作项,Return Modal Operator
+返回多个选定项,Return multiple selected items
+返回节点未连接到功能节点！,Return node not connected to function node!
+返回类型,Return Type
+返回所有节点树中的触发节点列表,Returns a list of all trigger nodes in all node trees
+返回完整路径列表，而不仅仅是文件和目录名称,Returns a list of full paths instead of just the file and directory names
+返回此插件的 bl_info,Returns the bl_info for this addon
+返回整个插件的代码，作为多个文件的字典,Returns the code for the entire addon as a dictionary of multiple files
+返回整个插件代码（用于开发），格式为单个 Python 文件,Returns the entire addon code (for development) formatted for a single python file
+反转,Reverse
+反转循环遍历项的顺序,Reverse the order the loop runs through the items
+右键点击任何选项以复制该空间中的上下文,Rightclick any option to copy the context in that space
+四舍五入,Round Number
+行,Row
+行（旧）,Row (Legacy)
+运行事件,Run Event
+间隔运行,Run In Intervals
+运行多次,Run Multiple Times
+运行操作项,Run Operator
+运行属性函数,Run Property Function
+运行脚本,Run Script
+运行事件代码而不触发事件,Run the event code without triggering event
+运行触发器,Run Trigger
+延迟运行,Run With Delay
+场景上下文,Scene Context
+场景,Scenes
+屏幕,Screens
+脚本,Script
+脚本行,Scriptline
+搜索：,Search:
+查看文档,See Docs
+选择,Select
+选择界面中的一个元素,Select an element in the interface
+选择菜单位置,Select Menu Location
+选择面板位置,Select Panel Location
+选择子面板位置,Select Subpanel Location
+选择界面中菜单的位置,Select the location of this menu in the Interface
+选择界面中面板的位置,Select the location of this panel in the Interface
+选择界面中子面板的位置,Select the location of this subpanel in the Interface
+从属性组中选择属性,Select the property from a property group
+选择属性组以选择属性,Select the property group to select the property from
+选择要生成项的属性,Select the property you want to generate items for
+在子面板节点上选择此自定义面板,Select this custom panel on the subpanel node
+选择界面中的此元素,Select this element in the interface
+已选择：,Selected:
+分隔符,Separator
+分隔符（旧）,Separator (Legacy)
+Serpens 属性,Serpens Property
+设置属性,Set Attribute
+设置自定义属性,Set Custom Property
+设置编辑选择,Set Edit Select
+设置标题文本,Set Header Text
+设置模态光标,Set Modal Cursor
+设置属性,Set Property
+设置状态文本,Set Status Text
+设置教程,Set Tutorial
+设置变量,Set Variable
+形状键,Shape Keys
+快捷键,Shortcut
+仅快捷键,Shortcut Only
+节点快捷键,Shortcut To Node
+快捷键类型,Shortcut Type
+在此节点上显示打印结果,Show print results on this node
+显示设置,Show Settings
+显示设置,Show the settings
+显示新的随机项,Shows you a new random item
+字符串两端去除,Sides of the string to strip
+大小,Size
+向量的大小,Size of this the vector
+跳过导出,Skip Export
+休眠,Sleep
+字符串切片,Slice String
+代码片段,Snippets
+代码片段,Snippet
+排序列表,Sort List
+来源,Source
+来源类型,Source Type
+空格,Space
+拆分,Split
+拆分（旧）,Split (Legacy)
+字符串拆分,Split String
+向量拆分,Split Vector
+开始绘制,Start Drawing
+开始时间戳记录或打印自开始以来的总时间,Start the timestamp recording or print the total time since the start
+开始教程,Start Tutorial
+静态UID,Static UID
+字符串,String
+字符串长度,String Length
+该节点的字符串值,String value of this node
+字符串去除,Strip String
+子菜单,Submenu
+子菜单（旧）,Submenu (Legacy)
+字符串中是否包含子字符串,Substring is in String
+切换数据,Switch Data
+切换图标,Switch Icons
+测试,test
+文本大小,Text Size
+文本,Texts
+纹理,Textures
+面板所属类别（仅在N面板中相关）,The category your panel is in (Only relevant if in an N-Panel)
+该节点的颜色,The color of this node
+此操作应在的上下文中运行,The context this operator should run in
+面板所属的上下文,The context your panel is in
+该节点的当前编译代码,The current compiled code for this node
+该节点导入的当前编译代码,The current compiled code for this nodes imports
+该节点注册的当前编译代码,The current compiled code for this nodes registrations
+该节点取消注册的当前编译代码,The current compiled code for this nodes unregistrations
+在模态运行时使用的光标,The cursor to use while the modal is running
+从上一个代码片段文件加载的数据,The data loaded from the last snippet file
+此门户的方向,The direction this portal goes in
+保存脚本的外部文件,The external file that holds your script
+属性的完整数据路径,The full data path to the property
+要运行的函数,The function to run
+要停止的处理程序,The handler to stop
+将此门户链接到另一个门户的标识符,The identifier that links this portal to another portal
+将此时间戳链接到其他时间戳的标识符,The identifier that links this timestamp to other timestamps
+要用作图标的图像,The image you want to use as an icon
+面板的标签,The label of your panel
+此菜单顶部显示的标签,The label shown at the top of this menu
+面板编译时最后的idname,The last idname that this panel had when it was compiled
+此界面应显示的菜单ID,The menu id this interface should be shown in
+应显示的菜单,The menu that should be displayed
+应显示的菜单,The menu that should be shown
+按下键时要打开的菜单,The menu to open when the key is pressed
+此快捷键打开的菜单,The menu to open with this shortcut
+用作此子菜单的菜单,The menu used for this submenu
+比较主动模式的模式,The mode which the active mode is compared to
+要获取属性的名称,The name of the property you want to get
+要获取类型的节点,The node to get the type for
+选择函数的节点树,The node tree to select the function from
+选择处理程序的节点树,The node tree to select the handler from
+选择菜单的节点树,The node tree to select the menu from
+选择操作员的节点树,The node tree to select the operator from
+选择面板的节点树,The node tree to select the panel from
+要从中获取属性的节点,The node which to take the property from
+要进行的操作,The operation you want to commence
+此按钮运行的操作员,The operator ran by this button
+按下键时要运行的操作,The operator to run when the key is pressed
+此快捷键运行的操作,The operator to run with this shortcut
+面板相对于其他自定义面板的顺序,The order of your panel compared to other custom panels
+此子面板应显示的面板ID,The panel id this subpanel should be shown in
+应显示的面板,The panel that should be displayed
+应显示的面板,The panel that should be shown
+此弹出窗口显示的面板,The panel to display with this popover
+按下键时要打开的面板,The panel to open when the key is pressed
+此快捷键打开的面板,The panel to open with this shortcut
+用作此子面板自定义父面板的面板,The panel used as a custom parent panel for this subpanel
+弹出窗口和弹出窗口的面板宽度,The panel width for popovers and popups
+代码片段json文件的路径,The path to the snippet json file
+按下键时要打开的饼状菜单,The pie menu to open when the key is pressed
+面板所在的区域,The region your panel is in
+获取值的返回节点,The return node to get values from
+要显示的快捷键,The shortcut to display
+图标的来源,The source of the icons
+获取代码的来源,The source of where to get the code from
+此操作员可以运行并绘制元素的空间,The space this operator can run in and elements are drawn in
+此操作员可以运行并绘制文本的空间,The space this operator can run in and the text is drawn in
+此操作应运行的空间,The space which this action should be able to run in
+面板所在的空间,The space your panel is in
+从此快捷键运行的操作类型,The type of action to run from this shortcut
+要查找的区域类型,The type of area to find
+要设置数据输入的数据类型,The type of data that you want to set the data input to
+应启动的绘制类型,The type of drawing that should be started
+要使用的索引类型,The type of index to use
+应使用的向量类型,The type of vector that should be used
+与物体比较的类型,The type which the object is compared to
+映射的值,The value from which to map
+要映射的值,The value to which to map
+按下键的方式,The way the key has to be pressed
+此模态应完成的方式,The way this modal should be finished
+此按钮没有关联的操作,This button has no operator associated
+此节点纯粹是为了您的享受！,This node is purely for your enjoyment!
+这只能在连接到操作员时工作,This only works when connected to operators
+此属性需要是Enum或String类型！,This property needs to be type Enum or String!
+此属性需要是Enum类型！,This property needs to be type Enum!
+这将运行弹出窗口之前的输出并保留交互元素。它不会,This will run the before popup output and keep the interactive elements. It won
+时间和日期,Time and Date
+操作时间,Time of Action
+时间戳,Timestamp
+到,To
+切换变量,Toggle Variable
+三角化BMesh,Triangulate BMesh
+触发,Trigger
+触发节点,Trigger Node
+触发此节点,Trigger this node
+教程,Tutorial
+类型,Type
+要预览的数据类型,Type of data to preview
+数字类型,Type of number
+附加物体的类型,Type of the Append object
+报告消息的类型,Type of the report message
+取消注册此插件,Unregisters this addon
+未使用,Unused
+使用3D,Use 3D
+使用3D坐标,Use 3D coordinates
+使用自定义操作员或Blender内部操作员,Use a custom operator or a blender internal
+使用自定义面板作为父面板,Use a custom panel as a parent
+使用列表节点来组合多个枚举项！,Use a list node to combine multiple enum items!
+使用Alpha,Use Alpha
+使用自定义,Use Custom
+使用自定义变量而不是独立的代码片段变量,Use custom variable instead of the standalone snippet variable
+对于可变换属性，使用获取属性脚本行！,Use Get Property Scriptline for transformable properties!
+使用Invoke,Use Invoke
+使用属性组,Use Property Group
+如果您想自己定义此面板的idname，请使用此选项,Use this if you want to define the idname of this panel yourself
+使用此节点时请小心！这可能会减慢您的UI,Use this node with care! This might slow down your UI
+值,Value
+此插座的值,Value of this socket
+变量,Variable
+要从中获取值的变量,Variable to get the value from
+变量类型,Variable Type
+向量数学,Vector Math
+版本,Version
+此节点的版本,Version of this node
+视图到区域,View To Region
+体积,Volumes
+当您希望事件处理程序运行时,When you want your event handler to run
+应从中选择属性的位置,Where the property should be selected from
+在文本文件中写入的位置,Where to write to in the text file
+是否绘制多个点（这比单独的节点更有效）,Whether to draw multiple points (this is more efficient than separate nodes)
+是否使用3D或2D坐标,Whether to use 3D or 2D coordinates
+窗口管理器,Window Managers
+带路径,With Path
+工作区,Workspaces
+世界,Worlds
+写文本文件,Write Text File
+您需要选择使用Serpens 3创建的代码片段！,You need to select a snippet that was created using Serpens 3!
+,
+插件,Addon
+保存插件,Save Addon
+添加到市场,Add to Marketplace
+导航,Navigation
+首选项导航,Preferences Navigation
+市场导航,Marketplace Navigation
+检查更新,Check For Updates
+在加载插件时在线检查更新,Check for updates online when loading the addon
+使用彩色节点,Use Colored Nodes
+根据类别为节点着色。不适用于现有节点,Color nodes to match their category. Does not apply to existing nodes
+保留错误文件,Keep Error File
+保留任何编译错误文件的副本,Keeps a copy of any compiled file that threw an error as
+搜索,Search
+搜索已加载的插件,Search through the loaded addons
+搜索已加载的软件包,Search through the loaded packages
+搜索已加载的代码片段,Search through the loaded snippets
+仅限 Serpens 3,Only Serpens 3
+隐藏所有之前 Serpens 版本的结果,Hide all results from previous serpens versions
+预设,Presets
+预设节点,Preset nodes
+强制编译,Force Compile
+节点文档,Node Docs
+从复制中添加节点,Add Node From Copied
+Blender:,Blender:
+插件:,Addon:
+加载包,Load Packages
+加载代码片段,Load Snippets
+加载插件,Load Addons
+未找到结果！,No results found!
+这将显示在您的首选项中：,This will be shown in your preferences:
+未向您的插件添加首选项节点。,No preferences node added to your addon.
+编译时间,Compile Time
+插件编译所需的时间,Time the addon took to compile
+暂停重新注册,Pause Reregistering
+在进行更改时暂停重新注册插件,Pauses reregistering the addon when changes are made
+可自定义变量,Variables Customizable
+保存代码片段变量的可自定义设置,Saves customizable setting of snippet variables
+可自定义属性,Properties Customizable
+保存代码片段属性的可自定义设置,Saves customizable setting of snippet properties
+正在导出,Is Exporting
+保存当前的导出状态以不同地评估节点,Saves the current status of exporting to evaluate nodes differently
+选择器激活,Picker Is Active
+当面板或类似的定位选择器处于活动状态时启用,This is enabled when a location picker for panels or similar is active
+最后复制的数据类型,Last Copied Data Type
+使用复制属性按钮最后复制的数据类型,The type of data last copied with the copy property button
+最后复制的数据路径,Last Copied Data Path
+使用复制属性按钮最后复制的数据路径,The path of data last copied with the copy property button
+最后复制的必需属性,Last Copied Required Properties
+显示换行设置,Show Wrap Settings
+如果启用，将显示这些面板中文字的换行设置。,"If this is enabled, the wrapping settings for the text in these panels are show."
+行换行,Line Wrap
+面板中单行显示的字符数量。,The amount of characters shown in a single line in the panel.
+有更新,Has Update
+Serpens 是否有可用更新。这在文件加载时设置。,If Serpens has an available update or not. This is set on file load.
+调试节点,Debug Nodes
+调试内部节点代码,Debug internal node code
+调试插座,Debug Sockets
+调试内部插座代码,Debug internal socket code
+仅调试选中的,Debug Selected Only
+仅调试选中的节点,Debug only selected nodes
+保留代码,Keep Code
+当代码更改时，在文本编辑器中保留一个 Python 文件,Keeps a python file in the text editor when the code changes
+调试属性,Debug Properties
+调试内部属性代码,Debug internal property code
+调试编译时间,Debug Compile Time
+打印编译代码所需的时间,Prints the time it takes to compile the code
+插入插座按钮,Insert Socket Buttons
+在动态插座上显示插入按钮以插入新的插座,Show an insert button on dynamic sockets to insert a new socket above
+加载时编译,Compile On Load
+文件加载时编译此插件,Compile this addon when the file is loaded
+简易 BPY 路径,Easy BPY Path
+文件加载时设置为简易 bpy 文件路径。,Gets set when a file is loaded. Set to the easy bpy file path.
+活动节点树,Active Node Tree
+您当前的节点树,The node tree you
+活动属性,Active Property
+您当前的属性,The property you
+显示属性类别,Show Property Categories
+显示插件属性的类别,Show categories for your addon properties
+显示的属性,The properties shown
+活动资源,Active Asset
+你的资产,The asset you
+插件名称,Addon Name
+插件的名称,The name of the addon
+插件的描述,The description of the addon
+作者,Author
+插件的作者,The author of this addon
+最低 Blender 版本,Minimum Blender
+此插件所需的最低 Blender 版本,Minimum blender version required for this addon
+位置,Location
+描述插件功能所在的位置,Describes where the addons functionality can be found
+警告,Warning
+如果有用户需要注意的错误或问题,Used if there is a bug or a problem that the user should be aware of
+文档 URL,Doc URL
+插件文档的 URL,URL to the addons documentation
+追踪器 URL,Tracker URL
+插件问题追踪器的 URL,URL to the addons bug tracker
+插件将显示的类别,The category the addon will be displayed in
+自定义类别,Custom Category
+您的自定义类别,Your custom category
+重新加载类别的基本数据,Reloads the basic data for a category
+设置过滤的操作项,Sets the filtered operators
+获取类别的操作项,Gets the operators for a category
+重新加载操作项列表,Reloads the list of operators
+加载 bpy 类别的数据,Loads the data for the bpy categories
+隐藏首选项,Hide Preferences
+隐藏首选项窗口中的所有面板,Hides all panels in the preferences window
+全局搜索,Global Search
+如果全局搜索是活动的,If the global search is active
+在全局搜索中搜索项目（用逗号分隔多个查询）,Searches for items in the global search (Separate multiple queries with commas)
+显示数量,Show Amount
+在发现标签中显示的项目数量,The amount of items to show in the discover tab
+仅完全匹配,Full Matches Only
+仅显示完全匹配的项目,Only show items that match the full search
+Blend 数据的类别,Category of blend data
+按数据类型过滤,Filter by data type
+搜索数据,Search data
+显示路径,Show Path
+显示属性的 Python 路径,Show python path of properties
+显示图表类别,Show Graph Categories
+显示插件图表的类别,Show categories for your addon graphs
+显示的图表,The graphs shown
+覆盖变量图表,Overwrite Variable Graph
+变量图表,Variable Graph
+显示变量的图表,Graph to display variables from
+删除重复代码,Remove Duplicate Code
+删除生成代码中的重复代码（对于大型插件有少量性能影响）,Removes duplicate code in the generated code (small performance impact for large addons)
+格式化代码,Format Code
+在生成的代码中格式化换行符（对于大型插件有小的性能影响）,Formats linebreaks in the generated code (small performance impact for large addons)
+监视脚本更改,Watch Script Changes
+将监视运行脚本节点中的脚本更改，并在保存文件时重新编译插件,Will watch for changes in the scripts of your run script nodes and recompile the addon when you save the file
+多文件,Multifile
+将各个节点树导出为单独的python文件,Export the separate node trees as separate python files
+设置,Settings
+保留代码文件,Keep Code File
+记录编译时间,Log Compile Time
+Easy BPY,Easy BPY
+Easy BPY已安装,Easy BPY installed
+打开安装,Open Install
+Easy BPY未安装,Easy BPY not installed
+文档,Documentation
+资产名称,Name of the asset
+资产文件路径,Path to the asset file
+添加资产,Add Asset
+将资产添加到插件中,Adds a asset to the addon
+将此目录或此文件作为资产添加,Add this directory or this file as an asset
+移除资产,Remove Asset
+从插件中移除此资产,Removes this asset from the addon
+查找节点,Find Node
+查找资产,Find Asset
+在插件中查找此资产,Finds this asset in the addon
+未找到此资产的节点,No nodes found for this asset
+空资产节点,Empty Asset Nodes
+未找到空资产节点,No empty asset nodes found
+添加资产节点,Add Asset Node
+添加一个资产节点,Adds an asset node
+插槽名称,Socket Name
+此插槽的名称,Name of this socket
+动态,Dynamic
+如果此插槽在连接时添加另一个插槽,If this socket adds another socket when connected
+以前动态,Previously Dynamic
+转换数据,Convert Data
+将传入数据转换为此插槽类型,Convert the incoming data to this sockets type
+已禁用,Disabled
+禁用此节点的此插槽,Disable this socket for this node
+可以隐藏,Can Be Hidden
+子类型,Subtype
+此插槽的子类型,The subtype of this socket
+设置此插槽的隐藏值并在隐藏时断开所有连接,Sets the hide value of this socket and disconnects all links if hidden
+可索引,Indexable
+此插槽索引属性的索引类型,The type of index this socket indexes the property with
+可更改,Changeable
+如果此数据插槽类型可以更改,If this data socket type can be changed
+此插槽当前的类型,The type this socket has right now
+是变量,Is Variable
+如果此插槽是可以重命名的变量插槽,If this socket is a variable socket that can be renamed
+绘制可移除插槽的操作,Draws the operators for removable sockets
+绘制动态插槽的操作,Draws the operators for dynamic sockets
+绘制以前动态插槽的操作,Draws the operators for previously dynamic sockets
+绘制此插槽,Draws this socket
+根据get_color函数和此插槽的状态绘制此节点的颜色,Draws the color of this node based on the get_color function and the status of this socket
+将此插槽的python值重置为默认值,Resets this sockets python value back to the default
+返回此插槽的python值,Returns the python value for this socket
+如果已更改，则设置此插槽的python值并触发更新,Sets the python value of this socket if it has changed and triggers an update
+根据此插槽的类型触发节点评估,Triggers node evaluation depending on the type of this socket
+Python值,Python Value
+此插槽值的Python表示,Python representation of this sockets value
+返回此插槽的当前值,Returns the current value of this socket
+根据当前子类型设置默认值并更新python值,Sets the default value depending on the current subtype and updates the python value
+子类型属性的更新功能，以强制节点更新,Update function for the subtype properties to force an update on the node
+触发连接插槽的数据和程序更新。用于假装此节点的数据已更改,"Triggers an update to the connected sockets, for both data and program sockets. Used to pretend the data of this node changed"
+递归返回连接到给定输出的输入，跳过重路由,"Recursively returns the inputs connected to the given output, skipping over reroutes"
+返回连接到此输出的所有输入，跳过重路由,"Returns all inputs connected to this output, skipping over reroutes"
+返回跳过重路由连接到此输入的插槽,Returns the socket this input comes from skipping over reroutes
+返回节点上此插槽的索引或-1（如果找不到）,Returns the index of this socket on the node or -1 if it can't be found
+在自身之后添加另一个类似的插槽并将自身转换为普通插槽,Adds another socket like this one after itself and turns itself into a normal socket
+布尔属性可以具有True或False的值。,Boolean properties can hold a value of True or False.\n
+绘制此属性类型的设置,Draws the settings for this property type
+默认,Default
+此属性的默认值（对于现有连接项可能不会自动重置）,Default value of this property (This may not reset automatically for existing attached items)
+是向量,Is Vector
+如果此属性是向量,If this property is a vector
+向量大小,Vector Size
+向量属性的长度,Length of the vector property
+此布尔向量的大小,Size of this boolean vector
+大小可编辑,Size Editable
+整数属性可以保存小数。,Integer properties can hold decimal number.\n
+所选属性不是组！,The selected property is not a group!
+没有选择有效的属性组！,There is no valid property group selected!
+您要指向的属性组,The property group you want to point to
+集合属性,Collection Property
+返回所有属性的命令代码,Returns the imperative code for all properties
+返回所有属性的注册代码,Returns the register code for all properties
+返回所有属性的取消注册代码,Returns the unregister code for all properties
+清除系统控制台,Clear System Console
+此操作清除系统控制台。,This operator clears the system console.
+移除所有无效的属性,Removes all attributes that aren't valid
+将给定数据转换为带有路径部分和数据键的字典,Converts the given data to a dictionary with keys for the path section and the data
+返回给定数据其路径和数据属性的数据物体,Returns a data object for the given data its path and the datas attribute
+根据给定的属性名称返回名称,Returns a name based on the given attribute name
+返回给定数据的项目类型,Returns the item type for the given data
+返回函数的特殊参数,Returns the special parameters for the given function
+返回函数的特殊输出,Returns the special outputs for the given function
+返回函数的特殊必需参数,Returns the special required parameters for the given function
+返回带有函数参数的字典,Returns a dictionary with function parameters
+返回路径中数据的项目。适用于bpy.xyz以上的任何内容,Returns the item in the data for the given path. Works for anything above bpy.xyz
+将blender python数据路径转换为json路径部分,Takes a blender python data path and converts it to json path sections
+将blender python数据路径转换为索引路径部分,Takes a blender python data path and converts it to indexed path sections
+返回给定部分连接到有效数据路径的结果,Returns the given sections joined to a valid data path
+显示数据概览,Show Data Overview
+打开一个显示数据概览的窗口,Opens a window that shows a data overview
+退出数据搜索,Exit Data Search
+退出数据搜索模式,Exits the data search mode
+展开数据,Expand Data
+加载给定项的数据,Loads the items for the given item
+展开操作,Expand Operators
+展开所有操作,Expands all operators
+过滤数据,Filter Data
+过滤此项数据,Filters this items data
+重置,Reset
+重置过滤器,Reset the filters
+重置过滤器,Reset Filters
+重置这些过滤器,Resets these filters
+重新加载数据,Reload Data
+重新加载列出的场景数据,Reloads the listed scene data
+重置项目过滤器,Reset Item Filters
+重置此项目的过滤器,Reset this items filters
+重新加载项目数据,Reload Item Data
+重新加载此项目的数据,Reloads this items data
+复制数据路径,Copy Data Path
+复制数据路径以粘贴到节点中,Copy data path to paste in a node
+添加到搜索,Add To Search
+将此部分添加到搜索,Adds this section to the search
+退出,Exit
+如何操作,How to
+重新加载,Reload
+发现（测试版）,Discover (BETA)
+来源：,Source:
+过滤概览：,Filter Overview:
+最大数量,Max Amount
+显示,Display
+由于项目过多而缩短,... Shortened because of too many items
+没有符合这些过滤条件的项目！,No Items for these filters!
+Serpens,Serpens
+Serpens 插件,Serpens Addon
+尽可能使用属性函数而不是操作项！,Use property functions instead of operators when possible!
+此枚举项的名称,Name of this enum item
+此枚举项的描述,Description of this enum item
+此枚举项的图标值,Icon value of this enum item
+枚举属性可以包含多个具有名称和描述的项目。,Enum properties can hold multiple items with a name and description.\n
+生成项目,Generate Items
+选择多个（枚举集合）,Select Multiple (Enum Set)
+允许您从此属性中选择多个选项,Lets you select multiple options from this property
+动态项目,Dynamic Items
+项目是通过函数生成的,The items are generated with a function and aren
+项目,Items
+枚举项目,Enum Items
+编辑枚举项目,Edit Enum Items
+编辑此插槽的枚举项目,Edit the enum items of this socket
+向此插槽添加一个枚举项目,Adds an enum item to this socket
+移除此枚举项目,Removes this enum item from this socket
+移动项目,Move Item
+移动此插槽中的枚举项目,Moves this enum item in this socket
+枚举集合,Enum Set
+可编辑的自定义项目,Editable Custom Items
+允许您编辑自定义项目,Lets you edit the custom items
+此插槽的字符串化项目,Stringified items for this socket
+打开资源管理器,Open Explorer
+打开资源管理器,Open the explorer
+导出插件,Export Addon
+将此插件导出为可安装的zip文件,Exports this addon to an installable zip file
+文件路径,File Path
+用于导出文件的文件路径,Filepath used for exporting the file
+如果需要，添加easybpy文件到插件中,Adds the easybpy file to the addon if needed
+将插件资产添加到文件夹中,Adds the addon assets to the folder
+将图标添加到文件夹中,Adds the icons to the folder
+创建索引文件,Creates the index file
+在文件夹结构中创建插件文件,Creates the addon files in the folder structure
+在给定的文件路径下设置插件的文件夹结构,Sets up the addons folder structure at the given filepath
+压缩给定路径,Zips the given path
+浮点属性可以保存小数,Float properties can hold decimal number.\n
+此属性的子类型。这会改变属性的显示方式,The subtype of this property. This changes how the property is displayed
+单位,Unit
+此属性的单位。这会改变属性的显示方式,The unit of this property. This changes how the property is displayed
+最小值,Minimum
+使用最小属性值,Use a minimum property value
+此属性的最小值,The minimum value of this property
+最大值,Maximum
+使用最大属性值,Use a maximum property value
+软最小值,Soft Minimum
+使用软最小属性值,Use a soft minimum property value
+此属性的软最小值,The soft minimum value of this property
+此属性的最大值,The maximum value of this property
+软最大值,Soft Maximum
+使用软最大属性值,Use a soft maximum property value
+此属性的软最大值,The soft maximum value of this property
+步长,Step
+UI中增加/减少的步长,Step of increment/decrement in the UI
+精度,Precision
+显示的小数位数的最大数量,Maximum number of decimal digits to display
+此浮点向量的大小,Size of this float vector
+此图表类别的名称,The name of this graph category
+添加图表类别,Add Graph Category
+添加一个图表类别,Adds a graph category
+移除图表类别,Remove Graph Category
+移除一个图表类别,Removes a graph category
+编辑图表类别,Edit Graph Categories
+编辑插件的图表类别,Edit the addon graph categories
+类别,Categories
+没有添加类别,No categories added
+添加类别,Add Category
+移动图表类别,Move Graph Category
+将选定的图表移动到不同的类别,Move the selected graph to a different category
+添加节点树,Add Node Tree
+将节点树添加到插件中,Adds a node tree to the addon
+移除节点树,Remove Node Tree
+从插件中移除该节点树,Removes this node tree from the addon
+附加节点树,Append Node Tree
+从其他文件中附加节点树到该插件中,Appends a node tree from another file to this addon
+附加此节点树到插件中,Appends this node tree from the addon
+返回在选定文件中找到的所有节点树,Returns all node trees that can be found in the selected file
+要导入的节点树,Node Tree to import
+在此 blend 文件中未找到节点树,No Node Trees found in this blend file
+对于大型插件，这可能会很慢！,This might be slow for large addons!
+强制所有节点树编译,Forces all node trees to compile
+强制注销,Force Unregister
+强制所有节点树注销,Forces all node trees to unregister
+移动节点树,Move Node Tree
+在列表中移动此节点树,Moves this node tree in the list
+获取 Python 名称,Get Python Name
+获取此元素的 Python 名称,Get the python name for this element
+节点树,Node Trees
+展开,Expand
+展开此属性,Expand this property
+返回此属性所在集合的父级,Returns the parent of the property collection this property lives in
+组属性可以容纳多个其他属性。\n,Group properties can hold multiple other properties.\n
+属性路径占位符。,PROP_PATH_PLACEHOLDER.
+空,empty
+显示 Python 工具提示,Show Python Tooltips
+混合数据,Blend Data
+控制台,Console
+更新！,Update!
+节点文档,Node Documentation
+默认值,default_value
+此整数向量的大小,Size of this integer vector
+界面,Interface
+节点之前的传递布局类型,Pass through layout type of the node before
+传递布局类型,Pass Through Layout Type
+返回给定 idname 的快捷方式结构,Returns the shortcut struct for the given idname
+节点编辑器,Node Editor
+打开节点文档,Open Node Docs
+打开节点文档,Open Node Documentation
+添加操作节点,Add Operator Node
+添加复制的节点,Add Copied Node
+从操作和属性的复制路径添加节点,Adds a node from the copied path for operators and properties
+添加复制的操作节点,Add Copied Operator Node
+从操作的复制路径添加节点,Adds a node from the copied path for operators
+从市场加载插件,Loads the addons from the marketplace
+从市场加载包,Loads the packages from the marketplace
+从市场加载代码片段,Loads the snippets from the marketplace
+复制命令,Copy Command
+复制命令以发布到 Discord 服务器,Copies the command to post in the discord server
+将插件导出到市场,Export Addon To Marketplace
+将活动节点树导出到市场,Exports the active node tree to the marketplace
+插件网址,Addon URL
+在此处输入您的插件网址,Enter the url to your addon here
+插件价格,Addon Price
+在此处输入您的插件价格,Enter the price of your addon here
+上传类型,Upload Type
+如果您认为您的插件对他人有趣，可以分享！,If you think your addon is interesting to others you can share it!
+步骤 1,Step 1
+? 设置您的插件名称、描述、版本、...,"? Set your addons name, description, version, ..."
+? 如果您想更新插件，请使用相同的名称,? If you want to update an addon use the same name
+? 选择是否要上传包含节点树的 blend 文件,? Select if you want to upload your blend file with the node tree
+上传 blend 文件,Upload blend file
+步骤 2,Step 2
+? 转到 Discord 的 #marketplace 频道并发布以下内容：,? Go in the #marketplace channel on discord and post the following:
+点击复制！,Click To Copy!
+? 您将被要求上传插件。导出并上传。,? You will be asked to upload your addon. Export it and do so.
+? 在此处粘贴您的插件链接：,? Paste the link to your addon in here:
+? 在此处输入您的插件价格：,? Enter the price of your addon here:
+步骤 3,Step 3
+布局,Layout
+框架,Frame
+重路由,Reroute
+属于此引用的节点的 static_uid,The static_uid of the node that belongs to this reference
+此引用所属节点的名称,The name of the node this reference belongs to
+此集合中节点的 idname,The idname of the nodes in this collection
+引用,References
+对此类型节点的引用,References to the nodes of this type
+移除所有不匹配节点的引用,Removes all references that don't match a node
+确保所有引用名称与节点名称匹配,Makes sure all ref names match the node names
+返回此集合的所有节点,Returns all the nodes for this collection
+节点树在节点树列表中的索引,The index of this node tree in the node tree list
+此属性显示的类别,The category this property is displayed in
+变量,Variables
+此节点树的变量,The variables of this node tree
+变量索引,Variable Index
+所选变量的索引,Index of the selected variable
+节点引用,Node References
+显示调试,Show Debug
+在调试面板中显示节点树数据,Show node tree data in the debug panel
+返回此节点树中给定节点 idname 引用的集合,Returns the collection for the given node idname refs in this node trees
+将给定链接映射到 from socket、to socket 和链接本身的元组,"Maps the given link to a tuple of the from socket, to socket and the link itself"
+检查给定 sockets 之间的连接是否有效,Check if a connection between the given sockets would be valid
+检查给定链接是否有效,Checks if the given link is valid
+为所有链接无效的链接插入定义数据节点,Inserts define data nodes for all links invalid links
+仅在此处进行视觉方面的操作，因为这是在评估节点之后运行的,Only do visual aspects in here as this is run after evaluating the nodes
+强制受影响的节点更新，具体取决于它是程序插座还是数据插座,Forces the affected nodes to update depending on if it's a program or data socket
+为所有新连接调用link_insert,Calls link_insert for all new links
+为所有移除的连接调用link_remove,Calls link_remove for all removed links
+触发给定连接的数据输出和程序输入的更新，以更新受影响的程序,Triggers an update on the given links data outputs and program inputs to update the affected program
+触发给定连接的数据输入和程序输出的更新，以更新受影响的程序,Triggers an update on the given links data inputs and program outputs to update the affected program
+查找所有更改的节点连接并更新连接,Finds all changed node links and updates the connections
+更新此节点树中所有输入和重定向的显示形状,Updates all inputs and display shapes of the reroutes in this node tree
+重新评估此节点树中的所有节点,Reevaluates all nodes in this node tree
+节点扩展,Node Extensions
+获取代码片段,Get Snippets
+导出代码片段,Export Snippet
+选择一个有效的运行功能节点以导出代码片段,Select a valid Run Function node to export a snippet
+选择运行功能节点以导出代码片段,Select Run Function node to export a snippet
+安装代码片段,Install Snippets
+未安装代码片段！,No snippets installed!
+包,Packages
+获取包,Get Packages
+安装包,Install Package
+由：,By:
+未安装包！,No packages installed!
+重新启动Blender以查看包！,Restart blender to see package!
+重新加载包,Reload Packages
+重新加载已安装的包列表,Reloads the installed packages list
+卸载包,Uninstall Package
+卸载此包,Uninstalls this package
+指针属性可以指向特定类型的Blend数据或属性组。,Pointer properties can point to specific types of blend data or property groups.\n
+数据类型,Data Type
+此属性要指向的Blend数据类型,The type of blend data to have this property point to
+指向您创建的自定义属性组,Point to a custom property group you created
+没有预设,No presets
+删除预设,Remove Preset
+此预设节点的名称,Name of this preset node
+Idname,Idname
+此节点的idname,The idname of this node
+用于重新创建此节点的字符串化json数据,The stringified json data used to recreate this node
+删除此预设,Removes this preset
+删除预设,Remove presets
+添加预设,Add Preset
+将活动节点添加为预设,Adds the active node as a preset
+加载预设,Load Preset
+加载此预设节点,Loads this preset node
+此属性可以存储的数据类型,The type of data this property can store
+绘制常规属性设置,Draws the general property settings
+可动画,Animatable
+Textedit更新,Textedit Update
+注册属性并注销以前的版本,Registers the property and unregisters previous version
+附加到,Attach To
+要将此属性附加到的Blend数据类型,The type of blend data to attach this property to
+隐藏,Hidden
+跳过保存,Skip Save
+返回此属性所属的集合,Returns the collection this property lives in
+返回主要属性集合所在的源,Returns the source where the main property collection lives
+返回此属性的完整数据路径,Returns the full data path for this property
+使用父类的编译功能更新属性,Update the property with the parent classes compile function
+属性名称,Property Name
+此属性的名称,Name of this property
+此属性的描述，显示在工具提示中,"The description of this property, shown in tooltips"
+选项,Options
+此属性的选项,Options for this property
+此属性类别的名称,The name of this property category
+添加属性类别,Add Property Category
+添加属性类别,Adds a property category
+删除属性类别,Remove Property Category
+删除属性类别,Removes a property category
+编辑属性类别,Edit Property Categories
+编辑插件属性类别,Edit the addon property categories
+移动属性类别,Move Property Category
+将选定属性移动到不同的类别,Move the selected property to a different category
+向插件添加属性,Adds a property to the addon
+从插件中删除此属性,Removes this property from the addon
+复制属性,Duplicate Property
+复制选定的属性,Duplicates the selected property
+复制Python名称,Copy Python Name
+复制此项的Python名称以在脚本中使用,Copies the python name of this item to use in scripts
+添加枚举项,Add Enum Item
+向此属性添加枚举项,Adds an enum item to this property
+删除枚举项,Remove Enum Item
+从此属性中删除枚举项,Removes an enum item from this property
+移动枚举项,Move Enum Item
+移动此枚举项,Moves this enum item
+向此组添加属性,Adds a property to this group
+添加属性节点弹出窗口,Add Property Node Popup
+打开弹出窗口以让您选择一个属性节点,Opens a popup to let you choose a property node
+添加属性节点,Add Property Node
+将此节点添加到编辑器,Adds this node to the editor
+查找属性,Find Property
+在插件中查找此属性,Finds this property in the addon
+未找到此属性的节点,No nodes found for this property
+空属性节点,Empty Propert Nodes
+未找到空属性节点,No empty property nodes found
+返回已排序以进行注册的属性列表,"Returns a list of the properties, sorted for registering"
+返回给定的属性组是否具有指向其他属性组的引用的指针或集合属性,Returns if the given property group has pointer or collection props with references to other prop groups
+查找引用节点,Find Referencing Nodes
+查找所有引用此节点的节点,Find all nodes that reference this node
+添加节点,Add Node
+未找到引用,No references found
+将引用的节点添加到节点树,Adds the referenced node to the node tree
+ID名称,ID Name
+属性,Attribute
+获取Serpens属性,Get Serpens Property
+获取Serpens操作项,Get Serpens Operator
+复制上下文,Copy Context
+复制属性,Copy Property
+复制此属性的路径,Copy the path of this property
+复制操作项,Copy Operator
+复制此操作项的路径,Copy the path of this operator
+复制此区域的上下文,Copy the context from this area
+占位符,DUMMY
+用于解析路径的占位符属性,Dummy prop for resolving path
+返回这些设置所属的属性,Returns the property these settings belong to
+编译这些设置的属性,Compile the property for these settings
+返回属性更新函数的代码,Returns the code for the on property update function
+返回更新函数的代码,Returns the code for the update function
+返回更新函数选项的代码,Returns the code for the update function option
+添加一个节点以生成动态枚举项,Adds a node to generate dynamic enum items
+其他,Others
+安装代码片段,Install Snippet
+安装单个或压缩文件的代码片段,Install a single or a zip file of snippets
+卸载代码片段,Uninstall Snippet
+卸载此代码片段,Uninstalls this snippet
+添加代码片段,Add Snippet
+添加此代码片段节点,Adds this snippets node
+绘制导出代码片段弹出窗口,Draw Export Snippet Popup
+选择可编辑的变量：,Select editable variables:
+选择可编辑的属性：,Select editable properties:
+将此节点导出为代码片段,Export this node as a snippet
+代码片段信息,Snippet Info
+信息,Info
+很棒的代码片段！,Awesome snippet!
+你认为其他人也能用上吗？,Do you think others could use this too?
+为什么不与Serpens社区分享呢？,Why not share it with the Serpens community?
+将其上传到#marketplace频道！,Upload it to the #marketplace channel!
+添加动态插座,Add Dynamic Socket
+添加另一个这样的插座,Add another socket like this one
+移除插座,Remove Socket
+移除此插座,Removes this socket
+设置图标,Set Icon
+设置此图标,Sets this icon
+选择图标,Select Icon
+显示所有Blender图标的选择,Shows you a selection of all blender icons
+字符串属性可以包含一行文本。,String properties can hold a line of text.\n
+最大长度,Max Length
+字符串的最大长度（0表示无限制）,The maximum length of the string (0 is unlimited)
+更新消息,Update Message
+Serpens更新可用！,Serpens Update available!
+有一个免费更新。,A free update is out.
+你现在可以去下载！,You can go and download it right now!
+此更新包括：,This update includes:
+返回给定名称作为有效Python变量名的表示,Returns the given name as a valid python represention to use as variable names in scripts
+返回基于给定名称列表的唯一名称,Returns a unique name based for the given list of names
+返回给定行开头的空格数量,Returns the amount of spaces at the start of the given line
+返回给定文本行的最小缩进,Returns the minimum indent of the given lines of text
+将给定代码标准化为最小缩进并移除空行,Normalizes the given code to the minimum indent and removes empty lines
+工具提示,Tooltip
+点击了解更多,Click to learn more
+注册变量并注销之前的版本,Registers the variable and unregisters previous version
+变量名称,Variable Name
+此变量的名称,Name of this variable
+此变量存储的数据类型,The type of data this variable stores
+变量的默认值,Default value for the variable
+添加变量,Add Variable
+向插件添加变量,Adds a variable to the addon
+新变量,New Variable
+移除变量,Remove Variable
+从插件中移除此变量,Removes this variable from the addon
+移动变量,Move Variable
+移动此变量,Moves this variable
+添加变量节点弹出窗口,Add Variable Node Popup
+打开弹出窗口以让你选择一个变量节点,Opens a popup to let you choose a variable node
+添加变量节点,Add Variable Node
+查找变量,Find Variable
+在插件中查找此变量,Finds this variable in the addon
+未找到此变量的节点,No nodes found for this variable
+空变量节点,Empty Variable Nodes
+未找到空变量节点,No empty variable nodes found
+不要编辑这些设置！,Do not edit these settings!
+过滤,Filter Glob
+选定的物体,Use Selection
+可见物体,Use Visible
+活动集合,Use Active Collection
+应用单位,Apply Unit Scale
+应用缩放,Apply Scale Options
+使用变换,Bake Space Transform
+应用修改器,Use Mesh Modifiers
+应用修改器渲染,Use Mesh Modifiers Render
+平滑,Mesh Smooth Type
+顶点色类型,Colors Type
+导出表面细分,Use Subsurf
+松散边,Use Mesh Edges
+切向空间,Use Tspace
+三角化,Use Triangles
+自定义属性,Use Custom Props
+仅形变骨骼,Use Armature Deform Only
+骨架FBXNode类型,Armature Nodetype
+烘焙动画,Bake Anim
+对所有骨骼插帧,Bake Anim Use All Bones
+NLA片段,Bake Anim Use Nla Strips
+全部动作,Bake Anim Use All Actions
+强制开始/结束插帧,Bake Anim Force Startend Keying
+采样率,Bake Anim Step
+简化,Bake Anim Simplify Factor
+批处理路径,Use Batch Own Dir
+向前,Axis Forward
+向上,Axis Up

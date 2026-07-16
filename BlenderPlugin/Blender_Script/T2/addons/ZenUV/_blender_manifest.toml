@@ -1,0 +1,28 @@
+schema_version = "1.0.0"
+
+id = "ZenUV"
+version = "4.5.2"
+name = "Zen UV"
+tagline = "Professional toolset for creating UVs in Blender"
+maintainer = "Zenmasters Team <tyapkin.art@gmail.com>"
+type = "add-on"
+
+website = "https://zenmastersteam.github.io/Zen-UV/latest/"
+
+tags = ["UV"]
+
+blender_version_min = "3.6.0"
+
+license = [
+  "SPDX:GPL-3.0-or-later",
+]
+
+copyright = [
+  "2020 Valeriy Yatsenko",
+  "2020 Alex Zhornyak",
+  "2020 Sergey Tyapkin",
+  "2020 Viktor Teplov"
+]
+
+[permissions]
+files = "Access to folders for importing Checker Textures"

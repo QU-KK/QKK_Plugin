@@ -1,0 +1,44 @@
+{
+  "version": "v1",
+  "blocklist": [],
+  "data": [
+    {
+      "schema_version": "1.0.0",
+      "id": "caca",
+      "name": "caca",
+      "tagline": "caca",
+      "version": "2.0.0",
+      "type": "add-on",
+      "maintainer": "\u53d1\u53d1",
+      "license": [
+        "SPDX:GPL-2.0-or-later"
+      ],
+      "blender_version_min": "4.2.0",
+      "tags": [
+        "3D View"
+      ],
+      "archive_url": "./caca_2.0.0.zip",
+      "archive_size": 1653,
+      "archive_hash": "sha256:8561316faedd04dcbd854c8d6bc6340ad9f1b327871779511ed684c990ab7f30"
+    },
+    {
+      "schema_version": "3.0.0",
+      "id": "my_addon",
+      "name": "My Addon",
+      "tagline": "My Addon",
+      "version": "3.0.0",
+      "type": "add-on",
+      "maintainer": "Your Name",
+      "license": [
+        "SPDX:GPL-2.0-or-later"
+      ],
+      "blender_version_min": "4.2.0",
+      "tags": [
+        "3D View"
+      ],
+      "archive_url": "./my_addon_1.0.0.zip",
+      "archive_size": 316969,
+      "archive_hash": "sha256:95ed44b174cc5520b67f77881764835f19b71989368283e171db88e0639c6b5d"
+    }
+  ]
+}
