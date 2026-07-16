@@ -1,0 +1,1737 @@
+﻿Log file open, 03/03/26 10:25:03
+LogWindows: Failed to load 'aqProf.dll' (GetLastError=126)
+LogWindows: File 'aqProf.dll' does not exist
+LogWindows: Failed to load 'VtuneApi.dll' (GetLastError=126)
+LogWindows: File 'VtuneApi.dll' does not exist
+LogWindows: Failed to load 'VtuneApi32e.dll' (GetLastError=126)
+LogWindows: File 'VtuneApi32e.dll' does not exist
+LogConsoleResponse: Display: Failed to find resolution value strings in scalability ini. Falling back to default.
+LogConsoleResponse: Display: Failed to find resolution value strings in scalability ini. Falling back to default.
+LogInit: Display: Running engine for game: 工具
+LogPlatformFile: Not using cached read wrapper
+LogTaskGraph: Started task graph with 5 named threads and 59 total threads with 3 sets of task threads.
+LogStats: Stats thread started at 0.362387
+LogICUInternationalization: ICU TimeZone Detection - Raw Offset: +8:00, Platform Override: ''
+LogInit: Display: Loading text-based GConfig....
+LogPluginManager: Mounting plugin MeshPainting
+LogPluginManager: Mounting plugin XGEController
+LogPluginManager: Mounting plugin Paper2D
+LogPluginManager: Mounting plugin AISupport
+LogPluginManager: Mounting plugin LightPropagationVolume
+LogPluginManager: Mounting plugin OodleNetwork
+LogPluginManager: Mounting plugin AssetManagerEditor
+LogPluginManager: Mounting plugin OodleData
+LogPluginManager: Mounting plugin LiveLink
+LogPluginManager: Mounting plugin EnvironmentQueryEditor
+LogPluginManager: Mounting plugin CameraShakePreviewer
+LogPluginManager: Mounting plugin GameplayCameras
+LogPluginManager: Mounting plugin AnimationSharing
+LogPluginManager: Mounting plugin CurveEditorTools
+LogPluginManager: Mounting plugin CryptoKeys
+LogPluginManager: Mounting plugin CLionSourceCodeAccess
+LogPluginManager: Mounting plugin CodeLiteSourceCodeAccess
+LogPluginManager: Mounting plugin EditorScriptingUtilities
+LogPluginManager: Mounting plugin GameplayTagsEditor
+LogPluginManager: Mounting plugin FacialAnimation
+LogPluginManager: Mounting plugin MacGraphicsSwitching
+LogPluginManager: Mounting plugin GeometryMode
+LogPluginManager: Mounting plugin DataValidation
+LogPluginManager: Mounting plugin NullSourceCodeAccess
+LogPluginManager: Mounting plugin KDevelopSourceCodeAccess
+LogPluginManager: Mounting plugin MobileLauncherProfileWizard
+LogPluginManager: Mounting plugin GitSourceControl
+LogPluginManager: Mounting plugin PixWinPlugin
+LogPluginManager: Mounting plugin PluginBrowser
+LogPluginManager: Mounting plugin SpeedTreeImporter
+LogPluginManager: Mounting plugin MaterialAnalyzer
+LogPluginManager: Mounting plugin PerforceSourceControl
+LogPluginManager: Mounting plugin PlasticSourceControl
+LogPluginManager: Mounting plugin PluginUtils
+LogPluginManager: Mounting plugin PropertyAccessNode
+LogPluginManager: Mounting plugin AlembicImporter
+LogPluginManager: Mounting plugin RiderSourceCodeAccess
+LogPluginManager: Mounting plugin BackChannel
+LogPluginManager: Mounting plugin SubversionSourceControl
+LogPluginManager: Mounting plugin AutomationUtils
+LogPluginManager: Mounting plugin VisualStudioCodeSourceCodeAccess
+LogPluginManager: Mounting plugin UObjectPlugin
+LogPluginManager: Mounting plugin TextureFormatOodle
+LogPluginManager: Mounting plugin XCodeSourceCodeAccess
+LogPluginManager: Mounting plugin VisualStudioSourceCodeAccess
+LogPluginManager: Mounting plugin ChaosCloth
+LogPluginManager: Mounting plugin ChaosClothEditor
+LogPluginManager: Mounting plugin ChaosNiagara
+LogPluginManager: Mounting plugin ChaosEditor
+LogPluginManager: Mounting plugin ChaosSolverPlugin
+LogPluginManager: Mounting plugin CharacterAI
+LogPluginManager: Mounting plugin GeometryCache
+LogPluginManager: Mounting plugin GeometryCollectionPlugin
+LogPluginManager: Mounting plugin GeometryProcessing
+LogPluginManager: Mounting plugin MotoSynth
+LogPluginManager: Mounting plugin OpenImageDenoise
+LogPluginManager: Mounting plugin PlanarCut
+LogPluginManager: Mounting plugin PlatformCrypto
+LogPluginManager: Mounting plugin ProxyLODPlugin
+LogPluginManager: Mounting plugin PythonScriptPlugin
+LogPluginManager: Mounting plugin DatasmithContent
+LogPluginManager: Mounting plugin SkeletalReduction
+LogPluginManager: Mounting plugin Niagara
+LogPluginManager: Mounting plugin LuminPlatformFeatures
+LogPluginManager: Mounting plugin VariantManagerContent
+LogPluginManager: Mounting plugin MagicLeap
+LogPluginManager: Mounting plugin AndroidMedia
+LogPluginManager: Mounting plugin MagicLeapLightEstimation
+LogPluginManager: Mounting plugin MagicLeapMedia
+LogPluginManager: Mounting plugin MagicLeapPassableWorld
+LogPluginManager: Mounting plugin MLSDK
+LogPluginManager: Mounting plugin AvfMedia
+LogPluginManager: Mounting plugin TcpMessaging
+LogPluginManager: Mounting plugin UdpMessaging
+LogPluginManager: Mounting plugin MediaCompositing
+LogPluginManager: Mounting plugin ImgMedia
+LogPluginManager: Mounting plugin ActorSequence
+LogPluginManager: Mounting plugin MediaPlayerEditor
+LogPluginManager: Mounting plugin LevelSequenceEditor
+LogPluginManager: Mounting plugin WebMMedia
+LogPluginManager: Mounting plugin OnlineSubsystem
+LogPluginManager: Mounting plugin MatineeToLevelSequence
+LogPluginManager: Mounting plugin WmfMedia
+LogPluginManager: Mounting plugin TemplateSequence
+LogPluginManager: Mounting plugin ActorLayerUtilities
+LogPluginManager: Mounting plugin SequencerScripting
+LogPluginManager: Mounting plugin OnlineSubsystemNull
+LogPluginManager: Mounting plugin OnlineSubsystemUtils
+LogPluginManager: Mounting plugin AndroidDeviceProfileSelector
+LogPluginManager: Mounting plugin AndroidPermission
+LogPluginManager: Mounting plugin AndroidMoviePlayer
+LogPluginManager: Mounting plugin AppleMoviePlayer
+LogPluginManager: Mounting plugin AppleImageUtils
+LogPluginManager: Mounting plugin ArchVisCharacter
+LogPluginManager: Mounting plugin AssetTags
+LogPluginManager: Mounting plugin AudioCapture
+LogPluginManager: Mounting plugin AudioSynesthesia
+LogPluginManager: Mounting plugin CableComponent
+LogPluginManager: Mounting plugin ChunkDownloader
+LogPluginManager: Mounting plugin CustomMeshComponent
+LogPluginManager: Mounting plugin EditableMesh
+LogPluginManager: Mounting plugin ExampleDeviceProfileSelector
+LogPluginManager: Mounting plugin GoogleCloudMessaging
+LogPluginManager: Mounting plugin GooglePAD
+LogPluginManager: Mounting plugin IOSDeviceProfileSelector
+LogPluginManager: Mounting plugin LinuxDeviceProfileSelector
+LogPluginManager: Mounting plugin LocationServicesBPLibrary
+LogPluginManager: Mounting plugin MobilePatchingUtils
+LogPluginManager: Mounting plugin OpenXR
+LogPluginManager: Mounting plugin OpenXREyeTracker
+LogPluginManager: Mounting plugin OpenXRHandTracking
+LogPluginManager: Mounting plugin PhysXVehicles
+LogPluginManager: Mounting plugin PostSplashScreen
+LogPluginManager: Mounting plugin ProceduralMeshComponent
+LogPluginManager: Mounting plugin PropertyAccessEditor
+LogPluginManager: Mounting plugin RuntimePhysXCooking
+LogPluginManager: Mounting plugin SignificanceManager
+LogPluginManager: Mounting plugin SoundFields
+LogPluginManager: Mounting plugin LauncherChunkInstaller
+LogPluginManager: Mounting plugin Synthesis
+LogPluginManager: Mounting plugin WebMMoviePlayer
+LogPluginManager: Mounting plugin WindowsMoviePlayer
+LogPluginManager: Mounting plugin Takes
+LogPluginManager: Mounting plugin ScreenshotTools
+LogPluginManager: Mounting plugin ContentBrowserAssetDataSource
+LogPluginManager: Mounting plugin ContentBrowserClassDataSource
+LogPluginManager: Mounting plugin ContentBrowserFileDataSource
+LogPluginManager: Mounting plugin OnlineSubsystemIOS
+LogPluginManager: Mounting plugin OnlineSubsystemGooglePlay
+LogPluginManager: Mounting plugin OculusVR
+LogPluginManager: Mounting plugin SteamVR
+PixWinPlugin: PIX capture plugin failed to initialize! Check that the process is launched from PIX.
+LogLuminAPIImpl: Warning: MLSDK not found.  This likely means the MLSDK environment variable is not set.
+LogInit: Using libcurl 7.55.1-DEV
+LogInit:  - built for x86_64-pc-win32
+LogInit:  - supports SSL with OpenSSL/1.1.1
+LogInit:  - supports HTTP deflate (compression) using libz 1.2.8
+LogInit:  - other features:
+LogInit:      CURL_VERSION_SSL
+LogInit:      CURL_VERSION_LIBZ
+LogInit:      CURL_VERSION_IPV6
+LogInit:      CURL_VERSION_ASYNCHDNS
+LogInit:      CURL_VERSION_LARGEFILE
+LogInit:      CURL_VERSION_IDN
+LogInit:  CurlRequestOptions (configurable via config and command line):
+LogInit:  - bVerifyPeer = true  - Libcurl will verify peer certificate
+LogInit:  - bUseHttpProxy = false  - Libcurl will NOT use HTTP proxy
+LogInit:  - bDontReuseConnections = false  - Libcurl will reuse connections
+LogInit:  - MaxHostConnections = 16  - Libcurl will limit the number of connections to a host
+LogInit:  - LocalHostAddr = Default
+LogInit:  - BufferSize = 65536
+LogOnline: OSS: Creating online subsystem instance for: NULL
+LogInit: WinSock: version 1.1 (2.2), MaxSocks=32767, MaxUdp=65467
+LogOnline: OSS: TryLoadSubsystemAndSetDefault: Loaded subsystem for module [NULL]
+LogOculusPluginWrapper: OculusPlugin initialized successfully
+LogHMD: Failed initializing OVRPlugin 1.59.0
+LogInit: Build: ++UE4+Release-4.27-CL-18319896
+LogInit: Engine Version: 4.27.2-18319896+++UE4+Release-4.27
+LogInit: Compatible Engine Version: 4.27.0-17155196+++UE4+Release-4.27
+LogInit: Net CL: 17155196
+LogInit: OS: Windows 10 (Release 2009) (), CPU: 12th Gen Intel(R) Core(TM) i7-12700, GPU: NVIDIA GeForce RTX 4070 Ti
+LogInit: Compiled (64-bit): Nov 30 2021 07:12:08
+LogInit: Compiled with Visual C++: 19.24.28315.00
+LogInit: Build Configuration: Development
+LogInit: Branch Name: ++UE4+Release-4.27
+LogInit: Command Line:  -AUTH_LOGIN=unused -AUTH_PASSWORD=e2dea18ca67a43c1a962aaf466985037 -AUTH_TYPE=exchangecode -epicapp=UE_4.27 -epicenv=Prod -EpicPortal -epicusername=嘿嘿旺旺 -epicuserid=e1f3334f642a431e8aba2ecf9d286b3d -epiclocale=zh-CN -epicsandboxid=ue
+LogInit: Base Directory: D:/Epic缓存/UE_4.27/Engine/Binaries/Win64/
+LogInit: Allocator: TBB
+LogInit: Installed Engine Build: 1
+LogDevObjectVersion: Number of dev versions registered: 29
+LogDevObjectVersion:   Dev-Blueprints (B0D832E4-1F89-4F0D-ACCF-7EB736FD4AA2): 10
+LogDevObjectVersion:   Dev-Build (E1C64328-A22C-4D53-A36C-8E866417BD8C): 0
+LogDevObjectVersion:   Dev-Core (375EC13C-06E4-48FB-B500-84F0262A717E): 4
+LogDevObjectVersion:   Dev-Editor (E4B068ED-F494-42E9-A231-DA0B2E46BB41): 40
+LogDevObjectVersion:   Dev-Framework (CFFC743F-43B0-4480-9391-14DF171D2073): 37
+LogDevObjectVersion:   Dev-Mobile (B02B49B5-BB20-44E9-A304-32B752E40360): 3
+LogDevObjectVersion:   Dev-Networking (A4E4105C-59A1-49B5-A7C5-40C4547EDFEE): 0
+LogDevObjectVersion:   Dev-Online (39C831C9-5AE6-47DC-9A44-9C173E1C8E7C): 0
+LogDevObjectVersion:   Dev-Physics (78F01B33-EBEA-4F98-B9B4-84EACCB95AA2): 14
+LogDevObjectVersion:   Dev-Platform (6631380F-2D4D-43E0-8009-CF276956A95A): 0
+LogDevObjectVersion:   Dev-Rendering (12F88B9F-8875-4AFC-A67C-D90C383ABD29): 45
+LogDevObjectVersion:   Dev-Sequencer (7B5AE74C-D270-4C10-A958-57980B212A5A): 13
+LogDevObjectVersion:   Dev-VR (D7296918-1DD6-4BDD-9DE2-64A83CC13884): 3
+LogDevObjectVersion:   Dev-LoadTimes (C2A15278-BFE7-4AFE-6C17-90FF531DF755): 1
+LogDevObjectVersion:   Private-Geometry (6EACA3D4-40EC-4CC1-B786-8BED09428FC5): 3
+LogDevObjectVersion:   Dev-AnimPhys (29E575DD-E0A3-4627-9D10-D276232CDCEA): 17
+LogDevObjectVersion:   Dev-Anim (AF43A65D-7FD3-4947-9873-3E8ED9C1BB05): 15
+LogDevObjectVersion:   Dev-ReflectionCapture (6B266CEC-1EC7-4B8F-A30B-E4D90942FC07): 1
+LogDevObjectVersion:   Dev-Automation (0DF73D61-A23F-47EA-B727-89E90C41499A): 1
+LogDevObjectVersion:   FortniteMain (601D1886-AC64-4F84-AA16-D3DE0DEAC7D6): 47
+LogDevObjectVersion:   FortniteRelease (E7086368-6B23-4C58-8439-1B7016265E91): 1
+LogDevObjectVersion:   Dev-Enterprise (9DFFBCD6-494F-0158-E221-12823C92A888): 10
+LogDevObjectVersion:   Dev-Niagara (F2AED0AC-9AFE-416F-8664-AA7FFA26D6FC): 1
+LogDevObjectVersion:   Dev-Destruction (174F1F0B-B4C6-45A5-B13F-2EE8D0FB917D): 10
+LogDevObjectVersion:   Dev-Physics-Ext (35F94A83-E258-406C-A318-09F59610247C): 41
+LogDevObjectVersion:   Dev-PhysicsMaterial-Chaos (B68FC16E-8B1B-42E2-B453-215C058844FE): 1
+LogDevObjectVersion:   Dev-CineCamera (B2E18506-4273-CFC2-A54E-F4BB758BBA07): 1
+LogDevObjectVersion:   Dev-VirtualProduction (64F58936-FD1B-42BA-BA96-7289D5D0FA4E): 1
+LogDevObjectVersion:   Dev-MediaFramework (6F0ED827-A609-4895-9C91-998D90180EA4): 2
+LogInit: Presizing for max 25165824 objects, including 0 objects not considered by GC, pre-allocating 0 bytes for permanent pool.
+LogConfig: Applying CVar settings from Section [/Script/Engine.StreamingSettings] File [D:/工具/Saved/Config/Windows/Engine.ini]
+LogConfig: Setting CVar [[s.MinBulkDataSizeForAsyncLoading:131072]]
+LogConfig: Setting CVar [[s.AsyncLoadingThreadEnabled:0]]
+LogConfig: Setting CVar [[s.EventDrivenLoaderEnabled:1]]
+LogConfig: Setting CVar [[s.WarnIfTimeLimitExceeded:0]]
+LogConfig: Setting CVar [[s.TimeLimitExceededMultiplier:1.5]]
+LogConfig: Setting CVar [[s.TimeLimitExceededMinTime:0.005]]
+LogConfig: Setting CVar [[s.UseBackgroundLevelStreaming:1]]
+LogConfig: Setting CVar [[s.PriorityAsyncLoadingExtraTime:15.0]]
+LogConfig: Setting CVar [[s.LevelStreamingActorsUpdateTimeLimit:5.0]]
+LogConfig: Setting CVar [[s.PriorityLevelStreamingActorsUpdateExtraTime:5.0]]
+LogConfig: Setting CVar [[s.LevelStreamingComponentsRegistrationGranularity:10]]
+LogConfig: Setting CVar [[s.UnregisterComponentsTimeLimit:1.0]]
+LogConfig: Setting CVar [[s.LevelStreamingComponentsUnregistrationGranularity:5]]
+LogConfig: Setting CVar [[s.FlushStreamingOnExit:1]]
+LogInit: Object subsystem initialized
+LogConfig: Setting CVar [[con.DebugEarlyDefault:1]]
+LogConfig: Setting CVar [[r.setres:1280x720]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[r.VSync:0]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[r.RHICmdBypass:0]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Applying CVar settings from Section [/Script/Engine.RendererSettings] File [D:/工具/Saved/Config/Windows/Engine.ini]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[r.GPUCrashDebugging:0]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Applying CVar settings from Section [/Script/Engine.RendererOverrideSettings] File [D:/工具/Saved/Config/Windows/Engine.ini]
+[2026.03.03-02.25.03:771][  0]LogConfig: Applying CVar settings from Section [/Script/Engine.StreamingSettings] File [D:/工具/Saved/Config/Windows/Engine.ini]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[s.MinBulkDataSizeForAsyncLoading:131072]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[s.AsyncLoadingThreadEnabled:0]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[s.EventDrivenLoaderEnabled:1]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[s.WarnIfTimeLimitExceeded:0]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[s.TimeLimitExceededMultiplier:1.5]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[s.TimeLimitExceededMinTime:0.005]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[s.UseBackgroundLevelStreaming:1]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[s.PriorityAsyncLoadingExtraTime:15.0]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[s.LevelStreamingActorsUpdateTimeLimit:5.0]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[s.PriorityLevelStreamingActorsUpdateExtraTime:5.0]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[s.LevelStreamingComponentsRegistrationGranularity:10]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[s.UnregisterComponentsTimeLimit:1.0]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[s.LevelStreamingComponentsUnregistrationGranularity:5]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[s.FlushStreamingOnExit:1]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Applying CVar settings from Section [/Script/Engine.GarbageCollectionSettings] File [D:/工具/Saved/Config/Windows/Engine.ini]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[gc.MaxObjectsNotConsideredByGC:1]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[gc.SizeOfPermanentObjectPool:0]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[gc.FlushStreamingOnGC:0]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[gc.NumRetriesBeforeForcingGC:10]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[gc.AllowParallelGC:1]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[gc.TimeBetweenPurgingPendingKillObjects:61.1]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[gc.MaxObjectsInEditor:25165824]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[gc.IncrementalBeginDestroyEnabled:1]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[gc.CreateGCClusters:1]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[gc.MinGCClusterSize:5]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[gc.ActorClusteringEnabled:0]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[gc.BlueprintClusteringEnabled:0]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[gc.UseDisregardForGCOnDedicatedServers:0]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Setting CVar [[gc.MultithreadedDestructionEnabled:1]]
+[2026.03.03-02.25.03:771][  0]LogConfig: Applying CVar settings from Section [/Script/Engine.NetworkSettings] File [D:/工具/Saved/Config/Windows/Engine.ini]
+[2026.03.03-02.25.03:771][  0]LogConfig: Applying CVar settings from Section [/Script/UnrealEd.CookerSettings] File [D:/工具/Saved/Config/Windows/Engine.ini]
+[2026.03.03-02.25.03:793][  0]LogConfig: Applying CVar settings from Section [ViewDistanceQuality@3] File [D:/工具/Saved/Config/Windows/Scalability.ini]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.SkeletalMeshLODBias:0]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.ViewDistanceScale:1.0]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Applying CVar settings from Section [AntiAliasingQuality@3] File [D:/工具/Saved/Config/Windows/Scalability.ini]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.PostProcessAAQuality:4]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Applying CVar settings from Section [ShadowQuality@3] File [D:/工具/Saved/Config/Windows/Scalability.ini]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.LightFunctionQuality:1]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.ShadowQuality:5]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.Shadow.CSM.MaxCascades:10]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.Shadow.MaxResolution:2048]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.Shadow.MaxCSMResolution:2048]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.Shadow.RadiusThreshold:0.01]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.Shadow.DistanceScale:1.0]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.Shadow.CSM.TransitionScale:1.0]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.Shadow.PreShadowResolutionFactor:1.0]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.DistanceFieldShadowing:1]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.DistanceFieldAO:1]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.AOQuality:2]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.VolumetricFog:1]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.VolumetricFog.GridPixelSize:8]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.VolumetricFog.GridSizeZ:128]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.VolumetricFog.HistoryMissSupersampleCount:4]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.LightMaxDrawDistanceScale:1]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.CapsuleShadows:1]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Applying CVar settings from Section [PostProcessQuality@3] File [D:/工具/Saved/Config/Windows/Scalability.ini]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.MotionBlurQuality:4]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.AmbientOcclusionMipLevelFactor:0.4]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.AmbientOcclusionMaxQuality:100]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.AmbientOcclusionLevels:-1]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.AmbientOcclusionRadiusScale:1.0]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.DepthOfFieldQuality:2]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.RenderTargetPoolMin:400]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.LensFlareQuality:2]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.SceneColorFringeQuality:1]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.EyeAdaptationQuality:2]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.BloomQuality:5]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.FastBlurThreshold:100]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.Upscale.Quality:3]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.Tonemapper.GrainQuantization:1]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.LightShaftQuality:1]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.Filter.SizeScale:1]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.Tonemapper.Quality:5]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.DOF.Gather.AccumulatorQuality:1        ; higher gathering accumulator quality]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.DOF.Gather.PostfilterMethod:1          ; Median3x3 postfilering method]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.DOF.Gather.EnableBokehSettings:0       ; no bokeh simulation when gathering]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.DOF.Gather.RingCount:4                 ; medium number of samples when gathering]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.DOF.Scatter.ForegroundCompositing:1    ; additive foreground scattering]]
+[2026.03.03-02.25.03:793][  0]LogConfig: Setting CVar [[r.DOF.Scatter.BackgroundCompositing:2    ; additive background scattering]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DOF.Scatter.EnableBokehSettings:1      ; bokeh simulation when scattering]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DOF.Scatter.MaxSpriteRatio:0.1         ; only a maximum of 10% of scattered bokeh]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DOF.Recombine.Quality:1                ; cheap slight out of focus]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DOF.Recombine.EnableBokehSettings:0    ; no bokeh simulation on slight out of focus]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DOF.TemporalAAQuality:1                ; more stable temporal accumulation]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DOF.Kernel.MaxForegroundRadius:0.025]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DOF.Kernel.MaxBackgroundRadius:0.025]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Applying CVar settings from Section [TextureQuality@3] File [D:/工具/Saved/Config/Windows/Scalability.ini]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Streaming.MipBias:0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Streaming.AmortizeCPUToGPUCopy:0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Streaming.MaxNumTexturesToStreamPerFrame:0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Streaming.Boost:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.MaxAnisotropy:8]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.VT.MaxAnisotropy:8]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Streaming.LimitPoolSizeToVRAM:0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Streaming.PoolSize:1000]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Streaming.MaxEffectiveScreenSize:0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Applying CVar settings from Section [EffectsQuality@3] File [D:/工具/Saved/Config/Windows/Scalability.ini]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.TranslucencyLightingVolumeDim:64]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.RefractionQuality:2]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SSR.Quality:3]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SSR.HalfResSceneColor:0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SceneColorFormat:4]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DetailMode:2]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.TranslucencyVolumeBlur:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.MaterialQualityLevel:1 ; High quality]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.AnisotropicMaterials:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SSS.Scale:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SSS.SampleSet:2]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SSS.Quality:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SSS.HalfRes:0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SSGI.Quality:3]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.EmitterSpawnRateScale:1.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.ParticleLightQuality:2]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.AerialPerspectiveLUT.FastApplyOnOpaque:1 ; Always have FastSkyLUT 1 in this case to avoid wrong sky]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.AerialPerspectiveLUT.SampleCountMaxPerSlice:4]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.AerialPerspectiveLUT.DepthResolution:16.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.FastSkyLUT:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.FastSkyLUT.SampleCountMin:4.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.FastSkyLUT.SampleCountMax:128.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.SampleCountMin:4.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.SampleCountMax:128.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.TransmittanceLUT.UseSmallFormat:0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.TransmittanceLUT.SampleCount:10.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.MultiScatteringLUT.SampleCount:15.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyLight.RealTimeReflectionCapture:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Applying CVar settings from Section [FoliageQuality@3] File [D:/工具/Saved/Config/Windows/Scalability.ini]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[foliage.DensityScale:1.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[grass.DensityScale:1.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Applying CVar settings from Section [ShadingQuality@3] File [D:/工具/Saved/Config/Windows/Scalability.ini]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.HairStrands.SkyLighting.IntegrationType:2]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.HairStrands.SkyAO.SampleCount:4]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.HairStrands.Visibility.MSAA.SamplePerPixel:4]]
+[2026.03.03-02.25.03:794][  0]LogInit: Selected Device Profile: [Windows]
+[2026.03.03-02.25.03:794][  0]LogInit: Applying CVar settings loaded from the selected device profile: [Windows]
+[2026.03.03-02.25.03:794][  0]LogHAL: Display: Platform has ~ 64 GB [68448202752 / 68719476736 / 64], which maps to Largest [LargestMinGB=32, LargerMinGB=12, DefaultMinGB=8, SmallerMinGB=6, SmallestMinGB=0)
+[2026.03.03-02.25.03:794][  0]LogInit: Going up to parent DeviceProfile []
+[2026.03.03-02.25.03:794][  0]LogConfig: Applying CVar settings from Section [ViewDistanceQuality@3] File [D:/工具/Saved/Config/Windows/Scalability.ini]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkeletalMeshLODBias:0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.ViewDistanceScale:1.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Applying CVar settings from Section [AntiAliasingQuality@3] File [D:/工具/Saved/Config/Windows/Scalability.ini]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.PostProcessAAQuality:4]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Applying CVar settings from Section [ShadowQuality@3] File [D:/工具/Saved/Config/Windows/Scalability.ini]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.LightFunctionQuality:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.ShadowQuality:5]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Shadow.CSM.MaxCascades:10]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Shadow.MaxResolution:2048]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Shadow.MaxCSMResolution:2048]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Shadow.RadiusThreshold:0.01]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Shadow.DistanceScale:1.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Shadow.CSM.TransitionScale:1.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Shadow.PreShadowResolutionFactor:1.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DistanceFieldShadowing:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DistanceFieldAO:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.AOQuality:2]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.VolumetricFog:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.VolumetricFog.GridPixelSize:8]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.VolumetricFog.GridSizeZ:128]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.VolumetricFog.HistoryMissSupersampleCount:4]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.LightMaxDrawDistanceScale:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.CapsuleShadows:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Applying CVar settings from Section [PostProcessQuality@3] File [D:/工具/Saved/Config/Windows/Scalability.ini]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.MotionBlurQuality:4]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.AmbientOcclusionMipLevelFactor:0.4]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.AmbientOcclusionMaxQuality:100]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.AmbientOcclusionLevels:-1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.AmbientOcclusionRadiusScale:1.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DepthOfFieldQuality:2]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.RenderTargetPoolMin:400]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.LensFlareQuality:2]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SceneColorFringeQuality:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.EyeAdaptationQuality:2]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.BloomQuality:5]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.FastBlurThreshold:100]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Upscale.Quality:3]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Tonemapper.GrainQuantization:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.LightShaftQuality:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Filter.SizeScale:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Tonemapper.Quality:5]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DOF.Gather.AccumulatorQuality:1        ; higher gathering accumulator quality]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DOF.Gather.PostfilterMethod:1          ; Median3x3 postfilering method]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DOF.Gather.EnableBokehSettings:0       ; no bokeh simulation when gathering]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DOF.Gather.RingCount:4                 ; medium number of samples when gathering]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DOF.Scatter.ForegroundCompositing:1    ; additive foreground scattering]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DOF.Scatter.BackgroundCompositing:2    ; additive background scattering]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DOF.Scatter.EnableBokehSettings:1      ; bokeh simulation when scattering]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DOF.Scatter.MaxSpriteRatio:0.1         ; only a maximum of 10% of scattered bokeh]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DOF.Recombine.Quality:1                ; cheap slight out of focus]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DOF.Recombine.EnableBokehSettings:0    ; no bokeh simulation on slight out of focus]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DOF.TemporalAAQuality:1                ; more stable temporal accumulation]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DOF.Kernel.MaxForegroundRadius:0.025]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DOF.Kernel.MaxBackgroundRadius:0.025]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Applying CVar settings from Section [TextureQuality@3] File [D:/工具/Saved/Config/Windows/Scalability.ini]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Streaming.MipBias:0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Streaming.AmortizeCPUToGPUCopy:0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Streaming.MaxNumTexturesToStreamPerFrame:0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Streaming.Boost:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.MaxAnisotropy:8]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.VT.MaxAnisotropy:8]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Streaming.LimitPoolSizeToVRAM:0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Streaming.PoolSize:1000]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.Streaming.MaxEffectiveScreenSize:0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Applying CVar settings from Section [EffectsQuality@3] File [D:/工具/Saved/Config/Windows/Scalability.ini]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.TranslucencyLightingVolumeDim:64]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.RefractionQuality:2]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SSR.Quality:3]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SSR.HalfResSceneColor:0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SceneColorFormat:4]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.DetailMode:2]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.TranslucencyVolumeBlur:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.MaterialQualityLevel:1 ; High quality]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.AnisotropicMaterials:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SSS.Scale:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SSS.SampleSet:2]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SSS.Quality:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SSS.HalfRes:0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SSGI.Quality:3]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.EmitterSpawnRateScale:1.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.ParticleLightQuality:2]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.AerialPerspectiveLUT.FastApplyOnOpaque:1 ; Always have FastSkyLUT 1 in this case to avoid wrong sky]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.AerialPerspectiveLUT.SampleCountMaxPerSlice:4]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.AerialPerspectiveLUT.DepthResolution:16.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.FastSkyLUT:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.FastSkyLUT.SampleCountMin:4.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.FastSkyLUT.SampleCountMax:128.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.SampleCountMin:4.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.SampleCountMax:128.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.TransmittanceLUT.UseSmallFormat:0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.TransmittanceLUT.SampleCount:10.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyAtmosphere.MultiScatteringLUT.SampleCount:15.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.SkyLight.RealTimeReflectionCapture:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Applying CVar settings from Section [FoliageQuality@3] File [D:/工具/Saved/Config/Windows/Scalability.ini]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[foliage.DensityScale:1.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[grass.DensityScale:1.0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Applying CVar settings from Section [ShadingQuality@3] File [D:/工具/Saved/Config/Windows/Scalability.ini]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.HairStrands.SkyLighting.IntegrationType:2]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.HairStrands.SkyAO.SampleCount:4]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[r.HairStrands.Visibility.MSAA.SamplePerPixel:4]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Applying CVar settings from Section [Startup] File [../../../Engine/Config/ConsoleVariables.ini]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[net.UseAdaptiveNetUpdateFrequency:0]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[p.chaos.AllowCreatePhysxBodies:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Setting CVar [[fx.SkipVectorVMBackendOptimizations:1]]
+[2026.03.03-02.25.03:794][  0]LogConfig: Applying CVar settings from Section [ConsoleVariables] File [D:/工具/Saved/Config/Windows/Engine.ini]
+[2026.03.03-02.25.03:794][  0]LogConfig: Applying CVar settings from Section [ConsoleVariables] File [D:/工具/Saved/Config/Windows/Editor.ini]
+[2026.03.03-02.25.03:796][  0]LogInit: Computer: GIH-D-32088
+[2026.03.03-02.25.03:796][  0]LogInit: User: qukuikui
+[2026.03.03-02.25.03:796][  0]LogInit: CPU Page size=4096, Cores=12
+[2026.03.03-02.25.03:796][  0]LogInit: High frequency timer resolution =10.000000 MHz
+[2026.03.03-02.25.03:796][  0]LogMemory: Memory total: Physical=63.7GB (64GB approx)
+[2026.03.03-02.25.03:796][  0]LogMemory: Platform Memory Stats for Windows
+[2026.03.03-02.25.03:796][  0]LogMemory: Process Physical Memory: 151.21 MB used, 151.21 MB peak
+[2026.03.03-02.25.03:796][  0]LogMemory: Process Virtual Memory: 132.88 MB used, 132.88 MB peak
+[2026.03.03-02.25.03:796][  0]LogMemory: Physical Memory: 18920.95 MB used,  46356.34 MB free, 65277.29 MB total
+[2026.03.03-02.25.03:796][  0]LogMemory: Virtual Memory: 134167000.00 MB used,  50726.96 MB free, 134217728.00 MB total
+[2026.03.03-02.25.03:801][  0]LogWindows: WindowsPlatformFeatures enabled
+[2026.03.03-02.25.03:837][  0]LogInit: Physics initialised using underlying interface: PhysX
+[2026.03.03-02.25.03:838][  0]LogInit: Using OS detected language (zh-CN).
+[2026.03.03-02.25.03:838][  0]LogInit: Using OS detected locale (zh-CN).
+[2026.03.03-02.25.03:839][  0]LogTextLocalizationManager: No specific localization for 'zh-CN' exists, so the 'zh-Hans' localization will be used.
+[2026.03.03-02.25.03:956][  0]LogTextLocalizationResource: LocRes '../../../Engine/Content/Localization/Editor/zh/Editor.locres' could not be opened for reading!
+[2026.03.03-02.25.03:956][  0]LogTextLocalizationResource: LocRes '../../../Engine/Content/Localization/EditorTutorials/zh/EditorTutorials.locres' could not be opened for reading!
+[2026.03.03-02.25.03:957][  0]LogTextLocalizationResource: LocRes '../../../Engine/Content/Localization/Keywords/zh/Keywords.locres' could not be opened for reading!
+[2026.03.03-02.25.03:957][  0]LogTextLocalizationResource: LocRes '../../../Engine/Content/Localization/Category/zh/Category.locres' could not be opened for reading!
+[2026.03.03-02.25.03:957][  0]LogTextLocalizationResource: LocRes '../../../Engine/Content/Localization/ToolTips/zh/ToolTips.locres' could not be opened for reading!
+[2026.03.03-02.25.03:957][  0]LogTextLocalizationResource: LocRes '../../../Engine/Content/Localization/PropertyNames/zh/PropertyNames.locres' could not be opened for reading!
+[2026.03.03-02.25.03:957][  0]LogTextLocalizationResource: LocRes '../../../Engine/Content/Localization/Engine/zh/Engine.locres' could not be opened for reading!
+[2026.03.03-02.25.03:957][  0]LogTextLocalizationResource: LocRes '../../../Engine/Plugins/Online/OnlineSubsystem/Content/Localization/OnlineSubsystem/zh/OnlineSubsystem.locres' could not be opened for reading!
+[2026.03.03-02.25.03:957][  0]LogTextLocalizationResource: LocRes '../../../Engine/Plugins/Online/OnlineSubsystemUtils/Content/Localization/OnlineSubsystemUtils/zh/OnlineSubsystemUtils.locres' could not be opened for reading!
+[2026.03.03-02.25.03:957][  0]LogTextLocalizationResource: LocRes '../../../Engine/Plugins/Online/IOS/OnlineSubsystemIOS/Content/Localization/OnlineSubsystemIOS/zh/OnlineSubsystemIOS.locres' could not be opened for reading!
+[2026.03.03-02.25.03:957][  0]LogTextLocalizationResource: LocRes '../../../Engine/Plugins/Online/Android/OnlineSubsystemGooglePlay/Content/Localization/OnlineSubsystemGooglePlay/zh/OnlineSubsystemGooglePlay.locres' could not be opened for reading!
+[2026.03.03-02.25.04:016][  0]LogInit: Setting process to per monitor DPI aware
+[2026.03.03-02.25.04:104][  0]LogWindowsTextInputMethodSystem: Display: IME system deactivated.
+[2026.03.03-02.25.04:133][  0]LogSlate: New Slate User Created.  User Index 0, Is Virtual User: 0
+[2026.03.03-02.25.04:133][  0]LogSlate: Slate User Registered.  User Index 0, Is Virtual User: 0
+[2026.03.03-02.25.04:386][  0]LogD3D11RHI: Loaded GFSDK_Aftermath_Lib.x64.dll
+[2026.03.03-02.25.04:419][  0]LogHMD: Failed to initialize OpenVR with code 110
+[2026.03.03-02.25.04:419][  0]LogD3D11RHI: D3D11 min allowed feature level: 11_0
+[2026.03.03-02.25.04:419][  0]LogD3D11RHI: D3D11 max allowed feature level: 11_0
+[2026.03.03-02.25.04:419][  0]LogD3D11RHI: D3D11 adapters:
+[2026.03.03-02.25.04:646][  0]LogD3D11RHI:    0. 'NVIDIA GeForce RTX 4070 Ti' (Feature Level 11_0)
+[2026.03.03-02.25.04:646][  0]LogD3D11RHI:       11994/0/32638 MB DedicatedVideo/DedicatedSystem/SharedSystem, Outputs:2, VendorId:0x10de
+[2026.03.03-02.25.04:648][  0]LogD3D11RHI:    1. 'Microsoft Basic Render Driver' (Feature Level 11_0)
+[2026.03.03-02.25.04:648][  0]LogD3D11RHI:       0/0/32638 MB DedicatedVideo/DedicatedSystem/SharedSystem, Outputs:0, VendorId:0x1414
+[2026.03.03-02.25.04:781][  0]LogD3D11RHI:    2. 'NVIDIA GeForce RTX 4070 Ti' (Feature Level 11_0)
+[2026.03.03-02.25.04:781][  0]LogD3D11RHI:       11994/0/32638 MB DedicatedVideo/DedicatedSystem/SharedSystem, Outputs:0, VendorId:0x10de
+[2026.03.03-02.25.04:922][  0]LogD3D11RHI:    3. 'NVIDIA GeForce RTX 4070 Ti' (Feature Level 11_0)
+[2026.03.03-02.25.04:922][  0]LogD3D11RHI:       11994/0/32638 MB DedicatedVideo/DedicatedSystem/SharedSystem, Outputs:0, VendorId:0x10de
+[2026.03.03-02.25.05:057][  0]LogD3D11RHI:    4. 'NVIDIA GeForce RTX 4070 Ti' (Feature Level 11_0)
+[2026.03.03-02.25.05:057][  0]LogD3D11RHI:       11994/0/32638 MB DedicatedVideo/DedicatedSystem/SharedSystem, Outputs:0, VendorId:0x10de
+[2026.03.03-02.25.05:057][  0]LogD3D11RHI: Chosen D3D11 Adapter:
+[2026.03.03-02.25.05:057][  0]LogD3D11RHI:     Description : NVIDIA GeForce RTX 4070 Ti
+[2026.03.03-02.25.05:057][  0]LogD3D11RHI:     VendorId    : 10de
+[2026.03.03-02.25.05:057][  0]LogD3D11RHI:     DeviceId    : 2782
+[2026.03.03-02.25.05:057][  0]LogD3D11RHI:     SubSysId    : 88a31043
+[2026.03.03-02.25.05:057][  0]LogD3D11RHI:     Revision    : 00a1
+[2026.03.03-02.25.05:057][  0]LogD3D11RHI:     DedicatedVideoMemory : 12576620544 bytes
+[2026.03.03-02.25.05:057][  0]LogD3D11RHI:     DedicatedSystemMemory : 0 bytes
+[2026.03.03-02.25.05:057][  0]LogD3D11RHI:     SharedSystemMemory : 34224101376 bytes
+[2026.03.03-02.25.05:057][  0]LogD3D11RHI:     AdapterLuid : 0 101950
+[2026.03.03-02.25.05:064][  0]LogD3D11RHI: Creating new Direct3DDevice
+[2026.03.03-02.25.05:064][  0]LogD3D11RHI:     GPU DeviceId: 0x2782 (for the marketing name, search the web for "GPU Device Id")
+[2026.03.03-02.25.05:064][  0]LogWindows: EnumDisplayDevices:
+[2026.03.03-02.25.05:064][  0]LogWindows:    0. 'NVIDIA GeForce RTX 4070 Ti' (P:1 D:1)
+[2026.03.03-02.25.05:064][  0]LogWindows:    1. 'NVIDIA GeForce RTX 4070 Ti' (P:0 D:1)
+[2026.03.03-02.25.05:064][  0]LogWindows:    2. 'NVIDIA GeForce RTX 4070 Ti' (P:0 D:0)
+[2026.03.03-02.25.05:065][  0]LogWindows:    3. 'NVIDIA GeForce RTX 4070 Ti' (P:0 D:0)
+[2026.03.03-02.25.05:065][  0]LogWindows:    4. 'GameViewer Virtual Display Adapter' (P:0 D:0)
+[2026.03.03-02.25.05:065][  0]LogWindows:    5. 'GameViewer Virtual Display Adapter' (P:0 D:0)
+[2026.03.03-02.25.05:065][  0]LogWindows:    6. 'GameViewer Virtual Display Adapter' (P:0 D:0)
+[2026.03.03-02.25.05:065][  0]LogWindows:    7. 'GameViewer Virtual Display Adapter' (P:0 D:0)
+[2026.03.03-02.25.05:065][  0]LogWindows:    8. 'GameViewer Virtual Display Adapter' (P:0 D:0)
+[2026.03.03-02.25.05:065][  0]LogWindows:    9. 'GameViewer Virtual Display Adapter' (P:0 D:0)
+[2026.03.03-02.25.05:065][  0]LogWindows:    10. 'GameViewer Virtual Display Adapter' (P:0 D:0)
+[2026.03.03-02.25.05:066][  0]LogWindows:    11. 'GameViewer Virtual Display Adapter' (P:0 D:0)
+[2026.03.03-02.25.05:066][  0]LogWindows:    12. 'GameViewer Virtual Display Adapter' (P:0 D:0)
+[2026.03.03-02.25.05:066][  0]LogWindows:    13. 'GameViewer Virtual Display Adapter' (P:0 D:0)
+[2026.03.03-02.25.05:066][  0]LogWindows:    14. 'seewo - Virtual MonitorX' (P:0 D:0)
+[2026.03.03-02.25.05:066][  0]LogWindows:    15. 'Lebo Virtual USB Monitor' (P:0 D:0)
+[2026.03.03-02.25.05:066][  0]LogWindows: DebugString: GetVideoDriverDetailsInvalid PrimaryIsNotTheChoosenAdapter GetVideoDriverDetailsInvalid PrimaryIsNotTheChoosenAdapter GetVideoDriverDetailsInvalid PrimaryIsNotTheChoosenAdapter GetVideoDriverDetailsInvalid PrimaryIsNotTheChoosenAdapter GetVideoDriverDetailsInvalid PrimaryIsNotTheChoosenAdapter GetVideoDriverDetailsInvalid PrimaryIsNotTheChoosenAdapter GetVideoDriverDetailsInvalid PrimaryIsNotTheChoosenAdapter GetVideoDriverDetailsInvalid PrimaryIsNotTheChoosenAdapter GetVideoDriverDetailsInvalid PrimaryIsNotTheChoosenAdapter GetVideoDriverDetailsInvalid PrimaryIsNotTheChoosenAdapter GetVideoDriverDetailsInvalid PrimaryIsNotTheChoosenAdapter GetVideoDriverDetailsInvalid PrimaryIsNotTheChoosenAdapter FoundDriverCount:4 
+[2026.03.03-02.25.05:066][  0]LogD3D11RHI:     Adapter Name: NVIDIA GeForce RTX 4070 Ti
+[2026.03.03-02.25.05:066][  0]LogD3D11RHI:   Driver Version: 591.59 (internal:32.0.15.9159, unified:591.59)
+[2026.03.03-02.25.05:066][  0]LogD3D11RHI:      Driver Date: 12-11-2025
+[2026.03.03-02.25.05:066][  0]LogRHI: Texture pool is 8395 MB (70% of 11994 MB)
+[2026.03.03-02.25.05:066][  0]LogD3D11RHI: Creating D3DDevice using adapter:
+[2026.03.03-02.25.05:066][  0]LogD3D11RHI:     Description : NVIDIA GeForce RTX 4070 Ti
+[2026.03.03-02.25.05:066][  0]LogD3D11RHI:     VendorId    : 10de
+[2026.03.03-02.25.05:066][  0]LogD3D11RHI:     DeviceId    : 2782
+[2026.03.03-02.25.05:066][  0]LogD3D11RHI:     SubSysId    : 88a31043
+[2026.03.03-02.25.05:066][  0]LogD3D11RHI:     Revision    : 00a1
+[2026.03.03-02.25.05:066][  0]LogD3D11RHI:     DedicatedVideoMemory : 12576620544 bytes
+[2026.03.03-02.25.05:066][  0]LogD3D11RHI:     DedicatedSystemMemory : 0 bytes
+[2026.03.03-02.25.05:066][  0]LogD3D11RHI:     SharedSystemMemory : 34224101376 bytes
+[2026.03.03-02.25.05:066][  0]LogD3D11RHI:     AdapterLuid : 0 101950
+[2026.03.03-02.25.05:188][  0]LogD3D11RHI: RHI has support for 64 bit atomics
+[2026.03.03-02.25.05:191][  0]LogD3D11RHI: Async texture creation enabled
+[2026.03.03-02.25.05:191][  0]LogD3D11RHI: Array index from any shader is supported
+[2026.03.03-02.25.05:206][  0]LogD3D11RHI: GPU Timing Frequency: 1000.000000 (Debug: 2 1)
+[2026.03.03-02.25.05:235][  0]LogRHI: GeForceNow SDK initialized: 1
+[2026.03.03-02.25.05:684][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'AllDesktop'
+[2026.03.03-02.25.05:697][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'Android'
+[2026.03.03-02.25.05:697][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'Android_ASTC'
+[2026.03.03-02.25.05:697][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'Android_DXT'
+[2026.03.03-02.25.05:697][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'Android_ETC2'
+[2026.03.03-02.25.05:697][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'AndroidClient'
+[2026.03.03-02.25.05:697][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'Android_ASTCClient'
+[2026.03.03-02.25.05:697][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'Android_DXTClient'
+[2026.03.03-02.25.05:697][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'Android_ETC2Client'
+[2026.03.03-02.25.05:697][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'Android_Multi'
+[2026.03.03-02.25.05:697][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'Android_MultiClient'
+[2026.03.03-02.25.05:710][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'IOSClient'
+[2026.03.03-02.25.05:710][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'IOS'
+[2026.03.03-02.25.05:717][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'Linux'
+[2026.03.03-02.25.05:721][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'LinuxNoEditor'
+[2026.03.03-02.25.05:724][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'LinuxClient'
+[2026.03.03-02.25.05:727][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'LinuxServer'
+[2026.03.03-02.25.05:733][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'LinuxAArch64NoEditor'
+[2026.03.03-02.25.05:736][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'LinuxAArch64Client'
+[2026.03.03-02.25.05:739][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'LinuxAArch64Server'
+[2026.03.03-02.25.05:753][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'Lumin'
+[2026.03.03-02.25.05:753][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'LuminClient'
+[2026.03.03-02.25.05:759][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'MacNoEditor'
+[2026.03.03-02.25.05:763][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'Mac'
+[2026.03.03-02.25.05:765][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'MacClient'
+[2026.03.03-02.25.05:768][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'MacServer'
+[2026.03.03-02.25.05:775][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'TVOSClient'
+[2026.03.03-02.25.05:775][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'TVOS'
+[2026.03.03-02.25.05:781][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'WindowsNoEditor'
+[2026.03.03-02.25.05:785][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'Windows'
+[2026.03.03-02.25.05:788][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'WindowsClient'
+[2026.03.03-02.25.05:791][  0]LogTargetPlatformManager: Display: Loaded TargetPlatform 'WindowsServer'
+[2026.03.03-02.25.05:791][  0]LogTargetPlatformManager: Display: Building Assets For Windows
+[2026.03.03-02.25.05:797][  0]LogAudioDebug: Display: Lib vorbis DLL was dynamically loaded.
+[2026.03.03-02.25.05:819][  0]LogTextureFormatOodle: Display: Oodle Texture 2.9.0 init RDO Off
+[2026.03.03-02.25.05:846][  0]LogRendererCore: Ray tracing is disabled. Reason: r.RayTracing=0.
+[2026.03.03-02.25.05:846][  0]LogShaderCompilers: Guid format shader working directory is 32 characters bigger than the processId version (../../../../../工具/Intermediate/Shaders/WorkingDirectory/2812/).
+[2026.03.03-02.25.05:846][  0]LogShaderCompilers: Cleaned the shader compiler working directory 'C:/Users/qukuikui/AppData/Local/Temp/UnrealShaderWorkingDir/EBD6833842CE74757B3578801DF398D7/'.
+[2026.03.03-02.25.05:847][  0]LogXGEController: Cannot use XGE Controller as Incredibuild is not installed on this machine.
+[2026.03.03-02.25.05:847][  0]LogShaderCompilers: Cannot use XGE Shader Compiler as Incredibuild is not installed on this machine.
+[2026.03.03-02.25.05:847][  0]LogShaderCompilers: Display: Using Local Shader Compiler.
+[2026.03.03-02.25.06:639][  0]LogDerivedDataCache: Display: Max Cache Size: 512 MB
+[2026.03.03-02.25.06:696][  0]LogDerivedDataCache: Loaded boot cache 0.06s 96MB C:/Users/qukuikui/AppData/Local/UnrealEngine/4.27/DerivedDataCache/Boot.ddc.
+[2026.03.03-02.25.06:696][  0]LogDerivedDataCache: Display: Loaded Boot cache: C:/Users/qukuikui/AppData/Local/UnrealEngine/4.27/DerivedDataCache/Boot.ddc
+[2026.03.03-02.25.06:696][  0]LogDerivedDataCache: FDerivedDataBackendGraph:  Pak pak cache file ../../../../../工具/DerivedDataCache/DDC.ddp not found, will not use a pak cache.
+[2026.03.03-02.25.06:696][  0]LogDerivedDataCache: Unable to find inner node Pak for hierarchical cache Hierarchy.
+[2026.03.03-02.25.06:696][  0]LogDerivedDataCache: FDerivedDataBackendGraph:  CompressedPak pak cache file ../../../../../工具/DerivedDataCache/Compressed.ddp not found, will not use a pak cache.
+[2026.03.03-02.25.06:696][  0]LogDerivedDataCache: Unable to find inner node CompressedPak for hierarchical cache Hierarchy.
+[2026.03.03-02.25.06:710][  0]LogDerivedDataCache: Display: Pak cache opened for reading ../../../Engine/DerivedDataCache/Compressed.ddp.
+[2026.03.03-02.25.06:710][  0]LogDerivedDataCache: FDerivedDataBackendGraph:  EnterprisePak pak cache file ../../../Enterprise/DerivedDataCache/Compressed.ddp not found, will not use a pak cache.
+[2026.03.03-02.25.06:711][  0]LogDerivedDataCache: Unable to find inner node EnterprisePak for hierarchical cache Hierarchy.
+[2026.03.03-02.25.06:717][  0]LogDerivedDataCache: Speed tests for C:/Users/qukuikui/AppData/Local/UnrealEngine/Common/DerivedDataCache took 0.01 seconds
+[2026.03.03-02.25.06:717][  0]LogDerivedDataCache: Display: Performance to C:/Users/qukuikui/AppData/Local/UnrealEngine/Common/DerivedDataCache: Latency=0.06ms. RandomReadSpeed=742.09MBs, RandomWriteSpeed=229.52MBs. Assigned SpeedClass 'Local'
+[2026.03.03-02.25.06:718][  0]LogDerivedDataCache: Using Local data cache path C:/Users/qukuikui/AppData/Local/UnrealEngine/Common/DerivedDataCache: Writable
+[2026.03.03-02.25.06:718][  0]LogDerivedDataCache: Shared data cache path not found in *engine.ini, will not use an Shared cache.
+[2026.03.03-02.25.06:718][  0]LogDerivedDataCache: Unable to find inner node Shared for hierarchical cache Hierarchy.
+[2026.03.03-02.25.06:750][  0]LogSlate: Using FreeType 2.10.0
+[2026.03.03-02.25.06:750][  0]LogSlate: SlateFontServices - WITH_FREETYPE: 1, WITH_HARFBUZZ: 1
+[2026.03.03-02.25.06:772][  0]LogAssetRegistry: FAssetRegistry took 0.0026 seconds to start up
+[2026.03.03-02.25.06:917][  0]LogInit: Selected Device Profile: [Windows]
+[2026.03.03-02.25.06:917][  0]LogInit: Active device profile: [000001964A5ABF00][0000019640AC5940 49] Windows
+[2026.03.03-02.25.06:917][  0]LogInit: Profiles: [000001964A5ABF00][0000019640AC5940 49] Windows, [000001964A5B7F00][000001964932FAC0 49] WindowsNoEditor, [000001964A5A8500][00000196493320C0 49] WindowsServer, [000001964A5B4600][0000019649336240 49] WindowsClient, [000001964A5ABD00][000001964932A380 49] IOS, [000001964A5B4100][000001964933A4C0 49] iPadAir, [000001964A5A8200][000001964933E600 49] iPadAir2, [000001964A561200][000001964934A880 49] IPadPro, [000001964A561300][00000196493428C0 49] iPadAir3, [000001964A5ABB00][000001964934EA40 49] iPadAir4, [000001964A560700][0000019649352BC0 49] iPadMini2, [000001964A5A8400][0000019649356D40 49] iPadMini3, [000001964A561700][000001964935AEC0 49] iPadMini4, [000001964A5ABA00][000001964935F040 49] iPadMini5, [000001964A5B5300][0000019649367300 49] iPhone6, [000001964A5B5400][0000019649363340 49] iPodTouch6, [000001964A563B00][000001964936F600 49] iPhone7, [000001964A563A00][000001964936B640 49] iPodTouch7, [000001964A5B4900][00000196493737C0 49] iPhone5S, [000001964A560C00][0000019649377940 49] iPhone6Plus, [000001964A5B5800][000001964937BAC0 49] iPhone6S, [000001964A563800][000001964B3900C0 49] iPhone6SPlus, [000001964A5B4C00][000001964B394240 49] iPhone7Plus, [000001964A561100][000001964B3983C0 49] iPhoneSE, [000001964A5B5A00][000001964B39C540 49] iPhone8, [000001964A563600][0000019649346680 49] iPhone8Plus, [000001964A5B4300][000001964B3A07C0 49] iPhoneX, [000001964A560200][000001964B3A4900 49] iPhoneXS, [000001964A5B5E00][000001964B3ACA80 49] iPhoneXSMax, [000001964A563100][000001964B3B0C00 49] iPhoneXR, [000001964A5B7900][000001964B3B4D80 49] iPhone11, [000001964A561900][000001964B3B8F00 49] iPhone11Pro, [000001964A5B6200][000001964B3BD080 49] iPhone11ProMax, [000001964A562D00][000001964B3C1200 49] iPhoneSE2, [000001964A5B7B00][000001964B3C5380 49] iPhone12Mini, [000001964A561B00][000001964B3C9500 49] iPhone12, [000001964A5B6600][000001964B3CD680 49] iPhone12Pro, [000001964A560500][000001964B3D1800 49] iPhone12ProMax, [000001964A5B7500][000001964B3D5980 49] iPadPro105, [000001964A561F00][000001964B3D9B00 49] iPadPro129, [000001964A5B5200][000001964B3DC100 49] iPadPro97, [000001964A561000][000001964B3E0280 49] iPadPro2_129, [000001964A5B6D00][000001964B3E4400 49] iPad5, [000001964A563C00][000001964B3E8580 49] iPad6, [000001964A5B5100][000001964B3EC700 49] iPad7, [000001964A560900][000001964B3A8840 49] iPad8, [000001964A5B6B00][000001964B3F0980 49] iPadPro11, [000001964A562200][000001964B3F4AC0 49] iPadPro2_11, [000001964A5B6900][000001964B3FCC40 49] iPadPro3_129, [000001964A562600][000001964B400DC0 49] iPadPro4_129, [000001964A5B6F00][000001964B404F40 49] AppleTV, [000001964A562500][000001964B4090C0 49] AppleTV4K, [000001964A5B5600][000001964B40D240 49] TVOS, [000001964A563400][000001964B4113C0 49] Mac, [000001964A5B6700][000001964B415540 49] MacClient, [000001964A562E00][000001964B4196C0 49] MacNoEditor, [000001964A5B4E00][000001964B41D840 49] MacServer, [000001964A563F00][000001964B4219C0 49] Linux, [000001964A5B5700][000001964B425B40 49] LinuxAArch64, [000001964A563900][000001964B428140 49] LinuxNoEditor, [000001964A5B4800][000001964B42C2C0 49] LinuxAArch64NoEditor, [000001964A563D00][000001964B430440 49] LinuxClient, [000001964A5B6C00][000001964B4345C0 49] LinuxAArch64Client, [000001964A561C00][000001964B438740 49] LinuxServer, [000001964A5B5F00][000001964B43C8C0 49] LinuxAArch64Server, [000001964A562900][000001964B3F8A00 49] Android, [000001964A5B5B00][000001964B440B40 49] Android_Low, [000001964A562400][000001964B444C80 49] Android_Mid, [000001964A5B7800][000001964B448DC0 49] Android_High, [000001964A562F00][000001964B450F40 49] Android_Default, [000001964A5B4D00][000001964B4550C0 49] Android_Adreno4xx, [000001964A5A8600][000001964B459240 49] Android_Adreno5xx_Low, [000001964A61E900][000001964B45D3C0 49] Android_Adreno5xx, [000001964A5A8C00][000001964B461540 49] Android_Adreno6xx, [000001964A61C600][000001964B4656C0 49] Android_Adreno6xx_Vulkan, [000001964A5A9500][000001964B469840 49] Android_Mali_T6xx, [000001964A61D200][000001964B46D9C0 49] Android_Mali_T7xx, [000001964A5AAA00][000001964B471B40 49] Android_Mali_T8xx, [000001964A61E200][000001964B474140 49] Android_Mali_G71, [000001964A5A9900][000001964B4782C0 49] Android_Mali_G72, [000001964A61CB00][000001964B47C440 49] Android_Mali_G72_Vulkan, [000001964A5AA400][000001964B4805C0 49] Android_Mali_G76, [000001964A61DF00][000001964B484740 49] Android_Mali_G76_Vulkan, [000001964A5A8900][000001964B4888C0 49] Android_Mali_G77, [000001964A61C900][000001964B48CA40 49] Android_Mali_G77_Vulkan, [000001964A5A8100][000001964B44CB80 49] Android_Mali_G78, [000001964A61E500][000001964B490CC0 49] Android_Mali_G78_Vulkan, [000001964A5AAD00][000001964B494E00 49] Android_Mali_G710, [000001964A61D800][000001964B498F40 49] Android_Mali_G710_Vulkan, [000001964A5A9F00][000001964B4A10C0 49] Android_Vulkan_SM5, [000001964A61C200][000001964B4A5240 49] Android_PowerVR_G6xxx, [000001964A5A9D00][000001964B4A93C0 49] Android_PowerVR_GT7xxx, [000001964A61C100][000001964B4AD540 49] Android_PowerVR_GE8xxx, [000001964A5B7100][000001964B4B16C0 49] Android_PowerVR_GM9xxx, [000001964A61C300][000001964B4B5840 49] Android_PowerVR_GM9xxx_Vulkan, [000001964A5B6A00][000001964B4B99C0 49] Android_TegraK1, [000001964A61D700][000001964B4BDB40 49] Android_Unknown_Vulkan, [000001964A5B6100][000001964B4C0140 49] Lumin, [000001964A61D300][000001964B4C42C0 49] Lumin_Desktop, [000001964A5B4F00][000001964B4C8440 49] HoloLens, 
+[2026.03.03-02.25.07:339][  0]LogMeshReduction: Using QuadricMeshReduction for automatic static mesh reduction
+[2026.03.03-02.25.07:339][  0]LogMeshReduction: Using SimplygonMeshReduction for automatic skeletal mesh reduction
+[2026.03.03-02.25.07:339][  0]LogMeshReduction: Using ProxyLODMeshReduction for automatic mesh merging
+[2026.03.03-02.25.07:339][  0]LogMeshReduction: No distributed automatic mesh merging module available
+[2026.03.03-02.25.07:339][  0]LogMeshMerging: No distributed automatic mesh merging module available
+[2026.03.03-02.25.07:352][  0]LogNetVersion: 工具 1.0.0, NetCL: 17155196, EngineNetVer: 17, GameNetVer: 0 (Checksum: 3100826957)
+[2026.03.03-02.25.07:660][  0]LogTexture: Default maximum texture size for cubemaps generated from long-lat sources has been changed from 512 to unlimited. In order to preserve old behaiour for '/Engine/MapTemplates/Sky/DaylightAmbientCubemap.DaylightAmbientCubemap', its maximum texture size has been explicitly set to 512.
+[2026.03.03-02.25.07:704][  0]LogHMD: PokeAHoleMaterial loaded successfully
+[2026.03.03-02.25.07:708][  0]LogUObjectArray: 17178 objects as part of root set at end of initial load.
+[2026.03.03-02.25.07:708][  0]LogUObjectAllocator: 4302048 out of 0 bytes used by permanent object pool.
+[2026.03.03-02.25.07:708][  0]LogUObjectArray: CloseDisregardForGC: 0/0 objects in disregard for GC pool
+[2026.03.03-02.25.08:171][  0]LogPython: Using Python 3.7.7
+[2026.03.03-02.25.08:722][  0]LogNiagaraDebuggerClient: Niagara Debugger Client Initialized | Session: 6D3B05F9445EEB2C2189CCBF5C17A86E | Instance: 6496BDA44C4E6FDD312E38A0F8B3B8F8 (GIH-D-32088-2812).
+[2026.03.03-02.25.09:687][  0]LogTcpMessaging: Initializing TcpMessaging bridge
+[2026.03.03-02.25.10:001][  0]LogUdpMessaging: Initializing bridge on interface 0.0.0.0:0 to multicast group 230.0.0.1:6666.
+[2026.03.03-02.25.10:802][  0]SourceControl: 源码管理已禁用
+[2026.03.03-02.25.10:802][  0]SourceControl: 源码管理已禁用
+[2026.03.03-02.25.10:833][  0]SourceControl: 源码管理已禁用
+[2026.03.03-02.25.10:837][  0]SourceControl: 源码管理已禁用
+[2026.03.03-02.25.10:862][  0]SourceControl: 源码管理已禁用
+[2026.03.03-02.25.10:871][  0]LogUProjectInfo: Found projects:
+[2026.03.03-02.25.10:960][  0]LogOpenImageDenoise: OIDN starting up
+[2026.03.03-02.25.11:032][  0]LogAndroidPermission: UAndroidPermissionCallbackProxy::GetInstance
+[2026.03.03-02.25.11:058][  0]LogAudioCaptureCore: Display: No Audio Capture implementations found. Audio input will be silent.
+[2026.03.03-02.25.11:058][  0]LogAudioCaptureCore: Display: No Audio Capture implementations found. Audio input will be silent.
+[2026.03.03-02.25.11:156][  0]LogCollectionManager: Loaded 0 collections in 0.000784 seconds
+[2026.03.03-02.25.11:211][  0]LogFileCache: Scanning file cache for directory 'D:/工具/Saved/Collections/' took 0.00s
+[2026.03.03-02.25.11:211][  0]LogFileCache: Scanning file cache for directory 'D:/工具/Content/Developers/qukuikui/Collections/' took 0.00s
+[2026.03.03-02.25.11:211][  0]LogFileCache: Scanning file cache for directory 'D:/工具/Content/Collections/' took 0.00s
+[2026.03.03-02.25.11:211][  0]LogOcInput: OculusInput pre-init called
+[2026.03.03-02.25.11:428][  0]LogEngine: Initializing Engine...
+[2026.03.03-02.25.11:891][  0]LogHMD: Failed to enumerate extensions. Please check that you have a valid OpenXR runtime installed.
+[2026.03.03-02.25.11:891][  0]LogHMD: Failed to initialize OpenVR with code 110
+[2026.03.03-02.25.11:961][  0]LogMagicLeap: Warning: VR disabled because ZI is not enabled.  To enable, in the editor, Edit -> Project Settings -> Plugins -> Magic Leap Plugin -> Enable Zero Iteration
+[2026.03.03-02.25.11:962][  0]LogStats: UGameplayTagsManager::InitializeManager -  0.000 s
+[2026.03.03-02.25.12:069][  0]LogInit: Initializing FReadOnlyCVARCache
+[2026.03.03-02.25.12:075][  0]LogAIModule: Creating AISystem for world Untitled
+[2026.03.03-02.25.12:076][  0]LogAudio: Display: Initializing Audio Device Manager...
+[2026.03.03-02.25.12:078][  0]LogAudio: Display: Loading Default Audio Settings Objects...
+[2026.03.03-02.25.12:079][  0]LogAudio: Display: No default SoundConcurrencyObject specified (or failed to load).
+[2026.03.03-02.25.12:079][  0]LogAudio: Display: Audio Device Manager Initialized
+[2026.03.03-02.25.12:079][  0]LogAudio: Display: Creating Audio Device:                 Id: 1, Scope: Shared, Realtime: True
+[2026.03.03-02.25.12:079][  0]LogAudioMixer: Display: Audio Mixer Platform Settings:
+[2026.03.03-02.25.12:079][  0]LogAudioMixer: Display: 	Sample Rate:						  48000
+[2026.03.03-02.25.12:079][  0]LogAudioMixer: Display: 	Callback Buffer Frame Size Requested: 1024
+[2026.03.03-02.25.12:079][  0]LogAudioMixer: Display: 	Callback Buffer Frame Size To Use:	  1024
+[2026.03.03-02.25.12:079][  0]LogAudioMixer: Display: 	Number of buffers to queue:			  2
+[2026.03.03-02.25.12:079][  0]LogAudioMixer: Display: 	Max Channels (voices):				  32
+[2026.03.03-02.25.12:079][  0]LogAudioMixer: Display: 	Number of Async Source Workers:		  0
+[2026.03.03-02.25.12:079][  0]LogAudio: Display: AudioDevice MaxSources: 32
+[2026.03.03-02.25.12:080][  0]LogAudio: Display: Audio Spatialization Plugin: None (built-in).
+[2026.03.03-02.25.12:080][  0]LogAudio: Display: Audio Reverb Plugin: None (built-in).
+[2026.03.03-02.25.12:080][  0]LogAudio: Display: Audio Occlusion Plugin: None (built-in).
+[2026.03.03-02.25.12:080][  0]LogAudioMixer: Display: Initializing audio mixer.
+[2026.03.03-02.25.12:086][  0]LogAudioMixer: Display: 0: FrontLeft
+[2026.03.03-02.25.12:086][  0]LogAudioMixer: Display: 1: FrontRight
+[2026.03.03-02.25.12:106][  0]LogAudioMixer: Display: Using Audio Device 扬声器 (USB PnP Audio Device)
+[2026.03.03-02.25.12:108][  0]LogAudioMixer: Display: Initializing Sound Submixes...
+[2026.03.03-02.25.12:110][  0]LogAudioMixer: Display: Creating Master Submix 'MasterSubmixDefault'
+[2026.03.03-02.25.12:110][  0]LogAudioMixer: Display: Creating Master Submix 'MasterReverbSubmixDefault'
+[2026.03.03-02.25.12:111][  0]LogAudioMixer: Display: Creating Master Submix 'MasterEQSubmixDefault'
+[2026.03.03-02.25.12:111][  0]LogAudioMixer: FMixerPlatformXAudio2::StartAudioStream() called
+[2026.03.03-02.25.12:111][  0]LogAudioMixer: Display: Output buffers initialized: Frames=1024, Channels=2, Samples=2048
+[2026.03.03-02.25.12:112][  0]LogAudioMixer: Display: Starting AudioMixerPlatformInterface::RunInternal()
+[2026.03.03-02.25.12:112][  0]LogAudioMixer: Display: FMixerPlatformXAudio2::SubmitBuffer() called for the first time
+[2026.03.03-02.25.12:112][  0]LogInit: FAudioDevice initialized.
+[2026.03.03-02.25.12:112][  0]LogAudio: Display: Audio Device (ID: 1) registered with world 'Untitled'.
+[2026.03.03-02.25.12:112][  0]LogNetVersion: Set ProjectVersion to 1.0.0.0. Version Checksum will be recalculated on next use.
+[2026.03.03-02.25.12:160][  0]LogDerivedDataCache: Saved boot cache 0.05s 94MB C:/Users/qukuikui/AppData/Local/UnrealEngine/4.27/DerivedDataCache/Boot.ddc.
+[2026.03.03-02.25.12:161][  0]LogInit: Texture streaming: Enabled
+[2026.03.03-02.25.12:172][  0]LogAnalytics: Display: [UEEditor.Rocket.Release] APIServer = https://datarouter.ol.epicgames.com/. AppVersion = 4.27.2-18319896+++UE4+Release-4.27
+[2026.03.03-02.25.12:175][  0]LogEngineSessionManager: EngineSessionManager initialized
+[2026.03.03-02.25.12:175][  0]LogEditorSessionSummary: Verbose: Initializing EditorSessionSummaryWriter for editor session tracking
+[2026.03.03-02.25.12:177][  0]LogEditorSessionSummary: EditorSessionSummaryWriter initialized
+[2026.03.03-02.25.12:192][  0]LogInit: Transaction tracking system initialized
+[2026.03.03-02.25.12:210][  0]BlueprintLog: New page: 编辑器加载
+[2026.03.03-02.25.12:373][  0]LocalizationService: 本地化服务已禁用
+[2026.03.03-02.25.12:521][  0]TimingProfiler: Initialize
+[2026.03.03-02.25.12:523][  0]TimingProfiler: OnSessionChanged
+[2026.03.03-02.25.12:523][  0]LoadingProfiler: Initialize
+[2026.03.03-02.25.12:524][  0]LoadingProfiler: OnSessionChanged
+[2026.03.03-02.25.12:524][  0]NetworkingProfiler: Initialize
+[2026.03.03-02.25.12:524][  0]NetworkingProfiler: OnSessionChanged
+[2026.03.03-02.25.12:524][  0]MemoryProfiler: Initialize
+[2026.03.03-02.25.12:524][  0]MemoryProfiler: OnSessionChanged
+[2026.03.03-02.25.13:166][  0]LogFileCache: Scanning file cache for directory 'D:/工具/Content/' took 0.00s
+[2026.03.03-02.25.13:167][  0]LogCook: Display: CookSettings for Memory: MemoryMaxUsedVirtual 0MiB, MemoryMaxUsedPhysical 16384MiB, MemoryMinFreeVirtual 0MiB, MemoryMinFreePhysical 1024MiB
+[2026.03.03-02.25.13:167][  0]LogCook: Display: Mobile HDR setting 1
+[2026.03.03-02.25.13:493][  0]LogInit: Display: Engine is initialized. Leaving FEngineLoop::Init()
+[2026.03.03-02.25.13:496][  0]SourceControl: 源码管理已禁用
+[2026.03.03-02.25.13:496][  0]LogUnrealEdMisc: Loading editor; pre map load, took 11.091
+[2026.03.03-02.25.13:496][  0]Cmd: MAP LOAD FILE="../../../Engine/Content/Maps/Templates/Template_Default.umap" TEMPLATE=1 SHOWPROGRESS=1 FEATURELEVEL=3
+[2026.03.03-02.25.13:497][  0]LightingResults: New page: 光照构建
+[2026.03.03-02.25.13:498][  0]LogWorld: UWorld::CleanupWorld for Untitled, bSessionEnded=true, bCleanupResources=true
+[2026.03.03-02.25.13:498][  0]LogSlate: InvalidateAllWidgets triggered.  All widgets were invalidated
+[2026.03.03-02.25.13:498][  0]MapCheck: New page: 地图检测
+[2026.03.03-02.25.13:498][  0]LightingResults: New page: 光照构建
+[2026.03.03-02.25.15:359][  0]LogAudio: Display: Audio Device unregistered from world 'None'.
+[2026.03.03-02.25.15:362][  0]LogUObjectHash: Compacting FUObjectHashTables data took   0.75ms
+[2026.03.03-02.25.15:391][  0]LogTexture: Display: 正在编译纹理：DeprecatedTextureEB9CBE3C423008B5E8E130901E171C89（BGRA8、128X128）
+[2026.03.03-02.25.15:398][  0]LogAudio: Display: Audio Device (ID: 1) registered with world 'Untitled_1'.
+[2026.03.03-02.25.15:399][  0]LogAIModule: Creating AISystem for world Untitled_1
+[2026.03.03-02.25.15:403][  0]LogEditorServer: Finished looking for orphan Actors (0.000 secs)
+[2026.03.03-02.25.15:409][  0]LogUObjectHash: Compacting FUObjectHashTables data took   0.61ms
+[2026.03.03-02.25.15:409][  0]Cmd: MAP CHECKDEP NOCLEARLOG
+[2026.03.03-02.25.15:409][  0]MapCheck: 地图检测完成：0个错误、0个警告、完成用时0.081毫秒。
+[2026.03.03-02.25.15:409][  0]LogFileHelpers: Loading map 'Template_Default' took 1.913
+[2026.03.03-02.25.15:411][  0]LogUnrealEdMisc: Total Editor Startup Time, took 13.005
+[2026.03.03-02.25.29:102][  0]LogSlate: Updating window title bar state: overlay mode, drag disabled, window buttons hidden, title bar hidden
+[2026.03.03-02.25.29:160][  0]LogSlate: Updating window title bar state: overlay mode, drag disabled, window buttons hidden, title bar hidden
+[2026.03.03-02.25.29:164][  0]LogSlate: Updating window title bar state: overlay mode, drag disabled, window buttons hidden, title bar hidden
+[2026.03.03-02.25.29:167][  0]LogSlate: Updating window title bar state: overlay mode, drag disabled, window buttons hidden, title bar hidden
+[2026.03.03-02.25.29:620][  0]LogNativeClassHierarchy: Verbose: Native class hierarchy populated in 0.0249 seconds. Added 3856 classes and 939 folders.
+[2026.03.03-02.25.29:739][  0]LogNativeClassHierarchy: Verbose: Native class hierarchy updated for 'WidgetCarousel' in 0.0003 seconds. Added 0 classes and 0 folders.
+[2026.03.03-02.25.29:741][  0]LogPakFile: PakFile PrimaryIndexSize=187
+[2026.03.03-02.25.29:741][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:741][  0]LogPakFile: PakFile FullDirectoryIndexSize=148
+[2026.03.03-02.25.29:741][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/FP_FirstPerson.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:741][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/FP_FirstPerson.upack)
+[2026.03.03-02.25.29:741][  0]LogPakFile: OnPakFileMounted2Time == 0.000057
+[2026.03.03-02.25.29:742][  0]LogPakFile: PakFile PrimaryIndexSize=189
+[2026.03.03-02.25.29:742][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:742][  0]LogPakFile: PakFile FullDirectoryIndexSize=152
+[2026.03.03-02.25.29:742][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/FP_FirstPersonBP.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:742][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/FP_FirstPersonBP.upack)
+[2026.03.03-02.25.29:742][  0]LogPakFile: OnPakFileMounted2Time == 0.000042
+[2026.03.03-02.25.29:743][  0]LogPakFile: PakFile PrimaryIndexSize=191
+[2026.03.03-02.25.29:743][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:743][  0]LogPakFile: PakFile FullDirectoryIndexSize=160
+[2026.03.03-02.25.29:743][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/MobileStarterContent.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:743][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/MobileStarterContent.upack)
+[2026.03.03-02.25.29:743][  0]LogPakFile: OnPakFileMounted2Time == 0.000040
+[2026.03.03-02.25.29:744][  0]LogPakFile: PakFile PrimaryIndexSize=185
+[2026.03.03-02.25.29:745][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:745][  0]LogPakFile: PakFile FullDirectoryIndexSize=148
+[2026.03.03-02.25.29:745][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/StarterContent.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:745][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/StarterContent.upack)
+[2026.03.03-02.25.29:745][  0]LogPakFile: OnPakFileMounted2Time == 0.000089
+[2026.03.03-02.25.29:745][  0]LogPakFile: PakFile PrimaryIndexSize=190
+[2026.03.03-02.25.29:745][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:745][  0]LogPakFile: PakFile FullDirectoryIndexSize=154
+[2026.03.03-02.25.29:745][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_2DSideScroller.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:745][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_2DSideScroller.upack)
+[2026.03.03-02.25.29:745][  0]LogPakFile: OnPakFileMounted2Time == 0.000027
+[2026.03.03-02.25.29:746][  0]LogPakFile: PakFile PrimaryIndexSize=192
+[2026.03.03-02.25.29:746][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:746][  0]LogPakFile: PakFile FullDirectoryIndexSize=158
+[2026.03.03-02.25.29:746][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_2DSideScrollerBP.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:746][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_2DSideScrollerBP.upack)
+[2026.03.03-02.25.29:746][  0]LogPakFile: OnPakFileMounted2Time == 0.000023
+[2026.03.03-02.25.29:746][  0]LogPakFile: PakFile PrimaryIndexSize=182
+[2026.03.03-02.25.29:746][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:746][  0]LogPakFile: PakFile FullDirectoryIndexSize=138
+[2026.03.03-02.25.29:746][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_Flying.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:746][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_Flying.upack)
+[2026.03.03-02.25.29:746][  0]LogPakFile: OnPakFileMounted2Time == 0.000028
+[2026.03.03-02.25.29:747][  0]LogPakFile: PakFile PrimaryIndexSize=184
+[2026.03.03-02.25.29:747][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:747][  0]LogPakFile: PakFile FullDirectoryIndexSize=142
+[2026.03.03-02.25.29:747][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_FlyingBP.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:747][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_FlyingBP.upack)
+[2026.03.03-02.25.29:747][  0]LogPakFile: OnPakFileMounted2Time == 0.000028
+[2026.03.03-02.25.29:747][  0]LogPakFile: PakFile PrimaryIndexSize=188
+[2026.03.03-02.25.29:747][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:747][  0]LogPakFile: PakFile FullDirectoryIndexSize=150
+[2026.03.03-02.25.29:747][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_HandheldARBP.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:747][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_HandheldARBP.upack)
+[2026.03.03-02.25.29:747][  0]LogPakFile: OnPakFileMounted2Time == 0.000023
+[2026.03.03-02.25.29:748][  0]LogPakFile: PakFile PrimaryIndexSize=182
+[2026.03.03-02.25.29:748][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:748][  0]LogPakFile: PakFile FullDirectoryIndexSize=138
+[2026.03.03-02.25.29:748][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_Puzzle.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:748][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_Puzzle.upack)
+[2026.03.03-02.25.29:748][  0]LogPakFile: OnPakFileMounted2Time == 0.000024
+[2026.03.03-02.25.29:748][  0]LogPakFile: PakFile PrimaryIndexSize=184
+[2026.03.03-02.25.29:748][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:748][  0]LogPakFile: PakFile FullDirectoryIndexSize=142
+[2026.03.03-02.25.29:748][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_PuzzleBP.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:748][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_PuzzleBP.upack)
+[2026.03.03-02.25.29:748][  0]LogPakFile: OnPakFileMounted2Time == 0.000020
+[2026.03.03-02.25.29:749][  0]LogPakFile: PakFile PrimaryIndexSize=183
+[2026.03.03-02.25.29:749][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:749][  0]LogPakFile: PakFile FullDirectoryIndexSize=140
+[2026.03.03-02.25.29:749][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_Rolling.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:749][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_Rolling.upack)
+[2026.03.03-02.25.29:749][  0]LogPakFile: OnPakFileMounted2Time == 0.000019
+[2026.03.03-02.25.29:749][  0]LogPakFile: PakFile PrimaryIndexSize=185
+[2026.03.03-02.25.29:750][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:750][  0]LogPakFile: PakFile FullDirectoryIndexSize=144
+[2026.03.03-02.25.29:750][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_RollingBP.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:750][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_RollingBP.upack)
+[2026.03.03-02.25.29:750][  0]LogPakFile: OnPakFileMounted2Time == 0.000022
+[2026.03.03-02.25.29:750][  0]LogPakFile: PakFile PrimaryIndexSize=188
+[2026.03.03-02.25.29:750][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:750][  0]LogPakFile: PakFile FullDirectoryIndexSize=150
+[2026.03.03-02.25.29:750][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_SideScroller.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:750][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_SideScroller.upack)
+[2026.03.03-02.25.29:750][  0]LogPakFile: OnPakFileMounted2Time == 0.000019
+[2026.03.03-02.25.29:750][  0]LogPakFile: PakFile PrimaryIndexSize=190
+[2026.03.03-02.25.29:750][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:750][  0]LogPakFile: PakFile FullDirectoryIndexSize=154
+[2026.03.03-02.25.29:750][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_SideScrollerBP.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:750][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_SideScrollerBP.upack)
+[2026.03.03-02.25.29:750][  0]LogPakFile: OnPakFileMounted2Time == 0.000019
+[2026.03.03-02.25.29:750][  0]LogPakFile: PakFile PrimaryIndexSize=187
+[2026.03.03-02.25.29:750][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:750][  0]LogPakFile: PakFile FullDirectoryIndexSize=148
+[2026.03.03-02.25.29:750][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_ThirdPerson.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:750][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_ThirdPerson.upack)
+[2026.03.03-02.25.29:750][  0]LogPakFile: OnPakFileMounted2Time == 0.000019
+[2026.03.03-02.25.29:751][  0]LogPakFile: PakFile PrimaryIndexSize=189
+[2026.03.03-02.25.29:751][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:751][  0]LogPakFile: PakFile FullDirectoryIndexSize=152
+[2026.03.03-02.25.29:751][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_ThirdPersonBP.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:751][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_ThirdPersonBP.upack)
+[2026.03.03-02.25.29:751][  0]LogPakFile: OnPakFileMounted2Time == 0.000019
+[2026.03.03-02.25.29:751][  0]LogPakFile: PakFile PrimaryIndexSize=183
+[2026.03.03-02.25.29:751][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:751][  0]LogPakFile: PakFile FullDirectoryIndexSize=140
+[2026.03.03-02.25.29:751][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_TopDown.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:751][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_TopDown.upack)
+[2026.03.03-02.25.29:751][  0]LogPakFile: OnPakFileMounted2Time == 0.000024
+[2026.03.03-02.25.29:751][  0]LogPakFile: PakFile PrimaryIndexSize=185
+[2026.03.03-02.25.29:751][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:751][  0]LogPakFile: PakFile FullDirectoryIndexSize=144
+[2026.03.03-02.25.29:751][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_TopDownBP.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:751][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_TopDownBP.upack)
+[2026.03.03-02.25.29:751][  0]LogPakFile: OnPakFileMounted2Time == 0.000021
+[2026.03.03-02.25.29:752][  0]LogPakFile: PakFile PrimaryIndexSize=185
+[2026.03.03-02.25.29:752][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:752][  0]LogPakFile: PakFile FullDirectoryIndexSize=144
+[2026.03.03-02.25.29:752][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_TwinStick.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:752][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_TwinStick.upack)
+[2026.03.03-02.25.29:752][  0]LogPakFile: OnPakFileMounted2Time == 0.000019
+[2026.03.03-02.25.29:752][  0]LogPakFile: PakFile PrimaryIndexSize=187
+[2026.03.03-02.25.29:752][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:752][  0]LogPakFile: PakFile FullDirectoryIndexSize=148
+[2026.03.03-02.25.29:752][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_TwinStickBP.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:752][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_TwinStickBP.upack)
+[2026.03.03-02.25.29:752][  0]LogPakFile: OnPakFileMounted2Time == 0.000026
+[2026.03.03-02.25.29:752][  0]LogPakFile: PakFile PrimaryIndexSize=183
+[2026.03.03-02.25.29:752][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:752][  0]LogPakFile: PakFile FullDirectoryIndexSize=140
+[2026.03.03-02.25.29:752][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_Vehicle.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:752][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_Vehicle.upack)
+[2026.03.03-02.25.29:752][  0]LogPakFile: OnPakFileMounted2Time == 0.000020
+[2026.03.03-02.25.29:752][  0]LogPakFile: PakFile PrimaryIndexSize=186
+[2026.03.03-02.25.29:752][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:752][  0]LogPakFile: PakFile FullDirectoryIndexSize=146
+[2026.03.03-02.25.29:752][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_VehicleAdv.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:752][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_VehicleAdv.upack)
+[2026.03.03-02.25.29:754][  0]LogPakFile: OnPakFileMounted2Time == 0.000021
+[2026.03.03-02.25.29:754][  0]LogPakFile: PakFile PrimaryIndexSize=188
+[2026.03.03-02.25.29:754][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:754][  0]LogPakFile: PakFile FullDirectoryIndexSize=150
+[2026.03.03-02.25.29:754][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_VehicleAdvBP.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:754][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_VehicleAdvBP.upack)
+[2026.03.03-02.25.29:754][  0]LogPakFile: OnPakFileMounted2Time == 0.000022
+[2026.03.03-02.25.29:754][  0]LogPakFile: PakFile PrimaryIndexSize=185
+[2026.03.03-02.25.29:754][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:754][  0]LogPakFile: PakFile FullDirectoryIndexSize=144
+[2026.03.03-02.25.29:754][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_VehicleBP.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:754][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_VehicleBP.upack)
+[2026.03.03-02.25.29:754][  0]LogPakFile: OnPakFileMounted2Time == 0.000022
+[2026.03.03-02.25.29:755][  0]LogPakFile: PakFile PrimaryIndexSize=192
+[2026.03.03-02.25.29:755][  0]LogPakFile: PakFile PathHashIndexSize=101
+[2026.03.03-02.25.29:755][  0]LogPakFile: PakFile FullDirectoryIndexSize=158
+[2026.03.03-02.25.29:755][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: PakFile 'D:/Epic缓存/UE_4.27/FeaturePacks/TP_VirtualRealityBP.upack' (chunk index -1, root 'root:/') mounted
+[2026.03.03-02.25.29:755][  0]LogShaderLibrary: Display: ShaderCodeLibraryPakFileMountedCallback: pending pak file info (ChunkID:-1 Root:root:/ File:D:/Epic缓存/UE_4.27/FeaturePacks/TP_VirtualRealityBP.upack)
+[2026.03.03-02.25.29:755][  0]LogPakFile: OnPakFileMounted2Time == 0.000020
+[2026.03.03-02.25.29:784][  0]LogNativeClassHierarchy: Verbose: Native class hierarchy updated for 'AddContentDialog' in 0.0002 seconds. Added 0 classes and 0 folders.
+[2026.03.03-02.25.32:586][  0]LogSlate: Took 0.000209 seconds to synchronously load lazily loaded font '../../../Engine/Content/Slate/Fonts/Roboto-Regular.ttf' (155K)
+[2026.03.03-02.25.32:587][  0]LogSlate: Took 0.000798 seconds to synchronously load lazily loaded font '../../../Engine/Content/Slate/Fonts/DroidSansFallback.ttf' (3848K)
+[2026.03.03-02.25.32:617][  0]LogSlate: Took 0.029429 seconds to synchronously load lazily loaded font '../../../Engine/Content/Editor/Slate/Fonts/FontAwesome.ttf' (139K)
+[2026.03.03-02.25.32:648][  0]LogSlate: Took 0.000268 seconds to synchronously load lazily loaded font '../../../Engine/Content/Slate/Fonts/Roboto-Bold.ttf' (160K)
+[2026.03.03-02.25.33:127][  0]LogRenderer: Reallocating scene render targets to support 1292x556 Format 10 NumSamples 1 (Frame:1).
+[2026.03.03-02.25.33:780][  0]LogNativeClassHierarchy: Verbose: Native class hierarchy updated for 'HierarchicalLODOutliner' in 0.0002 seconds. Added 0 classes and 0 folders.
+[2026.03.03-02.25.33:780][  0]LogLoad: (Engine Initialization) Total time: 31.37 seconds
+[2026.03.03-02.25.33:780][  0]LogLoad: (Engine Initialization) Total Blueprint compile time: 0.00 seconds
+[2026.03.03-02.25.33:840][  0]LogAssetRegistry: Asset discovery search completed in 27.0693 seconds
+[2026.03.03-02.25.33:844][  0]LogCollectionManager: Fixed up redirectors for 0 collections in 0.000004 seconds (updated 0 objects)
+[2026.03.03-02.25.33:845][  0]LogContentStreaming: Texture pool size now 1000 MB
+[2026.03.03-02.25.47:383][268]LogSlate: Took 0.000356 seconds to synchronously load lazily loaded font '../../../Engine/Content/Slate/Fonts/Roboto-BoldCondensed.ttf' (158K)
+[2026.03.03-02.25.57:903][717]LogSlate: Window '消息' being destroyed
+[2026.03.03-02.25.57:914][717]Message dialog closed, result: Ok, title: 消息, text: 无法打开此项目，因为它是由更新版本的虚幻引擎创建的。
+[2026.03.03-02.25.58:789][807]LogSlate: Window '打开项目' being destroyed
+[2026.03.03-02.37.14:611][432]LogSlate: Took 0.000388 seconds to synchronously load lazily loaded font '../../../Engine/Content/Slate/Fonts/Roboto-Light.ttf' (167K)
+[2026.03.03-02.37.14:680][432]LogFactory: FactoryCreateFile: StaticMesh with FbxFactory (0 0 C:\Users\qukuikui\Desktop\小罐子\SM.fbx)
+[2026.03.03-02.37.15:033][432]LogFbx: Loading FBX Scene from C:\Users\qukuikui\Desktop\小罐子\SM.fbx
+[2026.03.03-02.37.15:049][432]LogFbx: FBX Scene Loaded Succesfully
+[2026.03.03-02.37.23:575][432]LogSlate: Window 'FBX导入选项' being destroyed
+[2026.03.03-02.37.23:800][432]LogFbx: Display: Triangulating static mesh Suzanne
+[2026.03.03-02.37.23:898][432]LogStaticMesh: 正在构建静态网格体SM……
+[2026.03.03-02.37.23:917][432]LogStaticMesh: Built static mesh [0.02s] /Game/SM.SM
+[2026.03.03-02.37.24:127][433]LogSlate: Took 0.000213 seconds to synchronously load lazily loaded font '../../../Engine/Content/Slate/Fonts/Roboto-Light.ttf' (167K)
+[2026.03.03-02.37.25:404][549]LogActorFactory: Actor Factory created SM
+[2026.03.03-02.37.25:841][596]LogActorFactory: Actor Factory created SM
+[2026.03.03-02.37.34:255][499]LogAssetEditorSubsystem: Opening Asset editor for StaticMesh /Game/SM.SM
+[2026.03.03-02.37.34:453][499]LogTexture: Default maximum texture size for cubemaps generated from long-lat sources has been changed from 512 to unlimited. In order to preserve old behaiour for '/Engine/EditorMaterials/AssetViewer/EpicQuadPanorama_CC+EV1.EpicQuadPanorama_CC+EV1', its maximum texture size has been explicitly set to 512.
+[2026.03.03-02.37.34:687][499]LogTexture: Default maximum texture size for cubemaps generated from long-lat sources has been changed from 512 to unlimited. In order to preserve old behaiour for '/Engine/MapTemplates/Sky/SunsetAmbientCubemap.SunsetAmbientCubemap', its maximum texture size has been explicitly set to 512.
+[2026.03.03-02.37.35:440][499]LogRenderer: Reallocating scene render targets to support 1432x912 Format 10 NumSamples 1 (Frame:1).
+[2026.03.03-02.37.35:440][499]LogSlate: Took 0.030017 seconds to synchronously load lazily loaded font '../../../Engine/Content/Slate/Fonts/Roboto-Italic.ttf' (157K)
+[2026.03.03-02.37.37:272][698]LogSlate: Window 'SM' being destroyed
+[2026.03.03-02.37.37:283][698]LogSlate: Window 'SM' being destroyed
+[2026.03.03-02.37.37:285][698]LogWorld: UWorld::CleanupWorld for World_2, bSessionEnded=true, bCleanupResources=true
+[2026.03.03-02.37.37:285][698]LogSlate: InvalidateAllWidgets triggered.  All widgets were invalidated
+[2026.03.03-02.37.38:218][795]LogUObjectHash: Compacting FUObjectHashTables data took   0.71ms
+[2026.03.03-02.37.39:000][795]LogSlate: Window 'Delete Assets' being destroyed
+[2026.03.03-02.37.39:022][795]LogUObjectGlobals: Force Deleting 1 Package(s):
+	Asset Name: /Game/SM.SM
+[2026.03.03-02.37.40:556][795]LogUObjectHash: Compacting FUObjectHashTables data took   0.44ms
+[2026.03.03-02.37.43:019][ 79]Cmd: DELETE
+[2026.03.03-02.37.43:019][ 79]Cmd: ACTOR DELETE
+[2026.03.03-02.37.43:049][ 79]LogEditorActor: Deleted Actor: StaticMeshActor
+[2026.03.03-02.37.43:054][ 79]LogUObjectHash: Compacting FUObjectHashTables data took   0.19ms
+[2026.03.03-02.37.43:055][ 79]LogEditorActor: Deleted 1 Actors (0.021 secs)
+[2026.03.03-02.37.47:556][531]LogFactory: FactoryCreateFile: StaticMesh with FbxFactory (0 0 C:\Users\qukuikui\Desktop\小罐子\SM.fbx)
+[2026.03.03-02.37.47:564][531]LogFbx: Loading FBX Scene from C:\Users\qukuikui\Desktop\小罐子\SM.fbx
+[2026.03.03-02.37.47:568][531]LogFbx: FBX Scene Loaded Succesfully
+[2026.03.03-02.37.51:969][531]LogSlate: Window 'FBX导入选项' being destroyed
+[2026.03.03-02.37.51:992][531]LogFbx: Display: Triangulating static mesh Suzanne
+[2026.03.03-02.37.52:005][531]LogStaticMesh: 正在构建静态网格体SM……
+[2026.03.03-02.37.52:013][531]LogStaticMesh: Built static mesh [0.01s] /Game/SM.SM
+[2026.03.03-02.37.53:128][631]LogActorFactory: Actor Factory created SM
+[2026.03.03-02.37.53:254][645]LogActorFactory: Actor Factory created SM
+[2026.03.03-02.37.54:337][772]Cmd: DELETE
+[2026.03.03-02.37.54:337][772]Cmd: ACTOR DELETE
+[2026.03.03-02.37.54:338][772]LogEditorActor: Deleted Actor: StaticMeshActor
+[2026.03.03-02.37.54:342][772]LogUObjectHash: Compacting FUObjectHashTables data took   0.47ms
+[2026.03.03-02.37.54:343][772]LogEditorActor: Deleted 1 Actors (0.006 secs)
+[2026.03.03-02.37.55:127][866]LogUObjectHash: Compacting FUObjectHashTables data took   0.20ms
+[2026.03.03-02.37.55:827][866]LogSlate: Window 'Delete Assets' being destroyed
+[2026.03.03-02.37.55:841][866]LogUObjectGlobals: Force Deleting 1 Package(s):
+	Asset Name: /Game/SM.SM
+[2026.03.03-02.37.55:945][866]LogObjectTools: Warning: Detected inconsistencies between reference gathering algorithms. Switching 'Editor.UseLegacyGetReferencersForDeletion' on for the remainder of this editor session.
+[2026.03.03-02.37.55:963][866]LogUObjectHash: Compacting FUObjectHashTables data took   0.43ms
+[2026.03.03-02.39.27:355][723]LogSlate: Window '插件' being destroyed
+[2026.03.03-02.39.27:365][723]LogSlate: Window '插件' being destroyed
+[2026.03.03-02.39.27:366][723]LogDirectoryWatcher: A directory notification for '../../../Engine/Plugins/' was aborted.
+[2026.03.03-02.39.45:647][ 23]LogContentBrowser: Deferred new asset file creation: NewMaterial
+[2026.03.03-02.39.45:653][ 23]LogContentBrowser: Creating deferred item: NewMaterial
+[2026.03.03-02.39.45:930][ 56]LogContentBrowser: Attempting asset rename: NewMaterial -> NewMaterial
+[2026.03.03-02.39.45:955][ 56]LogContentBrowser: End creating deferred item NewMaterial
+[2026.03.03-02.39.46:818][151]LogUObjectHash: Compacting FUObjectHashTables data took   0.45ms
+[2026.03.03-02.39.47:573][151]LogSlate: Window '保存内容' being destroyed
+[2026.03.03-02.39.47:630][151]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/NewMaterial" FILE="../../../../../工具/Content/NewMaterial.uasset" SILENT=true
+[2026.03.03-02.39.47:729][151]LogSavePackage: Moving '../../../../../工具/Saved/NewMaterial351912FD4859FFD2BC524B9CFC88F34E.tmp' to '../../../../../工具/Content/NewMaterial.uasset'
+[2026.03.03-02.39.49:943][151]LogSlate: Window '将关卡另存为' being destroyed
+[2026.03.03-02.39.49:954][151]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/Untitled" FILE="../../../../../工具/Content/Untitled.umap" SILENT=true AUTOSAVING=false KEEPDIRTY=false
+[2026.03.03-02.39.49:977][151]LogUObjectHash: Compacting FUObjectHashTables data took   0.63ms
+[2026.03.03-02.39.49:982][151]LogSavePackage: Moving '../../../../../工具/Saved/Untitled6E9CD5C4416C8BACD058A4BBB36B1598.tmp' to '../../../../../工具/Content/Untitled.umap'
+[2026.03.03-02.39.49:983][151]LogFileHelpers: Saving map 'Untitled' took 0.031
+[2026.03.03-02.39.49:991][151]AssetCheck: New page: 资产保存：多个资产
+[2026.03.03-02.39.49:991][151]LogContentValidation: Display: 正在验证World /Game/Untitled.Untitled
+[2026.03.03-02.39.49:991][151]LogContentValidation: Display: 正在验证Material /Game/NewMaterial.NewMaterial
+[2026.03.03-02.40.09:285][585]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/导入导出/导入导出fbx_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:285][585]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/导入导出/导入导出fbx_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:285][585]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/安装py模块_BP.uasset is too old
+[2026.03.03-02.40.09:285][585]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/安装py模块_BP.uasset is too old
+[2026.03.03-02.40.09:285][585]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/导入导出/导入导出_BP.uasset is too old
+[2026.03.03-02.40.09:285][585]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/导入导出/导入导出_BP.uasset is too old
+[2026.03.03-02.40.09:285][585]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/导入导出/Shader/Grey_Shader.uasset is too old
+[2026.03.03-02.40.09:285][585]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/导入导出/Shader/Grey_Shader.uasset is too old
+[2026.03.03-02.40.09:285][585]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/定制/蓝图子项变换（low）/蓝图为物体变化_BP.uasset is too old
+[2026.03.03-02.40.09:285][585]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/定制/蓝图子项变换（low）/蓝图为物体变化_BP.uasset is too old
+[2026.03.03-02.40.09:285][585]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/导入导出/old/导入导出_JSON_BP.uasset is too old
+[2026.03.03-02.40.09:285][585]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/导入导出/old/导入导出_JSON_BP.uasset is too old
+[2026.03.03-02.40.09:285][585]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/导入导出/Shader/base_PBR_sgm.uasset is too old
+[2026.03.03-02.40.09:285][585]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/导入导出/Shader/base_PBR_sgm.uasset is too old
+[2026.03.03-02.40.09:285][585]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/小功能集_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:285][585]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/小功能集_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:285][585]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/其他/开发辅助/安装py模块_BP.uasset is too old
+[2026.03.03-02.40.09:321][585]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/其他/开发辅助/小功能集_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:321][585]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/定制/蓝图子项变换（low）/蓝图为物体变化_BP.uasset is too old
+[2026.03.03-02.40.09:321][585]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/导入导出/old/导入导出_JSON_BP.uasset is too old
+[2026.03.03-02.40.09:321][585]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/导入导出/导入导出fbx_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:321][585]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/导入导出/Shader/Grey_Shader.uasset is too old
+[2026.03.03-02.40.09:321][585]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/导入导出/导入导出_BP.uasset is too old
+[2026.03.03-02.40.09:321][585]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/导入导出/Shader/base_PBR_sgm.uasset is too old
+[2026.03.03-02.40.09:321][585]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/生成蓝图预制体/生成蓝图预制体_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:321][585]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/材质贴图导出/材质贴图导出_BP.uasset is too old
+[2026.03.03-02.40.09:321][585]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/图像PS打开/图像PS打开_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:321][585]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/生成蓝图预制体/生成蓝图预制体_BP.uasset is too old
+[2026.03.03-02.40.09:321][585]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/图像PS打开/图像PS打开_BP.uasset is too old
+[2026.03.03-02.40.09:321][585]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/快捷关卡/快捷关卡_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:321][585]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/快捷关卡/关卡单元格_BP.uasset is too old
+[2026.03.03-02.40.09:321][585]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/Blender同步坐标/Blender同步坐标_BP.uasset is too old
+[2026.03.03-02.40.09:321][585]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/场景白膜覆盖/场景白膜覆盖.uasset is too old
+[2026.03.03-02.40.09:321][585]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/PBR通道切换/PBR通道切换_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:321][585]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/定位视图/记录视图_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:331][586]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/快捷关卡/快捷关卡_BP.uasset is too old
+[2026.03.03-02.40.09:332][586]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/PBR通道切换/PBR通道切换_BP.uasset is too old
+[2026.03.03-02.40.09:332][586]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/生成蓝图预制体/处理资产.uasset is too old
+[2026.03.03-02.40.09:617][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/导入导出/导入导出fbx_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:617][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/定制/蓝图子项变换（low）/蓝图为物体变化_BP.uasset is too old
+[2026.03.03-02.40.09:617][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/安装py模块_BP.uasset is too old
+[2026.03.03-02.40.09:617][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/导入导出/old/导入导出_JSON_BP.uasset is too old
+[2026.03.03-02.40.09:617][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/定制/蓝图子项变换（low）/蓝图为物体变化_BP.uasset is too old
+[2026.03.03-02.40.09:617][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/小功能集_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:617][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/导入导出/old/导入导出_JSON_BP.uasset is too old
+[2026.03.03-02.40.09:617][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/导入导出/Shader/base_PBR_sgm.uasset is too old
+[2026.03.03-02.40.09:617][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/安装py模块_BP.uasset is too old
+[2026.03.03-02.40.09:617][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/小功能集_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:617][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/Blender同步坐标/Blender同步坐标_BP.uasset is too old
+[2026.03.03-02.40.09:617][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/导入导出/Shader/Grey_Shader.uasset is too old
+[2026.03.03-02.40.09:617][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/定位视图/记录视图_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:617][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/PBR通道切换/PBR通道切换_BP.uasset is too old
+[2026.03.03-02.40.09:617][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/导入导出/Shader/Grey_Shader.uasset is too old
+[2026.03.03-02.40.09:617][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/导入导出/Shader/base_PBR_sgm.uasset is too old
+[2026.03.03-02.40.09:617][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/场景白膜覆盖/场景白膜覆盖.uasset is too old
+[2026.03.03-02.40.09:617][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/PBR通道切换/PBR通道切换_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:617][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/生成蓝图预制体/处理资产.uasset is too old
+[2026.03.03-02.40.09:617][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/材质贴图导出/材质贴图导出_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/Blender同步坐标/Blender同步坐标_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/图像PS打开/图像PS打开_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/导入导出/导入导出_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/场景白膜覆盖/场景白膜覆盖.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/图像PS打开/图像PS打开_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/快捷关卡/关卡单元格_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/快捷关卡/快捷关卡_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/图像PS打开/图像PS打开_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/快捷关卡/快捷关卡_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/PBR通道切换/PBR通道切换_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/PBR通道切换/PBR通道切换_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/导入导出/old/导入导出_JSON_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/定制/蓝图子项变换（low）/蓝图为物体变化_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/定位视图/记录视图_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/导入导出/导入导出_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/图像PS打开/图像PS打开_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/快捷关卡/快捷关卡_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/导入导出/导入导出fbx_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/生成蓝图预制体/处理资产.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/Blender同步坐标/Blender同步坐标_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/图像PS打开/图像PS打开_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/导入导出/Shader/base_PBR_sgm.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/生成蓝图预制体/生成蓝图预制体_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/场景白膜覆盖/场景白膜覆盖.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/定位视图/记录视图_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/生成蓝图预制体/生成蓝图预制体_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/快捷关卡/关卡单元格_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/导入导出/Shader/Grey_Shader.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/生成蓝图预制体/生成蓝图预制体_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/快捷关卡/关卡单元格_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/图像PS打开/图像PS打开_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/快捷关卡/快捷关卡_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/材质贴图导出/材质贴图导出_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/快捷关卡/快捷关卡_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/生成蓝图预制体/生成蓝图预制体_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/快捷关卡/快捷关卡_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package ../../../../../工具/Content/QKK_Tool/提效工具/通用功能/生成蓝图预制体/生成蓝图预制体_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/PBR通道切换/PBR通道切换_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/生成蓝图预制体/处理资产.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/生成蓝图预制体/生成蓝图预制体_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/其他/开发辅助/小功能集_按钮_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/其他/开发辅助/安装py模块_BP.uasset is too old
+[2026.03.03-02.40.09:618][587]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/PBR通道切换/PBR通道切换_按钮_BP.uasset is too old
+[2026.03.03-02.40.37:840][260]LogUObjectHash: Compacting FUObjectHashTables data took   0.47ms
+[2026.03.03-02.40.39:027][260]LogSlate: Window '保存内容' being destroyed
+[2026.03.03-02.41.25:519][ 66]LogAssetRegistry: Error: Package D:/工具/Content/QKK_Tool/提效工具/通用功能/Blender同步坐标/Blender同步坐标_BP.uasset is too old
+[2026.03.03-02.42.00:480][935]LogContentBrowser: Deferred new asset file creation: NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.42.00:490][935]LogContentBrowser: Creating deferred item: NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.42.00:856][977]LogContentBrowser: Attempting asset rename: NewEditorUtilityWidgetBlueprint -> NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.42.00:892][977]LogContentBrowser: End creating deferred item NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.42.02:773][168]LogEditorClassViewer: Warning: Class /Engine/Tutorial/InWorldBlueprintEditing/TutorialAssets/IWBE_Blutility.IWBE_Blutility_C has parent /Script/Blutility.PlacedEditorUtilityBase, but this parent is not found. The Class will not be shown in ClassViewer.
+[2026.03.03-02.42.04:915][168]LogSlate: Window '选取父类' being destroyed
+[2026.03.03-02.42.05:608][245]LogAssetEditorSubsystem: Opening Asset editor for EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.42.06:131][245]LogNativeClassHierarchy: Verbose: Native class hierarchy updated for 'BlueprintGraph' in 0.0007 seconds. Added 126 classes and 0 folders.
+[2026.03.03-02.42.14:854][864]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.42.14:899][864]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint58BB997E4DBCA4E052C9B0B0EF4FE5BB.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.42.14:918][864]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.42.14:918][864]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.43.09:412][272]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.43.09:415][272]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint0588244B43270A2E90BCA9BA9598486B.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.43.09:438][272]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.43.09:438][272]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.43.09:820][315]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.43.09:899][315]LogUObjectHash: Compacting FUObjectHashTables data took   2.44ms
+[2026.03.03-02.43.10:739][409]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.43.10:741][409]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint525A730D44309EDA9D958AB5B4F6A468.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.43.10:755][409]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.43.10:755][409]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.43.20:862][558]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.43.20:865][558]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint88843D074C65557FFF1C5C9D30968D67.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.43.20:886][558]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.43.20:886][558]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.43.21:112][581]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.43.21:142][581]LogUObjectHash: Compacting FUObjectHashTables data took   2.12ms
+[2026.03.03-02.43.51:384][624]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.43.51:402][624]LogUObjectHash: Compacting FUObjectHashTables data took   2.01ms
+[2026.03.03-02.43.51:957][677]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.43.51:959][677]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint2302671D4BE29D6AB655A1A0E82584AF.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.43.51:979][677]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.43.51:979][677]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.44.14:208][ 72]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.44.14:213][ 72]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprintF8671975428E5D782E95BB8809EF6610.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.44.14:241][ 72]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.44.14:241][ 72]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.44.14:623][110]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.44.14:651][110]LogUObjectHash: Compacting FUObjectHashTables data took   1.91ms
+[2026.03.03-02.44.19:939][702]LogSlate: Window 'NewEditorUtilityWidgetBlueprint' being destroyed
+[2026.03.03-02.44.19:948][702]LogSlate: Window 'NewEditorUtilityWidgetBlueprint' being destroyed
+[2026.03.03-02.44.31:048][997]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.44.31:075][997]LogUObjectHash: Compacting FUObjectHashTables data took   2.19ms
+[2026.03.03-02.44.31:956][ 91]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.44.31:958][ 91]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint9DA5B31E4051D6BEEAEAFE9A45F7976A.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.44.31:983][ 91]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.44.31:983][ 91]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.45.04:620][847]LogSlate: Window '取色器' being destroyed
+[2026.03.03-02.45.23:520][733]LogSlate: Window '取色器' being destroyed
+[2026.03.03-02.45.35:103][ 41]LogSlate: Window '取色器' being destroyed
+[2026.03.03-02.45.53:864][209]LogSlate: Window '取色器' being destroyed
+[2026.03.03-02.46.04:689][422]LogSlate: Window '取色器' being destroyed
+[2026.03.03-02.46.33:787][767]LogSlate: Window '取色器' being destroyed
+[2026.03.03-02.46.42:793][376]LogSlate: Window '取色器' being destroyed
+[2026.03.03-02.46.43:952][504]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.46.43:983][504]LogUObjectHash: Compacting FUObjectHashTables data took   2.60ms
+[2026.03.03-02.46.44:508][543]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.46.44:511][543]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint94683217485ECC25B70CF9A357BF486C.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.46.44:532][543]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.46.44:532][543]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.46.45:058][593]LogTemp: Repeating last play command: 选中的视口
+[2026.03.03-02.46.45:090][593]LogPlayLevel: PlayLevel: No blueprints needed recompiling
+[2026.03.03-02.46.45:125][593]PIE: New page: PIE会话：Untitled（2026年3月3日 下午6:46:45）
+[2026.03.03-02.46.45:139][593]LogOnline: OSS: Creating online subsystem instance for: NULL
+[2026.03.03-02.46.45:151][593]LogOnline: OSS: TryLoadSubsystemAndSetDefault: Loaded subsystem for module [NULL]
+[2026.03.03-02.46.45:171][593]LogPlayLevel: Creating play world package: /Game/UEDPIE_0_Untitled
+[2026.03.03-02.46.45:174][593]LogPlayLevel: PIE: StaticDuplicateObject took: (0.003815s)
+[2026.03.03-02.46.45:175][593]LogAIModule: Creating AISystem for world Untitled
+[2026.03.03-02.46.45:177][593]LogPlayLevel: PIE: World Init took: (0.001935s)
+[2026.03.03-02.46.45:177][593]LogPlayLevel: PIE: Created PIE world by copying editor world from /Game/Untitled.Untitled to /Game/UEDPIE_0_Untitled.Untitled (0.006151s)
+[2026.03.03-02.46.45:195][593]LogUObjectHash: Compacting FUObjectHashTables data took   2.01ms
+[2026.03.03-02.46.45:196][593]LogAudio: Display: Creating Audio Device:                 Id: 2, Scope: Unique, Realtime: True
+[2026.03.03-02.46.45:196][593]LogAudioMixer: Display: Audio Mixer Platform Settings:
+[2026.03.03-02.46.45:196][593]LogAudioMixer: Display: 	Sample Rate:						  48000
+[2026.03.03-02.46.45:196][593]LogAudioMixer: Display: 	Callback Buffer Frame Size Requested: 1024
+[2026.03.03-02.46.45:196][593]LogAudioMixer: Display: 	Callback Buffer Frame Size To Use:	  1024
+[2026.03.03-02.46.45:196][593]LogAudioMixer: Display: 	Number of buffers to queue:			  2
+[2026.03.03-02.46.45:196][593]LogAudioMixer: Display: 	Max Channels (voices):				  32
+[2026.03.03-02.46.45:196][593]LogAudioMixer: Display: 	Number of Async Source Workers:		  0
+[2026.03.03-02.46.45:196][593]LogAudio: Display: AudioDevice MaxSources: 32
+[2026.03.03-02.46.45:197][593]LogAudio: Display: Audio Spatialization Plugin: None (built-in).
+[2026.03.03-02.46.45:197][593]LogAudio: Display: Audio Reverb Plugin: None (built-in).
+[2026.03.03-02.46.45:197][593]LogAudio: Display: Audio Occlusion Plugin: None (built-in).
+[2026.03.03-02.46.45:197][593]LogAudioMixer: Display: Initializing audio mixer.
+[2026.03.03-02.46.45:198][593]LogAudioMixer: Display: 0: FrontLeft
+[2026.03.03-02.46.45:198][593]LogAudioMixer: Display: 1: FrontRight
+[2026.03.03-02.46.45:209][593]LogAudioMixer: Display: Using Audio Device 扬声器 (USB PnP Audio Device)
+[2026.03.03-02.46.45:209][593]LogAudioMixer: Display: Initializing Sound Submixes...
+[2026.03.03-02.46.45:209][593]LogAudioMixer: Display: Creating Master Submix 'MasterSubmixDefault'
+[2026.03.03-02.46.45:209][593]LogAudioMixer: Display: Creating Master Submix 'MasterReverbSubmixDefault'
+[2026.03.03-02.46.45:210][593]LogAudioMixer: Display: Creating Master Submix 'MasterEQSubmixDefault'
+[2026.03.03-02.46.45:210][593]LogAudioMixer: FMixerPlatformXAudio2::StartAudioStream() called
+[2026.03.03-02.46.45:210][593]LogAudioMixer: Display: Output buffers initialized: Frames=1024, Channels=2, Samples=2048
+[2026.03.03-02.46.45:212][593]LogAudioMixer: Display: Starting AudioMixerPlatformInterface::RunInternal()
+[2026.03.03-02.46.45:212][593]LogAudioMixer: Display: FMixerPlatformXAudio2::SubmitBuffer() called for the first time
+[2026.03.03-02.46.45:212][593]LogInit: FAudioDevice initialized.
+[2026.03.03-02.46.45:212][593]LogAudio: Display: Audio Device (ID: 2) registered with world 'Untitled'.
+[2026.03.03-02.46.45:257][593]LogLoad: Game class is 'GameModeBase'
+[2026.03.03-02.46.45:258][593]LogWorld: Bringing World /Game/UEDPIE_0_Untitled.Untitled up for play (max tick rate 0) at 2026.03.03-10.46.45
+[2026.03.03-02.46.45:259][593]LogWorld: Bringing up level for play took: 0.000876
+[2026.03.03-02.46.45:259][593]LogOnline: OSS: Creating online subsystem instance for: :Context_6
+[2026.03.03-02.46.45:308][593]LogNativeClassHierarchy: Verbose: Native class hierarchy updated for 'MovieSceneCapture' in 0.0003 seconds. Added 20 classes and 0 folders.
+[2026.03.03-02.46.45:360][593]PIE: 登陆的服务器
+[2026.03.03-02.46.45:362][593]PIE: PIE总开始时间：0.29秒。
+[2026.03.03-02.47.07:260][696]LogSlate: Window 'NewEditorUtilityWidgetBlueprint' being destroyed
+[2026.03.03-02.47.07:279][696]LogSlate: Window 'NewEditorUtilityWidgetBlueprint' being destroyed
+[2026.03.03-02.47.19:323][988]LogSlate: Window '取色器' being destroyed
+[2026.03.03-02.47.23:930][491]LogSlate: Window '取色器' being destroyed
+[2026.03.03-02.47.28:405][968]LogSlate: Window '取色器' being destroyed
+[2026.03.03-02.47.32:434][396]LogSlate: Window '取色器' being destroyed
+[2026.03.03-02.47.34:536][623]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.47.34:539][623]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint36E090D948499851B19982879EA84949.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.47.34:553][623]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.47.34:553][623]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.47.38:557][ 69]LogSlate: Window 'NewEditorUtilityWidgetBlueprint' being destroyed
+[2026.03.03-02.47.38:572][ 69]LogSlate: Window 'NewEditorUtilityWidgetBlueprint' being destroyed
+[2026.03.03-02.47.42:494][503]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.47.42:497][503]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint63B406CE4CDDAE8413EBC5B3C28B9C8C.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.47.42:509][503]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.47.42:510][503]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.47.42:677][522]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.47.42:679][522]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint5CB6749648E4F08EADB2E0BCEE2F7E83.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.47.42:690][522]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.47.42:690][522]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.47.43:598][608]LogSlate: Updating window title bar state: overlay mode, drag disabled, window buttons hidden, title bar hidden
+[2026.03.03-02.47.43:598][608]LogWorld: BeginTearingDown for /Game/UEDPIE_0_Untitled
+[2026.03.03-02.47.43:598][608]LogWorld: UWorld::CleanupWorld for Untitled, bSessionEnded=true, bCleanupResources=true
+[2026.03.03-02.47.43:599][608]LogSlate: InvalidateAllWidgets triggered.  All widgets were invalidated
+[2026.03.03-02.47.43:605][608]LogPlayLevel: Display: Shutting down PIE online subsystems
+[2026.03.03-02.47.43:609][608]LogSlate: InvalidateAllWidgets triggered.  All widgets were invalidated
+[2026.03.03-02.47.43:625][608]LogAudio: Display: Audio Device unregistered from world 'None'.
+[2026.03.03-02.47.43:625][608]LogAudioMixer: FMixerPlatformXAudio2::StopAudioStream() called
+[2026.03.03-02.47.43:627][608]LogAudioMixer: FMixerPlatformXAudio2::StopAudioStream() called
+[2026.03.03-02.47.43:628][608]LogSlate: Updating window title bar state: overlay mode, drag disabled, window buttons hidden, title bar hidden
+[2026.03.03-02.47.43:664][608]LogUObjectHash: Compacting FUObjectHashTables data took   3.21ms
+[2026.03.03-02.47.43:686][609]LogPlayLevel: Display: Destroying online subsystem :Context_6
+[2026.03.03-02.47.44:280][666]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.47.44:284][666]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint4DBD16294DE196BA853448AB5AAB8267.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.47.44:305][666]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.47.44:305][666]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.47.44:566][693]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.47.44:617][693]LogUObjectHash: Compacting FUObjectHashTables data took   2.56ms
+[2026.03.03-02.47.48:267][ 93]LogSlate: Window 'NewEditorUtilityWidgetBlueprint' being destroyed
+[2026.03.03-02.47.48:281][ 93]LogSlate: Window 'NewEditorUtilityWidgetBlueprint' being destroyed
+[2026.03.03-02.47.52:147][526]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.47.52:150][526]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint713B2D54457D28A4D24AF9990F08AF0F.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.47.52:175][526]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.47.52:175][526]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.48.29:256][875]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.48.29:295][875]LogUObjectHash: Compacting FUObjectHashTables data took   4.88ms
+[2026.03.03-02.48.30:042][951]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.48.30:046][951]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprintE71975324F98F36BB9D24E845BFA386A.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.48.30:061][951]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.48.30:061][951]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.48.49:924][465]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.48.49:952][465]LogUObjectHash: Compacting FUObjectHashTables data took   2.07ms
+[2026.03.03-02.48.50:331][503]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.48.50:334][503]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint7240549849009103887999BE59E13B9C.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.48.50:358][503]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.48.50:358][503]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.48.58:825][487]LogSlate: Window 'NewEditorUtilityWidgetBlueprint' being destroyed
+[2026.03.03-02.48.58:838][487]LogSlate: Window 'NewEditorUtilityWidgetBlueprint' being destroyed
+[2026.03.03-02.49.22:291][214]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.49.22:320][214]LogUObjectHash: Compacting FUObjectHashTables data took   2.22ms
+[2026.03.03-02.49.22:829][268]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.49.22:832][268]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint2D44306345ECDD4337A500A04CFDD224.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.49.22:860][268]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.49.22:860][268]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.49.32:643][403]LogSlate: Window 'NewEditorUtilityWidgetBlueprint' being destroyed
+[2026.03.03-02.49.32:654][403]LogSlate: Window 'NewEditorUtilityWidgetBlueprint' being destroyed
+[2026.03.03-02.49.53:617][827]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.49.53:642][827]LogUObjectHash: Compacting FUObjectHashTables data took   1.98ms
+[2026.03.03-02.49.54:124][870]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.49.54:128][870]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint6FEC8D614FF3DD596FE7F69EEDBFA965.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.49.54:143][870]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.49.54:143][870]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.50.32:850][301]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.50.32:878][301]LogUObjectHash: Compacting FUObjectHashTables data took   2.23ms
+[2026.03.03-02.50.33:231][337]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.50.33:234][337]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint34F3577A4FDBEA5592976E8DF525D705.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.50.33:265][337]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.50.33:265][337]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.50.40:936][223]LogSlate: Window 'NewEditorUtilityWidgetBlueprint' being destroyed
+[2026.03.03-02.50.40:948][223]LogSlate: Window 'NewEditorUtilityWidgetBlueprint' being destroyed
+[2026.03.03-02.50.56:807][866]LogSlate: Window '资产另存为' being destroyed
+[2026.03.03-02.51.30:076][711]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.51.30:104][711]LogUObjectHash: Compacting FUObjectHashTables data took   2.18ms
+[2026.03.03-02.51.30:658][768]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.51.30:662][768]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint811E098948869752808741A724C1B1FC.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.51.30:685][768]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.51.30:685][768]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.51.34:657][164]LogSlate: Took 0.021890 seconds to synchronously load lazily loaded font '../../../Engine/Content/Slate/Fonts/DroidSansMono.ttf' (77K)
+[2026.03.03-02.51.38:444][603]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.51.38:472][603]LogUObjectHash: Compacting FUObjectHashTables data took   2.06ms
+[2026.03.03-02.51.38:848][642]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.51.38:852][642]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint620197384B09AC86B050DA981FCCF74C.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.51.38:875][642]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.51.38:875][642]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.51.48:976][742]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.51.49:006][742]LogUObjectHash: Compacting FUObjectHashTables data took   2.33ms
+[2026.03.03-02.52.11:252][254]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.52.11:274][254]LogUObjectHash: Compacting FUObjectHashTables data took   2.68ms
+[2026.03.03-02.52.38:551][778]LogUObjectHash: Compacting FUObjectHashTables data took   3.05ms
+[2026.03.03-02.52.38:553][778]LogFileHelpers: Editor autosave (incl. external actors) for '/Game/Untitled' took 0.026
+[2026.03.03-02.52.38:572][778]OBJ SavePackage: Generating thumbnails for [0] asset(s) in package [/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint] ([2] browsable assets)...
+[2026.03.03-02.52.38:572][778]OBJ SavePackage: Finished generating thumbnails for package [/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint]
+[2026.03.03-02.52.38:576][778]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint_6E2AD4FE46653786C46232BF4DF911CA.tmp' to '../../../../../工具/Saved/Autosaves/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint_Auto1.uasset'
+[2026.03.03-02.52.38:576][778]LogFileHelpers: Auto-saving content packages took 0.024
+[2026.03.03-02.53.19:374][484]LogSlate: Prevented a slow task dialog from being summoned while a context menu was open
+[2026.03.03-02.53.19:389][484]LogEditorClassViewer: Warning: Class /Engine/Tutorial/InWorldBlueprintEditing/TutorialAssets/IWBE_Blutility.IWBE_Blutility_C has parent /Script/Blutility.PlacedEditorUtilityBase, but this parent is not found. The Class will not be shown in ClassViewer.
+[2026.03.03-02.54.02:967][832]LogSlate: Window '编辑器偏好设置' being destroyed
+[2026.03.03-02.54.02:979][832]LogSlate: Window '编辑器偏好设置' being destroyed
+[2026.03.03-02.54.24:639][ 76]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.54.24:675][ 76]LogUObjectHash: Compacting FUObjectHashTables data took   3.34ms
+[2026.03.03-02.54.46:061][953]Warning: Unknown pin type member: bSerializeAsSinglePrecisionFloat.
+[2026.03.03-02.54.46:061][953]Warning: self: Parse error while importing property values (PinName = self).
+[2026.03.03-02.54.46:061][953]Warning: Unknown pin type member: bSerializeAsSinglePrecisionFloat.
+[2026.03.03-02.54.46:061][953]Warning: Object: Parse error while importing property values (PinName = Object).
+[2026.03.03-02.54.46:061][953]Warning: Unknown pin type member: bSerializeAsSinglePrecisionFloat.
+[2026.03.03-02.54.46:061][953]Warning: ReturnValue: Parse error while importing property values (PinName = ReturnValue).
+[2026.03.03-02.54.46:070][953]LogOutputDevice: Warning: 
+
+Script Stack (0 frames):
+
+[2026.03.03-02.54.53:944][953]LogStats: FPlatformStackWalk::StackWalkAndDump -  7.874 s
+[2026.03.03-02.54.53:944][953]LogOutputDevice: Error: === Handled ensure: ===
+[2026.03.03-02.54.53:944][953]LogOutputDevice: Error: 
+[2026.03.03-02.54.53:944][953]LogOutputDevice: Error: Ensure condition failed: ThisPin [File:D:/Build/++UE4/Sync/Engine/Source/Editor/UnrealEd/Private/EdGraphUtilities.cpp] [Line: 38]
+[2026.03.03-02.54.53:944][953]LogOutputDevice: Error: 
+[2026.03.03-02.54.53:944][953]LogOutputDevice: Error: Stack: 
+[2026.03.03-02.54.53:944][953]LogOutputDevice: Error: [Callstack] 0x00007ff869668438 UE4Editor-UnrealEd.d!<lambda_9b76607b3e5d9b6152685f118cf733ee>::operator()() [D:\Build\++UE4\Sync\Engine\Source\Editor\UnrealEd\Private\EdGraphUtilities.cpp:38]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff8689c2405 UE4Editor-UnrealEd.d!`anonymous namespace'::PostProcessPastedNodePinLinks() [D:\Build\++UE4\Sync\Engine\Source\Editor\UnrealEd\Private\EdGraphUtilities.cpp:38]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff8689c2872 UE4Editor-UnrealEd.d!FEdGraphUtilities::PostProcessPastedNodes() [D:\Build\++UE4\Sync\Engine\Source\Editor\UnrealEd\Private\EdGraphUtilities.cpp:213]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff8689ac3f7 UE4Editor-UnrealEd.d!FEdGraphUtilities::ImportNodesFromText() [D:\Build\++UE4\Sync\Engine\Source\Editor\UnrealEd\Private\EdGraphUtilities.cpp:416]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff866af4dc0 UE4Editor-Kismet.d!FBlueprintEditor::PasteNodesHere() [D:\Build\++UE4\Sync\Engine\Source\Editor\Kismet\Private\BlueprintEditor.cpp:6926]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff866af4b86 UE4Editor-Kismet.d!FBlueprintEditor::PasteNodes() [D:\Build\++UE4\Sync\Engine\Source\Editor\Kismet\Private\BlueprintEditor.cpp:6699]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff866acca46 UE4Editor-Kismet.d!TBaseSPMethodDelegateInstance<0,FBlueprintEditor,0,void __cdecl(void),FDefaultDelegateUserPolicy>::ExecuteIfSafe() [D:\Build\++UE4\Sync\Engine\Source\Runtime\Core\Public\Delegates\DelegateInstancesImpl.h:307]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff889089657 UE4Editor-Slate.d!FUICommandList::ConditionalProcessCommandBindings() [D:\Build\++UE4\Sync\Engine\Source\Runtime\Slate\Private\Framework\Commands\UICommandList.cpp:220]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff8890d6e4a UE4Editor-Slate.d!FUICommandList::ProcessCommandBindings() [D:\Build\++UE4\Sync\Engine\Source\Runtime\Slate\Private\Framework\Commands\UICommandList.cpp:164]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff864442258 UE4Editor-GraphEditor.d!SGraphEditorImpl::OnKeyDown() [D:\Build\++UE4\Sync\Engine\Source\Editor\GraphEditor\Private\SGraphEditorImpl.cpp:123]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff888fa2112 UE4Editor-Slate.d!FEventRouter::Route<FReply,FEventRouter::FBubblePolicy,FKeyEvent,<lambda_f630e7f24dbef73857a69219e32f2d96> >() [D:\Build\++UE4\Sync\Engine\Source\Runtime\Slate\Private\Framework\Application\SlateApplication.cpp:383]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff889005087 UE4Editor-Slate.d!FSlateApplication::ProcessKeyDownEvent() [D:\Build\++UE4\Sync\Engine\Source\Runtime\Slate\Private\Framework\Application\SlateApplication.cpp:4341]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff888ff8756 UE4Editor-Slate.d!FSlateApplication::OnKeyDown() [D:\Build\++UE4\Sync\Engine\Source\Runtime\Slate\Private\Framework\Application\SlateApplication.cpp:4238]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff90029bcc8 UE4Editor-ApplicationCore.d!FWindowsApplication::ProcessDeferredMessage() [D:\Build\++UE4\Sync\Engine\Source\Runtime\ApplicationCore\Private\Windows\WindowsApplication.cpp:2040]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff9002892b7 UE4Editor-ApplicationCore.d!FWindowsApplication::DeferMessage() [D:\Build\++UE4\Sync\Engine\Source\Runtime\ApplicationCore\Private\Windows\WindowsApplication.cpp:2698]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff90029e465 UE4Editor-ApplicationCore.d!FWindowsApplication::ProcessMessage() [D:\Build\++UE4\Sync\Engine\Source\Runtime\ApplicationCore\Private\Windows\WindowsApplication.cpp:1881]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff900284410 UE4Editor-ApplicationCore.d!FWindowsApplication::AppWndProc() [D:\Build\++UE4\Sync\Engine\Source\Runtime\ApplicationCore\Private\Windows\WindowsApplication.cpp:905]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff96d1a7846 USER32.dll!UnknownFunction []
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff96d1a539d USER32.dll!UnknownFunction []
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff90029fcd4 UE4Editor-ApplicationCore.d!FWindowsPlatformApplicationMisc::PumpMessages() [D:\Build\++UE4\Sync\Engine\Source\Runtime\ApplicationCore\Private\Windows\WindowsPlatformApplicationMisc.cpp:125]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff670057621 UE4Editor.e!FEngineLoop::Tick() [D:\Build\++UE4\Sync\Engine\Source\Runtime\Launch\Private\LaunchEngineLoop.cpp:4850]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff670070fcc UE4Editor.e!GuardedMain() [D:\Build\++UE4\Sync\Engine\Source\Runtime\Launch\Private\Launch.cpp:178]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff6700710ba UE4Editor.e!GuardedMainWrapper() [D:\Build\++UE4\Sync\Engine\Source\Runtime\Launch\Private\Windows\LaunchWindows.cpp:137]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff6700740dd UE4Editor.e!LaunchWindowsStartup() [D:\Build\++UE4\Sync\Engine\Source\Runtime\Launch\Private\Windows\LaunchWindows.cpp:273]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff670085984 UE4Editor.e!WinMain() [D:\Build\++UE4\Sync\Engine\Source\Runtime\Launch\Private\Windows\LaunchWindows.cpp:320]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff67008853a UE4Editor.e!__scrt_common_main_seh() [d:\agent\_work\5\s\src\vctools\crt\vcstartup\src\startup\exe_common.inl:288]
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff96b91e8d7 KERNEL32.DLL!UnknownFunction []
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: [Callstack] 0x00007ff96d6cc53c ntdll.dll!UnknownFunction []
+[2026.03.03-02.54.53:945][953]LogOutputDevice: Error: 
+[2026.03.03-02.54.53:950][953]LogStats:                SubmitErrorReport -  0.000 s
+[2026.03.03-02.55.00:996][953]LogAudioMixer: Display: Audio Buffer Underrun (starvation) detected.
+[2026.03.03-02.55.00:996][953]LogStats:                    SendNewReport -  7.046 s
+[2026.03.03-02.55.00:996][953]LogStats:             FDebug::EnsureFailed - 14.925 s
+[2026.03.03-02.55.46:880][238]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.55.46:885][238]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint2E144F3644A0F077D2CCB38526E8A362.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.55.46:898][238]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.55.46:898][238]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.56.36:067][333]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.56.36:106][333]LogUObjectHash: Compacting FUObjectHashTables data took   2.03ms
+[2026.03.03-02.56.36:765][382]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.56.36:770][382]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint3C92A07D4BE176A72217368E61907C34.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.56.36:792][382]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.56.36:792][382]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.57.03:238][793]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.57.03:260][793]LogUObjectHash: Compacting FUObjectHashTables data took   1.65ms
+[2026.03.03-02.57.46:800][834]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.57.46:819][834]LogUObjectHash: Compacting FUObjectHashTables data took   1.95ms
+[2026.03.03-02.57.47:365][878]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.57.47:370][878]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprintB64D28D74332B11758813E9AC3760AF6.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.57.47:394][878]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.57.47:394][878]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.59.43:331][596]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.59.43:361][596]LogUObjectHash: Compacting FUObjectHashTables data took   1.93ms
+[2026.03.03-02.59.43:766][633]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-02.59.43:773][633]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint7269F5334431DFB0B625C99C2E083736.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-02.59.43:794][633]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-02.59.43:794][633]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.00.47:292][811]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.00.47:326][811]LogUObjectHash: Compacting FUObjectHashTables data took   2.00ms
+[2026.03.03-03.00.47:756][838]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-03.00.47:762][838]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint21CBC9AB443B570443B827B158725DA9.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-03.00.47:789][838]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.00.47:789][838]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.00.56:027][381]Warning: Unknown pin type member: bSerializeAsSinglePrecisionFloat.
+[2026.03.03-03.00.56:027][381]Warning: py模组: Parse error while importing property values (PinName = py模组).
+[2026.03.03-03.00.56:027][381]Warning: Unknown pin type member: bSerializeAsSinglePrecisionFloat.
+[2026.03.03-03.00.56:027][381]Warning: self: Parse error while importing property values (PinName = self).
+[2026.03.03-03.00.56:027][381]LogBlueprint: Warning: [NewEditorUtilityWidgetBlueprint] RecreatePinForVariable: 'py模组' pin not found
+[2026.03.03-03.01.05:711][ 58]LogSlate: Took 0.035719 seconds to synchronously load lazily loaded font '../../../Engine/Content/Slate/Fonts/Roboto-BoldCondensedItalic.ttf' (160K)
+[2026.03.03-03.02.02:340][704]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.02.02:366][704]LogUObjectHash: Compacting FUObjectHashTables data took   1.54ms
+[2026.03.03-03.02.03:335][791]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-03.02.03:342][791]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprintDD69DE184199ECB6AD9724A3E36F7ADB.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-03.02.03:361][791]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.02.03:361][791]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.02.09:715][463]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.02.09:740][463]LogUObjectHash: Compacting FUObjectHashTables data took   1.54ms
+[2026.03.03-03.02.41:623][671]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.02.41:646][671]LogUObjectHash: Compacting FUObjectHashTables data took   1.67ms
+[2026.03.03-03.02.44:922][ 28]LogUObjectHash: Compacting FUObjectHashTables data took   1.47ms
+[2026.03.03-03.02.45:651][ 28]LogSlate: Window '保存内容' being destroyed
+[2026.03.03-03.02.45:704][ 28]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-03.02.45:710][ 28]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint5DB700EA48946A37EF837281B3A7C194.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-03.02.45:711][ 28]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/Untitled_BuiltData" FILE="../../../../../工具/Content/Untitled_BuiltData.uasset" SILENT=true
+[2026.03.03-03.02.45:720][ 28]LogSavePackage: Moving '../../../../../工具/Saved/Untitled_BuiltData6F323110463C5EF6A27F4396EF0BBDB3.tmp' to '../../../../../工具/Content/Untitled_BuiltData.uasset'
+[2026.03.03-03.02.45:742][ 28]AssetCheck: New page: 资产保存：多个资产
+[2026.03.03-03.02.45:742][ 28]LogContentValidation: Display: 正在验证MapBuildDataRegistry /Game/Untitled_BuiltData.Untitled_BuiltData
+[2026.03.03-03.02.45:742][ 28]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.02.48:507][308]LogScript: Error: Script Msg: Traceback (most recent call last):
+
+  File "<string>", line 2, in <module>
+
+NameError: name 'python_module_name' is not defined
+
+[2026.03.03-03.02.48:507][308]LogScript: Error: Script call stack:
+	NewEditorUtilityWidgetBlueprint_C.ExecuteUbergraph_NewEditorUtilityWidgetBlueprint
+	NewEditorUtilityWidgetBlueprint_C.BndEvt__NewEditorUtilityWidgetBlueprint_Button_54_K2Node_ComponentBoundEvent_0_OnButtonClickedEvent__DelegateSignature
+
+[2026.03.03-03.02.57:744][902]LogSlate: Window 'NewEditorUtilityWidgetBlueprint' being destroyed
+[2026.03.03-03.02.57:756][902]LogSlate: Window 'NewEditorUtilityWidgetBlueprint' being destroyed
+[2026.03.03-03.03.14:222][740]LogSlate: Window '设备输出日志' being destroyed
+[2026.03.03-03.03.14:237][740]LogSlate: Window '设备输出日志' being destroyed
+[2026.03.03-03.03.27:806][231]LogScript: Error: Script Msg: Traceback (most recent call last):
+
+  File "<string>", line 2, in <module>
+
+NameError: name 'python_module_name' is not defined
+
+[2026.03.03-03.03.27:806][231]LogScript: Error: Script call stack:
+	NewEditorUtilityWidgetBlueprint_C.ExecuteUbergraph_NewEditorUtilityWidgetBlueprint
+	NewEditorUtilityWidgetBlueprint_C.BndEvt__NewEditorUtilityWidgetBlueprint_Button_54_K2Node_ComponentBoundEvent_0_OnButtonClickedEvent__DelegateSignature
+
+[2026.03.03-03.04.59:920][485]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.04.59:952][485]LogUObjectHash: Compacting FUObjectHashTables data took   1.80ms
+[2026.03.03-03.05.17:878][386]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.05.17:910][386]LogUObjectHash: Compacting FUObjectHashTables data took   1.61ms
+[2026.03.03-03.05.21:751][804]LogUObjectHash: Compacting FUObjectHashTables data took   1.45ms
+[2026.03.03-03.05.22:584][804]LogSlate: Window '保存内容' being destroyed
+[2026.03.03-03.05.22:642][804]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-03.05.22:649][804]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint16C7F71044AA52EA265400B133F778B2.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-03.05.22:671][804]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.05.22:671][804]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.05.26:241][199]LogBlueprintUserMessages: [NewEditorUtilityWidgetBlueprint_C_26] 
+[2026.03.03-03.06.19:531][729]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.06.19:563][729]LogUObjectHash: Compacting FUObjectHashTables data took   1.41ms
+[2026.03.03-03.06.22:772][ 73]LogUObjectHash: Compacting FUObjectHashTables data took   1.59ms
+[2026.03.03-03.06.23:662][ 73]LogSlate: Window '保存内容' being destroyed
+[2026.03.03-03.06.23:705][ 73]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-03.06.23:713][ 73]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint0F5B832E43988AB776CB1C8A6B86B446.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-03.06.23:730][ 73]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.06.23:730][ 73]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.06.25:262][245]LogBlueprintUserMessages: [NewEditorUtilityWidgetBlueprint_C_35] --upgradepip
+[2026.03.03-03.07.09:412][706]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.07.09:443][706]LogUObjectHash: Compacting FUObjectHashTables data took   1.36ms
+[2026.03.03-03.07.12:630][ 42]LogUObjectHash: Compacting FUObjectHashTables data took   1.61ms
+[2026.03.03-03.07.13:327][ 42]LogSlate: Window '保存内容' being destroyed
+[2026.03.03-03.07.13:412][ 42]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-03.07.13:419][ 42]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint89BC6AF54544AFBD24E84B974067B7D8.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-03.07.13:449][ 42]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.07.13:449][ 42]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.07.15:396][265]LogBlueprintUserMessages: [NewEditorUtilityWidgetBlueprint_C_44] D:\Epic缓存\UE_4.27\Engine\Binaries\ThirdParty\Python3\Win64\python.exe -m pip install --upgradepip
+[2026.03.03-03.08.01:457][158]LogPython: import pyperclip
+[2026.03.03-03.08.01:459][158]LogPython: Error: Traceback (most recent call last):
+[2026.03.03-03.08.01:459][158]LogPython: Error:   File "<string>", line 1, in <module>
+[2026.03.03-03.08.01:459][158]LogPython: Error: ModuleNotFoundError: No module named 'pyperclip'
+[2026.03.03-03.08.04:557][520]LogBlueprintUserMessages: [NewEditorUtilityWidgetBlueprint_C_44] D:\Epic缓存\UE_4.27\Engine\Binaries\ThirdParty\Python3\Win64\python.exe -m pip install pyperclip
+[2026.03.03-03.08.09:961][669]LogPython: import pyperclip
+[2026.03.03-03.08.23:878][989]LogBlueprintUserMessages: [NewEditorUtilityWidgetBlueprint_C_44] D:\Epic缓存\UE_4.27\Engine\Binaries\ThirdParty\Python3\Win64\python.exe -m pip install --upgradepip
+[2026.03.03-03.09.24:065][512]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.09.24:093][512]LogUObjectHash: Compacting FUObjectHashTables data took   1.67ms
+[2026.03.03-03.09.27:136][730]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-03.09.27:144][730]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprintFFF66B3A45CD1B85E1DEE2AFF44A74C2.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-03.09.27:166][730]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.09.27:166][730]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.09.28:728][901]LogBlueprintUserMessages: [NewEditorUtilityWidgetBlueprint_C_53] --upgradepip
+[2026.03.03-03.09.30:514][ 88]LogBlueprintUserMessages: [NewEditorUtilityWidgetBlueprint_C_53] --upgradepip
+[2026.03.03-03.10.39:613][903]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.10.39:646][903]LogUObjectHash: Compacting FUObjectHashTables data took   1.65ms
+[2026.03.03-03.10.50:805][ 65]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.10.50:834][ 65]LogUObjectHash: Compacting FUObjectHashTables data took   1.67ms
+[2026.03.03-03.10.51:791][156]LogBlueprintUserMessages: [NewEditorUtilityWidgetBlueprint_C_71] TextBlock_123
+[2026.03.03-03.10.53:499][337]LogBlueprintUserMessages: [NewEditorUtilityWidgetBlueprint_C_71] TextBlock_123
+[2026.03.03-03.11.03:065][353]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.11.03:097][353]LogUObjectHash: Compacting FUObjectHashTables data took   1.57ms
+[2026.03.03-03.11.06:085][615]LogBlueprintUserMessages: [NewEditorUtilityWidgetBlueprint_C_80] --upgradepip0
+[2026.03.03-03.11.18:864][984]LogEditorTransaction: Undo 重命名控件
+[2026.03.03-03.11.19:330][997]LogEditorTransaction: Undo 移动节点
+[2026.03.03-03.11.19:681][ 37]LogEditorTransaction: Undo 创建引脚连接
+[2026.03.03-03.11.20:019][ 74]LogEditorTransaction: Undo 添加节点
+[2026.03.03-03.11.20:266][101]LogEditorTransaction: Undo 变量切换
+[2026.03.03-03.11.21:774][273]LogEditorTransaction: Undo 创建引脚连接
+[2026.03.03-03.11.23:167][419]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.11.23:198][419]LogUObjectHash: Compacting FUObjectHashTables data took   1.52ms
+[2026.03.03-03.11.24:025][481]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-03.11.24:032][481]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprintA7F75E7B4D3B504FCBC455A6D7E9BFF4.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-03.11.24:064][481]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.11.24:064][481]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.13.07:902][835]LogSlate: Window '修改变量类型' being destroyed
+[2026.03.03-03.13.24:231][511]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.13.24:233][511]LogClass: Warning: Type mismatch in py模组 of NewEditorUtilityWidgetBlueprint_C - Previous (ObjectProperty) Current(StrProperty) for package:  FObjectReader
+[2026.03.03-03.13.24:264][511]LogUObjectHash: Compacting FUObjectHashTables data took   1.69ms
+[2026.03.03-03.13.35:392][643]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.13.35:431][643]LogUObjectHash: Compacting FUObjectHashTables data took   2.58ms
+[2026.03.03-03.13.36:031][684]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-03.13.36:038][684]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint0F145BE744F01DF17529A0A012EBA999.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-03.13.36:064][684]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.13.36:064][684]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.13.40:280][ 68]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.13.40:322][ 68]LogUObjectHash: Compacting FUObjectHashTables data took   1.91ms
+[2026.03.03-03.13.40:842][ 99]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-03.13.40:849][ 99]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint60824FE74B5F6357F21CCEAE819350AC.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-03.13.40:888][ 99]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.13.40:888][ 99]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.13.42:101][230]LogSlate: Window '在蓝图中寻找' being destroyed
+[2026.03.03-03.13.42:114][230]LogSlate: Window '在蓝图中寻找' being destroyed
+[2026.03.03-03.13.44:648][494]LogBlueprintUserMessages: [NewEditorUtilityWidgetBlueprint_C_116] D:\Epic缓存\UE_4.27\Engine\Binaries\ThirdParty\Python3\Win64\python.exe -m pip install --upgrade pip
+[2026.03.03-03.14.16:679][777]BlueprintLog: New page: 编译NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.14.16:713][777]LogUObjectHash: Compacting FUObjectHashTables data took   1.83ms
+[2026.03.03-03.14.28:790][153]LogUObjectHash: Compacting FUObjectHashTables data took   1.62ms
+[2026.03.03-03.14.29:815][153]LogSlate: Window '保存内容' being destroyed
+[2026.03.03-03.14.29:879][153]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-03.14.29:885][153]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprint8D8FB8114265642899F6F0B42C1D2B11.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-03.14.29:905][153]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.14.29:905][153]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.14.49:089][932]LogVSAccessor: Warning: Couldn't open file 'D:/Epic缓存/UE_4.27/Engine/Source/Runtime/Engine/Private/Kismet/BlueprintPathsLibrary.cpp'.
+[2026.03.03-03.14.49:091][932]LogVSAccessor: Warning: Couldn't access Visual Studio
+[2026.03.03-03.14.49:099][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:099][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:099][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:099][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:101][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:102][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:103][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:104][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:106][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:106][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:106][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:106][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:106][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:106][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:106][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:106][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:106][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:106][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:106][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:106][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:106][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:106][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:106][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:106][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:106][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:106][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:106][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:106][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:107][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:107][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:107][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:107][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:107][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:107][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:107][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:107][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:107][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:108][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:109][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:109][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:109][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:109][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:109][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:109][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:110][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:112][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:112][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:112][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:113][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:116][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:118][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:118][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:118][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:118][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:119][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:135][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:135][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:135][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:135][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:135][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:135][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:138][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:138][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:146][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:157][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:158][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:162][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:164][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:164][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:164][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:165][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:165][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:185][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:186][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:188][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.14.49:332][932]LogVSAccessor: Warning: Couldn't access module table
+[2026.03.03-03.15.50:959][635]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset" SILENT=true
+[2026.03.03-03.15.50:966][635]LogSavePackage: Moving '../../../../../工具/Saved/NewEditorUtilityWidgetBlueprintC957CBCB497520F87812538053047A0E.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.uasset'
+[2026.03.03-03.15.50:988][635]AssetCheck: New page: 资产保存：NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.15.50:988][635]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.16.17:034][899]LogSlate: Window 'NewEditorUtilityWidgetBlueprint' being destroyed
+[2026.03.03-03.16.17:048][899]LogSlate: Window 'NewEditorUtilityWidgetBlueprint' being destroyed
+[2026.03.03-03.16.17:148][899]LogWorld: UWorld::CleanupWorld for World_4, bSessionEnded=true, bCleanupResources=true
+[2026.03.03-03.16.17:148][899]LogSlate: InvalidateAllWidgets triggered.  All widgets were invalidated
+[2026.03.03-03.16.17:151][899]LogWorld: UWorld::CleanupWorld for World_3, bSessionEnded=true, bCleanupResources=true
+[2026.03.03-03.16.17:151][899]LogSlate: InvalidateAllWidgets triggered.  All widgets were invalidated
+[2026.03.03-03.16.25:386][848]LogContentBrowser: Attempting asset rename: NewEditorUtilityWidgetBlueprint -> Python模块
+[2026.03.03-03.16.25:423][848]LogMetaData: Removing '/Game/QKK_Tool/提效工具/其他/开发辅助/Python模块.SKEL_Python模块_C' ref from Metadata '/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.PackageMetaData'
+[2026.03.03-03.16.25:423][848]LogMetaData: Removing '/Game/QKK_Tool/提效工具/其他/开发辅助/Python模块.Python模块_C' ref from Metadata '/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.PackageMetaData'
+[2026.03.03-03.16.25:423][848]LogMetaData: Removing '/Game/QKK_Tool/提效工具/其他/开发辅助/Python模块.Python模块:EventGraph.K2Node_Event_0' ref from Metadata '/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.PackageMetaData'
+[2026.03.03-03.16.25:423][848]LogMetaData: Removing '/Game/QKK_Tool/提效工具/其他/开发辅助/Python模块.Python模块:EventGraph.K2Node_Event_1' ref from Metadata '/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.PackageMetaData'
+[2026.03.03-03.16.25:423][848]LogMetaData: Removing '/Game/QKK_Tool/提效工具/其他/开发辅助/Python模块.Python模块:EventGraph.K2Node_Event_2' ref from Metadata '/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.PackageMetaData'
+[2026.03.03-03.16.25:423][848]LogMetaData: Removing '/Game/QKK_Tool/提效工具/其他/开发辅助/Python模块.SKEL_Python模块_C:BndEvt__NewEditorUtilityWidgetBlueprint_Button_129_K2Node_ComponentBoundEvent_1_OnButtonClickedEvent__DelegateSignature' ref from Metadata '/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.PackageMetaData'
+[2026.03.03-03.16.25:423][848]LogMetaData: Removing '/Game/QKK_Tool/提效工具/其他/开发辅助/Python模块.SKEL_Python模块_C:BndEvt__NewEditorUtilityWidgetBlueprint_Button_54_K2Node_ComponentBoundEvent_0_OnButtonClickedEvent__DelegateSignature' ref from Metadata '/Game/QKK_Tool/提效工具/其他/开发辅助/NewEditorUtilityWidgetBlueprint.PackageMetaData'
+[2026.03.03-03.16.25:481][848]Cmd: OBJ SAVEPACKAGE PACKAGE="/Game/QKK_Tool/提效工具/其他/开发辅助/Python模块" FILE="../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/Python模块.uasset" SILENT=true
+[2026.03.03-03.16.25:489][848]LogSavePackage: Moving '../../../../../工具/Saved/Python模块401E446B488C8213273F699FA9512799.tmp' to '../../../../../工具/Content/QKK_Tool/提效工具/其他/开发辅助/Python模块.uasset'
+[2026.03.03-03.16.25:666][848]LogSlate: Window 'NewEditorUtilityWidgetBlueprint' being destroyed
+[2026.03.03-03.16.25:708][848]LogUObjectHash: Compacting FUObjectHashTables data took   1.67ms
+[2026.03.03-03.16.25:739][848]LogUObjectHash: Compacting FUObjectHashTables data took   1.33ms
+[2026.03.03-03.16.25:752][848]LogUObjectHash: Compacting FUObjectHashTables data took   0.43ms
+[2026.03.03-03.16.25:776][848]AssetCheck: New page: 资产保存：Python模块
+[2026.03.03-03.16.25:776][848]LogContentValidation: Display: 正在验证EditorUtilityWidgetBlueprint /Game/QKK_Tool/提效工具/其他/开发辅助/Python模块.Python模块
+[2026.03.03-03.16.27:419][ 42]LogUObjectHash: Compacting FUObjectHashTables data took   1.83ms
+[2026.03.03-03.16.32:165][567]LogContentBrowser: Deferred new asset file creation: NewEditorUtilityWidgetBlueprint
+[2026.03.03-03.16.32:181][567]LogContentBrowser: Creating deferred item: NewEditorUtilityWidgetBlueprint
