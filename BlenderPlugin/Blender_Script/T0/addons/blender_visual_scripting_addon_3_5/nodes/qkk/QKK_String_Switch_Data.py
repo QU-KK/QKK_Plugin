@@ -11,7 +11,7 @@ def update_input_sockets(self, context):
     # 增加接口
     while current_data_inputs < target_count:
         # 使用默认名称添加，用户可以在节点UI上随时改名
-        self.add_data_input(f"Key_{current_data_inputs}")
+        self.add_data_input(f"接口{current_data_inputs}")
         current_data_inputs += 1
         
     # 移除多余的接口
@@ -28,8 +28,8 @@ class SN_String_SwitchDataNode(SN_ScriptingBaseNode, bpy.types.Node):
     
     # 控制输入数量
     input_count: bpy.props.IntProperty(
-        name="Input Count",
-        description="Number of data inputs to switch between",
+        name="数量",
+        description="数据输入数量",
         default=2,
         min=2,
         max=32,
@@ -38,25 +38,23 @@ class SN_String_SwitchDataNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     def on_create(self, context):
         # 1. 接收目标匹配的字符串 (ID)
-        self.add_data_input("ID String") 
+        self.add_data_input("输入名称") 
         
         # 初始默认创建2个输入，默认给个初始名称
-        self.add_data_input("Key_0")
-        self.add_data_input("Key_1")
-        self.add_data_output("Data").changeable = True
+        self.add_data_input("接口1")
+        self.add_data_input("接口2")
+        self.add_data_output("输出").changeable = True
 
     def draw_buttons(self, context, layout):
         # 在节点上绘制输入数量控制
         layout.prop(self, "input_count")
         
-        layout.separator()
-        layout.label(text="自定义接口名称 (作为匹配键值):")
-        
+
         # 2. 遍历所有数据接口（排除第1个 ID 接口）
         # 将它们的名字 (name) 暴露在 UI 上，用户可以直接在这里修改
         for i, inp in enumerate(self.inputs[1:]):
             row = layout.row(align=True)
-            row.label(text=f"Port {i}:")
+            row.label(text=f"名称:")
             # 这里修改 inp.name 也会自动同步到节点左侧插槽的文字显示上
             row.prop(inp, "name", text="")
 
