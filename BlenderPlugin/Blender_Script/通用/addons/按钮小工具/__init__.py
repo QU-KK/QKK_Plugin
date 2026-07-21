@@ -61,7 +61,7 @@ class SNA_PT_PY_8454F(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
-    bl_category = '便捷功能'
+    bl_category = 'Python'
     bl_order = 0
     bl_options = {'DEFAULT_CLOSED'}
     bl_ui_units_x=0
