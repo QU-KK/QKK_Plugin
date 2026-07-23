@@ -56,9 +56,9 @@ def make_enum_item(_id, name, descr, preview_id, uid):
     return _item_map[lookup]
 
 
-class SNA_PT_panel_4676B(bpy.types.Panel):
+class SNA_PT_panel_6BBA6(bpy.types.Panel):
     bl_label = '终末地质检'
-    bl_idname = 'SNA_PT_panel_4676B'
+    bl_idname = 'SNA_PT_panel_6BBA6'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
@@ -79,7 +79,7 @@ class SNA_PT_panel_4676B(bpy.types.Panel):
         sna_main_529FA(layout_function, )
 
 
-def sna_check_data_enum_items(self, context):
+def sna_check_category_enum_items(self, context):
     enum_items = zmd_['sna_check_overall_ui']
     return [make_enum_item(item[0], item[1], item[2], item[3], i) for i, item in enumerate(enum_items)]
 
@@ -97,113 +97,44 @@ class SNA_OT_Check_65690(bpy.types.Operator):
         return not False
 
     def execute(self, context):
-        Check_Overall_Ui = zmd_['sna_check_overall_ui']
+        script_path = None
         Check_Overall_Data = zmd_['sna_check_overall_data']
+        Check_Overall_Ui = zmd_['sna_check_overall_ui']
         selected_objects = None
         import os
         os.system('cls')
+        print('开始检查!')
+        # 获取选中的网格对象
         selected_objects = []
         for obj in bpy.context.selected_objects:
             if obj.type == 'MESH':
                 selected_objects.append(obj)
+        #target_dir = r"C:\QKK_Plugin\BlenderPlugin\Blender_Script\ZMD\addons\ZMD_质量检工具\Check_Py"
+        target_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Check_Py")
+        # 只过滤当前目录下的第一级文件夹
+        Contents = [
+            os.path.join(target_dir, d)
+            for d in os.listdir(target_dir)
+            if os.path.isdir(os.path.join(target_dir, d))
+        ]
+        for path in Contents:
+            # 外部脚本路径
+            script_path = os.path.join(path, "Run_Check.py")
+            namespace = {
+                "selected_objects": selected_objects, # 把你的变量传进去
+                "Check_Overall_Ui": Check_Overall_Ui, # 把你的变量传进去
+                "Check_Overall_Data": Check_Overall_Data # 把你的变量传进去
+            }
+            # 读取并运行外部 .py 文件
+            with open(script_path, 'r', encoding='utf-8') as file:
+                script_content = file.read()
+            # 核心：使用 exec 执行外部代码，执行的上下文就是我们刚才定义的 namespace
+            exec(script_content, namespace)
+            # 运行完毕后，从 namespace 中把变量拿出来
+            Check_Overall_Ui = namespace.get('Check_Overall_Ui') # 如果外部脚本没生成这个变量，默认给 False
+            Check_Overall_Data = namespace.get('Check_Overall_Data')
+        print('检查完毕!')
         zmd_['sna_check_overall_mod'] = selected_objects
-        # 变量
-        Check_Item_Name = '模型名称'
-        Description = '模型名称'
-        # 顶点色检查
-        Check_Data = [Check_Item_Name]
-        for obj in selected_objects:
-            name = obj.name
-            if "S_" not in name:
-                description = '缺少  S_'
-                data = [name,description]
-                Check_Data.append(data)
-            if "+1_" not in name:    
-                description = '缺少  +1_'
-                data = [name,description]
-                Check_Data.append(data)
-            if " " in name:    
-                description = '存在空格'
-                data = [name,description]
-                Check_Data.append(data)
-            if "." in name:    
-                description = '存在  .'
-                data = [name,description]
-                Check_Data.append(data)
-        # 枚举
-        icon = 'NODE_SOCKET_SHADER'
-        if len(Check_Data) > 1:
-            icon = 'NODE_SOCKET_MATRIX'
-        Check_Ui = [Check_Item_Name,Check_Item_Name, Description, icon]
-        # Merge Data
-        Check_Overall_Ui.append(Check_Ui)
-        Check_Overall_Data.append(Check_Data)
-        # 变量
-        Check_Item_Name = '材质槽数'
-        Description = '材质槽数'
-        # 顶点色检查
-        Check_Data = [Check_Item_Name]
-        for obj in selected_objects:
-            slots = len(obj.material_slots)
-            if slots > 5:
-                name = obj.name
-                description = '材质槽数>5  =' + str(slots)
-                data = [name,description]
-                Check_Data.append(data)
-        # 枚举
-        icon = 'NODE_SOCKET_SHADER'
-        if len(Check_Data) > 1:
-            icon = 'NODE_SOCKET_MATRIX'
-        Check_Ui = [Check_Item_Name,Check_Item_Name, Description, icon]
-        # Merge Data
-        Check_Overall_Ui.append(Check_Ui)
-        Check_Overall_Data.append(Check_Data)
-        # 变量
-        Check_Item_Name = 'UV数'
-        Description = 'UV数'
-        # 顶点色检查
-        Check_Data = [Check_Item_Name]
-        for obj in selected_objects:
-            name = obj.name
-            uvs = len(obj.data.uv_layers)
-            if "_COL" in name or "_sh" in name:
-                if uvs != 0:
-                    description = 'UV数=' + str(uvs)
-                    data = [name,description]
-                    Check_Data.append(data)
-            else:
-                if uvs == 0 or uvs > 2:
-                    description = 'UV数=' + str(uvs)
-                    data = [name,description]
-                    Check_Data.append(data)
-        # 枚举
-        icon = 'NODE_SOCKET_SHADER'
-        if len(Check_Data) > 1:
-            icon = 'NODE_SOCKET_MATRIX'
-        Check_Ui = [Check_Item_Name,Check_Item_Name, Description, icon]
-        # Merge Data
-        Check_Overall_Ui.append(Check_Ui)
-        Check_Overall_Data.append(Check_Data)
-        # 变量
-        Check_Item_Name = '顶点色检查'
-        Description = 'Mod顶点色检查'
-        # 顶点色检查
-        Check_Data = [Check_Item_Name]
-        for obj in selected_objects:
-            vc = len(obj.data.color_attributes)
-            if vc != 0:
-                name = obj.name
-                description = '顶点色数=' + str(vc)
-                data = [name,description]
-                Check_Data.append(data)
-        # 枚举
-        icon = 'NODE_SOCKET_SHADER'
-        if len(Check_Data) > 1:
-            icon = 'NODE_SOCKET_MATRIX'
-        Check_Ui = [Check_Item_Name,Check_Item_Name, Description, icon]
-        # Merge Data
-        Check_Overall_Ui.append(Check_Ui)
-        Check_Overall_Data.append(Check_Data)
         return {"FINISHED"}
 
     def invoke(self, context, event):
@@ -289,7 +220,7 @@ def sna_main_529FA(layout_function, ):
         col_CF307.scale_y = 1.0
         col_CF307.alignment = 'Expand'.upper()
         col_CF307.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
-        col_CF307.prop(bpy.context.scene, 'sna_check_data', text=bpy.context.scene.sna_check_data, icon_value=0, emboss=True, expand=True)
+        col_CF307.prop(bpy.context.scene, 'sna_check_category', text=bpy.context.scene.sna_check_category, icon_value=0, emboss=True, expand=True)
         col_DBC95 = split_02767.column(heading='', align=True)
         col_DBC95.alert = False
         col_DBC95.enabled = True
@@ -301,7 +232,7 @@ def sna_main_529FA(layout_function, ):
         col_DBC95.alignment = 'Expand'.upper()
         col_DBC95.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
         for i_E6AD3 in range(len(zmd_['sna_check_overall_data'])):
-            if (bpy.context.scene.sna_check_data == zmd_['sna_check_overall_data'][i_E6AD3][0]):
+            if (bpy.context.scene.sna_check_category == zmd_['sna_check_overall_data'][i_E6AD3][0]):
                 for i_DBCC1 in range(len(zmd_['sna_check_overall_data'][i_E6AD3])):
                     if (i_DBCC1 != 0):
                         box_F7A37 = col_DBC95.box()
@@ -379,7 +310,7 @@ class SNA_OT_Open_F0C59(bpy.types.Operator):
         return context.window_manager.invoke_props_dialog(self, width=700)
 
 
-def sna_add_to_view3d_mt_editor_menus_76788(self, context):
+def sna_add_to_view3d_mt_editor_menus_4E6CC(self, context):
     if not (False):
         layout = self.layout
         op = layout.operator('sna.open_f0c59', text='质检', icon_value=1013, emboss=True, depress=False)
@@ -444,17 +375,17 @@ def sna_function_interface_5C46D(layout_function, ):
     box_ACA1D.scale_x = 1.0
     box_ACA1D.scale_y = 1.0
     if not True: box_ACA1D.operator_context = "EXEC_DEFAULT"
-    op = box_ACA1D.operator('sn.dummy_button_operator', text=bpy.context.scene.sna_check_data, icon_value=0, emboss=True, depress=False)
+    op = box_ACA1D.operator('sn.dummy_button_operator', text=bpy.context.scene.sna_check_category, icon_value=0, emboss=True, depress=False)
 
 
 def register():
     global _icons
     _icons = bpy.utils.previews.new()
-    bpy.types.Scene.sna_check_data = bpy.props.EnumProperty(name='check_data', description='', items=sna_check_data_enum_items)
-    bpy.utils.register_class(SNA_PT_panel_4676B)
+    bpy.types.Scene.sna_check_category = bpy.props.EnumProperty(name='check_category', description='', items=sna_check_category_enum_items)
+    bpy.utils.register_class(SNA_PT_panel_6BBA6)
     bpy.utils.register_class(SNA_OT_Check_65690)
     bpy.utils.register_class(SNA_OT_Open_F0C59)
-    bpy.types.VIEW3D_MT_editor_menus.prepend(sna_add_to_view3d_mt_editor_menus_76788)
+    bpy.types.VIEW3D_MT_editor_menus.prepend(sna_add_to_view3d_mt_editor_menus_4E6CC)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_46C90)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_2B330)
 
@@ -467,10 +398,10 @@ def unregister():
     for km, kmi in addon_keymaps.values():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
-    del bpy.types.Scene.sna_check_data
-    bpy.utils.unregister_class(SNA_PT_panel_4676B)
+    del bpy.types.Scene.sna_check_category
+    bpy.utils.unregister_class(SNA_PT_panel_6BBA6)
     bpy.utils.unregister_class(SNA_OT_Check_65690)
     bpy.utils.unregister_class(SNA_OT_Open_F0C59)
-    bpy.types.VIEW3D_MT_editor_menus.remove(sna_add_to_view3d_mt_editor_menus_76788)
+    bpy.types.VIEW3D_MT_editor_menus.remove(sna_add_to_view3d_mt_editor_menus_4E6CC)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_46C90)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_2B330)
