@@ -670,7 +670,6 @@ Serpens 属性,Serpens Property
 世界,Worlds
 写文本文件,Write Text File
 您需要选择使用Serpens 3创建的代码片段！,You need to select a snippet that was created using Serpens 3!
-,
 插件,Addon
 保存插件,Save Addon
 添加到市场,Add to Marketplace
@@ -1061,16 +1060,16 @@ UI中增加/减少的步长,Step of increment/decrement in the UI
 上传类型,Upload Type
 如果您认为您的插件对他人有趣，可以分享！,If you think your addon is interesting to others you can share it!
 步骤 1,Step 1
-? 设置您的插件名称、描述、版本、...,"? Set your addons name, description, version, ..."
-? 如果您想更新插件，请使用相同的名称,? If you want to update an addon use the same name
-? 选择是否要上传包含节点树的 blend 文件,? Select if you want to upload your blend file with the node tree
+设置您的插件名称、描述、版本、...,"? Set your addons name, description, version, ..."
+如果您想更新插件，请使用相同的名称,? If you want to update an addon use the same name
+选择是否要上传包含节点树的 blend 文件,? Select if you want to upload your blend file with the node tree
 上传 blend 文件,Upload blend file
 步骤 2,Step 2
-? 转到 Discord 的 #marketplace 频道并发布以下内容：,? Go in the #marketplace channel on discord and post the following:
+转到 Discord 的 #marketplace 频道并发布以下内容：,? Go in the #marketplace channel on discord and post the following:
 点击复制！,Click To Copy!
-? 您将被要求上传插件。导出并上传。,? You will be asked to upload your addon. Export it and do so.
-? 在此处粘贴您的插件链接：,? Paste the link to your addon in here:
-? 在此处输入您的插件价格：,? Enter the price of your addon here:
+您将被要求上传插件。导出并上传。,? You will be asked to upload your addon. Export it and do so.
+在此处粘贴您的插件链接：,? Paste the link to your addon in here:
+在此处输入您的插件价格：,? Enter the price of your addon here:
 步骤 3,Step 3
 布局,Layout
 框架,Frame
@@ -1302,3 +1301,472 @@ NLA片段,Bake Anim Use Nla Strips
 批处理路径,Use Batch Own Dir
 向前,Axis Forward
 向上,Axis Up
+自动执行失败 ,Autoexec Fail
+自动执行下降队列,Autoexec Fail Quiet
+调试依赖图,Debug Depsgraph
+调试依赖图构建,Debug Depsgraph Build
+上下文(偏好),Context (Preferences)
+活动对象（Object）,Active Object (Object)
+活动操作符（Operator）,Active Operator (Operator)
+区域（Area） ,Area (Area)
+Blend 数据（Blend-File Data） ,Blend Data (Blend-File Data)
+集合（Collection） ,Collection (Collection)
+图层集合（Layer Collection）,Layer Collection (Layer Collection)
+对象（Object） ,Object (Object)
+偏好设置（Preferences） ,Preferences (Preferences)
+场景（Scene） ,Scene (Scene)
+屏幕（Screen） ,Screen (Screen)
+空间数据（Space Preferences） ,Space Data (Space Preferences)
+工具设置（Tool Settings） ,Tool Settings (Tool Settings)
+视图层（View Layer） ,View Layer (View Layer)
+窗口（Window） ,Window (Window)
+窗口管理器（Window Manager） ,Window Manager (Window Manager)
+工作区（Workspace）,Workspace (Workspace)
+资产库参考（Asset Library Reference）,Asset Library Reference (Asset Library Reference)
+可编辑对象 ,Editable Objects
+模式中的对象 ,Objects In Mode
+模式中唯一数据的对象 ,Objects In Mode Unique Data
+可选择对象 ,Selectable Objects
+选中的可编辑对象 ,Selected Editable Objects
+选中的可编辑序列,Selected Editable Sequences
+选中的序列 ,Selected Sequences
+活动注释层,Active Annotation Layer
+活动可编辑 F 曲线 ,Active Editable Fcurve
+活动蜡笔帧 ,Active Gpencil Frame
+活动蜡笔层 ,Active Gpencil Layer
+活动 NLA 条带 ,Active Nla Strip
+活动 NLA 轨道 ,Active Nla Track
+活动姿势骨骼 ,Active Pose Bone
+活动序列条带 ,Active Sequence Strip
+注释数据 ,Annotation Data
+注释数据所有者,Annotation Data Owner
+编辑对象 ,Edit Object
+可编辑骨骼 ,Editable Bones
+可编辑曲线 ,Editable Fcurves
+可编辑蜡笔层 ,Editable Gpencil Layers
+可编辑蜡笔线条 ,Editable Gpencil Strokes
+小工具组 ,Gizmo Group
+蜡笔数据 ,Gpencil Data
+蜡笔数据所有者 ,Gpencil Data Owner
+图像绘画对象 ,Image Paint Object
+粒子编辑对象 ,Particle Edit Object
+姿势对象,Pose Object
+选中活动对象的姿势骨骼 ,Selected Pose Bones From Active Object
+选中的可见动作 ,Selected Visible Actions
+选中的可见曲线 ,Selected Visible Fcurves
+UI 列表 ,Ui List
+顶点绘画对象 ,Vertex Paint Object
+可见骨骼 ,Visible Bones
+可见曲线 ,Visible Fcurves
+可见蜡笔层 ,Visible Gpencil Layers
+可见姿势骨骼 ,Visible Pose Bones
+权重绘画对象,Weight Paint Object
+区域弹出 ,Region Popup
+雕刻对象 ,Sculpt Object
+选中的骨骼 ,Selected Bones
+选中的可编辑动作 ,Selected Editable Actions
+选中的可编辑骨骼 ,Selected Editable Bones
+选中的可编辑曲线 ,Selected Editable Fcurves
+选中的可编辑关键帧 ,Selected Editable Keyframes
+选中的视频剪辑轨道 ,Selected Movieclip Tracks
+选中的 NLA 条带,Selected Nla Strips
+是否脏 ,Is Dirty
+是否已保存 ,Is Saved
+使用自动打包 ,Use Autopack
+作为指针 ,As Pointer
+批量移除 ,Batch Remove
+Bl Rna 获取子类 ,Bl Rna Get Subclass
+Bl Rna 获取子类 Py ,Bl Rna Get Subclass Py
+驱动器添加 ,Driver Add
+驱动器移除 ,Driver Remove
+获取 ,Get
+ID 属性清除 ,Id Properties Clear
+ID 属性确保 ,Id Properties Ensure
+ID 属性 UI ,Id Properties UI
+属性是否隐藏 ,Is Property Hidden
+属性是否可重写库 ,Is Property Overridable Library
+属性是否只读 ,Is Property Readonly
+属性是否已设置,Is Property Set
+关键帧删除 ,Keyframe Delete
+关键帧插入,Keyframe Insert
+孤立数据清除 ,Orphans Purge
+从 ID 获取路径 ,Path From Id
+路径解析 ,Path Resolve
+弹出 ,Pop
+属性可重写库设置 ,Property Overridable Library Set
+属性取消设置 ,Property Unset
+临时数据 ,Temp Data
+类型重归 ,Type Recast
+用户映射,User Map
+遍历获取 ,Foreach Get
+遍历设置,Foreach Set
+字符串/枚举,String/Enum
+骨架（Armatures）,Armatures (Main Armatures)
+动作（Actions）,Actions (Main Actions)
+库（Libraries） ,Libraries (Main Libraries)
+光探针（主要光探针） ,Lightprobes (Main Light Probes)
+灯光（Light Probes） ,Lights (Main Lights)
+线条样式（Line Styles） ,Linestyles (Main Line Styles)
+蒙版（Masks） ,Masks (Main Masks)
+材质（Materials） ,Materials (Main Materials)
+网格（Meshes） ,Meshes (Main Meshes)
+元球（Metaballs） ,Metaballs (Main Metaballs)
+视频剪辑（Movie Clips） ,Movieclips (Main Movie Clips)
+节点组（Node Groups） ,Node Groups (Main Node Trees)
+对象（Objects） ,Objects (Main Objects)
+绘画曲线（Paint Curves） ,Paint Curves (Main Paint Curves)
+调色板（Palettes） ,Palettes (Main Palettes)
+粒子（Particles） ,Particles (Main Particle Settings)
+点云（Pointclouds） ,Pointclouds (Main Point Clouds)
+场景（Scenes） ,Scenes (Main Scenes)
+屏幕（Screens）,Screens (Main Screens)
+画笔（Brushes） ,Brushes (Main Brushes)
+缓存文件（Cache Files） ,Cache Files (Main Cache Files)
+相机（Cameras） ,Cameras (Main Cameras)
+集合（Collections） ,Collections (Main Collections)
+曲线（Curves） ,Curves (Main Curves)
+字体（Fonts） ,Fonts (Main Fonts)
+蜡笔（Grease Pencil） ,Grease Pencils (Main Grease Pencils)
+头发曲线（Hair Curves） ,Hair Curves (Main Hair Curves)
+图像（Images） ,Images (Main Images)
+格子（Lattices） ,Lattices (Main Lattices)
+声音（Sounds） ,Sounds (Main Sounds)
+扬声器（Speakers） ,Speakers (Main Speakers)
+文本（Texts） ,Texts (Main Texts)
+纹理（Textures） ,Textures (Main Textures)
+体积（Volumes） ,Volumes (Main Volumes)
+窗口管理器（Window Managers） ,Window Managers (Main Window Managers)
+工作区（Workspaces） ,Workspaces (Main Workspaces)
+环境（Worlds）,Worlds (Main Worlds)
+创建蜡笔数据 ,Create Gpencil Data
+移除蜡笔数据,Remove Gpencil Data
+从对象新建,New From Object
+约束（Object Constraints） ,Constraints (Object Constraints)
+蜡笔修改器（Object Grease Pencil Modifiers） ,Grease Pencil Modifiers (Object Grease Pencil Modifiers)
+修改器（Modifiers） ,Modifiers (Object Modifiers)
+粒子（Particle） ,Particle Systems (Particle Systems)
+着色器效果（Shader Effects）,Shader Effects (Object Shader Effects)
+顶点组（Vertex Groups） ,Vertex Groups (Vertex Groups)
+活动 材质（Active Material）,Active Material (Material)
+动画可视化（Animation Visualization） ,Animation Visualization (Animation Visualization)
+Cycles（Cycles ObjectSettings） ,Cycles (CyclesObjectSettings)
+数据（Mesh） ,Data (Mesh)
+显示（Object Display） ,Display (Object Display)
+ID 数据（Object） ,Id Data (Object)
+光链接（Light Linking） ,Light Linking (Object Light Linking)
+线条艺术（Lineart）,Lineart (Object Line Art)
+添加休息位置属性 ,Add Rest Position Attribute
+隐藏探测平面 ,Hide Probe Plane
+隐藏探测球体 ,Hide Probe Sphere
+隐藏探测体积 ,Hide Probe Volume
+隐藏渲染 ,Hide Render
+隐藏视口,Hide Viewport
+嵌入数据 ,Is Embedded Data
+来自实例化器 ,Is From Instancer
+来自集合 ,Is From Set
+为遮挡物 ,Is Holdout
+为实例化器 ,Is Instancer
+为库间接 ,Is Library Indirect
+缺失 ,Is Missing
+为运行时数据 ,Is Runtime Data
+为阴影捕捉器 ,Is Shadow Catcher
+锁定 W 轴旋转 ,Lock Rotation W
+锁定 4D 旋转 ,Lock Rotations 4D
+显示所有边缘 ,Show All Edges
+显示轴 ,Show Axis
+显示边界 ,Show Bounds
+仅显示图像的空对象（轴对齐） ,Show Empty Image Only Axis Aligned
+显示空图像（正交） ,Show Empty Image Orthographic
+显示空图像（透视）,Show Empty Image Perspective
+显示渲染实例 ,Show Instancer For Render
+显示视口实例 ,Show Instancer For Viewport
+仅显示形状键 ,Show Only Shape Key
+显示透明 ,Show Transparent
+显示纹理空间 ,Show Texture Space
+使用相机锁定父级 ,Use Camera Lock Parent
+使用动态拓扑雕刻 ,Use Dynamic Topology Sculpting
+使用空图像 alpha ,Use Empty Image Alpha
+使用额外用户 ,Use Extra User
+使用假用户 ,Use Fake User
+使用蜡笔灯光 ,Use Grease Pencil Lights
+使用实例面缩放 ,Use Instance Faces Scale
+使用实例顶点旋转 ,Use Instance Vertices Rotation
+使用网格 X 轴镜像 ,Use Mesh Mirror X
+使用网格 Y 轴镜像 ,Use Mesh Mirror Y
+使用网格 Z 轴镜像 ,Use Mesh Mirror Z
+使用形状键编辑模式 ,Use Shape Key Edit Mode
+可见相机 ,Visible Camera
+可见漫反射 ,Visible Diffuse
+可见光泽 ,Visible Glossy
+可见阴影 ,Visible Shadow
+可见透射 ,Visible Transmission
+可见体积散射 ,Visible Volume Scatter
+增量旋转（欧拉） ,Delta Rotation Euler
+增量旋转（四元数） ,Delta Rotation Quaternion
+空图像偏移 ,Empty Image Offset
+旋转轴角 ,Rotation Axis Angle
+旋转（欧拉） ,Rotation Euler
+旋转（四元数） ,Rotation Quaternion
+清除动画数据 ,Animation Data Clear
+创建动画数据 ,Animation Data Create
+清除资产 ,Asset Clear
+生成资产预览 ,Asset Generate Preview
+标记资产 ,Asset Mark
+释放缓存 ,Cache Release
+计算相机矩阵 ,Calc Matrix Camera
+相机适配坐标 ,Camera Fit Coords
+网格上最近点 ,Closest Point On Mesh
+转换空间 ,Convert Space
+变形空间位移到变形 ,Crazyspace Displacement To Deformed
+变形空间位移到原始 ,Crazyspace Displacement To Original
+变形空间评估 ,Crazyspace Eval
+变形空间评估清除 ,Crazyspace Eval Clear
+获取评估结果 ,Evaluated Get
+查找骨架 ,Find Armature
+生成蜡笔画笔,Generate Gpencil Strokes
+隐藏获取 ,Hide Get
+隐藏设置 ,Hide Set
+遮挡物获取 ,Holdout Get
+ID 属性 UI ,Id Properties Ui
+仅间接获取 ,Indirect Only Get
+是否经过变形修改 ,Is Deform Modified
+是否已修改 ,Is Modified
+本地视图获取 ,Local View Get
+本地视图设置 ,Local View Set
+覆盖创建 ,Override Create
+覆盖层级创建 ,Override Hierarchy Create
+确保预览 ,Preview Ensure
+射线投射 ,Ray Cast
+选择获取 ,Select Get
+选择设置 ,Select Set
+添加形状键 ,Shape Key Add
+清除形状键 ,Shape Key Clear
+移除形状键 ,Shape Key Remove
+转换为曲线 ,To Curve
+清除曲线 ,To Curve Clear
+转换为网格 ,To Mesh
+清除网格,To Mesh Clear
+区域 (Region),Region (Region)
+从编辑模式更新 ,Update From Editmode
+更新标签 ,Update Tag
+清除用户 ,User Clear
+ID 的用户 ,User Of Id
+用户重映射 ,User Remap
+可见获取 ,Visible Get
+视口中的可见获取 ,Visible In Viewport Get
+相机抖动活动索引 ,Camera Shakes Active Index
+会话 UID ,Session Uid
+Zms 列表索引 ,Zms List Index
+Zsg 列表索引 ,Zsg List Index
+边界框 ,Bound Box
+递归子对象 ,Children Recursive
+基础矩阵 ,Matrix Basis
+局部矩阵 ,Matrix Local
+父级逆矩阵 ,Matrix Parent Inverse
+用户集合 ,Users Collection
+用户场景 ,Users Scene
+黑白自动网格 ,Bw Auto Cage
+覆盖库 ,Override Library
+空图像侧面 ,Empty Image Side
+ID 类型 ,Id Type
+完整名称,Name Ful
+添加新待办事项,Add a new todo item
+添加和链接节点,Add and Link Nodes
+添加和链接节点 2,Add and Link Nodes 2
+添加和链接节点 3,Add and Link Nodes 3
+将文件夹添加到模块,Add Folder to Modules
+添加项目,Add Item
+添加文本,Add text
+将文本添加到便签,Add text to the post note
+添加待办事项,Add Todo Item
+插件数据,Addon Data
+插件已安装,Addon Installed
+对齐节点,Align Nodes
+更改 JSON 数据,Change JSON Data
+更改面板名称,Change N Panel Name
+更改节点颜色,Change Node Color
+更改节点标签,Change Node Label
+清理列表重复项,Clean List Duplicate
+清除输出,Clear Output
+云雾,Cloudiness:
+颜色,Color
+颜色选择器,Color Picker
+控制台输出,Console Output
+控制台打印,Console Printer
+复制,Copy
+复制文件,Copy File
+创建文件,Create File
+创建文件夹,Create Folder
+自定义颜色,Custom Color
+自定义偏好设置,Custom Preference
+自定义属性列表,Custom Properties List
+自定义属性类型,Custom Property Type
+删除,Delete
+删除目录,Delete Directory
+删除空文件夹,Delete Empty Folder
+删除文件,Delete File
+删除节点,Delete Node
+描述,Description:
+Discord,Discord
+Discord 格式化,Discord Formatter
+Discord 读取,Discord Read
+显示用户界面,Display UI
+下载文件进度属性,Download File Progress Property
+下载文件进度变量,Download File Progress Variable
+下载压缩文件,Download Zip File
+下载压缩文件进度属性,Download Zip File Progress Property
+下载压缩文件进度变量,Download Zip File Progress Variable
+downloaded_file,downloaded_file
+翻转绘制图像,Draw Image with flip
+复制节点,Duplicate Node
+元素,Element
+输入所选节点的新标签,Enter a new label for the selected node
+枚举切换器,Enum Switcher
+导出打印,Export Prints
+文件存在,File Exists
+文件大小,File Size
+文件创建日期,Files Creation Dates
+图库,Gallery
+获取 JSON 数据,Get JSON Data
+获取字符串索引值,Get string index value
+获取用户的 Python 模块,Get Users Python Modules
+隐藏信息,Hide Info
+隐藏显示视口对象,Hide Show Viewport Objects
+如何找到要交换的元素,How to find the element to swap
+湿度,Humidity:
+索引,Index
+安装 Python 模块,Install Python Modules
+列表中的项目数量,Item Amount In List
+Json 创建模板,Json Create Template
+Json 删除模板,Json Delete Template
+Json 删除模板项,Json Delete Template Items
+Json 获取模板,Json Get Template
+Json 获取顶层,Json Get Top Level
+位置,Location
+位置,Location:
+字符串匹配,Match in String
+数学向上或向下取整,Math Round Up Or Down
+数学正弦、余弦、正切、反正切,"Math Sine, Cosine, Tangent, Arctangent"
+矩阵骨骼,Matrix Bone
+矩阵对象,Matrix Object
+将待办事项向下移动,Move a todo item down
+将待办事项向上移动,Move a todo item up
+移动目录,Move Directory
+移动文件,Move File
+将待办事项向下移动,Move Todo Item Down
+将待办事项向上移动,Move Todo Item Up
+新标签,New Label
+节点,Node
+节点操作,Node Actions
+节点属性,Node Properties
+节点属性,Node Properties:
+对象自定义属性,Object Custom Properties
+打开开发者模式,Open Dev
+打开开发者网站,Open Developers Website
+打开开发者网站 2,Open Developers Website 2
+打开目录,Open Directory
+打开 Tenor,Open Tenor
+打开 Tenor 网站,Open Tenor Website
+打开 Tenor 网站,Open the Tenor website
+打开天气网站,Open Weather Website
+打包并移动压缩文件进度属性,Pack And Move Zip File Progress Property
+打包并移动压缩文件进度变量,Pack And Move Zip File Progress Variable
+页面数量,Page Amount
+页面索引项,Page Index Items
+页面返回项,Page Return Items
+弹出消息,Popup Message
+弹出消息列表,Popup Message List
+便签节点,Post It Node
+便签,Post It Note
+打印 ASCII,Print ASCII
+打印 ASCII 文本,Print ASCII Text
+打印输出,Print Output
+打印当前待办事项的文本并加载到字符串输入中,Print the text of the current todo item and load it into String input
+打印到节点,Print to Node
+打印待办事项文本,Print Todo Item Text
+属性,Properties
+所选节点的属性,Properties of the selected node
+属性未设置！,Property not set!
+快捷操作,Quick Actions
+快捷函数,Quick Function
+快捷面板,Quick Panel
+快速打印,Quick Print
+在线阅读文本,Read Online Text
+刷新图标,Refresh Icons
+移除所有材料,Removal All Materials
+移除待办事项,Remove a todo item
+移除列表重复项,Remove List Duplicate
+移除待办事项,Remove Todo Item
+重命名文件,Rename File
+渲染图像,Render Image
+在字符串中替换加,Replace In String Plus
+运行外部 Python,Run External Python
+选择,Select
+选择一个节点,Select a node
+按类型选择所有,Select All By Type
+选择格式,Select format
+选择节点,Select Node
+选择选项,Select Option
+选择类型,Select type
+显示,Show
+显示附加框,Show Additional Box
+显示框,Show Box
+显示信息,Show Info
+显示或隐藏附加框布局,Show or hide the additional box layout
+显示或隐藏框布局,Show or hide the box layout
+大小,Size
+此向量的大小,Size of this the vector
+字符串移除,String Remove
+字符串转小写,String To lower
+字符串转标题,String To Title
+字符串转大写,String To Upper
+在列表中交换,Swap In List
+切换 3D 视口视图模式,Switch 3Dviewport view mode
+温度,Temperature:
+测试互联网连接,Test Internet Connection
+此节点的颜色,The color of this node
+线程打包并移动压缩文件,Thread Pack and Move Zip File
+线程解压缩文件,Thread unpack Zip File
+线程解压缩文件属性,Thread Unpack Zip File Property
+线程解压缩文件变量,Thread Unpack Zip File Variable
+待办事项,Todo
+类型,type
+卸载 Python 模块,Uninstall Python Modules
+更新,Update
+更新所选待办事项,Update the selected todo item
+更新待办事项,Update Todo Item
+变量未设置！,Variable not set!
+向量容差,Vector Tolerance
+查看节点,View Node
+查看节点属性,View Node Properties
+天气,Weather
+天气云量,Weather Clouds
+天气描述,Weather Description
+天气湿度,Weather Humidity
+天气位置,Weather Location
+天气温度,Weather Temp
+天气风速,Weather Wind
+风速,Wind:
+换行文本,Wrap Text
+SKD_附加功能,SKD_Addon
+SKD_颜色,SKD_Colours
+SKD_控制台,SKD_Console
+SKD_自定义,SKD_Custom
+SKD_Discord,SKD_Discord
+SKD_文件,SKD_Files
+SKD_图标,SKD_Icons
+SKD_界面,SKD_Interface
+SKD_互联网,SKD_Internet
+SKD_Json,SKD_Json
+SKD_列表,SKD_List
+SKD_材料,SkD_Materials
+SKD_数学,SKD_Math
+SKD_矩阵,SKD_Matrix
+SKD_页面,SKD_Page
+SKD_面板,SKD_Panel
+SKD_弹出窗口,SKD_Popups
+SKD_贴纸,SKD_posts
+SKD_Python,SKD_Python
+SKD_渲染,SKD_Renders
+SKD_字符串,SKD_Strings
+SKD_天气,SKD_Weather
