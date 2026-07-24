@@ -1,0 +1,24 @@
+schema_version = "1.0.0"
+
+id = "BakeWrangler"
+version = "1.9.2"
+name = "Bake Wrangler"
+tagline = "Improve all baking tasks using node based interface"
+maintainer = "DFS"
+type = "add-on"
+website = "https://bake-wrangler.readthedocs.io"
+tags = ["Bake", "Sequencer"]
+
+blender_version_min = "4.4.0"
+
+# License conforming to https://spdx.org/licenses/ (use "SPDX: prefix)
+# https://docs.blender.org/manual/en/dev/extensions/licenses.html
+license = [
+  "SPDX:GPL-3.0-or-later",
+]
+copyright = [
+   "2019-2024 Dancing Fortune Software",
+]
+
+[permissions]
+files = "Read/Write baked textures to disk"
