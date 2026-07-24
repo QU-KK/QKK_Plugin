@@ -1,0 +1,1243 @@
+ao曲线高度,ao_curv_height
+遮罩,masks
+更新文件路径,Update File Path
+更新消息,Update Message
+保留资产,Keep Assets
+"保留当前安装的资产文件夹,在当前DECALmachine安装中!强烈建议如果您创建了自定义贴花,并且您的资产路径仍在DECALmachine插件文件夹中,而不是在","Keep the currently installed assets folder, in your current DECCALmachine installation!\n\nHIGHLY RECOMMENDED if you have created custom Decals, and have your assetspath still in the DECALmachine addon folder, instead of somewhere outside"
+插件终端注册输出,Addon Terminal Registration Output
+DECALmachine assets:贴花库、装饰板库、贴花图集以及贴花/装饰板/图集创建和输出的临时位置,"DECALmachine assets:\nDecal Libraries, Trim Sheet Libraries, Decal Atlases as well as\ntemporary locations for Decal/Trim Sheet/Atlas Creation and Export"
+旧路径,Old Path
+"移动资产,当更改资产路径时","Move Assets, when changing assetspath"
+"将资产从当前位置移动到新位置,当更改资产路径时","Move assets from current location to new location, when changing assetspath"
+已注册的贴花或装饰板,Registered Decal or Trim Sheet
+已注册的图集,Registered Atlas
+新库模式,New Library Mode
+导入路径,Import Path
+选择一个文件夹或.zip文件以加载库,Choose a Folder or .zip File to load a Library from
+新建贴花库名称,New Library Name
+输入名称以创建新的空贴花库,Enter a name to create a new empty Decal Library
+导入贴花图,Import Atlas
+选择文件夹或.zip文件以加载贴花图,Choose a Folder or .zip File to load a Atlas from
+反向贴花排序(需要重新加载贴花库或重启Blender,Reverse Decal Sorting (requires library reload or Blender restart)
+按最新排序,Sort Decals Newest First
+饼图菜单中的贴花库行,Rows of libraries in the Pie Menu
+将贴花库偏移到饼图菜单的右侧或左侧,Offset libraries to the right or left side of the Pie Menu
+贴花库图标的大小,Size of Decal Library Icons
+贴花库中图标的大小,Size of Icons in Decal Libraries
+在贴花库名称旁边显示贴花数量,Show Decal Count next to Library Name
+在贴花库中显示贴花名称,Show Decal Names in Decal Libraries
+在插入按钮上显示贴花名称,Show Decal Name on Insert Button
+反向修剪排序(需要重新加载库或重新启动Blender),Reverse Trim Sorting (requires library reload or Blender restart)
+按最新排序,Sort Trims Newest First
+修剪表库中的图标大小,Size of Icons in Trimsheet Libraries
+在库名称旁边显示修剪数量,Show Trim Count next to Library Name
+在修剪表库中显示修剪名称,Show Trim Names in Trimsheet Libraries
+在插入按钮上显示修剪名称,Show Trim Name on Insert Button
+贴花创建器,Decal Creator
+"设置此属性后,您创建的贴花将带有您的详细信息","Setting this property, will mark Decals created by you with your own details"
+使用贴花浮点法线,Use Decal Float Normals
+"创建贴花时,使用16位或8位法线贴图","Use 16-bit vs 8-bit Normal Maps, when creating Decals"
+"在饼图菜单中显示“合并”和“拆分”选项;否则,可在3D视图侧边栏中主DECALmachine面板的工具部分找到它们",Show Join and Split in Pie Menu\nThey can otherwise always be found in the Tools section of the main DECALmachine Panel in the 3D Views Sidebar
+调整贴花高度时需要按下ALT键,Require ALT Key when adjusting Decal Height
+显示提示,Show Hints
+HUD缩放,HUD Scale
+HUD字体颜色,HUD Font Color
+HUD超时,HUD timeout
+全局超时调制(尚未在DECALmachine中公开或使用),Global Timeout Modulation (not exposed or used in DECALmachine yet)
+显示侧边栏面板,Show Sidebar Panel
+加载包含旧版资源的.blend文件时显示警告,Show warnings when loading .blend files containing legacy assets
+用于修剪细节的UV层,UV Layer used for Trim Detail
+用于盒体展开的辅助UV层,Secondary UV Layer used by Box Unwrap
+可用更新,Update is available
+选项卡,Tabs
+资源加载器选项卡,Asset Loader Tabs
+贴花模式,Decal Mode
+贴花移除模式,Decal Removal Mode
+"切换贴花移除模式,允许从硬盘中永久移除特定贴花",Toggle Decal Removal Mode\nThis allows for permanent removal of specific Decals from the Hard Drive
+PIL,PIL
+PIL重启,PIL restart
+显示PIL详细信息,Show PIL details
+显示/隐藏下一代信息,Show/Hide Next-Gen Info
+显示/隐藏碰撞信息,Show/Hide Collision Info
+显示/隐藏去污信息,Show/Hide Decluttered Info
+显示/隐藏隔离信息,Show/Hide Quarantiend Info
+显示/隐藏跳过信息,Show/Hide Skipped Info
+资产,Assets
+设置,Settings
+创建,Create
+导出,Export
+贴花建模,MACHIN3
+获取更多贴花,Get More Decals
+插件,Addon
+位置,Location
+我强烈建议您更改此路径!,I highly recommend you change this path!
+"否则您的资产将保留在DECALmachine文件夹中,","Otherwise your Assets will remain in the DECALmachine folder,"
+"在卸载或更新DECALmachine时,您可能会丢失",and you risk loosing any Decals/Trim Sheets/Atlases you have
+自己创建的任何贴花/装饰板/图集,"created yourself, when uninstalling or updating DECALmachine"
+资产注册失败,Failed Asset Registration
+可更新资产库,Update-able Asset Libraries
+新一代资产库,Next-Gen Asset Libraries
+资产位置中的以下文件夹是为较新的DECALmachine或Blender版本创建或更新的库。,The following Folders in your Assets Location are Libraries created in or updated for a newer DECALmachine or Blender version.
+它们可以,They can
+"在任何现有的.blend文件中正常显示,但使用较旧版本的文件时,它们应该仍然可以正常显示。","They should still display fine in any existing .blend files, that use a previous version of them however."
+"资产位置中的某些库无法注册,需要","Some Libraries in your assets location could not be registered, and require"
+进一步调查。最好的方法是首先将它们移入,further investigation. The best way to do this is is by first moving them into
+"隔离区,然后检查在此过程中生成的日志文件。","Quarantine, followed by checking the log files, generated in that process."
+隔离区,Quarantine
+以下原因导致这些库无法注册:,The following reasons caused these libraries to fail registration:
+" • 过时的库!这些库早于贴花版本,并且","  •  Obsolete Libraries! These are libraries, that predate decal versioning, and can"
+ • 无效的库!这些库没有指示文件。,  •  Invalid Libraries! These are libraries without an indicator file.
+ • 损坏的库!这些库包含空文件夹或非贴花文件夹。,  •  Corrupt Libraries! These are libraries containing empty or non-Decal folders.
+更多信息以及原因请参阅文档。,For more info and on what and why please see the documentation.
+文档,Documentation
+杂乱,Clutter
+您的资产位置中的以下文件/文件夹应该,The following files/folders in your Assets Location shouldn
+清理,Declutter
+冲突的资产库,Collided Asset Libraries
+"在更改资产位置时,一些以前的库已被移出,","Some previous libraries have been moved out of the way, when changing the assets location, with the "
+"这样做是为了避免覆盖目标位置中的现有文件夹,从而可能创建不明确的库。","This was done to avoid overwriting existing folders in the target location, thereby potentially creating ambiguous libraries."
+"请检查以下库,确定是否仍然需要,否则请将其删除。通常它们只是DM","Investigate the following libraries, to see if they are still required, otherwise remove them. Usually they are just DM"
+清理的文件/文件夹,Decluttered Files/Folders
+"在之前的资产路径操作中,您的资产位置中检测到一些放错位置的文件夹。",In a previous Asset Path Operation a number of misplaced files/folders have been detected in your assets location.
+"它们现在被收集在Clutter文件夹中。这些很可能是旧的贴花库,它们最终位于根资产路径中,而不是","They have been collected in the Clutter folder now. Most likely these are old decal libraries, that ended up in the root assets path, rather"
+"而不是贴花子文件夹。调查是否仍然需要它们,如果不需要,请将其删除。","than the Decals sub-folder. Investigate if they are still needed, and if not remove them."
+"您可以尝试将它们移入贴花子文件夹,并选择更新它们。但请注意重复项。","You can try moving them into the Decals sub-folder, and optionally update them. But watch out for duplicates."
+隔离的资产库,Quarantined Asset Libraries
+以下库,The following Libraries couldn
+"每个库都包含一个log.txt文件,其中包含这些库被隔离的原因。",Each one contains a log.txt file with information on why these libraries were quarantined.
+跳过的资产库,Skipped Asset Libraries
+一些贴花或可能整个库,Some Decals or potentially entire Libraries couldn
+每个贴花或整个贴花库被隔离的具体原因已记录在每个贴花库文件夹中的log.txt文件中。,"The specific reasons for this have been logged per-Decal, and can be found in the log.txt file in each library folder."
+客户支持,Customer Support
+"如果您需要上述任何方面的帮助,请随时联系decal@machin3.io","If you need assistance with any of the above, feel free to reach out to decal@machin3.io"
+但请务必使用相应的GetSupport工具。,"But when you do, make sure to use the GetSupport tool accordingly."
+如何获得支持?,How to get Support?
+GetSupport工具,Get Support tool
+已注册的贴花+装饰贴库,Registered Decal + Trim Libraries
+文件夹或.zip中的贴花库,Library from Folder or .zip
+库名为,Library named
+Asset Loaders,Asset Loaders
+键盘映射,Keymaps
+恢复键盘映射,Restore Keymaps
+UI,UI
+HUDs,HUDs
+查看3D,View 3D
+UV,UVs
+PIL已安装。,PIL is installed.
+清除PIL,Purge PIL
+PIL已安装。请立即重启Blender。,PIL has been installed. Please restart Blender now.
+安装PIL,Install PIL
+PIL是创建贴花和装饰板以及贴图和烘焙所必需的。,PIL is needed for Decal and Trim Sheet Creation as wells as for Atlasing and Baking.
+需要互联网连接。,Internet connection required.
+其他安装方法,Alternative Installation Methods
+如果您,If you
+"在重新启动Blender后仍然无法解决问题,您可以尝试以下替代安装方法。","even after a Blender restart, you can try the following alternative installation methods."
+"Windows用户,请立即清除PIL。","Windows users, purge PIL now."
+警告,Warning
+"Blender未正确安装,AppTranslocation已启用。","Blender is not properly installed, AppTranslocation is enabled."
+请参阅Blender,Please refer to Blender
+"注意,拖动文件和文件夹时,您需要按住命令键。","Note that, for dragging of files and folders, you need to hold down the command key."
+在macOS上安装,Installing on macOS
+附加信息,additional Information
+"确保以管理员身份运行Blender,或至少对Blender文件夹具有写入权限。",Make sure to either run Blender as Administrator or at least have write access to the Blender folder.
+"重启Blender,如果绿色复选标记","Restart Blender, if the green checkmark doesn"
+安装PIL(管理员),Install PIL (Admin)
+轻松安装PIL(管理员),Easy Install PIL (Admin)
+"更改此设置,以便您创建的贴花带有您的信息!","Change this, so Decals created by you, are tagged with your info!"
+浮法法线,Float Normals
+"未经过充分测试,使用风险自担","Largely untested, use at your own risk"
+"贴花图集将起作用,但会创建8位法线贴图图集","Atlasing will work, but will create 8-bit normal Atlas map"
+贴花图集,Decal Atlases
+从文件夹或.zip导入现有图集,Import Existing Atlas from Folder or .zip
+我的其他Blender插件,My other Blender Addons
+MESHmachine,MESHmachine
+Web,Web
+Gumroad,Gumroad
+Blender Market,Blender Market
+MACHIN3tools,MACHIN3tools
+PUNCHit,PUNCHit
+CURVEmachine,CURVEmachine
+HyperCursor,HyperCursor
+"Youtube播放列表,可在Patreon上提前发布","Youtube Playlist, Pre-Release available on Patreon"
+文档,Docs
+Youtube,Youtube
+常见问题,FAQ
+获取支持,Get Support
+讨论,Discussion
+Blender艺术家,Blender Artists
+关注我的作品,Follow my work
+MACHINƎ.io,MACHINƎ.io
+Twitter @machin3io,Twitter @machin3io
+Twitter #DECALmachine,Twitter #DECALmachine
+Artstation,Artstation
+切换可见性,Toggle Visibility
+隐藏的库不会显示在“派”菜单中,Hidden Libraries will not show up in the Pie Menu
+标记为面板贴花库,Mark as Panel Decal Library
+标记的贴花库可通过Slice、GPanel和EPanel等工具访问。更改此设置需要重新加载贴花库,"Marked Librares will be accessed by tools like Slice, GPanel and EPanel\nChanging this requires Library Reload"
+切换 使用调整工具在贴花库中循环,Toggle Ability to cycle through Library with Adjust tool
+隐藏的贴花库将不可用,Hidden Libaries will not be available for 
+锁定贴花库以防止用户创建和删除贴花。需要重新加载贴花库，提供的贴花库可以,Lock a library to prevent User Decal Creation and Removal. Requires Library Reload\nSupplied Libraries can
+是裁剪贴花库,Is Trim Sheet Library
+缩放,Scale
+预预览材质,Pre-Preview Material
+裁剪uuid,trim uuid
+矩阵,Matrix
+将修剪标记为空 空修剪对于展开网格的大面积区域而不显示细节非常有用,Mark Trim as Empty\nAn Empty Trim is useful for Unwraping large sections of a mesh without detail
+"将修剪标记为面板 展开时,面板修剪的处理方式有所不同",Mark Trim as a Panel\nPanel Trims are treated differently when Unwrapping
+切换可选项,Toggle Selectability
+面板贴花预打包模式,Panel Decal Pre-Pack Mode
+预打包面板贴花,Pre-Pack Panel Decal
+视差量,Parallax Amount
+显示Alpha,Show Alpha
+启用导出,Enable for Export
+防止用户覆盖或删除 提供的图集可以,Prevent User Overwrite or Removal\nSupplied Atlases can
+是修剪表,Is Trim Sheet
+预图集材质,Pre-Atlas Material
+材质索引,Material Index
+预连接贴花对象,Pre-Join Deccal Object
+处于活动状态,is active
+通道名称 打包纹理,Name of Channel Packed Texture
+红色通道,Red Channel
+绿色通道,Green Channel
+蓝色通道,Blue Channel
+Alpha通道,Alpha Channel
+显示创建面板,Show Creation Panel
+显示导出面板,Show Export Panel
+显示更新面板,Show Update Panel
+显示帮助面板,Show Help Panel
+显示管理贴花的默认行为,Show Settings governing Decal Default Behavior 
+"显示辅助工具,未在饼图菜单中显示","Show secondary Tools, not shown in the Pie Menu"
+"显示很少使用的实用工具,可用于清理和修复","Show rarely used Utilities, which can help with Cleanup and Repair"
+"全局缩放修改器。如果贴图在场景中过大或过小,请根据您正在使用的缩放比例进行必要的调整。全局缩放比例还与面板宽度相乘。","Global Scale modifier.\nAdjust as needed, if decals come into the scene too big or small, for the scale you are working at\nGlobal Scale is also multiplied with Panel Width."
+面板宽度,Panel Width
+"默认面板宽度,用于Slice、GPanel和EPanel,可通过调整","Default Panel Width, used by Slice, GPanel and EPanel, and changed by Adjust"
+高度,Height
+默认贴图高度——置换修改器中的mid_level,Default Decal Height - mid_level in Displace modifier
+贴图类型集合,Decal Type Collection
+创建贴图类型集合,Create Decal Type Collections
+贴图父集合,Decal Parent Collection
+根据贴花父对象创建贴花集合,Create Decal Collections based on Decal Parent Object
+活动集合,Active Collection
+将贴花添加到活动集合,Add Decals to Active Collection
+隐藏材质,Hide Materials
+从Blender材质列表中隐藏贴花材质,Hide Decal Materials from Blenders Material Lists
+隐藏纹理,Hide Textures
+从Blender隐藏贴花纹理,Hide Decal Textures from Blender
+隐藏节点树,Hide Node Trees
+从Blender隐藏贴花节点树,Hide Decal Node Trees from Blender
+隐藏贴花类型集合,Hide Decal Type Collections
+从BatchOps隐藏贴花类型集合,Hide Decal-Type Collections from BatchOps
+隐藏贴花父集合,Hide Decal Parent Collections
+从BatchOps隐藏贴花父集合,Hide Decal-Paretn Collections from BatchOps
+覆盖贴花子集,Override Decal Subsets
+覆盖贴花子集材质组件,Override Decal Subset Material Component as well
+覆盖贴花发射,Override Decal Emission
+覆盖贴花发射(实际禁用),Override Decal Emission too (disable actualy)
+光泽光线,Glossy Rays
+在Cycles中启用贴花的光泽光线,Enable Glossy Rays for Decals in Cycles
+视差,Parallax
+为法线贴花和裁剪片启用视差着色器效果,Enable the Parallax Shader Effect for normal mapped Decals and Trim Sheets
+法线传递渲染,Normal Transfer Render
+使用传递的法线进行渲染,Use Transfered Normals for Rendering
+法线传递视口,Normal Transfer Viewport
+在视口中显示传递的法线,Show Transfered Normals in the Viewport
+颜色插值,Color Interpolation
+插值贴花颜色贴图,Interpolate Decal Color Maps
+Alpha混合模式,Alpha Blend Mode
+"设置Alpha混合,尤其适用于重叠贴花","Set Alpha Blending, relevant especially for overlapping Decals"
+AO强度,AO Strength
+混合到贴花材质中的AO量,Amount of AO mixed into Decal Material
+反转信息贴花,Invert Info Decals
+反转贴花颜色贴图,Invert Decal Color Maps
+边缘高光,Edge Highlights
+混合到贴花材质中的曲率量,Amount of Curvature mixed into Decal Material
+涂层,Coat
+将细节置于涂层之下或之上,Place Detail Under or Over Coat
+打包图像,Pack Images
+将纹理存储在混合文件或磁盘上,Store Textures in blend file or on disk
+对齐模式,Align Mode
+自动匹配材质,Auto-Match Materials
+在插入贴花或使用重新应用工具时匹配贴花,Match Materials when Inserting them or when using the Re-Apply tool
+启用表面捕捉,Enable Surface Snapping
+插入贴花时设置表面捕捉。这将更改现有的捕捉设置,"Setup Surface Snapping, whenever a decal is inserted.\nThis changes the existing snapping settings"
+更新贴花/装饰板库路径,Update Decal/Trimsheet Library Path
+就地更新,Update in place
+更新库是装饰贴花库,Update Library is Trim Decal Libarary
+创建类型,Create Type
+修复旧法线,Fix Legacy Normals
+保留旧缩略图,Keep Old Thumbnails
+使用旧贴花存储 UUID,Store UUID with Old Decals
+名称(可选),Name (optional)
+使用图像文件名,Use Image File Name
+跳过根据文件名创建的贴花名称索引,Skip the Index for Decal Names created from File Names
+贴花类型,Decal Type
+信息 贴花创建类型,Info Decal Creation Type
+裁剪,Crop
+从源图像裁剪透明区域,Crop transparent areas from Source Images
+填充,Padding
+向源图像添加填充,Add Padding to Source Images
+批处理,Batch
+"输入文本,使用 \\n 作为换行符","Enter Text, use \\n for line breaks"
+文本颜色和透明度,Text Color and Alpha
+背景颜色和透明度,Background Color and Alpha
+对齐文本,Align Text
+大小,Size
+字体大小,Font Size
+X 和 Y 填充,X and Y Padding
+X 和 Y 偏移,X and Y Offset
+超采样,Supersample
+超采样透明度,Supersample Alpha
+超采样透明度,Super Sample Alpha
+分辨率,Resolution
+样本,Samples
+AO 样本,AO Samples
+对比度,Contrast
+AO 对比度,AO Contrast
+宽度,Width
+曲率 宽度,Curvature Width
+曲率 对比度,Curvature Contrast
+距离,Distance
+高度限制,Height Limit
+烘焙 发射图,Bake Emission Map
+烘焙 发射图(需要发射材料),Bake Emission Map (requires emissive materials)
+烘焙 发射 反射,Bake Emissive Bounce
+烘焙 反射光,Bake Bounced Light
+发射 反射光 样本,Emission Bounced Light Samples
+将 Alpha 限制为活动,Limit Alpha to Active
+将 Alpha 限制为从向上多边形到活动对象的创建,Limit Alpha Map Creation from upwards facing Polygons to Active Object
+将 Alpha 限制为边界,Limit Alpha to Boundary
+将 Alpha 限制为边界上的多边形创建,Limit Alpha Map Creation to polygons on the Boundary
+将 Alpha 平面化法线,Flatten Alpha Normals
+为向上多边形创建完全平坦的法线,Create perfectly flat Normals for upwards facing Polygons
+材质 2,Material 2
+"烘焙材质2蒙版,用于面板贴花创建材质分离","Bake Material 2 Mask, for Panel Decals creating a Material Separation"
+存储子集材质,Store Subset Material
+"在贴花资源上存储自定义子集材质,而不是默认的金属材质","Store custom Subset Material on the Decal Asset, instead of the default Metal Material"
+检查烘焙,Inspect Bakes
+"烘焙后,打开文件夹检查烘焙纹理","After Baking, open the folder to inspect Baked Textures"
+强制使用特定UUID,Force specific UUID
+"强制使用特定UUID,存储在贴花源几何体上并从贴花源几何体中检索。启用此功能可能会在已注册的贴花之间产生重复的UUID。应避免这种情况","Force using specific UUID, stored on and retrieved from Decal Source Geometry\nEnabling this risks producing duplicate UUIDs among registered Decals. This is to be avoided"
+修剪表创建类型,Trim Sheet Creation Type
+修剪表创建类型,Trime Sheet Creation Type
+"修剪表的位置,由data.json和相关纹理定义","Location of Trim Sheet, defined by data.json and related textures"
+保留修剪UUID,Keep Trim UUIDs
+"保留与导入的表/图集中的修剪/贴花相同的修剪UUID 如果您将图集作为修剪表导入,则应关闭此选项 如果您导入已注册的表,并且打算替换它,则应启用此选项","Keep the same trim UUIDs as the trims/decals in the imported Sheet/Atlas\nIf you import an Atlas as a Trim Sheet, you should keep this turned OFF\nIf you import a Sheet, that is is registered and that you plan to replace, you should enable this"
+保留表UUID,Keep Sheet UUID
+"保持与初始化或导入的装饰板相同的UUID 如果您修改并打算替换一个已注册并用于混合文件的现有装饰板,则应启用此功能!","Keep the same UUID as the initiated or imported Trim Sheet\nIf you modifiy and intend to replace an existing Sheet, that is registered and used in a blend file, you should enable this!"
+图集创建类型,Atlas Creation Type
+"图集的位置,由data.json和相关纹理定义","Location of Atlas, defined by data.json and related textures"
+图集类型,Atlas Type
+图集填充,Atlas Padding
+在图集中的每个贴花之间添加此数量的空白空间(以像素为单位),Add this amount of empty sapce in pixels between every Decal in the Atlas
+尺寸模式,Size Mode
+图集分辨率目标,Atlas Resolution to aim for
+图集分辨率增加,Atlas Resolution Increase
+"每次打包尝试时,将图集分辨率增加此值","For every packing attempt, increase the atlas resolution by this amount"
+预打包面板贴花,Pre-Pack Panel Decals
+补偿高度,Compensate Height
+根据贴花相对于图集的大小调整高度 确保图集中的视差与场景中的视差相同,Adjust Height based on Decal size in relation to Atlas size\nEnsures parallax amount in Atlas is the same as in Scene
+归一化高度,Normalize Height
+"利用最大值范围归一化图集高度贴图,同时保持中间灰度不变","Normalize atlas height map, utilizing the maximum value range, while keeping mid grey constant"
+非均匀小工具缩放,Non-Uniform Gizmo Scaling
+允许图集中的贴花进行非均匀缩放,Allow non-uniform scaling for decals in Atlas
+导出类型,Export Type
+创建图集集合,Create Atlas Collections
+为每个使用的图集创建图集贴花集合,Create Collections for Atlased Decals per Atlas used
+为每个父对象合并图集贴花,Join atlased Decals per Parent Object
+将图集纹理导出到下面设置的导出位置,Export Atlas Textures to Export Location set below
+将模型导出到下面设置的导出位置,Export Models to Export Location set below
+导出路径,Export Path
+导出纹理文件夹,Export Textures Folder
+导出模型文件夹,Export Models Folder
+使用纹理文件夹,Use Textures Folder
+使用模型文件夹,Use Models Folder
+导出Alpha图,Export Alpha Map
+切换Alpha图,Toggle Alpha Map
+导出环境光遮蔽图,Export Ambient Occlusion Map
+切换环境光遮蔽图,Toggle Ambient Occlusion Map
+导出颜色图,Export Color Map
+切换颜色图,Toggle Color Map
+导出曲率贴图,Export Curvature Map
+切换曲率贴图,Toggle Curvature Map
+导出发射贴图,Export Emission Map
+切换发射贴图,Toggle Emission Map
+导出高度贴图,Export Height Map
+切换高度贴图,Toggle Height Map
+导出法线贴图,Export Normal Map
+切换法线贴图,Toggle Normal Map
+导出材质2贴图,Export Material 2 Map
+切换材质2贴图,Toggle Material 2 Map\nMost likely not needed for Export
+导出金属贴图,Export Metallic Map
+切换金属贴图,Toggle Metallic Map
+导出粗糙度,Export Roughness
+切换粗糙度贴图,Toggle Roughness Map
+导出平滑度,Export Smoothness
+切换平滑度贴图 平滑度与粗糙度相反,Toggle Smoothness Map\nSmootheness is inverted Roughness
+导出子集贴图,Export Subset Map
+切换子集贴图,Toggle Subset Map
+导出子集遮挡贴图,Export Subset Occlusion Map
+"切换子集遮挡贴图 子集贴图,扩展为反向环境遮挡","Toggle Subset Occlusion Map\nA Subset Map, extended with inverted Ambient Occlusion"
+导出白色高度贴图,Export White Height Map
+"切换白色高度贴图 高度贴图,灰度值为50%的白色,舍弃了所有比中间灰度更浅的深度信息","Toggle White Height Map\nA Height map, with its 50% grey value, shifted to White,\nthereby discarding any depth information lighter than mid grey"
+图集纹理通道包,Atlas Texture Channel Pack
+通道打包地图 最多可将4张单色地图打包到一张RGB或RGBA纹理中,Channel Packed Atlas Map\nUp to 4 monochromatic maps can packed into a single RGB or RGBA texture
+选择导出格式,Pick Export Format
+使用MACHIN3tools,Utilize MACHIN3tools
+X 分辨率,X Resolution
+Y 分辨率,Y Resolution
+强制方形分辨率,Force Square Resolution
+渲染样本,Render Samples
+边缘,Margin
+边缘(以像素为单位,Margins in px
+射线距离,Ray Distance
+挤压距离,Extrusion Distance
+三角剖分,Triangulate
+烘焙前添加三角剖分修改器,Add Triangulatrion Modidfier before Baking
+颜色,Color
+从信息贴花烘焙颜色贴图,Bake Color Maps from Info Decals
+法线,Normal
+烘焙 简单、子集和面板贴花的法线贴图,"Bake Normal Maps from Simple, Subset and Panel Decals"
+发射,Emission
+烘焙 简单、子集、面板和贴花信息的发射贴图,"Bake Emission Maps from Simple, Subset, Panel and Info Decals"
+AO/曲率/高度,AO / Curvature / Height
+烘焙 简单、子集和面板贴花的AO、曲率和高度贴图,"Bake AO, Curvature, and Height Maps from Simple, Subset and Panel Decals"
+蒙版,Masks
+烘焙 简单、子集、面板和贴花信息的蒙版,"Bake Masks from Simple, Subset, Panel and Info Decals"
+合并烘焙,Combine Bakes
+"将多个对象的烘焙合并到一个纹理表 中。注意,准备UV时,合并的对象实际上共享相同的0-1 UV空间","Combine Bakes of multiple objects into a single Texture Sheet\nNote, prepare your UVs in a way, that the combined objects actually share the same 0-1 UV space"
+预览烘焙,Preview Bakes
+直接在对象上预览烘焙。这将创建一个临时材质并隐藏贴花,Preview Bakes directly on the Object\nThis creates a temporary Material and hides the Decals
+打开烘焙文件夹,Open Bake Folder
+"烘焙后,在文件浏览器中打开纹理的位置","After baking, open the location of the textures in the file browser"
+材质命名,Substance Naming
+"命名烘焙纹理的方式,允许在Substance Painter中自动分配","Name baked textures in a way, that allows for automatic assignment in Substance Painter"
+贴花uuid,decal uuid
+强制贴花UUID,Forced Decal UUID
+"强制UUID存储在贴花源几何体上,并从贴花源几何体中检索",The forced UUID is stored on and retreived from Decal Source Geometry
+强制uuid,is forced uuid
+"贴花使用源几何体的强制uuid,并","Decal uses forced uuid from source geometry, and doesn"
+贴花版本,decal version
+贴花类型,decal type
+贴花库,decal library
+贴花名称,decal name
+贴花材质名称,decal material name
+是贴花,is decal
+是备份,is backup
+是投影,is projected
+是切片,is sliced
+贴花备份对象,decal backup object
+投影在对象上,projected on Object
+切片在对象上,sliced on Object
+父级中的备份矩阵,Backup Matrix in Parent
+预烘焙预览材质,Pre-BakePreview Materials
+%s_%s,%s_%s
+是裁剪板,is trim sheet
+是裁剪贴花,is trim decal
+裁剪板名称,Trim Sheet Name
+用于裁剪的索引,Index used for triminstant folder
+裁剪板 uuid,trim sheet uuid
+裁剪,Trims
+裁剪/贴花,Trim / Decal
+列表末尾的引脚工具,Pin Tools to end of List
+捕捉,Snapping
+创建裁剪时使用捕捉,Use Snapping when creating Trims
+绘制捕捉网格,Draw Snapping Grid
+像素捕捉,Pixel Snapping
+捕捉像素,Snap on Pixels
+对象/网格对齐,Object/Mesh Snapping
+对象对齐,Snap on Object
+绘制对象对齐边缘,Draw Object Snapping Edges
+对齐分辨率,Snapping Resolution
+X和Y方向上的对齐分辨率,Snapping Resolution in X and Y divisions
+贴花纸纹理贴图,Trim Sheet Texture Maps
+贴花纸纹理贴图,Trim Sheet Texture Map
+贴花纸集合,Trim Collection
+显示/隐藏贴花纸贴图,Show/Hide Trim Sheet Maps
+显示/隐藏贴花纸设置,Show/Hide Trim Setup
+%s(预览),%s (preview)
+%s 虚拟 %s,%s Dummy %s
+是图集,is atlas
+是图集 虚拟,is atlas dummy
+图集名称,Atlas Name
+图集文件夹索引,Index used for atlas folder
+图集 uuid,atlas uuid
+图集细化,Atlas Refinement
+图集 装饰 排序,Atlas Trim Sort
+图集 集合,Atlas Collection
+图集 虚拟垫,Atlas Dummy Mat
+显示图集属性,Show Atlas Properties
+缩放图集 缩小,Scale Atlas Down
+图集前材质,Pre-Atlas Materials
+预拼接贴花,Pre-Join Decals
+"贴花已拼接,在图集化后","Decal has been joined, after it was atlased"
+贴花已存储并替换为已拼接贴花,Decal has been stashed away and replaced by a joined Decal
+贴花名称来自文件,decalname from file
+贴花材质,is decal material
+已匹配,is matched
+已视差,is parallaxed
+匹配的贴花材料参数,matched Decal Material Parameters to
+匹配的贴花材料2参数,matched Decal Material2 Parameters to
+匹配的贴花子集参数,matched Decal Subset Parameters to
+匹配的装饰板参数,matched Trim Sheet Parameters to
+视差节点名称,parallax node name
+默认视差,Default Parallax
+名称,Name
+是装饰板材料,is trim sheet material
+是装饰贴花材料,is trim decal material
+是图集材料,is atlas material
+是图集背景材料,is atlas background material
+是图集虚拟材料,is atlas dummy material
+是贴花纹理,is decal texture
+贴花纹理类型,decal texture type
+是装饰板纹理,is trim sheet texture
+是装饰贴花纹理,is trim decal texture
+装饰板纹理类型,trimsheet texture type
+是图集纹理,is atlas texture
+是图集虚拟纹理,is atlas dummy texture
+图集纹理类型,atlas texture type
+是贴花类型集合,is decaltype collection
+是贴花父集合,is decal parent collection
+可匹配的材料,"Materials, that can be matched"
+仅匹配特定选择的材料,Match specificly selected Material only
+鼠标位置用于贴花插入,Mouse Position for Decal Insertion
+MACHIN3:调整贴花,MACHIN3: Adjust Decal
+调整贴花高度、视差和其他各种属性,"Adjust Decal Height, Parallax and Various Other Properties"
+模式,Mode
+3D 视图,3D View
+view3d.rotate,view3d.rotate
+DECALMACHINE_OVERRIDE,DECALMACHINE_OVERRIDE
+MACHIN3: 调整修剪,MACHIN3: Adjust Trim
+适合、移动、缩放、旋转和更改修剪,"Fit, Move, Scale, Rotate and Change Trims"
+将展开的面适合修剪,Fit unwrapped faces to trim
+旋转,Rotate
+快速缩放,Quick Scale
+MACHIN3: 将贴花对齐边缘,MACHIN3: Align Decal to Edge
+将贴花对齐活动对象的边缘,Align Decal(s) to edge of the active object
+MACHIN3: 创建图集,MACHIN3: Create Atlas
+图集模式,Atlasing Mode
+MACHIN3: 导入图集,MACHIN3: Import Atlas
+导入在DECALmachine中创建的现有图集/修剪表,Import an existing Atlas/Trim Sheet created in DECALmachine
+MACHIN3: 将贴花添加到图集,MACHIN3: Add Decals to Atlas
+将选定的贴花添加到活动图集,Add selected Decals to active Atlas
+MACHIN3: 从图集移除贴花,MACHIN3: Remove Decal from Atlas
+从图集移除活动贴花,Remove active Decal from Atlas
+这将从图集移除选定的贴花!,This removes the selected Decal from the Atlas!
+MACHIN3: 移除即时图集,MACHIN3: Remove Instant Atlas
+移除选定的即时图集,Remove Selected Instant Atlas
+"这将从场景中移除选定的图集,并从磁盘移除其所有临时纹理!",This removes the selected Atlas from the scene and all its temporary textures from disk!
+确定吗?这无法撤销!,Are you sure? This cannot be undone!
+MACHIN3: 存储图集,MACHIN3: Store Atlas
+存储用于导出的贴图,Store Atlas for Export Use
+已经有一个名为,There already is an Atlas called 
+的贴图。是否要替换?无法撤销!,Do you want to proceed and replace it? This can not be undone!
+MACHIN3:使用贴图,MACHIN3: Use Atlas
+调整贴图UV以适应贴图并应用贴图材质,Adjust Decal UVs to fit Atlas and apply Atlas Material
+贴图UV,Atlas UVs
+贴图UV,Decal UVs
+MACHIN3:恢复贴图前的贴图材质,MACHIN3: Restore Pre-Atlas Decal Materials
+恢复原始贴图UV和材质,Restore original Decal UVs and Materials
+UVMap,UVMap
+MACHIN3:添加贴图通道包,MACHIN3: Add Atlas Channel Pack
+添加新的通道打包纹理,Add new Channel Packed Texture
+MACHIN3: 移除 Atlas 通道包,MACHIN3: Remove Atlas Channel Pack
+移除激活的通道打包纹理,Remove active Channel Packed Texture
+MACHIN3: 导出 Atlas 贴花,MACHIN3: Export Atlas Decals
+导出 Atlas 纹理和模型,Export Atlas Textures and Models
+MACHIN3: 获取备份贴花,MACHIN3: Get Backup Decal
+默认:检索贴花备份 Alt:删除投影/切片贴花,Default: Retrieve Decal Backup\nAlt: Delete Projected/Sliced Decal
+MACHIN3: 烘焙贴花,MACHIN3: Bake Decals
+将贴花纹理烘焙到父对象,Bake Decal Textures to Parent Object
+MACHIN3: 恢复烘焙前预览材质,MACHIN3: Restore Pre-BakePreview Materials
+恢复烘焙前预览材质,Restore Pre-BakePreview Materials
+MACHIN3: 创建贴花,MACHIN3: Create Decal
+从几何图形、图像或文本创建自己的贴花,"Create your own Decals - from Geometry, Images or Text"
+%d_%s_%s,%d_%s_%s
+MACHIN3: 批量创建贴花,MACHIN3: Batch Create Decals
+从多个图像批量创建自己的信息贴花,Batch create your own Info Decals from multiple Images
+MACHIN3: 将贴花添加到贴花库,MACHIN3: Add Decal to Library
+将选定的贴花添加到贴花库,Add Selected Decal(s) to Decal Library
+LIBRARY_DECAL,LIBRARY_DECAL
+贴花资产,Decal Asset
+MACHIN3: 更新贴花库,MACHIN3: Update Decal Library
+更新贴花库,Update Decal Library
+库更新路径,Library Update Path
+从批量更新调用,Called from Batch Updated
+保留原始缩略图(从批量更新程序传入),Keep Original Thumbnails (passed in from Batch Updater)
+自动修复运行,Auto-Fix Run
+MACHIN3: 批量更新旧版贴花和装饰板库,MACHIN3: Batch Update Legacy Decal and Trim Sheet libraries
+MACHIN3: 使用旧版贴花更新混合文件,MACHIN3: Update Blend File with Legacy Decals
+更新当前混合文件 旧版贴花、装饰贴花和装饰板,"Update the current Blend file Legacy Decals, Trim Decals and Trim Sheets"
+MACHIN3:加载图像,MACHIN3: Load Images
+加载PNG图像以创建信息贴花,Load PNG Images to Create Info Decals from
+MACHIN3:清除图像,MACHIN3: Clear Images
+清除用于创建信息贴花的图像池,Clear Pool of Images to be used for Info Decal Creation
+MACHIN3:加载字体,MACHIN3: Load Fonts
+加载用于创建信息贴花的字体,Load Fonts to be used for Info Decal Creation
+MACHIN3:清除字体,MACHIN3: Clear Fonts
+清除用于创建信息贴花的字体池,Clear Pool of Fonts to be used for Info Decal Creation
+保留Ubuntu字体,Keep Ubuntu Font
+MACHIN3:面板切割,MACHIN3: Panel Cut
+使用面板贴花构建切割机网格或立即网格切割。ALT:为每个镜像实例创建切割机或网格切割,Construct Cutter Mesh or instantly Mesh-Cut using Panel Decals.\nALT: Create Cutter or Mesh-Cut for every Mirror instance
+方法,Method
+深度,Depth
+扩展,Extend
+应用Mods,Apply Mods
+XRay,XRay
+FACES,FACES
+MACHIN3:删除网格切割,MACHIN3: Remove Mesh Cuts
+"删除网格切割 ALT:同时删除材质(第一个除外) SHIFT:选择网格切割边缘,而不是删除它们。","Remove Mesh Cuts\nALT: Remove Materials as well (except the first one)\nSHIFT: Select Mesh Cut Edges, instead of removing them."
+MACHIN3: 修剪 剪切,MACHIN3: Trim Cut
+剪切 修剪 贴花到其父对象,Cut Trim Decal into the its Parent Object
+MACHIN3: 调试 DECALmachine,MACHIN3: Debug DECALmachine
+MACHIN3: 修剪 矩阵转换,MACHIN3: Trim Matrix Conversion
+切换 DECALmachine 开发工具,Toggle DECALmachine Developer Tools
+MACHIN3: 重新渲染贴花缩略图,MACHIN3: Re-Render Decal Thumbnails
+重新渲染所选用户贴花库的贴花缩略图,Re-Render Decal Thumbnails of the Selected User Decal Library
+MACHIN3: update_decal_node_tree,MACHIN3: update_decal_node_tree
+更新所选用户贴花库中的贴花节点树,Updatees Decal Node Tree in selected User Decal Library
+MACHIN3:更新蒙版插值,MACHIN3: Update Masks Interpolation
+更新贴花蒙版插值所选用户贴花库,Updates Decal Masks Interpolation selected User Decal Library
+MACHIN3:更新修改器折叠,MACHIN3: Update Modifier Collapse
+更新修改器折叠,Update Modifier Collapse
+MACHIN3:更新添加节点夹紧,MACHIN3: Update Add Nodes Clamping
+更新所选用户贴花库中的贴花节点树中的添加节点夹紧,Updates Add Node Clamping in Decal Node Trees in selected User Decal Library
+MACHIN3:替换材质,MACHIN3: Replace Material
+替换材质,Replace Material
+MACHIN3:根据材质设置道具和名称,MACHIN3: Set Props and Name from Material
+根据材质设置贴花道具和名称,Set decal props and name from material
+置换,Displace
+法线传递,NormalTransfer
+MACHIN3:更新贴花备份,MACHIN3: Update Decal Backup
+更新贴花备份(矩阵),Update Decal Backup (Matrix)
+MACHIN3:边缘面板,MACHIN3: Edge Panel
+"在编辑模式下从边缘创建面板贴花,或在对象模式下从仅边缘对象创建面板贴花。SHIFT:在编辑模式下,将边缘标记为网格切割。CTRL:在编辑模式下,立即删除边缘。ALT:在编辑模式下,创建仅边缘对象","Create Panel Decals from edges in EDIT mode or from and edge-only object in OBJECT mode\nSHIFT: In EDIT mode, mark edges as MESHCUTS\nCTRL: in EDIT mode, remove edges immediately.\nALT: In EDIT mode, create edge-only object"
+EPanel Object,EPanel Object
+Panel Decal,Panel Decal
+VERTS,VERTS
+MACHIN3:润滑面板,MACHIN3: Grease Panel
+将油彩笔触转换为面板贴花。SHIFT:连接面板 CTRL:连接循环面板,Turns Grease Pencil Strokes into a Panel Decal.\nSHIFT: Connected Panels\nCTRL: Connected Cyclic Panel
+连接笔触,Connect Strokes
+连接线段,Segments
+创建循环,Make Cyclic
+MACHIN3:插入贴花,MACHIN3: Insert Decal
+插入所选贴花 ALT:批量插入整个贴花库,Insert Selected Decal\nALT: Batch Insert entire Library
+MACHIN3:快速插入贴花,MACHIN3: Quick Insert Decal
+"快速插入与之前相同的贴花,直接放在鼠标下","Quickly Insert the same Decal as before, directly under the Mouse"
+MACHIN3:清除 即时,MACHIN3: Clear Instant
+即时类型,Instant Type
+001_%s,001_%s
+MACHIN3: 移除贴花,MACHIN3: Remove Decal
+移除所选贴花,Remove Selected Decal
+MACHIN3: 移除所有即时贴花,MACHIN3: Remove All Instant Decals
+从硬盘中移除所有即时贴花,Remove all Instant Decals from the hard drive
+MACHIN3: 合并贴花,MACHIN3: Join Decal
+将多个贴花合并到一个对象中,Join multiple Decals to a single Object
+MACHIN3: 合并贴花图集,MACHIN3: Join Atlased Decals
+"自动选择并合并所有可见的贴花图集,可按图集,也可按父贴花选择","Automatically select and join all visible atlased Decals, per Atlas, and optionally per Parent"
+MACHIN3: Split Decal,MACHIN3: Split Decal
+将之前合并的贴花分离为原始的单独贴花,"Separate previously joined Decals into their original, Individual Decals"
+MACHIN3: Split Atased Decals,MACHIN3: Split Atased Decals
+将所有可见的合并贴花和贴花图自动分离为原始的单独贴花,"Automatically separate all visible joined and atlased Decals into their original, individual Decals"
+MACHIN3: Match Material,MACHIN3: Match Material
+将贴花材质、材质2或子集元素与原理着色器材质匹配。,"Matches Decal Materials, Material 2 or Subset elements to Principled Shader Materials."
+MACHIN3: Mirror Trim,MACHIN3: Mirror Trim
+镜像修剪 ALT:根据选择区域进行批量镜像修剪 CTRL:V镜像,Mirror Trim\nALT: Batch Mirror Trims based on Selection Islands\nCTRL: V Mirror
+MACHIN3: Override Decal Materials,MACHIN3: Override Decal Materials
+覆盖选定对象的BSDF(和修剪片)材质及其贴花 ALT:撤销覆盖,"Override BSDF (and Trim Sheet) Materials of Selected Objects, as well as their Decals\nALT: Undo Override"
+撤销,Undo
+撤销覆盖,Undo Override
+MACHIN3:投影贴花,MACHIN3: Project Decal
+在表面上投影选定的贴花 ALT:手动调整投影深度 CTRL:使用UV投影代替UV转移 SHIFT:收缩包装,Project Selected Decals on Surface\nALT: Manually Adjust Projection Depth\nCTRL: Use UV Project instead of UV Transfer\nSHIFT: Shrinkwrap
+NormalUVTransfer,NormalUVTransfer
+Solidify,Solidify
+UVProject,UVProject
+UVTransfer,UVTransfer
+MACHIN3:取消收缩包装,MACHIN3: Unshrinkwrap
+"取消收缩包装,将收缩包装的贴花恢复为平面贴花。","Un-Shrinkwrap, turn shrinkwrapped decal back into flat one."
+MACHIN3:重新应用贴花,MACHIN3: Re-Apply Decal
+"将贴花重新应用到(新的)对象。父贴花,设置自定义法线并自动匹配材质。ALT:强制自动匹配材质,即使已选择特定材质。","Re-Apply Decal to (new) Object. Parents Decal, Sets Up Custom Normals and Auto-Matches Materials\nALT: Forcibly auto-match Material, even if a specific Material is selected."
+MACHIN3:选择贴花,MACHIN3: Select Decals
+选择模式,Select Mode
+保持已选择的贴花父项,Keep Decal Parents Selected
+MACHIN3:切片贴花,MACHIN3: Slice Decal
+"在两个对象的交点创建面板贴花。ALT:拓扑切片,使用目标对象","Create Panel Decal at Intersection of Two Objects.\nALT: Topo Slice, use target object"
+FACES_KEEP_BOUNDARY,FACES_KEEP_BOUNDARY
+EDGES,EDGES
+MACHIN3: Stitch,MACHIN3: Stitch
+将UV化的面缝合在一起,Stitch UVed faces together
+MACHIN3: Initialize Generated Coordinates,MACHIN3: Initialize Generated Coordinates
+"通过在贴花父对象的边界框角创建单独的vert,为生成的纹理坐标准备投影和切片的贴花",Prepare projected and sliced decals for generated texture coordinates by creating lone verts in the bounding box corners of the decal parent
+使用评估的几何体,Use evaluated Geometry
+MACHIN3: UV Transfer,MACHIN3: UV Transfer
+将贴花父材质的UV和所有图像纹理转移到贴花上。 替代:移除UV转移,Transfer UVs and and all Image Textures from Decal Parent Material over to the Decal\nALT: Remove UVTransfer
+移除之前创建的UV转移,Remove a previously created UV Transfer
+使用法线贴图,Use Normal Map
+使用视差转移贴图,Use Parallax for Transferred Maps
+以下操作仅在贴花和父贴花,The following will only work if Decal and Parent
+UV空间方向一致时有效!,UV spaces are oriented the same way!
+"通常情况下,情况并非如此。",Usually this will not be the case.
+使用视差,Use Parallax
+UVTRANSFER,UVTRANSFER
+MACHIN3:初始化裁剪表,MACHIN3: Initialize Trim Sheet
+初始化新的裁剪表,Initialize a new Trim Sheet
+MACHIN3: 复制裁剪表,MACHIN3: Duplicate Trim Sheet
+复制裁剪表 ALT: 保留纹理分配,Duplicate Trim Sheet\nALT: Keep the Texture Assignments
+sRGB,sRGB
+MACHIN3: 导入裁剪表,MACHIN3: Import Trim Sheet
+导入在DECALmachine中创建的现有裁剪表/图集,Import an existing Trim Sheet/Atlas created in DECALmachine
+MACHIN3: 裁剪表,MACHIN3: Trim the Sheet
+创建裁剪贴花,Create Trim Decals
+%s.%s,%s.%s
+视差.%s,parallax.%s
+高度.%s.,height.%s
+%s.%s,.%s.%s
+裁剪贴花,TrimDecal
+MACHIN3: 创建贴花纸库,MACHIN3: Create Trim Sheet Library
+创建贴花纸库,Create Trim Sheet Library
+已经有一个名为 ,There already is a Trim Sheet Library called 
+MACHIN3 的贴花纸库:加载贴花纸纹理,MACHIN3: Load Trim Sheet Textures
+加载纹理以创建贴花纸,Load Textures to create a Trim Sheet from
+MACHIN3: 清除贴花纸纹理,MACHIN3: Clear Trim Sheet Textures
+清除用于创建贴花纸的纹理池,Clear Pool of Textures used for Trim Sheet Creation
+MACHIN3: 清除贴花纸贴图,MACHIN3: Clear Trim Map
+删除贴花纸纹理,Remove Trim Sheet Texture
+MACHIN3: 更新贴花纸贴图,MACHIN3: Update Trim Map
+更新贴花纸纹理,Update Trim Sheet Texture
+非彩色,Non-Color
+alpha.%s,alpha.%s
+MACHIN3: 初始化贴图材质,MACHIN3: Init Trim Sheet Material
+初始化贴图材质 ALT: 避免展开为空贴图,Initialize Trim Sheet Material\nALT: Avoid Unwrapping to Empty Trim
+MACHIN3: 设置子集,MACHIN3: Setup Subsets
+在贴图材质中设置子集,Setup Subsets in Trim Sheet Material
+MACHIN3: 移除已选即时贴图,MACHIN3: Remove Selected Instant Trim Sheet
+移除已选即时贴图,Remove Selected Instant Trim Sheet
+"这将从场景中移除已选贴图,并从磁盘移除其所有纹理!",This removes the selected Trim Sheet from the scene and all its textures from disk!
+MACHIN3: 盒状展开,MACHIN3: Box Unwrap
+"设置第二个UV通道,用于平铺纹理或光照贴图",Set up second UV channel with cubic projection for tiling textures or lightmaps
+保持之前的UV通道处于活动状态,Keep previous UV Channel active
+展开选择、共享材质或可见对象,"Unwrap Selection, Shared Materials or Visible Objects"
+MACHIN3: Panel Decal Unwrap,MACHIN3: Panel Decal Unwrap
+重新展开面板贴图,Re-Unwraps panel decals\nALT: Shrinkwraps in addtion to Unwrap
+MACHIN3: Quad Unwrap,MACHIN3: Quad Unwrap
+"四边形展开所选面,即使所选面包含三角形和n边形","Quad Unwrap selected faces, even with triangles and n-gons among the selection"
+MACHIN3: 展开修剪,MACHIN3: Unwrap Trim
+"将所选面展开到所选修剪上 ALT:将反转的选择展开到空修剪上 CTRL:使用保形法展开,而不是基于角度展开","Unwrap selected faces to selected trim\nALT: Unwrap the inverted selection to the Empty Trim\nCTRL: Unwrap using CONFORMAL method, instead of ANGLE_BASED"
+MACHIN3: 修剪展开到空,MACHIN3: Trim Unwrap to Empty
+"将所选面展开到空修剪上 ALT:移除并选择接缝 CTRL:使用 UV 展开,而不是 UV 重置",Unwrap selected faces to Empty Trim\nALT: Remove and Select Seams\nCTRL: use UV Unwrap instead of UV Reset
+MACHIN3:移除孤立贴花,MACHIN3: Remove Decal Orphans
+移除孤立贴花,Remove Decal Orphans
+MACHIN3:修复贴花纹理路径,MACHIN3: Fix Decal Texture Paths
+修复贴花、裁剪贴花和贴花图集纹理路径 ALT:强制从贴花 UUID 完全重建路径 CTRL:重建局部解压缩纹理的路径,"Fix Decal, Trim Sheet and Atlas Texture Paths\nALT: Force rebuilding paths completely from decal UUIDs\nCTRL: Rebuild paths of locally unpacked textures too"
+MACHIN3:验证贴花,MACHIN3: Validate Decal
+"验证贴花,用于调试贴花,有时用于创建贴花","Validate Decal, useful for debugging Decals and at times for Decal Creation"
+修复缺失的纹理,Fix missing Textures
+生成新的UUID,Generate new UUID
+禁用强制UUID,Disable forced UUID
+设置新的贴花类型,Set new decaltype
+设置新的贴花库,Set new decallibrary
+库,Library
+设置新的贴花名称,Set new decalname
+设置新的贴花贴图名称,Set new decalmatname
+材质名称,Material Name
+设置新的创建者,Set new creator
+此对象不是有效的DECALmachine贴花!,This object is not a valid DECALmachine Decal!
+"这是一个旧版贴花,需要更新。使用 ","This is a Legacy Decal, and needs to be updated. Use the "
+"这是在新版本的DECALmachine或Blender中创建的未来贴花,可以","This is a Future Decal created in a newer version of DECALmachine or Blender, and can"
+基本,Basics
+贴花对象:%s,Decal Object: %s
+贴花材质:%s,Decal Material: %s
+贴花纹理:%s,Decal Textures: %s
+ • %s: %s,  • %s: %s
+贴花纹理:无,Decal Textures: None
+通用属性,Common Properties
+UUID: %s,UUID: %s
+UUID:,UUID:
+存在: %s,present: %s
+唯一: %s,unique: %s
+完成: %s,complete: %s
+裁剪表 UUID: %s,trimsheet UUID: %s
+饰板 UUID:,trimsheet UUID:
+"版本: %s, 预期: %s","Version: %s, Expected: %s"
+版本: %s,Version: %s
+版本:,version:
+贴花类型: %s,decaltype: %s
+贴花类型:,decaltype:
+贴花库: %s,decallibrary: %s
+贴花库:,decallibrary:
+贴花名称: %s,decalname: %s
+贴花名称:,decalname:
+贴花材料名称: %s,decalmatname: %s
+贴花材料名称:,decalmatname:
+创建者: %s,creator: %s
+创建者:,creator:
+对象属性,Object Properties
+  • isbackup: %s,  • isbackup: %s
+  • decalbackup: %s,  • decalbackup: %s
+  • isprojected: %s,  • isprojected: %s
+  • projectedon: %s,    • projectedon: %s
+  • issliced: %s,  • issliced: %s
+  • slicedon: %s,    • slicedon: %s
+材料属性,Material Properties
+  • ismatched: %s,  • ismatched: %s
+  • material: %s,    • material: %s
+  • material2: %s,    • material2: %s
+  • subset: %s,    • subset: %s
+  • isparallaxed: %s,  • isparallaxed: %s
+  • 视差节点名称:%s,  • parallaxnodename: %s
+TRUE,True
+"真实,但名称不同","True, but name differs"
+FALSE,False
+ • 视差组:%s,  • parallax group: %s
+ • 高度组纹理:%s,    • height group texture: %s
+ • istrimdecalmat:%s,  • istrimdecalmat: %s
+操作,Actions
+创建者:%s,Creator: %s
+MACHIN3:clear_decal_props,MACHIN3: clear_decal_props
+"清除贴花属性,将贴花转换为常规对象","Clear Decal Properties, turning a Decal into a regular object"
+清除修改器,Clear Modifiers
+清除材质,Clear Materials
+清除,Clear
+修改器,Modifiers
+材质,Materials
+MACHIN3: 还原 DECALmachine 键位图,MACHIN3: Restore DECALmachine Keymaps
+"还原 DECALmachine 键位图,由用户删除","Restore DECALmachine keymaps, removed by the user"
+MACHIN3: 绘制 MeshCut,MACHIN3: Draw MeshCut
+时间 (s),Time (s)
+Alpha,Alpha
+TrimSheet Gizmo,TrimSheet Gizmo
+Atlas Gizmo,Atlas Gizmo
+DECALmachine %s,DECALmachine %s
+默认,Defaults
+扫描贴花 备份,Sweep Decal Backups
+工具,Tools
+实用工具,Utils
+开发人员,Developer
+集合,Collections
+类型,Type
+父项,Parent
+活动,Active
+隐藏,Hide
+纹理,Textures
+节点树,Node Trees
+类型 颜色,Type Col
+父级颜色,Parent Col
+纹理存储,Texture Storage
+质量,Quality
+正常传输,Normal Transfer
+视口,Viewport
+渲染,Render
+混合模式,Blend Mode
+AO和反转,AO & Invert
+使转化,Invert
+自动匹配,Auto-Match
+材料,Material
+以（权力）否决,Override
+覆盖材料,Override Materials
+材料覆盖,Material Override
+预设,Presets
+贴花子集,Decal Subsets
+十碳排放,Decal Emission
+表面抓拍,Surface Snapping
+贴花对齐,Decal Align
+加入我们,Join
+拆分,Split
+删除网格切割,Remove Mesh Cuts
+初始化生成的坐标,Init Generated Coords
+转移紫外线,Transfer UVs
+修复纹理路径,Fix Texture Paths
+验证贴花,Validate Decal
+透明贴花道具,Clear Decal Props
+调试贴花,Debug Decal
+用户贴花库,User Decal Library
+重新渲染贴花缩略图,Re-Render Decal Thumbnails
+更新插值,Update Interpolation
+创建新贴花库或解锁现有贴花库,Create a new Library or Unlock an existing one.
+更新贴花节点树,Update Decal NodeTrees
+从材质设置贴花和命名,Set Props and Name from Material
+更新贴花备份,Update Decal Backup
+修复AO夹紧,Fix AO Clamping
+贴花、贴花图和装饰板创建,"Decal, Atlas & Trim Sheet Creation"
+烘焙设置,Bake Settings
+设备,Device
+纹理设置,Texture Settings
+源,Source
+%s即时贴花,%sInstant Decals
+打开文件夹,Open Folder
+切换删除,Toggle Remove
+删除贴花,Remove Decals
+添加到贴花库,Add to Library
+即时装饰板,Instant Trim Sheets
+清空文件夹,Clear Out Folder
+装饰它,Trim it
+装饰板属性,Trim Sheet Properties
+%d x %d,%d x %d
+不匹配,Mismatch
+纹理贴图 (%d),Texture Maps (%d)
+修剪设置 (%d),Trim Setup (%d)
+像素,Pixel
+对象,Object
+初始化,Initialze
+复制,Duplicate
+导入修剪贴图,Import Trim Sheet
+可用PNG纹理:,Available PNG Textures:
+%d,%d
+加载纹理,Load Texture(s)
+清除纹理,Clear Textures
+即时图集,Instant Atlases
+添加到图集,Add to Atlas
+添加 %s,Add %s
+存储图集,Store Atlas
+调整大小,Resize
+存储所选图集,Store selected Atlas
+图集属性,Atlas Properties
+统计,Stats
+"%d x %d,%d 填充,%0.1f%% 有效","%d x %d, %d padding, %0.1f%% efficient"
+打包贴花(按 %s 分类),Packed Decals (sorted by %s)
+%s 选定的贴花,%s selected Atlas
+%s 设置,%s Settings
+优化,Refinement
+预打包面板,Pre-Pack Panels
+补偿,Compensate
+归一化,Normalize
+从 %s 创建新的贴花贴花,Create new Decal Atlas from %s
+创建新的空贴花贴花库,Create a new empty Decal Library
+贴花名称,Decal Name
+复制贴花名称!,Duplicate Decal Names!
+路径预览,Path Preview
+子集,Subset
+高级,Advanced
+将 %s 添加到贴花库,Add %s to Library
+machin3.insert_decal,machin3.insert_decal
+machin3.remove_decal,machin3.remove_decal
+一次移除所有即时贴花,Remove All Instant Decals at once
+批量创建 %s 贴花,Batch Create %s Decals
+创建 %s 贴花,Create %s Decal
+"抗锯齿,填充","Anti Aliasing, Padding"
+烘焙发射,Bake Emission
+尚未设置 UUID,No UUID set yet
+选择贴花源几何体,Select Decal Source Geometry
+加载字体,Load Font
+清除字体,Clear Fonts
+字体,Font
+文本,Text
+颜色,Colors
+"填充,偏移","Padding, Offset"
+加载图像,Load Image(s)
+清除图像,Clear Images
+"裁剪,填充","Crop, Padding"
+批量创建,Batch Creation
+一次处理所有源图像,All source images at once
+抗锯齿,Anti Aliasing
+AO,AO
+曲率,Curvature
+反射光,Bounce Light
+限制活动,Limit to Active
+限制边界,Limit to Boundary
+展平法线,Flatten Normals
+蒙版,Mask
+存储子集贴花资产上的材质,Store Subset Material on Decal Asset
+贴花导出,Decal Export
+图集设置,Atlas Settings
+准备 %s,Prepare %s
+恢复变换,Restore Transformations
+导出图集纹理和模型,Export Atlas Textures & Models
+模型,Models
+导出位置,Export Location
+纹理文件夹,Textures Folder
+模型文件夹,Models Folder
+单独,Individual
+金属,Metallic
+平滑度,Smoothness
+子集遮挡,Subset Occlusion
+环境光遮蔽,Ambient Occlusion
+粗糙度,Roughness
+白色高度,White Height
+通道填充,Channel Packed
+无贴图贴花 %s!,No atlased Decals %s!
+格式,Format
+统一,Unity
+合并和拆分,Join & Split
+合并贴图贴花,Join Atlased Decals
+每个父项,per Parent
+拆分贴图贴花,Split Atlased Decals
+使用 %s,Use %s
+恢复贴图贴花预贴图贴花 UV + 材质,Restore Pre-Atlas Decal UVs + Materials
+EXEC_DEFAULT,EXEC_DEFAULT
+创建集合,Create Collections
+注意,Attention
+这会显著增加渲染时间!,This significantly increases the render time!
+这会显著增加渲染时间!,This dramatically increases the render time!
+属性,Properties
+贴图,Maps
+烘焙后,Post-Baking
+烘焙贴花,Bake Decals
+恢复材质 + 贴花,Restore Materials + Decals
+更新贴花和裁剪表,Update Decals & Trim Sheets
+库路径,Library Path
+已存在同名裁剪表!,A Trim Sheet of that name is already registered!
+当前文件中的旧版资源,Legacy Assets in Current File
+DECALmachine 帮助,DECALmachine Help
+帮助,Help
+本地,Local
+在线,Online
+支持,Support
+示例,Examples
+当前文件未保存!,Your current file is not saved!
+"未保存的更改将会丢失,","Unsaved changes will be lost,"
+如果您加载以下示例。,if you load the following examples.
+贴花基础,Decal Basics
+创建贴花,Create Decals
+贴花演示资源,Decal Demo Asset
+裁剪表几何,Trim Sheet Geometry
+裁剪表设置,Trim Sheet Setup
+裁剪表演示资源,Trim Sheet Demo Asset
+请参阅文档,Please refer to the documentation
+了解裁剪表和图集创建的详细信息,for details on Trim Sheet and Atlas Creation
+贴花资源,Decal Resources
+贴花包,Decal Packs
+讨论,Discuss
+polycount,polycount
+关注开发,Follow Development
+Twitter,Twitter
+@machin3io,@machin3io
+#DECALmachine,#DECALmachine
+裁剪表,Trim Sheet
+材料,material
+初始化裁剪表材料,Init Trim Sheet Material
+设置子集,Setup Subsets
+EPanel,EPanel
+Quad Unwrap,Quad Unwrap
+Box Unwrap,Box Unwrap
+(W) Unwrap to Empty Trim,(W) Unwrap to Empty Trim
+Adjust,Adjust
+Align to Edge,Align to Edge
+Stitch,Stitch
+Mirror Trim,Mirror Trim
+(C) Panel Cut,(C) Panel Cut
+(T) Trim Cut,(T) Trim Cut
+(B) Get Backup,(B) Get Backup
+(V) Match,(V) Match
+(D) Project,(D) Project
+Unwrap,Unwrap
+GPanel,GPanel
+Slice,Slice
+Re-Apply,Re-Apply
+LOCKED,LOCKED
+(H) Visibility,(H) Visibility
+Removal,Removal
+Panel,Panel
+EMPTY,EMPTY
+Show,Show
+重置 DECALmachine 资产位置,Reset DECALmachine Assets Location
+将资产位置重置为 Blender 中的 DECALmachine/assets/,Resets Assets Location to DECALmachine/assets/ in Blender
+MACHIN3:隔离资产库,MACHIN3: Quarantine Asset Library
+隔离过时、无效和损坏的资产库,"Quarantine Obsolete, Invalid and Corrupted Asset Libraries"
+MACHIN3:清理资产路径,MACHIN3: Declutter Assetspath
+清理资产路径,De-clutter assets location
+MACHIN3:移动贴图集,MACHIN3: Move Atlas
+"上下移动贴图集。当在多个已注册的贴图集中找到贴图时,这将控制首先考虑哪个贴图集。","Move Atlas up or down.\nThis controls which Atlas is considered first, when a Decal is found in multiple registered Atlases."
+MACHIN3: Reload Atlases,MACHIN3: Reload Atlases
+重新加载所有图集。传播锁定设置。保存偏好设置以完成该过程,Reload all Atlases. Propagates lock settings.\nSave prefs to complete the process
+重命名图集,Rename Atlas
+重命名所选图集,Rename selected Atlas
+新名称,New Name
+旧名称:,Old Name:
+新名称:,New Name:
+删除图集,Remove Atlas
+删除所选图集,Remove selected atlas
+这将删除图集,This removes the atlas 
+MACHIN3: Decal Library Visibility,MACHIN3: Decal Library Visibility
+调整贴花和装饰板库的可见性,Adjust Decal and Trimsheet Library Visibility
+切换贴花和装饰板库的可见性,Toggle Decal and Trimsheet Library Visibility
+保存偏好设置,Save Prefrences
+INVOKE_DEFAULT,INVOKE_DEFAULT
+MACHIN3: Call DECALmachine Operator,MACHIN3: Call DECALmachine Operator
+MACHIN3: Call DECALmachine Pie,MACHIN3: Call DECALmachine Pie
+MACHIN3_MT_%s,MACHIN3_MT_%s
+MACHIN3: sweep_decal_backups,MACHIN3: sweep_decal_backups
+"扫描贴花备份,这些备份在附加其他混合文件的对象时变得可见","Sweep up Decal Backups, that became visible aber appending objects from other blend files"
+MACHIN3: Draw Decal Label,MACHIN3: Draw Decal Label
+绘制HUD的文本,Text to draw the HUD
+屏幕坐标,Screen Coordinates
+居中,Center
+MACHIN3: 打开即时贴花位置,MACHIN3: Open Instant Decal Location
+MACHIN3: open_user_decal_lib,MACHIN3: open_user_decal_lib
+MACHIN3: 打开文件夹,MACHIN3: Open Folder
+MACHIN3: 获取 DECALmachine 支持,MACHIN3: Get DECALmachine Support
+生成日志文件和支持请求说明。,Generate Log Files and Instructions for a Support Request.
+请注意,Please Note
+涂层信息,Coat Information
+此设置会影响混合文件中的所有贴花!,This setting affects all decals in the blend file globally!
+"这是因为 DECALmachine 不仅尝试重复使用贴花材质,","This is because DECALmachine attempts to re-use not only decal materials,"
+还包括贴花节点组在这些材质中使用的节点树。,but also the node trees used by the decal node groups in those materials.
+"像这样重复使用材质和节点树,无论现在还是过去,都是明智之举,",Re-using materials and node trees like that is - and always was - wise in terms of
+有利于提高性能和减小文件大小。,performance and file size.
+"但是,如果您想在涂层下使用一些贴花,而在涂层上使用其他贴花,","However, in case you want to have some decals under the coat, and others over,"
+目前 - 您必须手动设置。,you will - for now - have to set it up manually.
+研究贴花材料及其贴花组,Study the decal material and its decal group
+"如果您需要帮助,请联系decal@machin3.io。",Get in touch with decal@machin3.io if you need assistance.
+MACHIN3:重置偏移或填充,MACHIN3: Rest Offset or Padding
+重置偏移/填充,Reset Offset/Padding
+MACHIN3:移动贴花或修剪库,MACHIN3: Move Decal or Trim Library
+上下移动库。这控制着DECALmachine pie菜单中的位置。保存预设以供日后使用,Move library up or down.\nThis controls the position in the DECALmachine pie menus.\nSave prefs to remember
+MACHIN3: 清除贴花和装饰库,MACHIN3: Clear Decal and Trim Libraries
+"清除贴花和装饰库的预设,将其重置为原始状态。贴花不会丢失!保存预设并重新启动Blender以完成该过程","Clear library prefs, resets them into their original state.\nNo decals will be lost!\nSave prefs and restart Blender to complete the process"
+MACHIN3: 重新加载贴花和装饰库,MACHIN3: Reload Decal and Trim Libraries
+重新加载所有贴花和装饰库。传播锁定和切片设置。保存预设以完成该过程,Reload all libraries. Propagates lock and slice settings.\nSave prefs to complete the process
+重命名贴花或装饰库,Rename Decal or Trim Sheet Library
+重命名所选贴花或装饰库,Rename selected library
+移除贴花或装饰板库,Remove Decal or Trim Library
+移除所选贴花或装饰板库以及其中包含的所有贴花资源和装饰板数据,Remove selected decal or trim sheet library and all the contained decal assets and trim sheet data
+MACHIN3: 更新匹配材质,MACHIN3: Update Match Materials
+更新可匹配的材质列表。红色:当前所选材质无法匹配,"Update list of Materials, that can be matched.\nRED: The currently selected material can not be matched anymore"
+MACHIN3: 打包贴花纹理,MACHIN3: Pack Decal Textures
+将贴花和装饰板纹理打包到混合文件中,Pack Decal and Trim Sheet Textures into blend file
+MACHIN3: 解压缩贴花纹理,MACHIN3: Unpack Decal Textures
+解压贴花和装饰板纹理 ALT:强制解压到本地路径,Unpack Decal and Trim Sheet Textures\nALT: Force unpacking to local path
+MACHIN3:安装 PIL,MACHIN3: Install PIL
+在用户级别安装 pip 和 PIL ALT:禁止调试输出,Install pip and PIL on the User Level\nALT: Suppress Debug Output
+记录调试输出,Log Debug Output
+MACHIN3:安装 PIL(管理员),MACHIN3: Install PIL (Admin)
+为 Blender 安装 pip 和 PIL,Install pip and PIL for Blender
+MACHIN3:轻松安装 PIL(管理员),MACHIN3: Easy Install PIL (Admin)
+轻松为 Blender 安装 PIL,Easy Installs PIL for Blender
+MACHIN3:清除 PIL,MACHIN3: Purge PIL
+尝试从当前用户配置文件和Blender Python中删除PIL,Attempt to remove PIL from the current user profile and Blender Python
+MACHIN3: 可见性预设,MACHIN3: Visibility Preset
+预设名称,Preset Name
+存储预设,Store Preset
+MACHIN3: 存储单独贴花比例,MACHIN3: Store Individual Decal Scale
+存储当前贴花,Store current Decal
+MACHIN3: 清除单独贴花比例,MACHIN3: Clear Individual Decal Scale
+清除此类贴花的比例,Clear the Scale for this type of Decal
+MACHIN3: 设置默认属性,MACHIN3: Set Default Property
+MACHIN3: 重置默认属性,MACHIN3: Reset Default Property
+MACHIN3: 添加装饰,MACHIN3: Add Trim
+"添加新的装饰,覆盖整个图纸","Add a new trim, encompassing the entire sheet"
+装饰 %d,Trim %d
+MACHIN3: 删除装饰,MACHIN3: Remove Trim
+删除选定的装饰,Remove selected trim
+MACHIN3: 复制装饰,MACHIN3: Duplicate Trim
+复制现有的装饰,Duplicate an existing trim
+MACHIN3: 绘制装饰,MACHIN3: Draw Trim
+通过绘制矩形创建装饰,Create trim by drawing a rectangle
+十字线尺寸,Crosshair Size
+MACHIN3: 对齐装饰,MACHIN3: Align Trim
+对齐方向,Align Direction
+MACHIN3: 隐藏所有装饰,MACHIN3: Hide All Trims
+MACHIN3: 重置贴花,MACHIN3: Reset Decal
+MACHIN3: 缩放贴花,MACHIN3: Scale Decal
+缩放模式,Scaling Mode
+MACHIN3: 对齐贴花,MACHIN3: Align Decal
+MACHIN3: 切换贴花排序,MACHIN3: Toggle Decal Sorting
+MACHIN3: 删除更新,MACHIN3: Remove Update
+"我改变主意了,我","I changed my mind, I don"
+MACHIN3: 使用更新,MACHIN3: Use Update
+MACHIN3: 重新扫描更新,MACHIN3: Re-Scan Updates
+重新扫描更新,Re-Scan Updates
+图集,Atlas
+烘焙垫,BakeMat
+NO_SLOTS.,NO_SLOTS
+%s.,.%s
+贴花.,.Decals
+%s_贴花,.%s_Decals
+贴花,Decal
+曲率,curvature
+贴花.,DECAL
+%s_%s,.%s_%s
+Cutter_%s,Cutter_%s
+传统材质,legacy materials
+贴花表.%s,trimsheet.%s
+底色,Base Color
+IOR,IOR
+覆盖输出,Override Output
+细分,Subdivision
+收缩包装,Shrinkwrap
+资产字典,assets dict
+用户贴花库索引,User Decal Library Index
+面板类型,Panel Types
+INSTANT,INSTANT
+活动贴花表,Active Trim Sheet
+贴花表纹理,Trim Sheet Textures
+可用贴花表纹理贴图,Available Trim Sheet Texture Maps
+贴花表,TrimSheet
+PIL 已安装。请立即重启 Blender。,PIL has been installed. Restart Blender now.
+需要PIL %s。需要互联网连接。,PIL is needed %s. Internet connection required.
+完成,Finish
+取消,Cancel
+贴花制作 + 导出,Decal Creation + Export
+当前资产位置中存在可更新的“传统贴花”和“装饰板”库!,"There are Legacy Decal and Trim Sheet libraries in your current Assets Location, that can be updated!"
+全部更新!,Update Them All!
+更改资产路径时，将资产移动到新位置,"Move Assets to new location, when changing assetspath"
+贴花,Decals
+饼图菜单中的贴花库行,Rows of Decal Libraries in the Pie Menu
+在饼图菜单中将贴花库偏移到右侧或左侧,Offset Decal Libraries to right or left side in the Pie Menu
+在插入按钮上显示贴花名称  ,Show Decal Name on Insert Buttons
+MACHIN3: 调用DECALmachine Pie  ,MACHIN3:Call DECALmachine Pie
+MACHIN3: 调用DECALmachine Pie  ,MACHIN3: Call DECALmachine Pie
+MACHIN3: 调用DECALmachine Pie  ,MACHIN3: Call DECALmachine Pie
+MACHIN3: 调用DECALmachine操作  ,MACHIN3: Call DECALmachine Operator
+对于多个对象，请在背景中双击  ,"For multiple objects, double-click in the background"
+使用2.80/默认Blender键位映射的用户以及使用右键选择的用户：请考虑重新映射此操作  ,Users of the 2.80/default Blender keymap and users selecting with RIGHTMOUSE: consider remapping this
+完整的网格贴花和修整表工作流程：将贴花用作对象或在网格级别使用修整，设计自定义贴花或导入修整表，通过图集或烘焙导出贴花资产。,"A complete mesh-decal and trim sheet pipeline: Use decals as objects or use trims on the mesh level, design your own custom decals or import trim sheets, export decal assets via atlasing or baking."
+在系统控制台中打印插件注册输出,Print Addon Registration Output in System Console
+在Pie菜单中显示合并和分割工具,Show Join and Split tools in Pie Menu
+调整贴花高度时需要按ALT键,Require ALT key when adjusting decal height
+显示侧边栏面板,Show Sidebar panel
+加载包含旧资产的.blend文件时显示淡出警告,Show fading warnings when loading .blend files containing legacy assets
+用于箱形展开的UV层,UV Layer used for Box Unwrap
+有助于防止意外的高度变化  ,Helpful to prevent accidental height changes
+导入现有内容  ,Import Existing
+创建空对象  ,Create Empty
+快速插入  ,Quick Insert
+idname：  ,idname:
+isinvoke  ,isinvoke
+资产加载器  ,Asset Loaders
+需要重新加载库或重启Blender  ,requires library reload or Blender restart
+下面  ,Under
+上面  ,Over
+鼠标指针  ,Mouse Pointer
+需要 PIL 进行库更新。需要互联网连接。,PIL is needed for library update. Internet connection required.
+如果您使用了上面的安装按钮，但没有看到绿色勾选标记，,If you've used the Install button above. but are not seeing a green checkmark.
+请重启 Blender，如果在按下任一按钮后仍然没有显示绿色勾选标记。,Restart Blender. if the green checkmark doesn't show. after pressing either button.
+安装 DECALmachine 更新  ,Install DECALmachine Update
+未找到更新，无论是在您的主目录还是在下载文件夹中。  ,No Update was found. Neither in your Home directory. nor in your Downloads folder.
+重新扫描  ,Re-Scan
+选择 DECALmachine_x.x.x.zip 文件,Select DECALmachine_x.x.x.zip file
+飞机  ,Aircraft
+示例面板  ,Example Panels
+示例  ,Examples
+我的贴花  ,MyDecals
+示例表单,Example Sheet
+（C）面板切割  ,(C) Panel Cut
+（T）修剪切割  ,(T) Trim Cut
+（B）获取备份  ,(B) Get Backup
+（V）匹配  ,(V) Match
+切片  ,Slice
+（D）缩裹  ,(D) Shrinkwrap
+调整  ,Adjust
+重新应用  ,Re-Apply
+访问  ,ACCESS
+电气  ,ELECTRICAL
+DECALmaNhine 2.13.0  ,DECALmaNhine 2.13.0
+（Q）选择贴花  ,(Q) Select Decals
+（H）可见性  ,(H) Visibility
+移除,Removal
+（D）项目,(D) Project
+飞机图集  ,Aircraft Atlas
+示例图集  ,Example Atlas
+示例表单,Example Sheet
+调整贴花,Adjust Decal
+如果您已使用上面的“安装”按钮，但未看到绿色复选标记，,"If you've used the Install button above, but are not seeing a green checkmark,"
+请重新启动 Blender。如果在按下任一按钮后仍未显示绿色复选标记，请重新启动 Blender。,"Restart Blender, if the green checkmark doesn't show, after pressing either button."
+工具 + 实用程序,Tools + Utils
+资源,Resources
+第三方贴花包,3rd Party Decal Packs
+已更新至最新,An Update is Available
+新增功能,What's new?
+饼形菜单中的 Trim 库行数,Rows of Trim Libraries in the Pie Menu
+在饼形菜单中将 Trim 库向左或向右偏移,Offset Trim Libraries to right or left side in the Pie Menu
+Trim 库图标大小,Size of Trim Library Icons
+Trim 库中的图标大小,Size of Icons in Trim Libraries
+在 Decal 库中显示 Trim 名称,Show Trim Names in Decal Libraries
+在插入按钮上显示 Trim 名称,Show Trim Name on Insert Buttons

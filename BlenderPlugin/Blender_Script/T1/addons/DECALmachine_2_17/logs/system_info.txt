@@ -1,0 +1,160 @@
+========================================
+= Blender 4.5.1 LTS System Information =
+========================================
+
+
+Blender:
+========================================
+
+version: 4.5.1 LTS, branch: blender-v4.5-release, commit date: 2025-07-29 05:31, hash: b0a72b245dcf, revision: 593d50af3db3f07aa84b5529b63d982fdea8f57a, type: Release
+build date: 2025-07-29, 05:38:13
+platform: 'macOS-12.7.6-x86_64-i386-64bit'
+binary path: '/Applications/Blender 4.5.1.app/Contents/MacOS/Blender'
+build cflags:  -Wall -Werror=implicit-function-declaration -Werror=return-type -Wno-tautological-compare -Wno-unknown-pragmas -Wno-char-subscripts -Wstrict-prototypes -Wmissing-prototypes -Wunused-parameter -Wundef -Wundef-prefix -Werror=unguarded-availability-new  -mmacosx-version-min=11.2 -march=x86-64-v2 -std=gnu11  -pipe -funsigned-char -fno-strict-aliasing -ffp-contract=off  
+build cxxflags:  -Wall -Wc++20-designator -Wno-tautological-compare -Wno-unknown-pragmas -Wno-char-subscripts -Wno-overloaded-virtual -Wno-sign-compare -Wno-invalid-offsetof -Wno-suggest-override -Wundef -Wundef-prefix -Wunused-parameter -Wmismatched-tags -Werror=unguarded-availability-new  -mmacosx-version-min=11.2 -ftemplate-depth=1024 -march=x86-64-v2  -pipe -funsigned-char -fno-strict-aliasing -ffp-contract=off  
+build linkflags: -fexceptions -framework CoreServices -framework Foundation -framework IOKit -framework AppKit -framework Cocoa -framework Carbon -framework AudioUnit -framework AudioToolbox -framework CoreAudio -framework Metal -framework QuartzCore -liconv -Wl,-unexported_symbols_list,'/Users/blender/git/blender-v450/blender.git/source/creator/symbols_apple.map' -Wl,-ld_classic
+build system: CMake
+
+Python:
+========================================
+
+version: 3.11.11 (main, Apr 25 2025, 12:39:20) [Clang 17.0.0 (clang-1700.0.13.3)]
+file system encoding: utf-8:surrogateescape
+paths:
+	'/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/startup'
+	'/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/modules'
+	'/Applications/Blender 4.5.1.app/Contents/Resources/4.5/python/lib/python311.zip'
+	'/Applications/Blender 4.5.1.app/Contents/Resources/4.5/python/lib/python3.11'
+	'/Applications/Blender 4.5.1.app/Contents/Resources/4.5/python/lib/python3.11/lib-dynload'
+	'/Users/mac/Library/Application Support/Blender/4.5/extensions/.local/lib/python3.11/site-packages'
+	'/Applications/Blender 4.5.1.app/Contents/Resources/4.5/python/lib/python3.11/site-packages'
+	'/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/freestyle/modules'
+	'/Users/mac/Library/Application Support/Blender/4.5/scripts/addons/modules'
+	'/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/addons_core'
+	'/Users/mac/Library/Application Support/Blender/4.5/scripts/addons'
+	'/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/modules'
+
+Python (External Binary):
+========================================
+
+binary path: '/Applications/Blender 4.5.1.app/Contents/Resources/4.5/python/bin/python3.11'
+version: Python 3.11.11
+
+Directories:
+========================================
+
+scripts:
+	'/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts'
+	'/Users/mac/Library/Application Support/Blender/4.5/scripts'
+user scripts: '/Users/mac/Library/Application Support/Blender/4.5/scripts'
+pref scripts:
+datafiles: '/Users/mac/Library/Application Support/Blender/4.5/datafiles'
+config: '/Users/mac/Library/Application Support/Blender/4.5/config'
+scripts: '/Users/mac/Library/Application Support/Blender/4.5/scripts'
+extensions: '/Users/mac/Library/Application Support/Blender/4.5/extensions'
+tempdir: '/var/folders/dx/qz5x44fn4nj4qb67mggp_5xr0000gn/T/blender_gWp4Fk/'
+
+FFmpeg:
+========================================
+
+avcodec:   '61, 19, 101'
+avdevice:  '61,  3, 100'
+avformat:  '61,  7, 100'
+avutil:    '59, 39, 100'
+swscale:   ' 8,  3, 100'
+
+Other Libraries:
+========================================
+
+OpenColorIO:  2,  4,  1
+OpenImageIO:  3,  0,  6
+OpenShadingLanguage:  1, 14,  4
+OpenSubdiv:  3,  6,  0
+OpenVDB: 12,  0,  0
+Alembic:  1,  8,  3
+USD:  0, 25,  2
+SDL: Blender was built without SDL support
+
+GPU:
+========================================
+
+renderer:	'Metal API'
+vendor:		'AMD Radeon Pro 5500 XT'
+version:	'1.2'
+device type:	'AMD'
+backend type:	'METAL'
+extensions:
+
+Implementation Dependent GPU Limits:
+========================================
+
+Maximum Batch Vertices:	-2147483648
+Maximum Batch Indices:	-2147483648
+
+GLSL:
+Maximum Varying Floats:	60
+Maximum Vertex Attributes:	31
+Maximum Vertex Uniform Components:	1024
+Maximum Fragment Uniform Components:	1024
+Maximum Vertex Image Units:	128
+Maximum Fragment Image Units:	128
+Maximum Pipeline Image Units:	128
+Maximum Image Units:	128
+
+Cycles:
+========================================
+
+
+CPU device capabilities: AVX2
+
+Metal device capabilities:
+Number of devices: 1
+		Device: AMD Radeon Pro 5500 XT (GPU)
+
+Enabled add-ons:
+========================================
+
+io_curve_svg (version: (), path: '/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/addons_core/io_curve_svg/__init__.py')
+io_mesh_uv_layout (version: (1, 2, 0), path: '/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/addons_core/io_mesh_uv_layout/__init__.py')
+io_scene_fbx (version: (5, 13, 0), path: '/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/addons_core/io_scene_fbx/__init__.py')
+io_scene_gltf2 (version: (4, 5, 47), path: '/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/addons_core/io_scene_gltf2/__init__.py')
+cycles (version: (), path: '/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/addons_core/cycles/__init__.py')
+pose_library (version: (2, 0), path: '/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/addons_core/pose_library/__init__.py')
+bl_pkg (version: (0, 0, 1), path: '/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/addons_core/bl_pkg/__init__.py')
+bl_ext.user_default.bilingual_translation_toolkit (version: (0, 6, 0), path: '/Users/mac/Library/Application Support/Blender/4.5/extensions/user_default/bilingual_translation_toolkit/__init__.py')
+io_anim_bvh (version: (1, 0, 1), path: '/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/addons_core/io_anim_bvh/__init__.py')
+bl_ext.user_default.mesh_materializer (version: (2, 1, 0), path: '/Users/mac/Library/Application Support/Blender/4.5/extensions/user_default/mesh_materializer/__init__.py')
+user_translate (version: (1, 0, 22), path: '/Users/mac/Library/Application Support/Blender/4.5/scripts/addons/user_translate/__init__.py')
+DECALmachine (version: (2, 15, 0), path: '/Users/mac/Library/Application Support/Blender/4.5/scripts/addons/DECALmachine/__init__.py')
+  Assets Location: /Users/mac/Library/Application Support/Blender/4.5/scripts/addons/DECALmachine/assets/
+          Version: 2.13.0
+  
+  ✔  Registered Assets =============
+  
+    Atlases
+      📁 Atlases/Aircraft Atlas
+      📁 Atlases/Example Atlas
+  
+    Decals
+      📁 Decals/Aircraft
+      📁 Decals/Example Panels
+      📁 Decals/Examples
+      📁 Decals/MyDecals
+  
+    Trims
+      📁 Trims/Example Sheet
+  
+  🐵 Updateable/Fixable Assets  ====
+  
+    None
+  
+  ❌ Deferred Assets  ==============
+  
+    None
+  
+  🖌 Color Management ==============
+  
+    View Transform: AgX
+              Look: None
+         Sequencer: sRGB
+  
