@@ -1,0 +1,18 @@
+{
+    'orbit-controls': {
+        'alt-mouse0': 'orbit:rotate',
+        'alt-mouse1': 'orbit:pan',
+        'alt-mouse2': 'orbit:dolly',
+    },
+    'body:not([gizmo])': {
+        'ctrl-mouse2': 'view:radial:鼠标右键',
+        w: 'command:move',
+        e: 'command:rotate',
+        r: 'command:scale',
+        q: 'command:deselect-all',
+        f3: 'view:modal:command-palette',
+    },
+    'body:not([gizmo]) plasticity-viewport': {
+        f: 'viewport:focus',
+    },
+}

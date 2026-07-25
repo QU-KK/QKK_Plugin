@@ -1,0 +1,14 @@
+# 自定义饼菜单网站
+https://doc.plasticity.xyz/plasticity-essentials/radial-menu
+
+# 插件
+\Plasticity\app-26.1.3\resources\app\.webpack\renderer\app_window
+
+# 配置文件.plasticity
+C:\Users\qkk666\.plasticity
+
+# 饼菜单位置
+\.plasticity\radials
+
+# 快捷键位置
+\.plasticity\config\v2\keymap.json

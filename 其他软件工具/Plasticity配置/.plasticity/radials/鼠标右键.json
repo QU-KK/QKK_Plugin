@@ -1,0 +1,26 @@
+{
+  "name": "鼠标右键",
+  "command": "鼠标右键",
+  "items": [
+    {
+      "command": "selection:mode:set:edge",
+      "icon": "selection-mode-set-edge",
+      "label": "线"
+    },
+    {
+      "command": "selection:mode:set:face",
+      "icon": "selection-mode-set-face",
+      "label": "面"
+    },
+    {
+      "command": "selection:mode:set:solid",
+      "icon": "selection-mode-set-solid",
+      "label": "物体"
+    },
+    {
+      "command": "selection:mode:set:control-point",
+      "icon": "selection-mode-set-control-point",
+      "label": "点"
+    }
+  ]
+}
