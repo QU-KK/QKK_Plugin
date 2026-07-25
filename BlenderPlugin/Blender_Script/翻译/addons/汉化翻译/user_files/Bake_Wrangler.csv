@@ -423,7 +423,6 @@ AOV源,AOV Source
 目标细分：,Target Divs:
 源细分：,Source Divs:
 混合RGB,Mix RGB
-运算符,Operator
 要执行的数学运算,Mathematical operation to perform
 分离RGB,Split RGB
 合并RGB,Join RGB
