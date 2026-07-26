@@ -535,7 +535,7 @@ Serpens 属性,Serpens Property
 字符串去除,Strip String
 子菜单,Submenu
 子菜单（旧）,Submenu (Legacy)
-字符串中是否包含子字符串,Substring is in String
+字符串包含,Substring is in String
 切换数据,Switch Data
 切换图标,Switch Icons
 测试,test
