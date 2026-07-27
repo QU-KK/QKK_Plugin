@@ -12,3 +12,5 @@ bpy.ops.object.scale_clear()
 bpy.context.object.active_material.node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = (0,0,0,1)
 bpy.context.object.active_material.node_tree.nodes['Principled BSDF'].inputs['Specular IOR Level'].default_value = 0
 bpy.context.object.active_material.diffuse_color = (1,1,1,1)
+
+bpy.ops.sna.place_put_dfe71('INVOKE_DEFAULT', sna_copy=False)
