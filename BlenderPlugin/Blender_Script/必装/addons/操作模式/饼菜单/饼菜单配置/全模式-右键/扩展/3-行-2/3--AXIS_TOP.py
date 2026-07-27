@@ -1,6 +1,6 @@
 import bpy
 import mathutils
-
+# 对齐世界底部
 # 确保我们在物体模式下运行
 if bpy.context.mode != 'OBJECT':
     bpy.ops.object.mode_set(mode='OBJECT')

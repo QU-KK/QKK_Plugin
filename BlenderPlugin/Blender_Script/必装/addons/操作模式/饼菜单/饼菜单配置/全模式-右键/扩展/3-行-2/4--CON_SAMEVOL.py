@@ -1,3 +1,2 @@
 import bpy
-# 冻结旋转 缩放
-bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+# 选择物体对齐最低端
