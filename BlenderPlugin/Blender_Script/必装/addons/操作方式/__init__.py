@@ -40,9 +40,6 @@ from.快捷键.__init__ import unregister as 快捷键_unregister
 from.扩展.__init__ import register as 扩展_register
 from.扩展.__init__ import unregister as 扩展_unregister
 
-
-
-
 def register():
     #第三方关联插件加载_register()
     物体模式饼菜单_register()
