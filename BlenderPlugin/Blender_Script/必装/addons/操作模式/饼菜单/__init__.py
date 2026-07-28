@@ -28,6 +28,7 @@ bl_info = {
 import bpy
 import bpy.utils.previews
 import os
+import subprocess
 
 
 
@@ -142,12 +143,18 @@ class SNA_OT_Run_Py_30311(bpy.types.Operator):
         return not False
 
     def execute(self, context):
-        Py_Script_Path = self.sna_py_script_path
-        # 读取并运行外部 .py 文件
-        with open(Py_Script_Path, 'r', encoding='utf-8') as file:
-            script_content = file.read()
-        # 使用 exec 执行外部代码
-        exec(script_content)
+        if bpy.context.scene.sna_qkk_pie_debug:
+            Py_Script_Path = self.sna_py_script_path
+            # 打开指定目录并选中
+            # 注意：/select, 后面不要有空格
+            subprocess.Popen(f'explorer /select, "{Py_Script_Path}"')
+        else:
+            Py_Script_Path = self.sna_py_script_path
+            # 读取并运行外部 .py 文件
+            with open(Py_Script_Path, 'r', encoding='utf-8') as file:
+                script_content = file.read()
+            # 使用 exec 执行外部代码
+            exec(script_content)
         return {"FINISHED"}
 
     def invoke(self, context, event):
@@ -170,8 +177,8 @@ class SNA_OT_Qkk_Pie_B6877(bpy.types.Operator):
     def execute(self, context):
         print((self.sna_mode if (self.sna_mode == '全模式-右键') else (bpy.context.mode + '-' + ('点' if bpy.context.tool_settings.mesh_select_mode[0] else '') + ('线' if bpy.context.tool_settings.mesh_select_mode[1] else '') + ('面' if bpy.context.tool_settings.mesh_select_mode[2] else '') if ((self.sna_mode != '空格') and (bpy.context.mode == 'EDIT_MESH')) else bpy.context.mode) + '-' + self.sna_mode))
         Py_Path = None
-        Py_Path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "饼菜单配置")
-        #Py_Path = r'C:\QKK_Plugin\BlenderPlugin\Blender_Script\必装\addons\饼菜单\饼菜单配置'
+        #Py_Path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "饼菜单配置")
+        Py_Path = r'C:\QKK_Plugin\BlenderPlugin\Blender_Script\必装\addons\操作模式\饼菜单\饼菜单配置'
         main['sna_py_path'] = os.path.join(Py_Path,(self.sna_mode if (self.sna_mode == '全模式-右键') else (bpy.context.mode + '-' + ('点' if bpy.context.tool_settings.mesh_select_mode[0] else '') + ('线' if bpy.context.tool_settings.mesh_select_mode[1] else '') + ('面' if bpy.context.tool_settings.mesh_select_mode[2] else '') if ((self.sna_mode != '空格') and (bpy.context.mode == 'EDIT_MESH')) else bpy.context.mode) + '-' + self.sna_mode))
         bpy.ops.wm.call_menu_pie(name="SNA_MT_527A6")
         return {"FINISHED"}
@@ -186,12 +193,20 @@ def sna_expansion_panel_958FC(layout_function, py_file_data_list):
         op.sna_py_script_path = py_file_data_list[i_B2508]
 
 
+def sna_add_to_statusbar_ht_header_53C38(self, context):
+    if not (False):
+        layout = self.layout
+        layout.prop(bpy.context.scene, 'sna_qkk_pie_debug', text='', icon_value=730, emboss=True)
+
+
 def register():
     global _icons
     _icons = bpy.utils.previews.new()
+    bpy.types.Scene.sna_qkk_pie_debug = bpy.props.BoolProperty(name='qkk_pie_debug', description='饼菜单调试', default=False)
     bpy.utils.register_class(SNA_MT_527A6)
     bpy.utils.register_class(SNA_OT_Run_Py_30311)
     bpy.utils.register_class(SNA_OT_Qkk_Pie_B6877)
+    bpy.types.STATUSBAR_HT_header.append(sna_add_to_statusbar_ht_header_53C38)
     kc = bpy.context.window_manager.keyconfigs.addon
     km = kc.keymaps.new(name='3D View', space_type='VIEW_3D')
     kmi = km.keymap_items.new('sna.qkk_pie_b6877', 'RIGHTMOUSE', 'PRESS',
@@ -226,6 +241,8 @@ def unregister():
     for km, kmi in addon_keymaps.values():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
+    del bpy.types.Scene.sna_qkk_pie_debug
     bpy.utils.unregister_class(SNA_MT_527A6)
     bpy.utils.unregister_class(SNA_OT_Run_Py_30311)
     bpy.utils.unregister_class(SNA_OT_Qkk_Pie_B6877)
+    bpy.types.STATUSBAR_HT_header.remove(sna_add_to_statusbar_ht_header_53C38)
