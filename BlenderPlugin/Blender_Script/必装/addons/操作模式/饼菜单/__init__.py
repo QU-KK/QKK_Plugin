@@ -177,8 +177,8 @@ class SNA_OT_Qkk_Pie_B6877(bpy.types.Operator):
     def execute(self, context):
         print((self.sna_mode if (self.sna_mode == '全模式-右键') else (bpy.context.mode + '-' + ('点' if bpy.context.tool_settings.mesh_select_mode[0] else '') + ('线' if bpy.context.tool_settings.mesh_select_mode[1] else '') + ('面' if bpy.context.tool_settings.mesh_select_mode[2] else '') if ((self.sna_mode != '空格') and (bpy.context.mode == 'EDIT_MESH')) else bpy.context.mode) + '-' + self.sna_mode))
         Py_Path = None
-        #Py_Path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "饼菜单配置")
-        Py_Path = r'C:\QKK_Plugin\BlenderPlugin\Blender_Script\必装\addons\操作模式\饼菜单\饼菜单配置'
+        Py_Path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "饼菜单配置")
+        #Py_Path = r'C:\QKK_Plugin\BlenderPlugin\Blender_Script\必装\addons\操作模式\饼菜单\饼菜单配置'
         main['sna_py_path'] = os.path.join(Py_Path,(self.sna_mode if (self.sna_mode == '全模式-右键') else (bpy.context.mode + '-' + ('点' if bpy.context.tool_settings.mesh_select_mode[0] else '') + ('线' if bpy.context.tool_settings.mesh_select_mode[1] else '') + ('面' if bpy.context.tool_settings.mesh_select_mode[2] else '') if ((self.sna_mode != '空格') and (bpy.context.mode == 'EDIT_MESH')) else bpy.context.mode) + '-' + self.sna_mode))
         bpy.ops.wm.call_menu_pie(name="SNA_MT_527A6")
         return {"FINISHED"}
