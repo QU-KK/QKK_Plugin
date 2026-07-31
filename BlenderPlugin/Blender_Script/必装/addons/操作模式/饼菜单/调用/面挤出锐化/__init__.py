@@ -89,7 +89,7 @@ class SNA_OT_Qkk_Hard_Edge_Extrusion_Dbef6(bpy.types.Operator):
         context.window.cursor_set('SCROLL_XY')
         try:
             bpy.ops.mesh.select_more(use_face_step=True)
-            bpy.ops.mesh.set_sharpness_by_angle(angle=0.5, extend=False)
+            bpy.ops.mesh.set_sharpness_by_angle(angle=0.5236, extend=False)
             bpy.ops.mesh.select_less(use_face_step=True)
             if ((event.mouse_region_x, event.mouse_region_y) != visual_scripting_editor['sna_xyz']):
 
@@ -99,7 +99,7 @@ class SNA_OT_Qkk_Hard_Edge_Extrusion_Dbef6(bpy.types.Operator):
                         return {'CANCELLED'}
                     self.execute(context)
                     return {"FINISHED"}
-                bpy.app.timers.register(delayed_58C31, first_interval=0.05000000074505806)
+                bpy.app.timers.register(delayed_58C31, first_interval=0.05)
         except Exception as error:
             print(error)
         if event.type in ['RIGHTMOUSE', 'ESC']:
