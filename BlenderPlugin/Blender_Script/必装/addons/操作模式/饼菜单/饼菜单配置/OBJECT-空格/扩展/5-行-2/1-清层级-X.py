@@ -1,4 +1,5 @@
 import bpy
+#清空父子集合
 bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
 Empty_list = []
 for obj in bpy.context.selected_objects:
