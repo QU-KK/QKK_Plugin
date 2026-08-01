@@ -10,7 +10,7 @@ for obj in selected_objects:
     name = obj.name
     if '_COL' in name:
         # 1. 实例化一个空的 BMesh 容器
-        bm = bmesh.new()    
+        bm = bmesh.new()
         # 2. 将当前物体的网格数据加载进 BMesh 中
         bm.from_mesh(obj.data)    
         # 3. 遍历所有的边，进行拓扑检查
