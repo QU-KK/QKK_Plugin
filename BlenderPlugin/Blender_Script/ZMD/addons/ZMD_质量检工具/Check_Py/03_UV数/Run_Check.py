@@ -2,21 +2,23 @@ import bpy
 
 # 变量
 Check_Item_Name = 'UV数'
-Description = 'UV数'
+Description = '_lod UV数等0或大于2报错。_COL、_shadowProxy UV数大于1报错。'
 
-# 顶点色检查
+# UV数检查
 Check_Data = [Check_Item_Name]
 for obj in selected_objects:
     name = obj.name
     uvs = len(obj.data.uv_layers)
     
-    if "_COL" in name or "_sh" in name:
-        if uvs != 0:
+    if '_lod' in name:
+        if uvs == 0 or uvs > 2:
             description = 'UV数=' + str(uvs)
             data = [name,description]
-            Check_Data.append(data)
-    else:
-        if uvs == 0 or uvs > 2:
+            Check_Data.append(data) 
+
+
+    if "_COL" in name or "_shadowProxy" in name:
+        if uvs > 1:
             description = 'UV数=' + str(uvs)
             data = [name,description]
             Check_Data.append(data)

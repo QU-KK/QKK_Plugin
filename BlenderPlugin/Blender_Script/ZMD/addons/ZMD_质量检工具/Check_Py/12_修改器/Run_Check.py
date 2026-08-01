@@ -1,17 +1,15 @@
 import bpy
 
 # 变量
-Check_Item_Name = '材质槽数'
-Description = '材质槽数'
-
-# 顶点色检查
+Check_Item_Name = '修改器'
+Description = '是否存在修改器'
 Check_Data = [Check_Item_Name]
+
+#检查短边
 for obj in selected_objects:
-    slots = len(obj.material_slots)
-    if slots > 5:
-        name = obj.name
-        description = '材质槽数>5  =' + str(slots)
-        data = [name,description]
+   if len(obj.modifiers) > 0:
+        description = '存在修改器'
+        data = [obj.name,description]
         Check_Data.append(data)
 
 # 枚举
