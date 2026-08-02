@@ -154,14 +154,14 @@ class SNA_OT_Run_Py_30311(bpy.types.Operator):
             subprocess.Popen(f'explorer /select, "{Py_Script_Path}"')
         else:
             Py_Script_Path = self.sna_py_script_path
+            exec(open(Py_Script_Path).read())
+
             # 读取并运行外部 .py 文件
-            with open(Py_Script_Path, 'r', encoding='utf-8') as file:
-                script_content = file.read()
-            
-            # 🌟 建议优化：传入 globals()，确保外部脚本能获取正确的全局上下文
-            # exec(script_content)
-            exec(script_content, globals())
-            
+            #with open(Py_Script_Path, 'r', encoding='utf-8') as file:
+                #script_content = file.read()
+            #exec(script_content)        
+            #exec(script_content, globals())
+
         return {"FINISHED"}
 
     def invoke(self, context, event):
