@@ -134,7 +134,7 @@ class SNA_OT_Run_Py_30311(bpy.types.Operator):
     bl_label = "Run_Py"
     bl_description = ""
     
-    # 🌟 关键修改：去掉 "UNDO"，只保留 "REGISTER"
+    # 关键修改：去掉 "UNDO"，只保留 "REGISTER"
     #bl_options = {"REGISTER", "UNDO"}
     bl_options = {"REGISTER"} 
     
