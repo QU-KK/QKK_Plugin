@@ -133,7 +133,11 @@ class SNA_OT_Run_Py_30311(bpy.types.Operator):
     bl_idname = "sna.run_py_30311"
     bl_label = "Run_Py"
     bl_description = ""
-    bl_options = {"REGISTER", "UNDO"}
+    
+    # 🌟 关键修改：去掉 "UNDO"，只保留 "REGISTER"
+    #bl_options = {"REGISTER", "UNDO"}
+    bl_options = {"REGISTER"} 
+    
     sna_py_script_path: bpy.props.StringProperty(name='Py_Script_Path', description='', options={'HIDDEN'}, default='', subtype='NONE', maxlen=0)
 
     @classmethod
@@ -153,8 +157,11 @@ class SNA_OT_Run_Py_30311(bpy.types.Operator):
             # 读取并运行外部 .py 文件
             with open(Py_Script_Path, 'r', encoding='utf-8') as file:
                 script_content = file.read()
-            # 使用 exec 执行外部代码
-            exec(script_content)
+            
+            # 🌟 建议优化：传入 globals()，确保外部脚本能获取正确的全局上下文
+            # exec(script_content)
+            exec(script_content, globals())
+            
         return {"FINISHED"}
 
     def invoke(self, context, event):
