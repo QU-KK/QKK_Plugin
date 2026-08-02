@@ -55,15 +55,15 @@ def string_to_type(value, to_type, default):
 addon_keymaps = {}
 _icons = None
 py_script = {'sna_py_script_path': 'None', 'sna_py_script_path_list': [], 'sna_py_script_name': 'None', }
-class SNA_PT_PY_218F8(bpy.types.Panel):
+class SNA_PT_PY_EED24(bpy.types.Panel):
     bl_label = 'Py脚本工具'
-    bl_idname = 'SNA_PT_PY_218F8'
+    bl_idname = 'SNA_PT_PY_EED24'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_category = 'Python'
     bl_order = 1
-    bl_ui_units_x=0
+    bl_ui_units_x=12
 
     @classmethod
     def poll(cls, context):
@@ -237,6 +237,19 @@ class SNA_PT_PY_218F8(bpy.types.Panel):
                                 if not True: grid_DE03A.operator_context = "EXEC_DEFAULT"
                                 layout_function = grid_DE03A
                                 sna_py_B70D0(layout_function, [os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f) for f in os.listdir(py_script['sna_py_script_path_list'][i_E9FFD]) if os.path.isdir(os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f))][i_FD8DB])
+                    col_754A9 = col_EB305.column(heading='', align=False)
+                    col_754A9.alert = False
+                    col_754A9.enabled = True
+                    col_754A9.active = True
+                    col_754A9.use_property_split = False
+                    col_754A9.use_property_decorate = False
+                    col_754A9.scale_x = 1.0
+                    col_754A9.scale_y = 1.0
+                    col_754A9.alignment = 'Expand'.upper()
+                    col_754A9.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
+                    for i_18AB5 in range(len([os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f) for f in os.listdir(py_script['sna_py_script_path_list'][i_E9FFD]) if os.path.isfile(os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f))])):
+                        op = col_754A9.operator('sna.execute_py_script_32961', text=os.path.basename([os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f) for f in os.listdir(py_script['sna_py_script_path_list'][i_E9FFD]) if os.path.isfile(os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f))][i_18AB5]).replace('.py', ''), icon_value=0, emboss=True, depress=False)
+                        op.sna_script_path = [os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f) for f in os.listdir(py_script['sna_py_script_path_list'][i_E9FFD]) if os.path.isfile(os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f))][i_18AB5]
 
 
 def sna_py_B70D0(layout_function, path):
@@ -269,8 +282,8 @@ class SNA_OT_Refresh_Path_5Ca64(bpy.types.Operator):
 
     def execute(self, context):
         Py_Path = None
-        Py_Path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Python脚本")
-        #Py_Path = r'C:\QKK_Plugin\BlenderPlugin\Blender_Script\通用\addons\按钮小工具\Python脚本'
+        #Py_Path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Python脚本")
+        Py_Path = r'C:\QKK_Plugin\BlenderPlugin\Blender_Script\通用\addons\按钮小工具pro\Python脚本'
         py_script['sna_py_script_path'] = Py_Path
         py_script['sna_py_script_path_list'] = [os.path.join(Py_Path, f) for f in os.listdir(Py_Path) if os.path.isdir(os.path.join(Py_Path, f))]
         if (py_script['sna_py_script_name'] == 'None'):
@@ -350,14 +363,35 @@ class SNA_OT_Script_Name_053Ed(bpy.types.Operator):
         return self.execute(context)
 
 
+class SNA_OT_Open_Python_Script_Tool_D24Cf(bpy.types.Operator):
+    bl_idname = "sna.open_python_script_tool_d24cf"
+    bl_label = "Open_Python_Script_Tool"
+    bl_description = "打开Py脚本工具界面"
+    bl_options = {"REGISTER", "UNDO"}
+
+    @classmethod
+    def poll(cls, context):
+        if bpy.app.version >= (3, 0, 0) and True:
+            cls.poll_message_set('')
+        return not False
+
+    def execute(self, context):
+        bpy.ops.wm.call_panel(name="SNA_PT_PY_EED24", keep_open=True)
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return self.execute(context)
+
+
 def register():
     global _icons
     _icons = bpy.utils.previews.new()
-    bpy.utils.register_class(SNA_PT_PY_218F8)
+    bpy.utils.register_class(SNA_PT_PY_EED24)
     bpy.utils.register_class(SNA_OT_Refresh_Path_5Ca64)
     bpy.utils.register_class(SNA_OT_Execute_Py_Script_32961)
     bpy.utils.register_class(SNA_OT_Open_Folder_D57F2)
     bpy.utils.register_class(SNA_OT_Script_Name_053Ed)
+    bpy.utils.register_class(SNA_OT_Open_Python_Script_Tool_D24Cf)
 
 
 def unregister():
@@ -368,8 +402,9 @@ def unregister():
     for km, kmi in addon_keymaps.values():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
-    bpy.utils.unregister_class(SNA_PT_PY_218F8)
+    bpy.utils.unregister_class(SNA_PT_PY_EED24)
     bpy.utils.unregister_class(SNA_OT_Refresh_Path_5Ca64)
     bpy.utils.unregister_class(SNA_OT_Execute_Py_Script_32961)
     bpy.utils.unregister_class(SNA_OT_Open_Folder_D57F2)
     bpy.utils.unregister_class(SNA_OT_Script_Name_053Ed)
+    bpy.utils.unregister_class(SNA_OT_Open_Python_Script_Tool_D24Cf)
