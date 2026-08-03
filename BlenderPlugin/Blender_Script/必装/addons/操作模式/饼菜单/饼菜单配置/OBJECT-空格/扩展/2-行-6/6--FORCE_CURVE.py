@@ -5,3 +5,4 @@ bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.curve.select_all(action='SELECT')
 bpy.ops.curve.delete(type='VERT')
 bpy.ops.wm.tool_set_by_id(name="builtin.draw")
+bpy.context.object.data.uv_layers[0].name = "1U"
