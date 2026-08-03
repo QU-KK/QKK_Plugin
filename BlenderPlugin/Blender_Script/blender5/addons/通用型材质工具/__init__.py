@@ -80,9 +80,9 @@ def get_id_preview_id(data):
     return 0
 
 
-class SNA_PT_material_tools_EBDA6(bpy.types.Panel):
+class SNA_PT_material_tools_2B26C(bpy.types.Panel):
     bl_label = '材质工具_2026.8.3'
-    bl_idname = 'SNA_PT_material_tools_EBDA6'
+    bl_idname = 'SNA_PT_material_tools_2B26C'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
@@ -250,16 +250,16 @@ class SNA_OT_Shader_D6429(bpy.types.Operator):
             }
             functions[func_name]()
             shader['sna_shader_list'] = shader_list
-        bpy.ops.wm.call_panel(name="SNA_PT_SHADER_LIST_76A4C", keep_open=False)
+        bpy.ops.wm.call_panel(name="SNA_PT_SHADER_LIST_D7B6A", keep_open=False)
         return {"FINISHED"}
 
     def invoke(self, context, event):
         return self.execute(context)
 
 
-class SNA_PT_SHADER_LIST_76A4C(bpy.types.Panel):
+class SNA_PT_SHADER_LIST_D7B6A(bpy.types.Panel):
     bl_label = 'Shader_List'
-    bl_idname = 'SNA_PT_SHADER_LIST_76A4C'
+    bl_idname = 'SNA_PT_SHADER_LIST_D7B6A'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
     bl_context = ''
@@ -879,6 +879,7 @@ class SNA_OT_My_Generic_Operator_6F86E(bpy.types.Operator, ImportHelper):
             # 将图像赋值给节点，并确保节点未被静音
             nod.image = img  
             nod.mute = False
+            #图像色彩空间
             # 统一将A通道设置为 “通道打包”
             img.alpha_mode = 'CHANNEL_PACKED'
             # 直接使用原始名称进行字符串包含判断
@@ -888,6 +889,15 @@ class SNA_OT_My_Generic_Operator_6F86E(bpy.types.Operator, ImportHelper):
             elif ("_D." in img.name) or ("_E." in img.name):
                 img.colorspace_settings.name = 'sRGB'
                 print(f"贴图 [{img.name}] 已直接设置为: sRGB")
+            #模型UV名称命名
+            obj = bpy.context.active_object
+            # 遍历该对象的所有 UV 通道（按通道顺序索引）
+            for index, uv_layer in enumerate(obj.data.uv_layers):
+                # 生成新的名称，例如：1U, 2U, 3U...
+                new_name = f"{index + 1}U"        
+                # 修改 UV 通道名称
+                uv_layer.name = new_name            
+            print("UV 通道名称已重命名完成！")
         # 调用函数
         functions = {
             "Open_Directory": Open_Directory,
@@ -965,15 +975,15 @@ class SNA_OT_Uv_Name_Set_3Ead6(bpy.types.Operator):
         return self.execute(context)
 
 
-class SNA_PT_material_tools_parameter_B5F56(bpy.types.Panel):
+class SNA_PT_material_tools_parameter_FCD93(bpy.types.Panel):
     bl_label = '参数'
-    bl_idname = 'SNA_PT_material_tools_parameter_B5F56'
+    bl_idname = 'SNA_PT_material_tools_parameter_FCD93'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_order = 2
     bl_options = {'DEFAULT_CLOSED'}
-    bl_parent_id = 'SNA_PT_material_tools_EBDA6'
+    bl_parent_id = 'SNA_PT_material_tools_2B26C'
     bl_ui_units_x=0
 
     @classmethod
@@ -1015,14 +1025,14 @@ class SNA_PT_material_tools_parameter_B5F56(bpy.types.Panel):
                 sna_func_3C3A3(layout_function, )
 
 
-class SNA_PT_SHADER__C45FD(bpy.types.Panel):
+class SNA_PT_SHADER__007A7(bpy.types.Panel):
     bl_label = 'Shader '
-    bl_idname = 'SNA_PT_SHADER__C45FD'
+    bl_idname = 'SNA_PT_SHADER__007A7'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_order = 1
-    bl_parent_id = 'SNA_PT_material_tools_EBDA6'
+    bl_parent_id = 'SNA_PT_material_tools_2B26C'
     bl_ui_units_x=0
 
     @classmethod
@@ -1140,10 +1150,10 @@ def register():
     global _icons
     _icons = bpy.utils.previews.new()
     bpy.types.Scene.sna_mat_ui_switch = bpy.props.EnumProperty(name='mat_ui_switch', description='', items=[('图像', '图像', '', 0, 0), ('参数', '参数', '', 0, 1)])
-    bpy.utils.register_class(SNA_PT_material_tools_EBDA6)
+    bpy.utils.register_class(SNA_PT_material_tools_2B26C)
     bpy.utils.register_class(SNA_OT_Shader_649Db)
     bpy.utils.register_class(SNA_OT_Shader_D6429)
-    bpy.utils.register_class(SNA_PT_SHADER_LIST_76A4C)
+    bpy.utils.register_class(SNA_PT_SHADER_LIST_D7B6A)
     bpy.utils.register_class(SNA_OT_Input_Shader_21057)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_246A7)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_2A3Bd)
@@ -1155,8 +1165,8 @@ def register():
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_6F86E)
     bpy.utils.register_class(SNA_OT_Image_Color_Space_Abdf8)
     bpy.utils.register_class(SNA_OT_Uv_Name_Set_3Ead6)
-    bpy.utils.register_class(SNA_PT_material_tools_parameter_B5F56)
-    bpy.utils.register_class(SNA_PT_SHADER__C45FD)
+    bpy.utils.register_class(SNA_PT_material_tools_parameter_FCD93)
+    bpy.utils.register_class(SNA_PT_SHADER__007A7)
 
 
 def unregister():
@@ -1168,10 +1178,10 @@ def unregister():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
     del bpy.types.Scene.sna_mat_ui_switch
-    bpy.utils.unregister_class(SNA_PT_material_tools_EBDA6)
+    bpy.utils.unregister_class(SNA_PT_material_tools_2B26C)
     bpy.utils.unregister_class(SNA_OT_Shader_649Db)
     bpy.utils.unregister_class(SNA_OT_Shader_D6429)
-    bpy.utils.unregister_class(SNA_PT_SHADER_LIST_76A4C)
+    bpy.utils.unregister_class(SNA_PT_SHADER_LIST_D7B6A)
     bpy.utils.unregister_class(SNA_OT_Input_Shader_21057)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_246A7)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_2A3Bd)
@@ -1183,5 +1193,5 @@ def unregister():
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_6F86E)
     bpy.utils.unregister_class(SNA_OT_Image_Color_Space_Abdf8)
     bpy.utils.unregister_class(SNA_OT_Uv_Name_Set_3Ead6)
-    bpy.utils.unregister_class(SNA_PT_material_tools_parameter_B5F56)
-    bpy.utils.unregister_class(SNA_PT_SHADER__C45FD)
+    bpy.utils.unregister_class(SNA_PT_material_tools_parameter_FCD93)
+    bpy.utils.unregister_class(SNA_PT_SHADER__007A7)
