@@ -28,6 +28,7 @@ bl_info = {
 import bpy
 import bpy.utils.previews
 import os
+import subprocess
 
 
 
@@ -55,15 +56,15 @@ def string_to_type(value, to_type, default):
 addon_keymaps = {}
 _icons = None
 py_script = {'sna_py_script_path': 'None', 'sna_py_script_path_list': [], 'sna_py_script_name': 'None', }
-class SNA_PT_PY_EED24(bpy.types.Panel):
+class SNA_PT_PY_769D9(bpy.types.Panel):
     bl_label = 'Py脚本工具'
-    bl_idname = 'SNA_PT_PY_EED24'
+    bl_idname = 'SNA_PT_PY_769D9'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_category = 'Python'
     bl_order = 1
-    bl_ui_units_x=12
+    bl_ui_units_x=0
 
     @classmethod
     def poll(cls, context):
@@ -97,6 +98,7 @@ class SNA_PT_PY_EED24(bpy.types.Panel):
         op = row_F183B.operator('sna.refresh_path_5ca64', text='', icon_value=string_to_icon('FILE_REFRESH'), emboss=True, depress=False)
         op = row_F183B.operator('sna.open_folder_d57f2', text='', icon_value=string_to_icon('FILE_FOLDER'), emboss=True, depress=False)
         op.sna_script_path = py_script['sna_py_script_path']
+        row_F183B.prop(bpy.context.scene, 'sna_py_script_debug', text='', icon_value=string_to_icon('SEQ_STRIP_MODIFIER'), emboss=True)
         if (py_script['sna_py_script_path'] == 'None'):
             col_3A2F2 = col_1E8CC.column(heading='', align=False)
             col_3A2F2.alert = False
@@ -130,7 +132,7 @@ class SNA_PT_PY_EED24(bpy.types.Panel):
             grid_57696.scale_y = 1.5
             if not True: grid_57696.operator_context = "EXEC_DEFAULT"
             for i_A96F2 in range(len(py_script['sna_py_script_path_list'])):
-                op = grid_57696.operator('sna.script_name_053ed', text=os.path.basename(py_script['sna_py_script_path_list'][i_A96F2]), icon_value=0, emboss=True, depress=(py_script['sna_py_script_path_list'][i_A96F2] == py_script['sna_py_script_name']))
+                op = grid_57696.operator('sna.script_name_053ed', text=os.path.basename(py_script['sna_py_script_path_list'][i_A96F2]).split('-')[1], icon_value=0, emboss=True, depress=(py_script['sna_py_script_path_list'][i_A96F2] == py_script['sna_py_script_name']))
                 op.sna_script_name = py_script['sna_py_script_path_list'][i_A96F2]
             for i_E9FFD in range(len(py_script['sna_py_script_path_list'])):
                 if (py_script['sna_py_script_name'] == py_script['sna_py_script_path_list'][i_E9FFD]):
@@ -177,7 +179,7 @@ class SNA_PT_PY_EED24(bpy.types.Panel):
                                 box_E61CF.scale_x = 1.0
                                 box_E61CF.scale_y = 1.0
                                 if not True: box_E61CF.operator_context = "EXEC_DEFAULT"
-                                col_3B899 = box_E61CF.column(heading='', align=False)
+                                col_3B899 = box_E61CF.column(heading='', align='-对齐' in os.path.basename([os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f) for f in os.listdir(py_script['sna_py_script_path_list'][i_E9FFD]) if os.path.isdir(os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f))][i_FD8DB]))
                                 col_3B899.alert = False
                                 col_3B899.enabled = True
                                 col_3B899.active = True
@@ -190,7 +192,7 @@ class SNA_PT_PY_EED24(bpy.types.Panel):
                                 layout_function = col_3B899
                                 sna_py_B70D0(layout_function, [os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f) for f in os.listdir(py_script['sna_py_script_path_list'][i_E9FFD]) if os.path.isdir(os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f))][i_FD8DB])
                             else:
-                                col_D19EA = col_2D975.column(heading='', align=False)
+                                col_D19EA = col_2D975.column(heading='', align='-对齐' in os.path.basename([os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f) for f in os.listdir(py_script['sna_py_script_path_list'][i_E9FFD]) if os.path.isdir(os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f))][i_FD8DB]))
                                 col_D19EA.alert = False
                                 col_D19EA.enabled = True
                                 col_D19EA.active = True
@@ -214,7 +216,7 @@ class SNA_PT_PY_EED24(bpy.types.Panel):
                                 box_B186C.scale_x = 1.0
                                 box_B186C.scale_y = 1.0
                                 if not True: box_B186C.operator_context = "EXEC_DEFAULT"
-                                grid_C30A0 = box_B186C.grid_flow(columns=string_to_type(os.path.basename([os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f) for f in os.listdir(py_script['sna_py_script_path_list'][i_E9FFD]) if os.path.isdir(os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f))][i_FD8DB]).split('-')[2], int, 0), row_major=True, even_columns=False, even_rows=False, align=True)
+                                grid_C30A0 = box_B186C.grid_flow(columns=string_to_type(os.path.basename([os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f) for f in os.listdir(py_script['sna_py_script_path_list'][i_E9FFD]) if os.path.isdir(os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f))][i_FD8DB]).split('-')[2], int, 0), row_major=True, even_columns=False, even_rows=False, align='-对齐' in os.path.basename([os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f) for f in os.listdir(py_script['sna_py_script_path_list'][i_E9FFD]) if os.path.isdir(os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f))][i_FD8DB]))
                                 grid_C30A0.enabled = True
                                 grid_C30A0.active = True
                                 grid_C30A0.use_property_split = False
@@ -226,7 +228,7 @@ class SNA_PT_PY_EED24(bpy.types.Panel):
                                 layout_function = grid_C30A0
                                 sna_py_B70D0(layout_function, [os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f) for f in os.listdir(py_script['sna_py_script_path_list'][i_E9FFD]) if os.path.isdir(os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f))][i_FD8DB])
                             else:
-                                grid_DE03A = col_2D975.grid_flow(columns=string_to_type(os.path.basename([os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f) for f in os.listdir(py_script['sna_py_script_path_list'][i_E9FFD]) if os.path.isdir(os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f))][i_FD8DB]).split('-')[2], int, 0), row_major=True, even_columns=False, even_rows=False, align=True)
+                                grid_DE03A = col_2D975.grid_flow(columns=string_to_type(os.path.basename([os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f) for f in os.listdir(py_script['sna_py_script_path_list'][i_E9FFD]) if os.path.isdir(os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f))][i_FD8DB]).split('-')[2], int, 0), row_major=True, even_columns=False, even_rows=False, align='-对齐' in os.path.basename([os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f) for f in os.listdir(py_script['sna_py_script_path_list'][i_E9FFD]) if os.path.isdir(os.path.join(py_script['sna_py_script_path_list'][i_E9FFD], f))][i_FD8DB]))
                                 grid_DE03A.enabled = True
                                 grid_DE03A.active = True
                                 grid_DE03A.use_property_split = False
@@ -254,18 +256,21 @@ class SNA_PT_PY_EED24(bpy.types.Panel):
 
 def sna_py_B70D0(layout_function, path):
     for i_40330 in range(len([os.path.join(path, f) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))])):
-        col_55626 = layout_function.column(heading='', align=True)
-        col_55626.alert = False
-        col_55626.enabled = True
-        col_55626.active = True
-        col_55626.use_property_split = False
-        col_55626.use_property_decorate = False
-        col_55626.scale_x = 1.0
-        col_55626.scale_y = string_to_type(os.path.basename([os.path.join(path, f) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))][i_40330]).replace('.py', '').split('-')[3], float, 0)
-        col_55626.alignment = 'Expand'.upper()
-        col_55626.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
-        op = col_55626.operator('sna.execute_py_script_32961', text=os.path.basename([os.path.join(path, f) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))][i_40330]).replace('.py', '').split('-')[1], icon_value=string_to_icon(os.path.basename([os.path.join(path, f) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))][i_40330]).replace('.py', '').split('-')[2]), emboss=True, depress=False)
-        op.sna_script_path = [os.path.join(path, f) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))][i_40330]
+        if '-题头' in os.path.basename([os.path.join(path, f) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))][i_40330]).replace('.py', ''):
+            layout_function.label(text=os.path.basename([os.path.join(path, f) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))][i_40330]).replace('.py', '').split('-')[1], icon_value=string_to_icon(os.path.basename([os.path.join(path, f) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))][i_40330]).replace('.py', '').split('-')[2]))
+        else:
+            col_55626 = layout_function.column(heading='', align=True)
+            col_55626.alert = False
+            col_55626.enabled = True
+            col_55626.active = True
+            col_55626.use_property_split = False
+            col_55626.use_property_decorate = False
+            col_55626.scale_x = 1.0
+            col_55626.scale_y = string_to_type(os.path.basename([os.path.join(path, f) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))][i_40330]).replace('.py', '').split('-')[3], float, 0)
+            col_55626.alignment = 'Expand'.upper()
+            col_55626.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
+            op = col_55626.operator('sna.execute_py_script_32961', text=os.path.basename([os.path.join(path, f) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))][i_40330]).replace('.py', '').split('-')[1], icon_value=string_to_icon(os.path.basename([os.path.join(path, f) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))][i_40330]).replace('.py', '').split('-')[2]), emboss=True, depress=False)
+            op.sna_script_path = [os.path.join(path, f) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))][i_40330]
 
 
 class SNA_OT_Refresh_Path_5Ca64(bpy.types.Operator):
@@ -282,8 +287,8 @@ class SNA_OT_Refresh_Path_5Ca64(bpy.types.Operator):
 
     def execute(self, context):
         Py_Path = None
-        Py_Path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Python脚本")
-        #Py_Path = r'C:\QKK_Plugin\BlenderPlugin\Blender_Script\通用\addons\按钮小工具pro\Python脚本'
+        #Py_Path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Python脚本")
+        Py_Path = r'C:\QKK_Plugin\BlenderPlugin\Blender_Script\通用\addons\按钮小工具pro\Python脚本'
         py_script['sna_py_script_path'] = Py_Path
         py_script['sna_py_script_path_list'] = [os.path.join(Py_Path, f) for f in os.listdir(Py_Path) if os.path.isdir(os.path.join(Py_Path, f))]
         if (py_script['sna_py_script_name'] == 'None'):
@@ -309,10 +314,17 @@ class SNA_OT_Execute_Py_Script_32961(bpy.types.Operator):
         return not False
 
     def execute(self, context):
-        script_path = self.sna_script_path
-        # 运行指定路径脚本
-        exec(open(script_path).read())
-        self.report({'INFO'}, message='运行Py脚本完成!')
+        if bpy.context.scene.sna_py_script_debug:
+            script_path = self.sna_script_path
+            # 打开指定目录并选中
+            # 注意：/select, 后面不要有空格
+            subprocess.Popen(f'explorer /select, "{script_path}"')
+            self.report({'INFO'}, message='定位完成!')
+        else:
+            script_path = self.sna_script_path
+            # 运行指定路径脚本
+            exec(open(script_path).read())
+            self.report({'INFO'}, message='运行Py脚本完成!')
         return {"FINISHED"}
 
     def invoke(self, context, event):
@@ -376,7 +388,7 @@ class SNA_OT_Open_Python_Script_Tool_D24Cf(bpy.types.Operator):
         return not False
 
     def execute(self, context):
-        bpy.ops.wm.call_panel(name="SNA_PT_PY_EED24", keep_open=True)
+        bpy.ops.wm.call_panel(name="SNA_PT_PY_769D9", keep_open=True)
         return {"FINISHED"}
 
     def invoke(self, context, event):
@@ -386,7 +398,8 @@ class SNA_OT_Open_Python_Script_Tool_D24Cf(bpy.types.Operator):
 def register():
     global _icons
     _icons = bpy.utils.previews.new()
-    bpy.utils.register_class(SNA_PT_PY_EED24)
+    bpy.types.Scene.sna_py_script_debug = bpy.props.BoolProperty(name='py_script_debug', description='', default=False)
+    bpy.utils.register_class(SNA_PT_PY_769D9)
     bpy.utils.register_class(SNA_OT_Refresh_Path_5Ca64)
     bpy.utils.register_class(SNA_OT_Execute_Py_Script_32961)
     bpy.utils.register_class(SNA_OT_Open_Folder_D57F2)
@@ -402,7 +415,8 @@ def unregister():
     for km, kmi in addon_keymaps.values():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
-    bpy.utils.unregister_class(SNA_PT_PY_EED24)
+    del bpy.types.Scene.sna_py_script_debug
+    bpy.utils.unregister_class(SNA_PT_PY_769D9)
     bpy.utils.unregister_class(SNA_OT_Refresh_Path_5Ca64)
     bpy.utils.unregister_class(SNA_OT_Execute_Py_Script_32961)
     bpy.utils.unregister_class(SNA_OT_Open_Folder_D57F2)
