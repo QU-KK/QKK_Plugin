@@ -55,7 +55,7 @@ class SNA_PT_ZMD_MAYA_B9FC3(bpy.types.Panel):
     bl_context = ''
     bl_category = 'ZMD'
     bl_order = 2
-    bl_options = {'DEFAULT_CLOSED'}
+    #bl_options = {'DEFAULT_CLOSED'}
     bl_ui_units_x=0
 
     @classmethod
@@ -274,7 +274,7 @@ class SNA_PT_excel_mat_1FE88(bpy.types.Panel):
     bl_context = ''
     bl_category = 'ZMD'
     bl_order = 4
-    bl_options = {'DEFAULT_CLOSED'}
+    #bl_options = {'DEFAULT_CLOSED'}
     bl_ui_units_x=0
 
     @classmethod

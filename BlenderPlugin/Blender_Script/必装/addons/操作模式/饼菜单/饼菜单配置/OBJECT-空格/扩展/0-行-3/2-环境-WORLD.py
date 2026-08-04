@@ -1,5 +1,10 @@
 import bpy
-#打开面板浮窗
-#bpy.ops.sna.open_python_script_tool_d24cf()
-#SNA_PT_environment_configuration_0D4F8
+#打开N面板
 
+bpy.context.space_data.show_region_ui = True
+
+for r in bpy.context.area.regions:
+    if r.type == 'UI':
+        r.active_panel_category = "环境"
+        r.tag_redraw()
+        break  # 找到 UI 区域处理完毕后立即跳出循环，精简且高效

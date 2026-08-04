@@ -86,9 +86,9 @@ class SNA_PT_material_tools_06C90(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
-    bl_category = 'ZMD'
+    bl_category = '材质'
     bl_order = 0
-    bl_options = {'DEFAULT_CLOSED'}
+    #bl_options = {'DEFAULT_CLOSED'}
     bl_ui_units_x=15
 
     @classmethod
@@ -984,7 +984,7 @@ class SNA_PT_material_tools_parameter_5A727(bpy.types.Panel):
     bl_region_type = 'UI'
     bl_context = ''
     bl_order = 2
-    bl_options = {'DEFAULT_CLOSED'}
+    #bl_options = {'DEFAULT_CLOSED'}
     bl_parent_id = 'SNA_PT_material_tools_06C90'
     bl_ui_units_x=0
 

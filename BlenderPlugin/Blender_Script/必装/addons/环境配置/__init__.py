@@ -114,7 +114,7 @@ class SNA_PT_environment_configuration_0D4F8(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
-    bl_category = '便捷功能'
+    bl_category = '环境'
     bl_order = 0
     bl_ui_units_x=0
 
