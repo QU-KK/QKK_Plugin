@@ -13,13 +13,13 @@ from.右键.右键_py import unregister as 右键_unregister
 
 def register():
     Ctrl右键_register()
-    #Shift右键_register()
-    #空格_register()
-    #右键_register()
+    Shift右键_register()
+    空格_register()
+    右键_register()
 
 
 def unregister(): 
     Ctrl右键_unregister()
-    #Shift右键_unregister()
-    #空格_unregister()
-    #右键_unregister()
+    Shift右键_unregister()
+    空格_unregister()
+    右键_unregister()

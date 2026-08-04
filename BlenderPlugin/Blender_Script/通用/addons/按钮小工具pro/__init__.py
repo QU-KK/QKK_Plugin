@@ -64,7 +64,7 @@ class SNA_PT_PY_769D9(bpy.types.Panel):
     bl_context = ''
     bl_category = 'Python'
     bl_order = 1
-    bl_ui_units_x=0
+    bl_ui_units_x=13
 
     @classmethod
     def poll(cls, context):
@@ -380,6 +380,7 @@ class SNA_OT_Open_Python_Script_Tool_D24Cf(bpy.types.Operator):
     bl_label = "Open_Python_Script_Tool"
     bl_description = "打开Py脚本工具界面"
     bl_options = {"REGISTER", "UNDO"}
+
 
     @classmethod
     def poll(cls, context):

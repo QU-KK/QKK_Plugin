@@ -21,12 +21,12 @@ import bpy
 
 
 #物体模式饼菜单
-from.物体模式饼菜单.__init__ import register as 物体模式饼菜单_register
-from.物体模式饼菜单.__init__ import unregister as 物体模式饼菜单_unregister
+#from.物体模式饼菜单.__init__ import register as 物体模式饼菜单_register
+#from.物体模式饼菜单.__init__ import unregister as 物体模式饼菜单_unregister
 
 #编辑模式饼菜单
-from.编辑模式饼菜单.__init__ import register as 编辑模式饼菜单_register
-from.编辑模式饼菜单.__init__ import unregister as 编辑模式饼菜单_unregister
+#from.编辑模式饼菜单.__init__ import register as 编辑模式饼菜单_register
+#from.编辑模式饼菜单.__init__ import unregister as 编辑模式饼菜单_unregister
 
 #快捷按钮
 from.快捷按钮.__init__ import register as 快捷按钮_register
@@ -42,16 +42,16 @@ from.扩展.__init__ import unregister as 扩展_unregister
 
 def register():
     #第三方关联插件加载_register()
-    物体模式饼菜单_register()
-    编辑模式饼菜单_register()
+    #物体模式饼菜单_register()
+    #编辑模式饼菜单_register()
     快捷按钮_register()
     快捷键_register()
     扩展_register()
 
 def unregister(): 
     #第三方关联插件加载_unregister()
-    物体模式饼菜单_unregister()
-    编辑模式饼菜单_unregister()
+    #物体模式饼菜单_unregister()
+    #编辑模式饼菜单_unregister()
     快捷按钮_unregister()
     快捷键_unregister()
     扩展_unregister()
