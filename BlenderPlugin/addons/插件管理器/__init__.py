@@ -251,7 +251,7 @@ class SNA_OT_My_Generic_Operator_87B0F(bpy.types.Operator):
             grid_BE71D.scale_y = 1.5
             if not True: grid_BE71D.operator_context = "EXEC_DEFAULT"
             for i_BD473 in range(len(node_tree['sna_addons_directories'])):
-                op = grid_BE71D.operator('sna.my_generic_operator_04323', text=os.path.basename(node_tree['sna_addons_directories'][i_BD473]), icon_value=0, emboss=True, depress=(os.path.basename(node_tree['sna_addons_directories'][i_BD473]) == node_tree['sna_addons_class_name']))
+                op = grid_BE71D.operator('sna.my_generic_operator_04323', text=os.path.basename(node_tree['sna_addons_directories'][i_BD473]).split('-')[1], icon_value=0, emboss=True, depress=(os.path.basename(node_tree['sna_addons_directories'][i_BD473]) == node_tree['sna_addons_class_name']))
                 op.sna_name = os.path.basename(node_tree['sna_addons_directories'][i_BD473])
             for i_3734C in range(len(node_tree['sna_addons_directories'])):
                 if (node_tree['sna_addons_class_name'] == os.path.basename(node_tree['sna_addons_directories'][i_3734C])):
