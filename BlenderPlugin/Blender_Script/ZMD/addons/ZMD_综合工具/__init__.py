@@ -47,14 +47,15 @@ def string_to_icon(value):
 addon_keymaps = {}
 _icons = None
 node_tree_001 = {'sna_zmd_mat_list': [], 'sna_zmd_img_list': [], }
-class SNA_PT_ZMD_MAYA_019F5(bpy.types.Panel):
+class SNA_PT_ZMD_MAYA_B9FC3(bpy.types.Panel):
     bl_label = 'ZMD_互导Maya'
-    bl_idname = 'SNA_PT_ZMD_MAYA_019F5'
+    bl_idname = 'SNA_PT_ZMD_MAYA_B9FC3'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_category = 'ZMD'
     bl_order = 2
+    bl_options = {'DEFAULT_CLOSED'}
     bl_ui_units_x=0
 
     @classmethod
@@ -265,288 +266,15 @@ class SNA_OT_Maya_To_Blender_1F248(bpy.types.Operator):
         return self.execute(context)
 
 
-class SNA_PT_ZMD__F55C4(bpy.types.Panel):
-    bl_label = 'ZMD_批量处理'
-    bl_idname = 'SNA_PT_ZMD__F55C4'
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-    bl_context = ''
-    bl_category = 'ZMD'
-    bl_order = 5
-    bl_ui_units_x=0
-
-    @classmethod
-    def poll(cls, context):
-        return not (False)
-
-    def draw_header(self, context):
-        layout = self.layout
-
-    def draw(self, context):
-        layout = self.layout
-        split_8F6E3 = layout.split(factor=0.5, align=True)
-        split_8F6E3.alert = False
-        split_8F6E3.enabled = True
-        split_8F6E3.active = True
-        split_8F6E3.use_property_split = False
-        split_8F6E3.use_property_decorate = False
-        split_8F6E3.scale_x = 1.0
-        split_8F6E3.scale_y = 1.5
-        split_8F6E3.alignment = 'Expand'.upper()
-        if not True: split_8F6E3.operator_context = "EXEC_DEFAULT"
-        op = split_8F6E3.operator('sna.zmd_name_b2a11', text='+1_  →  _1_', icon_value=0, emboss=True, depress=False)
-        op.sna_old_str = '+1_'
-        op.sna_new_str = '_1_'
-        op = split_8F6E3.operator('sna.zmd_name_b2a11', text='_1_  →  +1_', icon_value=0, emboss=True, depress=False)
-        op.sna_old_str = '_1_'
-        op.sna_new_str = '+1_'
-        split_98250 = layout.split(factor=0.5, align=True)
-        split_98250.alert = False
-        split_98250.enabled = True
-        split_98250.active = True
-        split_98250.use_property_split = False
-        split_98250.use_property_decorate = False
-        split_98250.scale_x = 1.0
-        split_98250.scale_y = 1.5
-        split_98250.alignment = 'Expand'.upper()
-        if not True: split_98250.operator_context = "EXEC_DEFAULT"
-        op = split_98250.operator('sna.my_generic_operator_d747e', text='打组', icon_value=0, emboss=True, depress=False)
-        op = split_98250.operator('sna.my_generic_operator_c0922', text='拆组', icon_value=0, emboss=True, depress=False)
-        col_B5A6D = layout.column(heading='', align=False)
-        col_B5A6D.alert = False
-        col_B5A6D.enabled = True
-        col_B5A6D.active = True
-        col_B5A6D.use_property_split = False
-        col_B5A6D.use_property_decorate = False
-        col_B5A6D.scale_x = 1.0
-        col_B5A6D.scale_y = 1.5
-        col_B5A6D.alignment = 'Expand'.upper()
-        col_B5A6D.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
-        op = col_B5A6D.operator('sna.my_generic_operator_d6702', text='全量材质名称规范化', icon_value=0, emboss=True, depress=False)
-
-
-class SNA_OT_Zmd_Name_B2A11(bpy.types.Operator):
-    bl_idname = "sna.zmd_name_b2a11"
-    bl_label = "ZMD_Name"
-    bl_description = ""
-    bl_options = {"REGISTER", "UNDO"}
-    sna_old_str: bpy.props.StringProperty(name='old_str', description='', options={'HIDDEN'}, default='', subtype='NONE', maxlen=0)
-    sna_new_str: bpy.props.StringProperty(name='new_str', description='', options={'HIDDEN'}, default='', subtype='NONE', maxlen=0)
-
-    @classmethod
-    def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
-            cls.poll_message_set('')
-        return not False
-
-    def execute(self, context):
-        old_str = self.sna_old_str
-        new_str = self.sna_new_str
-
-        def replace_names(old_str, new_str):
-            # 获取当前选中的所有物体
-            selected_objects = bpy.context.selected_objects
-            if not selected_objects:
-                print("请先在场景中选中至少一个物体！")
-                return
-            # 用于记录已被修改过材质的集合，防止同一个材质被重复处理
-            processed_materials = set()
-            for obj in selected_objects:
-                # 1. 替换物体名称
-                if old_str in obj.name:
-                    old_obj_name = obj.name
-                    obj.name = obj.name.replace(old_str, new_str)
-                    print(f"物体改名: {old_obj_name} -> {obj.name}")
-                # 2. 遍历物体关联的材质槽
-                if obj.material_slots:
-                    for slot in obj.material_slots:
-                        mat = slot.material
-                        # 确保材质槽里确实有材质，且该材质还没被处理过
-                        if mat and mat not in processed_materials:
-                            processed_materials.add(mat)
-                            if old_str in mat.name:
-                                old_mat_name = mat.name
-                                mat.name = mat.name.replace(old_str, new_str)
-                                print(f"  材质改名: {old_mat_name} -> {mat.name}")
-        replace_names(old_str,new_str)
-        self.report({'INFO'}, message='OK！')
-        return {"FINISHED"}
-
-    def invoke(self, context, event):
-        return self.execute(context)
-
-
-class SNA_OT_My_Generic_Operator_D747E(bpy.types.Operator):
-    bl_idname = "sna.my_generic_operator_d747e"
-    bl_label = "打组"
-    bl_description = ""
-    bl_options = {"REGISTER", "UNDO"}
-
-    @classmethod
-    def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
-            cls.poll_message_set('')
-        return not False
-
-    def execute(self, context):
-        #冻结变换
-        bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
-        #_lod0储存
-        obj_lod0 = []
-        for obj in bpy.context.selected_objects:
-            obj_name = obj.name
-            if '_lod0' in obj_name:
-                obj_lod0.append(obj)
-        PRE_Empty_List = []
-        #创建结构体
-        for obj in obj_lod0:
-            #激活物体集合位置
-            Collection = obj.users_collection[0]
-            #创建PRE主空物体
-            PRE_Name = obj.name.replace("_lod0", "")
-            PRE_Empty = bpy.data.objects.new(PRE_Name, None)
-            Collection.objects.link(PRE_Empty)
-            PRE_Empty.location = obj.location
-            PRE_Empty_List.append(PRE_Empty)
-            #创建结构空物体
-            LOD_Empty = bpy.data.objects.new('LOD__' + PRE_Name, None)
-            COL1_Empty = bpy.data.objects.new('COL1__' + PRE_Name, None)
-            COL3_Empty = bpy.data.objects.new('COL3__' + PRE_Name, None)
-            shadowProxy_Empty = bpy.data.objects.new('shadowProxy__' + PRE_Name, None)
-            HLOD_Empty = bpy.data.objects.new('HLOD__' + PRE_Name, None)
-            #空物体
-            Empty_List = [LOD_Empty,COL1_Empty,COL3_Empty,shadowProxy_Empty,HLOD_Empty]
-            #创建空物体并整理好结构
-            for Empty in Empty_List:
-                Collection.objects.link(Empty)
-                Empty.location = (0,0,0)
-                Empty.parent = PRE_Empty
-            #模型放入结构
-            for obj in bpy.context.selected_objects:
-                if PRE_Name in obj.name:
-                    if any(lod in obj.name for lod in ['_lod0', '_lod1', '_lod2', '_lod3', '_lod4']):
-                        obj.parent = LOD_Empty
-                        obj.location = (0,0,0)
-                    if '_COL1_'in obj.name:
-                        obj.parent = COL1_Empty
-                        obj.location = (0,0,0)
-                    if '_COL3_'in obj.name:
-                        obj.parent = COL3_Empty
-                        obj.location = (0,0,0)
-                    if '_shadowProxy'in obj.name:
-                        obj.parent = shadowProxy_Empty
-                        obj.location = (0,0,0)
-                    if '_HLOD'in obj.name:
-                        obj.parent = HLOD_Empty
-                        obj.location = (0,0,0)
-        #选中最终结构
-        bpy.ops.object.select_all(action='DESELECT')#取消全部选择
-        for Empty in PRE_Empty_List:
-            Empty.select_set(True)
-            bpy.context.view_layer.objects.active = Empty
-            bpy.ops.object.select_grouped(extend=True,type='CHILDREN_RECURSIVE')
-        #删除子集为0的空物体
-        for obj in bpy.context.selected_objects:    
-            if obj.type == 'EMPTY' and len(obj.children) == 0:
-                print(len(obj.children))
-                bpy.data.objects.remove(obj)
-        self.report({'INFO'}, message='OK！')
-        return {"FINISHED"}
-
-    def invoke(self, context, event):
-        return self.execute(context)
-
-
-class SNA_OT_My_Generic_Operator_C0922(bpy.types.Operator):
-    bl_idname = "sna.my_generic_operator_c0922"
-    bl_label = "拆组"
-    bl_description = ""
-    bl_options = {"REGISTER", "UNDO"}
-
-    @classmethod
-    def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
-            cls.poll_message_set('')
-        return not False
-
-    def execute(self, context):
-        for obj in bpy.context.selected_objects:
-            if obj.type == 'EMPTY':
-                bpy.context.view_layer.objects.active = obj
-                bpy.ops.object.select_grouped(extend=True,type='PARENT')
-                bpy.ops.object.select_grouped(extend=True,type='CHILDREN_RECURSIVE')
-        for obj in bpy.context.selected_objects:
-            if obj.type == 'EMPTY':        
-                bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')        
-                bpy.data.objects.remove(obj)
-        self.report({'INFO'}, message='OK！')
-        return {"FINISHED"}
-
-    def invoke(self, context, event):
-        return self.execute(context)
-
-
-class SNA_OT_My_Generic_Operator_D6702(bpy.types.Operator):
-    bl_idname = "sna.my_generic_operator_d6702"
-    bl_label = "处理材质名称"
-    bl_description = ""
-    bl_options = {"REGISTER", "UNDO"}
-
-    @classmethod
-    def poll(cls, context):
-        if bpy.app.version >= (3, 0, 0) and True:
-            cls.poll_message_set('')
-        return not False
-
-    def execute(self, context):
-        # 将所有名称中包含 '_1_' 的材质提取到一个列表中，避免在遍历时修改名称导致异常
-        materials_to_process = [mat for mat in bpy.data.materials if '_1_' in mat.name]
-        # 记录操作次数
-        renamed_count = 0
-        replaced_count = 0
-        for mat in materials_to_process:
-            old_name = mat.name
-            # 生成目标名称
-            target_name = old_name.replace('_1_', '+1_')
-            # 检查目标名称是否已经存在于材质库中
-            if target_name not in bpy.data.materials:
-                # 情况 1：不重名，直接改名
-                mat.name = target_name
-                print(f"已重命名: {old_name} -> {target_name}")
-                renamed_count += 1
-            else:
-                # 情况 2：发生重名，获取已经存在的目标材质
-                target_mat = bpy.data.materials[target_name]
-                print(f"发现重名: [{target_name}] 已存在。正在将使用 [{old_name}] 的模型替换为目标材质...")
-                # 遍历场景中的所有物体
-                for obj in bpy.data.objects:
-                    # 只有支持材质的物体（网格、曲线、字体等）才有 material_slots 属性
-                    if hasattr(obj, 'material_slots'):
-                        for slot in obj.material_slots:
-                            # 如果该物体的材质槽正在使用我们要被替换的材质
-                            if slot.material == mat:
-                                slot.material = target_mat
-                                print(f"  - 物体 [{obj.name}] 的材质已被替换")
-                replaced_count += 1
-        print("-" * 30)
-        print(f"操作完成！")
-        print(f"直接重命名的材质数量: {renamed_count}")
-        print(f"因重名而重新分配的材质数量: {replaced_count}")
-        self.report({'INFO'}, message='OK!')
-        return {"FINISHED"}
-
-    def invoke(self, context, event):
-        return self.execute(context)
-
-
-class SNA_PT_excel_mat_D66CA(bpy.types.Panel):
+class SNA_PT_excel_mat_1FE88(bpy.types.Panel):
     bl_label = '材质读表'
-    bl_idname = 'SNA_PT_excel_mat_D66CA'
+    bl_idname = 'SNA_PT_excel_mat_1FE88'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_category = 'ZMD'
     bl_order = 4
+    bl_options = {'DEFAULT_CLOSED'}
     bl_ui_units_x=0
 
     @classmethod
@@ -607,7 +335,9 @@ class SNA_OT_Read_Excle_73Eb5(bpy.types.Operator):
 
         def Set_Shader(Mat,Shader_Name):
             #Shader_Name = 'ZMD_Lit_Two'
-            Blender_Path = 'C:\\Blender_Shader\\ZMD_Lit_Two.blend\\Material\\'
+            #Blender_Path = 'C:\\Blender_Shader\\ZMD_Lit_Two.blend\\Material\\'
+            dir_path = os.path.dirname(os.path.abspath(__file__))
+            Blender_Path=dir_path.split('Blender_Script')[0]+'Blender_Shader\\ZMD_Lit_Two.blend\\Material\\'
             # 清理重名的旧材质，防止冲突
             Old_Mat = bpy.data.materials.get(Shader_Name)
             if Old_Mat:
@@ -863,15 +593,10 @@ def register():
     bpy.types.Scene.sna_zmd_obj_mat_name = bpy.props.BoolProperty(name='zmd_obj_mat_name', description='', default=True)
     bpy.types.Scene.sna_zmd_mat_excel_path = bpy.props.StringProperty(name='zmd_mat_excel_path', description='', default='', subtype='FILE_PATH', maxlen=0)
     bpy.types.Scene.sna_zmd_mat_img_check = bpy.props.EnumProperty(name='zmd_mat_img_check', description='', items=[('材质', '材质', '', 0, 0), ('图像', '图像', '', 0, 1)])
-    bpy.utils.register_class(SNA_PT_ZMD_MAYA_019F5)
+    bpy.utils.register_class(SNA_PT_ZMD_MAYA_B9FC3)
     bpy.utils.register_class(SNA_OT_Blender_To_Maya_4A904)
     bpy.utils.register_class(SNA_OT_Maya_To_Blender_1F248)
-    bpy.utils.register_class(SNA_PT_ZMD__F55C4)
-    bpy.utils.register_class(SNA_OT_Zmd_Name_B2A11)
-    bpy.utils.register_class(SNA_OT_My_Generic_Operator_D747E)
-    bpy.utils.register_class(SNA_OT_My_Generic_Operator_C0922)
-    bpy.utils.register_class(SNA_OT_My_Generic_Operator_D6702)
-    bpy.utils.register_class(SNA_PT_excel_mat_D66CA)
+    bpy.utils.register_class(SNA_PT_excel_mat_1FE88)
     bpy.utils.register_class(SNA_OT_Read_Excle_73Eb5)
 
 
@@ -887,13 +612,8 @@ def unregister():
     del bpy.types.Scene.sna_zmd_mat_excel_path
     del bpy.types.Scene.sna_zmd_obj_mat_name
     del bpy.types.Scene.sna_zmd_tex_export
-    bpy.utils.unregister_class(SNA_PT_ZMD_MAYA_019F5)
+    bpy.utils.unregister_class(SNA_PT_ZMD_MAYA_B9FC3)
     bpy.utils.unregister_class(SNA_OT_Blender_To_Maya_4A904)
     bpy.utils.unregister_class(SNA_OT_Maya_To_Blender_1F248)
-    bpy.utils.unregister_class(SNA_PT_ZMD__F55C4)
-    bpy.utils.unregister_class(SNA_OT_Zmd_Name_B2A11)
-    bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_D747E)
-    bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_C0922)
-    bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_D6702)
-    bpy.utils.unregister_class(SNA_PT_excel_mat_D66CA)
+    bpy.utils.unregister_class(SNA_PT_excel_mat_1FE88)
     bpy.utils.unregister_class(SNA_OT_Read_Excle_73Eb5)

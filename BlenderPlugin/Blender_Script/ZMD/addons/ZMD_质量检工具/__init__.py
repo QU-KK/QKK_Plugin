@@ -56,14 +56,15 @@ def make_enum_item(_id, name, descr, preview_id, uid):
     return _item_map[lookup]
 
 
-class SNA_PT_panel_6BBA6(bpy.types.Panel):
+class SNA_PT_panel_5E14A(bpy.types.Panel):
     bl_label = '终末地质检'
-    bl_idname = 'SNA_PT_panel_6BBA6'
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-    bl_context = ''
+    bl_idname = 'SNA_PT_panel_5E14A'
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = 'constraint'
     bl_category = 'ZMD'
     bl_order = 0
+    bl_options = {'DEFAULT_CLOSED'}
     bl_ui_units_x=0
 
     @classmethod
@@ -310,7 +311,7 @@ class SNA_OT_Open_F0C59(bpy.types.Operator):
         return context.window_manager.invoke_props_dialog(self, width=700)
 
 
-def sna_add_to_view3d_mt_editor_menus_4E6CC(self, context):
+def sna_add_to_view3d_mt_editor_menus_44E7C(self, context):
     if not (False):
         layout = self.layout
         op = layout.operator('sna.open_f0c59', text='质检', icon_value=1013, emboss=True, depress=False)
@@ -382,10 +383,10 @@ def register():
     global _icons
     _icons = bpy.utils.previews.new()
     bpy.types.Scene.sna_check_category = bpy.props.EnumProperty(name='check_category', description='', items=sna_check_category_enum_items)
-    bpy.utils.register_class(SNA_PT_panel_6BBA6)
+    bpy.utils.register_class(SNA_PT_panel_5E14A)
     bpy.utils.register_class(SNA_OT_Check_65690)
     bpy.utils.register_class(SNA_OT_Open_F0C59)
-    bpy.types.VIEW3D_MT_editor_menus.prepend(sna_add_to_view3d_mt_editor_menus_4E6CC)
+    bpy.types.VIEW3D_MT_editor_menus.prepend(sna_add_to_view3d_mt_editor_menus_44E7C)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_46C90)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_2B330)
 
@@ -399,9 +400,9 @@ def unregister():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
     del bpy.types.Scene.sna_check_category
-    bpy.utils.unregister_class(SNA_PT_panel_6BBA6)
+    bpy.utils.unregister_class(SNA_PT_panel_5E14A)
     bpy.utils.unregister_class(SNA_OT_Check_65690)
     bpy.utils.unregister_class(SNA_OT_Open_F0C59)
-    bpy.types.VIEW3D_MT_editor_menus.remove(sna_add_to_view3d_mt_editor_menus_4E6CC)
+    bpy.types.VIEW3D_MT_editor_menus.remove(sna_add_to_view3d_mt_editor_menus_44E7C)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_46C90)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_2B330)

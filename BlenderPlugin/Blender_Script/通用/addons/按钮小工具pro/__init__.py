@@ -287,8 +287,8 @@ class SNA_OT_Refresh_Path_5Ca64(bpy.types.Operator):
 
     def execute(self, context):
         Py_Path = None
-        #Py_Path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Python脚本")
-        Py_Path = r'C:\QKK_Plugin\BlenderPlugin\Blender_Script\通用\addons\按钮小工具pro\Python脚本'
+        Py_Path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Python脚本")
+        #Py_Path = r'C:\QKK_Plugin\BlenderPlugin\Blender_Script\通用\addons\按钮小工具pro\Python脚本'
         py_script['sna_py_script_path'] = Py_Path
         py_script['sna_py_script_path_list'] = [os.path.join(Py_Path, f) for f in os.listdir(Py_Path) if os.path.isdir(os.path.join(Py_Path, f))]
         if (py_script['sna_py_script_name'] == 'None'):
