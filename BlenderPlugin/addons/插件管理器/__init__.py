@@ -47,7 +47,7 @@ def string_to_icon(value):
 
 addon_keymaps = {}
 _icons = None
-node_tree = {'sna_addons_activate_list': [], 'sna_addons_directories': [], 'sna_addons_class_name': '必装', 'sna_addons_path': '', }
+node_tree = {'sna_addons_activate_list': [], 'sna_addons_directories': [], 'sna_addons_class_name': '01-必装', 'sna_addons_path': '', }
 
 
 def property_exists(prop_path, glob, loc):

@@ -29,6 +29,10 @@ import bpy
 import bpy.utils.previews
 import os
 
+# 获取当前脚本所在目录
+dir_path = os.path.dirname(os.path.abspath(__file__))
+Blender_HDR = os.path.join(dir_path, "Blender_HDR")
+
 
 
 
@@ -68,6 +72,7 @@ def property_exists(prop_path, glob, loc):
 _item_map = dict()
 
 
+
 def make_enum_item(_id, name, descr, preview_id, uid):
     lookup = str(_id)+"\0"+str(name)+"\0"+str(descr)+"\0"+str(preview_id)+"\0"+str(uid)
     if not lookup in _item_map:
@@ -93,8 +98,8 @@ def sna_update_sna_hdr_iocn_A4BA6(self, context):
 def sna_update_sna_hdr_asset_library_65F7F(self, context):
     sna_updated_prop = self.sna_hdr_asset_library
     node_tree['sna_hdr_iocn'] = []
-    for i_FA335 in range(len([os.path.join(os.path.join(r'D:\Blender_HDR_Assets',), f) for f in os.listdir(os.path.join(r'D:\Blender_HDR_Assets',)) if os.path.isfile(os.path.join(os.path.join(r'D:\Blender_HDR_Assets',), f))])):
-        node_tree['sna_hdr_iocn'].append([[os.path.join(os.path.join(r'D:\Blender_HDR_Assets',), f) for f in os.listdir(os.path.join(r'D:\Blender_HDR_Assets',)) if os.path.isfile(os.path.join(os.path.join(r'D:\Blender_HDR_Assets',), f))][i_FA335], [os.path.join(os.path.join(r'D:\Blender_HDR_Assets',), f) for f in os.listdir(os.path.join(r'D:\Blender_HDR_Assets',)) if os.path.isfile(os.path.join(os.path.join(r'D:\Blender_HDR_Assets',), f))][i_FA335], os.path.basename([os.path.join(os.path.join(r'D:\Blender_HDR_Assets',), f) for f in os.listdir(os.path.join(r'D:\Blender_HDR_Assets',)) if os.path.isfile(os.path.join(os.path.join(r'D:\Blender_HDR_Assets',), f))][i_FA335]), load_preview_icon([os.path.join(os.path.join(r'D:\Blender_HDR_Assets',), f) for f in os.listdir(os.path.join(r'D:\Blender_HDR_Assets',)) if os.path.isfile(os.path.join(os.path.join(r'D:\Blender_HDR_Assets',), f))][i_FA335])])
+    for i_FA335 in range(len([os.path.join(os.path.join(Blender_HDR), f) for f in os.listdir(os.path.join(Blender_HDR)) if os.path.isfile(os.path.join(os.path.join(Blender_HDR), f))])):
+        node_tree['sna_hdr_iocn'].append([[os.path.join(os.path.join(Blender_HDR), f) for f in os.listdir(os.path.join(Blender_HDR)) if os.path.isfile(os.path.join(os.path.join(Blender_HDR), f))][i_FA335], [os.path.join(os.path.join(Blender_HDR), f) for f in os.listdir(os.path.join(Blender_HDR)) if os.path.isfile(os.path.join(os.path.join(Blender_HDR), f))][i_FA335], os.path.basename([os.path.join(os.path.join(Blender_HDR), f) for f in os.listdir(os.path.join(Blender_HDR)) if os.path.isfile(os.path.join(os.path.join(Blender_HDR), f))][i_FA335]), load_preview_icon([os.path.join(os.path.join(Blender_HDR), f) for f in os.listdir(os.path.join(Blender_HDR)) if os.path.isfile(os.path.join(os.path.join(Blender_HDR), f))][i_FA335])])
 
 
 def load_preview_icon(path):
@@ -413,13 +418,13 @@ class SNA_OT_Open_Hdr_Path_0029A(bpy.types.Operator):
         return not False
 
     def execute(self, context):
-        if os.path.isdir(os.path.join(r'D:\Blender_HDR_Assets',)):
+        if os.path.isdir(os.path.join(Blender_HDR)):
             pass
         else:
-            if not os.path.exists(os.path.join(r'D:', '/Blender_HDR_Assets')):
-                os.mkdir(os.path.join(r'D:', '/Blender_HDR_Assets'))
+            if not os.path.exists(os.path.join(Blender_HDR)):
+                os.mkdir(os.path.join(Blender_HDR))
             self.report({'INFO'}, message='首次创建仓库成功！')
-        hdr_path = os.path.join(r'D:\Blender_HDR_Assets',)
+        hdr_path = os.path.join(Blender_HDR)
         os.system(f'explorer {hdr_path}')
         self.report({'INFO'}, message='打开仓库成功！')
         return {"FINISHED"}
@@ -530,7 +535,7 @@ def sna_func_A203C(layout_function, ):
         col_82373.alignment = 'Expand'.upper()
         col_82373.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
         col_82373.label(text='日光配置：', icon_value=0)
-        split_52561 = col_82373.split(factor=0.15000000596046448, align=True)
+        split_52561 = col_82373.split(factor=0.15, align=True)
         split_52561.alert = False
         split_52561.enabled = True
         split_52561.active = True
@@ -554,6 +559,7 @@ def sna_func_A203C(layout_function, ):
         if not True: split_9FC0B.operator_context = "EXEC_DEFAULT"
         split_9FC0B.prop(bpy.data.lights['环境配置_日光'], 'energy', text='强度', icon_value=0, emboss=True)
         split_9FC0B.prop(bpy.data.lights['环境配置_日光'], 'color', text='', icon_value=0, emboss=True)
+        col_82373.prop(bpy.data.lights['环境配置_日光'], 'angle', text='大小', icon_value=0, emboss=True)       
         col_82373.prop(bpy.data.objects['环境配置_日光'], 'rotation_euler', text='', icon_value=0, emboss=True)
     if property_exists("bpy.data.worlds['环境配置_HDR']", globals(), locals()):
         box_66E61 = col_33A08.box()
@@ -625,7 +631,7 @@ def sna_func_A203C(layout_function, ):
             col_7340A.scale_y = 1.0
             col_7340A.alignment = 'Expand'.upper()
             col_7340A.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
-            if (os.path.isdir(os.path.join(r'D:\Blender_HDR_Assets',)) and bpy.context.scene.sna_hdr_asset_library):
+            if (os.path.isdir(os.path.join(Blender_HDR)) and bpy.context.scene.sna_hdr_asset_library):
                 grid_5CB37 = col_7340A.grid_flow(columns=4, row_major=True, even_columns=False, even_rows=False, align=True)
                 grid_5CB37.enabled = True
                 grid_5CB37.active = True

@@ -1,14 +1,14 @@
 import bpy
 # 合并模型
-
-Active_Mod = False
-for obj in bpy.context.selected_objects:
-    if bpy.context.view_layer.objects.active == obj:
-        Active_Mod = True
-
-if Active_Mod:
-    bpy.ops.object.join()
-else:
+if bpy.context.active_object != None:
+    Active_Mod = False
     for obj in bpy.context.selected_objects:
-        bpy.context.view_layer.objects.active = obj
-    bpy.ops.object.join()
+        if bpy.context.view_layer.objects.active == obj:
+            Active_Mod = True
+
+    if Active_Mod:
+        bpy.ops.object.join()
+    else:
+        for obj in bpy.context.selected_objects:
+            bpy.context.view_layer.objects.active = obj
+        bpy.ops.object.join()
