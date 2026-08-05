@@ -121,7 +121,7 @@ class SNA_PT_environment_configuration_0D4F8(bpy.types.Panel):
     bl_context = ''
     bl_category = '环境'
     bl_order = 0
-    bl_ui_units_x=0
+    bl_ui_units_x=11
 
     @classmethod
     def poll(cls, context):
@@ -132,7 +132,7 @@ class SNA_PT_environment_configuration_0D4F8(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        split_9D88F = layout.split(factor=0.800000011920929, align=True)
+        split_9D88F = layout.split(factor=0.8, align=True)
         split_9D88F.alert = False
         split_9D88F.enabled = True
         split_9D88F.active = True
@@ -142,7 +142,7 @@ class SNA_PT_environment_configuration_0D4F8(bpy.types.Panel):
         split_9D88F.scale_y = 1.0
         split_9D88F.alignment = 'Expand'.upper()
         if not True: split_9D88F.operator_context = "EXEC_DEFAULT"
-        split_2D7AD = split_9D88F.split(factor=0.800000011920929, align=True)
+        split_2D7AD = split_9D88F.split(factor=0.8, align=True)
         split_2D7AD.alert = False
         split_2D7AD.enabled = True
         split_2D7AD.active = True
@@ -584,7 +584,17 @@ def sna_func_A203C(layout_function, ):
         col_24DAE.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
         col_24DAE.label(text='HDR配置：', icon_value=0)        
         col_24DAE.prop(bpy.data.worlds['环境配置_HDR'].node_tree.nodes['HDR强度'].outputs[0], 'default_value', text='强度', icon_value=0, emboss=True)
+        
+        row_QKK01 = col_24DAE.row(heading='', align=True)
+        row_QKK01.prop(bpy.data.worlds['环境配置_HDR'].node_tree.nodes['漫射强度'].outputs[0], 'default_value', text='漫射', icon_value=0, emboss=True)
+        row_QKK01.prop(bpy.data.worlds['环境配置_HDR'].node_tree.nodes['反射强度'].outputs[0], 'default_value', text='反射', icon_value=0, emboss=True)
+        
         col_24DAE.prop(bpy.data.worlds['环境配置_HDR'].node_tree.nodes['HDR旋转'].inputs[0], 'default_value', text='旋转', icon_value=0, emboss=True)
+        
+        row_D3299 = col_24DAE.row(heading='', align=True)
+        row_D3299.prop(bpy.data.worlds['环境配置_HDR'].node_tree.nodes['背景切换'].inputs[0], 'default_value', text='背景', icon_value=(0), emboss=True)
+        row_D3299.prop(bpy.data.worlds['环境配置_HDR'].node_tree.nodes['背景颜色'].outputs[0], 'default_value', text='', icon_value=(0), emboss=True)
+
         row_D3236 = col_24DAE.row(heading='', align=True)
         row_D3236.alert = False
         row_D3236.enabled = True
