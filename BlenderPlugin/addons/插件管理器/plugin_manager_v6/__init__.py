@@ -290,7 +290,7 @@ class SNA_OT_My_Generic_Operator_87B0F(bpy.types.Operator):
         addon_path = None
         import os
         # 只有当插件被启用时，才能直接这样获取
-        addon_path = os.path.dirname(__file__)
+        addon_path = os.path.dirname(sys.modules["Plug-in_Manager_v6"].__file__)
         print(f"插件路径: {addon_path}")
         node_tree['sna_addons_path'] = addon_path
         sna_func_36762()
@@ -300,7 +300,7 @@ class SNA_OT_My_Generic_Operator_87B0F(bpy.types.Operator):
         return context.window_manager.invoke_props_dialog(self, width=400)
 
 
-def sna_add_to_view3d_ht_tool_header_3B763(self, context):
+def sna_add_to_view3d_ht_tool_header_CB472(self, context):
     if not (False):
         layout = self.layout
         op = layout.operator('sna.my_generic_operator_87b0f', text='插件', icon_value=string_to_icon('DISC'), emboss=True, depress=False)
@@ -350,7 +350,7 @@ def register():
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_8D541)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_04323)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_87B0F)
-    bpy.types.VIEW3D_HT_tool_header.append(sna_add_to_view3d_ht_tool_header_3B763)
+    bpy.types.VIEW3D_HT_tool_header.append(sna_add_to_view3d_ht_tool_header_CB472)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_30228)
 
 
@@ -368,5 +368,5 @@ def unregister():
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_8D541)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_04323)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_87B0F)
-    bpy.types.VIEW3D_HT_tool_header.remove(sna_add_to_view3d_ht_tool_header_3B763)
+    bpy.types.VIEW3D_HT_tool_header.remove(sna_add_to_view3d_ht_tool_header_CB472)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_30228)
