@@ -80,16 +80,15 @@ def get_id_preview_id(data):
     return 0
 
 
-class SNA_PT_material_tools_06C90(bpy.types.Panel):
+class SNA_PT_material_tools_1D1DD(bpy.types.Panel):
     bl_label = '材质工具_2026.8.3'
-    bl_idname = 'SNA_PT_material_tools_06C90'
+    bl_idname = 'SNA_PT_material_tools_1D1DD'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_category = '材质'
     bl_order = 0
-    #bl_options = {'DEFAULT_CLOSED'}
-    bl_ui_units_x=15
+    bl_ui_units_x=0
 
     @classmethod
     def poll(cls, context):
@@ -108,7 +107,6 @@ class SNA_OT_Shader_Mat_2F193(bpy.types.Operator):
     bl_description = "打开材质面板"
     bl_options = {"REGISTER", "UNDO"}
 
-
     @classmethod
     def poll(cls, context):
         if bpy.app.version >= (3, 0, 0) and True:
@@ -116,7 +114,7 @@ class SNA_OT_Shader_Mat_2F193(bpy.types.Operator):
         return not False
 
     def execute(self, context):
-        bpy.ops.wm.call_panel(name="SNA_PT_material_tools_06C90", keep_open=True)
+        bpy.ops.wm.call_panel(name="SNA_PT_material_tools_1D1DD", keep_open=True)
         return {"FINISHED"}
 
     def invoke(self, context, event):
@@ -137,63 +135,39 @@ class SNA_OT_Shader_649Db(bpy.types.Operator):
         return not False
 
     def execute(self, context):
-        shader_path = self.sna_shader_path
-        func_name = 'Linked_Shader'
-        import os
-        # 获取文件
-        shader_list = []
-
-        def Get_The_File():
-            directory = ('C:\Blender_Shader')
-            for file in os.listdir(directory):
-                path = os.path.join(directory,file)
-                if os.path.isfile(path) and file.endswith('.blend'):
-                    shader_list.append(path)
-        # 关联Shader
-
-        def Linked_Shader():
-            # 文件名称
-            base_name = os.path.basename(shader_path)
-            # 替换字符
-            group_name = base_name.replace('.blend', '_GROUP')
-            # 判断是否存在
-            if group_name in bpy.data.node_groups:
-                pass
-            else:  
-                # 关联节点
-                bpy.ops.wm.append(directory=os.path.join(shader_path, 'NodeTree'), filename = group_name, link = True)
-            # 锁定节点组
-            bpy.data.node_groups[group_name].use_fake_user = True
-            # 当前材质
-            mat = bpy.context.object.active_material
-            # 材质节点
-            mat_nodes = mat.node_tree.nodes
-            # 清空节点
-            mat_nodes.clear()
-            # 新建节点组
-            node = mat_nodes.new(type ='ShaderNodeGroup')
-            # 设置节点树
-            node.node_tree = bpy.data.node_groups[group_name]
-            # 切换至材质视口
-            bpy.context.area.ui_type = 'ShaderNodeTree'
-            # 解散节点组
-            bpy.ops.node.group_ungroup()
-            #bpy.ops.node.select_all(action='DESELECT')
-            #node = mat_nodes.new(type ='ShaderNodeGroup')
-            #node.node_tree = bpy.data.node_groups[group_name]
-            #bpy.ops.node.mute_toggle()
-            #bpy.ops.node.hide_toggle()
-            #bpy.ops.node.select_all(action='DESELECT')
-            # 切换回3D视口
-            bpy.context.area.ui_type = 'VIEW_3D'
-            #bpy.ops.file.make_paths_absolute()
-        # 调用函数
-        functions = {
-            "Get_The_File": Get_The_File,
-            "Linked_Shader": Linked_Shader,
-        }
-        functions[func_name]()
+        Blender_Path = self.sna_shader_path
+        #Shader_Name = 'ZMD_Lit_Two'
+        #Blender_Path = 'C:\\Blender_Shader\\ZMD_Lit_Two.blend\\Material\\'
+        # 清理重名的旧材质，防止冲突
+        Old_Mat = bpy.data.materials.get(Shader_Name)
+        if Old_Mat:
+            bpy.data.materials.remove(Old_Mat)
+        # 追加外部材质并修正节点组引用
+        bpy.ops.wm.append(directory=Blender_Path, filename=Shader_Name, link=False)
+        New_Mat = bpy.data.materials.get(Shader_Name)
+        Node_Name = New_Mat.node_tree.nodes['Shader'].node_tree.name
+        if Node_Name != Shader_Name:
+            New_Mat.node_tree.nodes['Shader'].node_tree = bpy.data.node_groups[Shader_Name]
+            bpy.data.node_groups.remove(bpy.data.node_groups[Node_Name])
+        # 记录当前物体材质，并临时替换为新材质
+        Active_Mat = bpy.context.active_object.active_material
+        bpy.context.active_object.active_material = New_Mat
+        # 切换至材质编辑器，复制新材质的节点
+        bpy.context.area.ui_type = 'ShaderNodeTree'
+        bpy.ops.node.select_all(action='SELECT')
+        bpy.ops.node.clipboard_copy()
+        # 删除临时材质，清空原材质节点
+        bpy.context.blend_data.materials.remove(material=New_Mat)
+        # 将复制的节点粘贴到原材质中，并切回3D视图
+        Active_Mat.node_tree.nodes.clear()
+        bpy.context.active_object.active_material = Active_Mat
+        bpy.context.area.ui_type = 'ShaderNodeTree'
+        bpy.ops.node.select_all(action='SELECT')
+        bpy.ops.node.clipboard_paste()
+        bpy.context.area.ui_type = 'VIEW_3D'
+        bpy.context.view_layer.objects.active.select_set(True)
         bpy.ops.file.make_paths_absolute()
+        self.report({'INFO'}, message='OK！')
         return {"FINISHED"}
 
     def invoke(self, context, event):
@@ -214,7 +188,6 @@ class SNA_OT_Shader_D6429(bpy.types.Operator):
 
     def execute(self, context):
         if (len(shader['sna_shader_list']) == 0):
-            directory = None
             shader_list = None
             # 获取文件
             dir_path = os.path.dirname(os.path.abspath(__file__))
@@ -226,16 +199,16 @@ class SNA_OT_Shader_D6429(bpy.types.Operator):
                 if os.path.isfile(path) and file.endswith('.blend'):
                     shader_list.append(path)
             shader['sna_shader_list'] = shader_list
-        bpy.ops.wm.call_panel(name="SNA_PT_SHADER_LIST_8AD6E", keep_open=False)
+        bpy.ops.wm.call_panel(name="SNA_PT_SHADER_LIST_EC7B5", keep_open=False)
         return {"FINISHED"}
 
     def invoke(self, context, event):
         return self.execute(context)
 
 
-class SNA_PT_SHADER_LIST_8AD6E(bpy.types.Panel):
+class SNA_PT_SHADER_LIST_EC7B5(bpy.types.Panel):
     bl_label = 'Shader_List'
-    bl_idname = 'SNA_PT_SHADER_LIST_8AD6E'
+    bl_idname = 'SNA_PT_SHADER_LIST_EC7B5'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
     bl_context = ''
@@ -621,25 +594,14 @@ def sna_func_3C3A3(layout_function, ):
         if '贴图包' in bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].label:
             pass
         else:
-            if '_标签' in bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].label:
-                col_B3203.label(text=bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].label.split('_')[0], icon_value=0)
+            if '    ' in bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].label:
+                col_B3203.label(text='', icon_value=0)
             else:
                 if bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].is_inactive:
                     pass
                 else:
-                    split_A1A65 = col_B3203.split(factor=0.019999999552965164, align=True)
-                    split_A1A65.alert = False
-                    split_A1A65.enabled = True
-                    split_A1A65.active = True
-                    split_A1A65.use_property_split = False
-                    split_A1A65.use_property_decorate = False
-                    split_A1A65.scale_x = 1.0
-                    split_A1A65.scale_y = 1.0
-                    split_A1A65.alignment = 'Expand'.upper()
-                    if not True: split_A1A65.operator_context = "EXEC_DEFAULT"
-                    split_A1A65.label(text='', icon_value=0)
                     if (bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].type == 'VECTOR'):
-                        split_D220F = split_A1A65.split(factor=0.5, align=True)
+                        split_D220F = col_B3203.split(factor=0.5, align=True)
                         split_D220F.alert = False
                         split_D220F.enabled = True
                         split_D220F.active = True
@@ -662,7 +624,7 @@ def sna_func_3C3A3(layout_function, ):
                         row_582F8.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
                         row_582F8.prop(bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069], 'default_value', text='', icon_value=0, emboss=True)
                     else:
-                        split_35CAD = split_A1A65.split(factor=0.5, align=True)
+                        split_35CAD = col_B3203.split(factor=0.5, align=True)
                         split_35CAD.alert = False
                         split_35CAD.enabled = True
                         split_35CAD.active = True
@@ -977,15 +939,15 @@ class SNA_OT_Uv_Name_Set_3Ead6(bpy.types.Operator):
         return self.execute(context)
 
 
-class SNA_PT_material_tools_parameter_5A727(bpy.types.Panel):
+class SNA_PT_material_tools_parameter_38332(bpy.types.Panel):
     bl_label = '参数'
-    bl_idname = 'SNA_PT_material_tools_parameter_5A727'
+    bl_idname = 'SNA_PT_material_tools_parameter_38332'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_order = 2
-    #bl_options = {'DEFAULT_CLOSED'}
-    bl_parent_id = 'SNA_PT_material_tools_06C90'
+    bl_options = {'DEFAULT_CLOSED'}
+    bl_parent_id = 'SNA_PT_material_tools_1D1DD'
     bl_ui_units_x=0
 
     @classmethod
@@ -1027,14 +989,14 @@ class SNA_PT_material_tools_parameter_5A727(bpy.types.Panel):
                 sna_func_3C3A3(layout_function, )
 
 
-class SNA_PT_SHADER__BC972(bpy.types.Panel):
+class SNA_PT_SHADER__F2352(bpy.types.Panel):
     bl_label = 'Shader '
-    bl_idname = 'SNA_PT_SHADER__BC972'
+    bl_idname = 'SNA_PT_SHADER__F2352'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_order = 1
-    bl_parent_id = 'SNA_PT_material_tools_06C90'
+    bl_parent_id = 'SNA_PT_material_tools_1D1DD'
     bl_ui_units_x=0
 
     @classmethod
@@ -1152,11 +1114,11 @@ def register():
     global _icons
     _icons = bpy.utils.previews.new()
     bpy.types.Scene.sna_mat_ui_switch = bpy.props.EnumProperty(name='mat_ui_switch', description='', items=[('图像', '图像', '', 0, 0), ('参数', '参数', '', 0, 1)])
-    bpy.utils.register_class(SNA_PT_material_tools_06C90)
+    bpy.utils.register_class(SNA_PT_material_tools_1D1DD)
     bpy.utils.register_class(SNA_OT_Shader_Mat_2F193)
     bpy.utils.register_class(SNA_OT_Shader_649Db)
     bpy.utils.register_class(SNA_OT_Shader_D6429)
-    bpy.utils.register_class(SNA_PT_SHADER_LIST_8AD6E)
+    bpy.utils.register_class(SNA_PT_SHADER_LIST_EC7B5)
     bpy.utils.register_class(SNA_OT_Input_Shader_21057)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_246A7)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_2A3Bd)
@@ -1168,8 +1130,8 @@ def register():
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_6F86E)
     bpy.utils.register_class(SNA_OT_Image_Color_Space_Abdf8)
     bpy.utils.register_class(SNA_OT_Uv_Name_Set_3Ead6)
-    bpy.utils.register_class(SNA_PT_material_tools_parameter_5A727)
-    bpy.utils.register_class(SNA_PT_SHADER__BC972)
+    bpy.utils.register_class(SNA_PT_material_tools_parameter_38332)
+    bpy.utils.register_class(SNA_PT_SHADER__F2352)
 
 
 def unregister():
@@ -1181,11 +1143,11 @@ def unregister():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
     del bpy.types.Scene.sna_mat_ui_switch
-    bpy.utils.unregister_class(SNA_PT_material_tools_06C90)
+    bpy.utils.unregister_class(SNA_PT_material_tools_1D1DD)
     bpy.utils.unregister_class(SNA_OT_Shader_Mat_2F193)
     bpy.utils.unregister_class(SNA_OT_Shader_649Db)
     bpy.utils.unregister_class(SNA_OT_Shader_D6429)
-    bpy.utils.unregister_class(SNA_PT_SHADER_LIST_8AD6E)
+    bpy.utils.unregister_class(SNA_PT_SHADER_LIST_EC7B5)
     bpy.utils.unregister_class(SNA_OT_Input_Shader_21057)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_246A7)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_2A3Bd)
@@ -1197,5 +1159,5 @@ def unregister():
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_6F86E)
     bpy.utils.unregister_class(SNA_OT_Image_Color_Space_Abdf8)
     bpy.utils.unregister_class(SNA_OT_Uv_Name_Set_3Ead6)
-    bpy.utils.unregister_class(SNA_PT_material_tools_parameter_5A727)
-    bpy.utils.unregister_class(SNA_PT_SHADER__BC972)
+    bpy.utils.unregister_class(SNA_PT_material_tools_parameter_38332)
+    bpy.utils.unregister_class(SNA_PT_SHADER__F2352)
