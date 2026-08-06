@@ -203,7 +203,7 @@ def sna_expansion_panel_958FC(layout_function, py_file_data_list):
 def sna_add_to_statusbar_ht_header_53C38(self, context):
     if not (False):
         layout = self.layout
-        layout.prop(bpy.context.scene, 'sna_qkk_pie_debug', text='', icon_value=730, emboss=True)
+        layout.prop(bpy.context.scene, 'sna_qkk_pie_debug', text='', icon='SEQ_STRIP_MODIFIER', emboss=True)
 
 
 def register():

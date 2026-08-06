@@ -256,6 +256,8 @@ class SNA_OT_My_Generic_Operator_Def26(bpy.types.Operator):
         #sun.use_contact_shadow = True  # 开启接触阴影
         # 创建日光灯对象
         sun_obj = bpy.data.objects.new(name='环境配置_日光', object_data=sun)
+        # 设置为不可选中
+        sun_obj.hide_select = True
         # 将日光灯对象添加到场景中
         bpy.context.collection.objects.link(sun_obj)
         # 设置日光灯对象的位置
