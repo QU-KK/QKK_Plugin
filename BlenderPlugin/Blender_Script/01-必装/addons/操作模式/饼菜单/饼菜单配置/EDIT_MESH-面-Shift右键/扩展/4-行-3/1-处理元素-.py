@@ -18,9 +18,9 @@ def draw_menu(self, context):
     layout = self.layout
     layout.scale_y = 1.2
     
-    layout.operator("mesh.split", text="分离元素", icon='NONE')
-    layout.operator("qkk.duplicate_the_element", text="复制出元素", icon='NONE')
-    layout.operator("mesh.separate", text="分离出元素", icon='NONE').type = 'SELECTED'    
+    layout.operator("mesh.split", text="分离元素", icon='SEQ_STRIP_META')
+    layout.operator("qkk.duplicate_the_element", text="复制出元素", icon='SEQ_STRIP_DUPLICATE')
+    layout.operator("mesh.separate", text="分离出元素", icon='MOD_EXPLODE').type = 'SELECTED'    
     #layout.separator()  # 分割线
 # 注册操作项
 bpy.utils.register_class(QKK_Duplicate_The_Element)
