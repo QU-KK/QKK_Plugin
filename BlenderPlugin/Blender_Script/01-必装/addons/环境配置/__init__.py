@@ -596,6 +596,8 @@ def sna_func_A203C(layout_function, ):
         row_D3299 = col_24DAE.row(heading='', align=True)
         row_D3299.prop(bpy.data.worlds['环境配置_HDR'].node_tree.nodes['背景切换'].inputs[0], 'default_value', text='背景', icon_value=(0), emboss=True)
         row_D3299.prop(bpy.data.worlds['环境配置_HDR'].node_tree.nodes['背景颜色'].outputs[0], 'default_value', text='', icon_value=(0), emboss=True)
+        
+        col_24DAE.prop(bpy.data.worlds['环境配置_HDR'].node_tree.nodes['饱和度'].inputs[1], 'default_value', text='饱和度', icon_value=(0), emboss=True)
 
         row_D3236 = col_24DAE.row(heading='', align=True)
         row_D3236.alert = False

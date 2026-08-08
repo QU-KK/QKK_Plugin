@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Unity 材质同步文档</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { margin: 0; background: #0f172a; color: #dbeafe; font-family: "Microsoft YaHei", "Segoe UI", sans-serif; line-height: 1.65; }
+    .page { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 32px; max-width: 1280px; margin: 0 auto; padding: 32px 32px 56px; }
+    .toc { position: sticky; top: 24px; align-self: start; max-height: calc(100vh - 48px); overflow-y: auto; padding: 18px; border: 1px solid #334155; border-radius: 12px; background: #111827; }
+    .toc-title { margin: 0 0 12px; color: #93c5fd; font-size: 15px; font-weight: 700; }
+    .toc a { display: block; color: #cbd5e1; text-decoration: none; padding: 4px 0; font-size: 13px; }
+    .toc a:hover { color: #60a5fa; }
+    .toc-level-1 { font-weight: 700; }
+    .toc-level-2 { padding-left: 12px !important; }
+    .toc-level-3, .toc-level-4, .toc-level-5, .toc-level-6 { padding-left: 24px !important; }
+    main { min-width: 0; padding: 28px 34px; border: 1px solid #334155; border-radius: 14px; background: #111827; }
+    h1, h2, h3 { line-height: 1.25; }
+    h1 { color: #f8fafc; border-bottom: 1px solid #334155; padding-bottom: 12px; }
+    h2 { margin-top: 32px; color: #bfdbfe; border-bottom: 1px solid #1e293b; padding-bottom: 6px; }
+    h3 { color: #93c5fd; }
+    code { background: #1e293b; color: #fef3c7; padding: 2px 5px; border-radius: 4px; }
+    pre { background: #020617; color: #f8fafc; padding: 14px 16px; border-radius: 8px; overflow-x: auto; }
+    pre code { background: transparent; padding: 0; }
+    img { max-width: 100%; border: 1px solid #334155; border-radius: 8px; }
+    blockquote { border-left: 4px solid #334155; margin-left: 0; padding-left: 16px; color: #cbd5e1; }
+    @media (max-width: 860px) { .page { display: block; padding: 20px; } .toc { position: static; margin-bottom: 20px; } main { padding: 22px; } }
+  </style>
+</head>
+<body>
+<div class="page">
+<nav class="toc">
+<p class="toc-title">目录</p>
+<a class="toc-level-1" href="#unity-材质同步">Unity 材质同步</a>
+<a class="toc-level-2" href="#使用前提">使用前提</a>
+<a class="toc-level-2" href="#flowserver-版本检查">FlowServer 版本检查</a>
+<a class="toc-level-2" href="#快速使用">快速使用</a>
+<a class="toc-level-2" href="#命名规则">命名规则</a>
+<a class="toc-level-2" href="#模板材质要求">模板材质要求</a>
+<a class="toc-level-2" href="#常见问题">常见问题</a>
+<a class="toc-level-3" href="#提示模型不符合规则">提示模型不符合规则</a>
+<a class="toc-level-3" href="#提示-metadata-缺少-workspace_dir">提示 `metadata 缺少 workspace_dir`</a>
+<a class="toc-level-3" href="#提示连接-flowserver-失败">提示连接 FlowServer 失败</a>
+<a class="toc-level-3" href="#提示没有检测到-unity-客户端">提示没有检测到 Unity 客户端</a>
+<a class="toc-level-3" href="#提示贴图不存在">提示贴图不存在</a>
+<a class="toc-level-3" href="#材质仍显示模板默认图">材质仍显示模板默认图</a>
+<a class="toc-level-2" href="#更新说明">更新说明</a>
+<a class="toc-level-3" href="#0219---2026-07-09">0.2.19 - 2026-07-09</a>
+<a class="toc-level-3" href="#0218---2026-07-09">0.2.18 - 2026-07-09</a>
+<a class="toc-level-3" href="#0217---2026-06-29">0.2.17 - 2026-06-29</a>
+<a class="toc-level-3" href="#0216---2026-06-29">0.2.16 - 2026-06-29</a>
+<a class="toc-level-3" href="#0215---2026-06-12">0.2.15 - 2026-06-12</a>
+<a class="toc-level-3" href="#0214---2026-06-12">0.2.14 - 2026-06-12</a>
+<a class="toc-level-3" href="#0213---2026-06-11">0.2.13 - 2026-06-11</a>
+<a class="toc-level-3" href="#0212---2026-06-11">0.2.12 - 2026-06-11</a>
+<a class="toc-level-3" href="#0211---2026-06-11">0.2.11 - 2026-06-11</a>
+<a class="toc-level-3" href="#0210---2026-06-10">0.2.10 - 2026-06-10</a>
+<a class="toc-level-3" href="#029---2026-06-10">0.2.9 - 2026-06-10</a>
+<a class="toc-level-3" href="#028---2026-06-10">0.2.8 - 2026-06-10</a>
+<a class="toc-level-3" href="#027---2026-06-10">0.2.7 - 2026-06-10</a>
+<a class="toc-level-3" href="#026---2026-06-10">0.2.6 - 2026-06-10</a>
+<a class="toc-level-3" href="#025---2026-06-10">0.2.5 - 2026-06-10</a>
+<a class="toc-level-3" href="#024---2026-06-10">0.2.4 - 2026-06-10</a>
+<a class="toc-level-3" href="#023---2026-06-10">0.2.3 - 2026-06-10</a>
+<a class="toc-level-3" href="#022---2026-06-10">0.2.2 - 2026-06-10</a>
+<a class="toc-level-3" href="#021---2026-06-10">0.2.1 - 2026-06-10</a>
+<a class="toc-level-3" href="#020---2026-06-10">0.2.0 - 2026-06-10</a>
+<a class="toc-level-3" href="#010">0.1.0</a>
+<a class="toc-level-2" href="#安装">安装</a>
+<a class="toc-level-2" href="#配置">配置</a>
+<a class="toc-level-2" href="#交付内容">交付内容</a>
+<a class="toc-level-2" href="#构建发布包">构建发布包</a>
+</nav>
+<main>
+<h1 id="unity-材质同步">Unity 材质同步</h1>
+<p>Blender 插件：按选中模型名查询 Unity prefab 的材质信息，并把贴图写入 Blender 模板材质中的预留 Image Texture 节点。</p>
+<h2 id="使用前提">使用前提</h2>
+<ul>
+<li>Blender 版本：<code>5.2.0</code> 或更高。</li>
+<li>FlowServer 版本：<code>89.0</code> 或更高。</li>
+<li>Unity 工程已打开。</li>
+<li>Blender 选中的对象必须是 Mesh，且名称必须以 <code>_lod数字</code> 结尾，例如 <code>S_build_map02_floor+1_006_02b_lod0</code>。</li>
+</ul>
+<h2 id="flowserver-版本检查">FlowServer 版本检查</h2>
+<p>请确保用户已安装并启动 <code>FlowServer</code>，版本需要为 <code>89.0</code> 或以上。可在 Oasis 的 <code>指令集</code> 页面查看 <code>FlowServer安装</code> 指令卡片上的版本号。</p>
+<p><img src="flowserver-89.png" alt="FlowServer 89.0 版本入口"></p>
+<h2 id="快速使用">快速使用</h2>
+<p>1. 确认 <code>FlowServer</code> 和 Unity 客户端已启动。</p>
+<p>2. 在 Blender 中选择目标 Mesh。</p>
+<p>3. 确认 Mesh 名称以 <code>_lod数字</code> 结尾，例如 <code>S_build_map02_floor+1_006_02b_lod0</code>。</p>
+<p>4. 在 3D View 顶部 Header 点击 <code>同步材质</code>。</p>
+<p>5. 如需查看说明，可点击 Header 中的问号图标按钮，或在插件 Preferences 中点击 <code>打开文档</code>，插件会打开本地 HTML 文档页面。</p>
+<h2 id="命名规则">命名规则</h2>
+<p>模型名到 prefab 名：</p>
+<ul>
+<li><code>S_xxx_lod0</code> -&gt; <code>P_xxx</code></li>
+<li><code>SK_xxx_lod0</code> -&gt; <code>P_xxx</code></li>
+<li>其他前缀保持不变，但仍会去掉 <code>_lod数字</code> 后缀。</li>
+</ul>
+<p>材质匹配规则：</p>
+<p>1. 优先按材质名匹配。</p>
+<p>2. 匹配时会忽略 Blender 自动生成的 <code>.001</code> 后缀。</p>
+<p>3. 匹配时会弱化 <code>_</code>、<code>+</code> 等分隔符差异。</p>
+<p>4. 如果仍未匹配，则按材质槽顺序匹配 Unity 返回的 <code>materials</code> 列表。</p>
+<h2 id="模板材质要求">模板材质要求</h2>
+<p>插件会从 <code>ZMD_Lit_Two.blend</code> 复制模板材质，并写入预留 Image Texture 节点。</p>
+<p>模板节点要求：</p>
+<ul>
+<li><code>Color</code>：必需，对应 Unity <code>_BaseColorMap</code></li>
+<li><code>NRO</code>：必需，对应 Unity <code>_NormalMap</code></li>
+<li><code>Mask</code>：可选，对应 Unity <code>_MaskMap</code></li>
+</ul>
+<p>如果模板中有多个同名或同 label 的 <code>Color</code> / <code>NRO</code> / <code>Mask</code> Image Texture 节点，插件会全部更新，避免保留模板默认图。</p>
+<h2 id="常见问题">常见问题</h2>
+<h3 id="提示模型不符合规则">提示模型不符合规则</h3>
+<p>选中 Mesh 名称必须以 <code>_lod数字</code> 结尾，例如 <code>_lod0</code>。</p>
+<h3 id="提示-metadata-缺少-workspace_dir">提示 <code>metadata 缺少 workspace_dir</code></h3>
+<p>Unity 客户端需要在 service metadata 中提供 <code>workspace_dir</code>。插件不再提供手动工程路径输入。</p>
+<h3 id="提示连接-flowserver-失败">提示连接 FlowServer 失败</h3>
+<p>请确认 FlowServer <code>89.0</code> 或以上版本已启动。插件会自动检查通信地址、端口连通性和 NATS 握手状态，并在错误信息中提示是连接超时、端口未监听还是服务类型不匹配。</p>
+<h3 id="提示没有检测到-unity-客户端">提示没有检测到 Unity 客户端</h3>
+<p>说明插件已经能连接到 FlowServer，但没有发现在线 Unity 客户端。请确认 Unity 工程已打开，并且 Unity 客户端已连接到 FlowServer。</p>
+<h3 id="提示贴图不存在">提示贴图不存在</h3>
+<p>检查 Unity 客户端上报的 <code>workspace_dir</code> 是否指向正确工程根目录，并确认返回的 <code>Assets/...</code> 或 <code>Packages/...</code> 路径在本机可访问。</p>
+<h3 id="材质仍显示模板默认图">材质仍显示模板默认图</h3>
+<p>重新加载插件后再次同步。如果仍出现，检查模板材质中的目标 Image Texture 节点名称或 label 是否能匹配 <code>Color</code>、<code>NRO</code>、<code>Mask</code>。</p>
+<h2 id="更新说明">更新说明</h2>
+<h3 id="0219---2026-07-09">0.2.19 - 2026-07-09</h3>
+<ul>
+<li>更新 <code>ZMD_Lit_Two.blend</code> 模板材质，保持插件内模板文件名不变。</li>
+</ul>
+<h3 id="0218---2026-07-09">0.2.18 - 2026-07-09</h3>
+<ul>
+<li>同步结束时自动清理无用户的 <code>*_sync_old</code> 旧材质，减少旧材质让名后在材质列表中残留。</li>
+<li>保留仍有用户引用的 <code>*_sync_old</code> 材质，避免误删未参与同步对象仍在使用的旧材质。</li>
+</ul>
+<h3 id="0217---2026-06-29">0.2.17 - 2026-06-29</h3>
+<ul>
+<li>单次同步内的 prefab 查询缓存改为按完整候选名列表命中，重复 instance 会复用已查询到的 Unity 材质数据。</li>
+<li>同步同名材质时优先复用已存在的同步材质，避免多对象共享旧材质时生成 <code>.001</code> / <code>.002</code> 材质副本。</li>
+<li>旧共享材质占用目标名称时会先让出名称，确保新同步材质使用干净的 Unity 材质名。</li>
+<li>同步开始时固定每个材质槽的原始材质名，避免同步过程中材质重命名影响后续槽位匹配。</li>
+</ul>
+<h3 id="0216---2026-06-29">0.2.16 - 2026-06-29</h3>
+<ul>
+<li>支持选中嵌套 prefab 父级后递归同步子层级中的合法 <code>_lod数字</code> Mesh，并在没有合法子对象时禁用同步按钮。</li>
+<li>嵌套 prefab 查询优先使用最近的 <code>P_</code> 父级名称，并在失败时回退到子 Mesh 名推导出的 prefab 名。</li>
+<li>prefab 查询增加候选名 fallback，兼容 <code>_1_</code> / <code>+1_</code> 差异以及导入后产生的 <code>__数字_</code> 实例后缀。</li>
+<li>多个子对象同步时，单个 prefab 查询失败不再中断整体流程，并对重复失败的 prefab 做缓存去重。</li>
+<li>缺少贴图或贴图文件不存在时改为清空对应节点并提示 warning，已有贴图和参数继续同步。</li>
+<li>选中层级同步时自动隐藏名称以 <code>_shadowProxy</code> 结尾的 Mesh，并跳过其材质同步。</li>
+</ul>
+<h3 id="0215---2026-06-12">0.2.15 - 2026-06-12</h3>
+<ul>
+<li>更新 <code>ZMD_Lit_Two.blend</code> 模板材质。</li>
+<li>Node Group 复用逻辑改为按模板实际节点组的基础名和类型动态匹配，不再写死 <code>ZMD_Lit_Two</code>。</li>
+<li>重复同步材质时复用已有同类型 Node Group，并清理本次 append 出来的重复节点组。</li>
+<li>普通 Unity <code>Color</code> 参数同步到 Blender 前转换为 Linear，HDR 自发光颜色 <code>_EmissiveColor</code> 保持 Unity 返回值直写。</li>
+</ul>
+<h3 id="0214---2026-06-12">0.2.14 - 2026-06-12</h3>
+<ul>
+<li>为同步写入的模板 Image Texture 图片统一设置 <code>Alpha</code> 为 <code>Channel Packed</code>。</li>
+<li>兼容新模板中的 <code>三通道_MASK</code> 节点名称，确保 Unity 三通道 Mask 贴图能写入对应图片节点。</li>
+<li>同步材质时清理不再使用的旧材质和临时模板材质，避免重复同步后残留 <code>.001</code> 材质或 <code>ZMD_Lit_Two_Mat</code>。</li>
+</ul>
+<h3 id="0213---2026-06-11">0.2.13 - 2026-06-11</h3>
+<ul>
+<li>更新 <code>ZMD_Lit_Two.blend</code> 模板材质。</li>
+<li>同步自发光贴图，并修正自发光 UV 输入名称以匹配新模板。</li>
+<li>同步 NRO 本体法线贴图、使用本体法线模式、本体法线贴图强度和本体法线 AO 强度。</li>
+<li>将本体法线、透贴和三通道混合下拉项映射到新模板的枚举文本。</li>
+<li>同步三通道混合 <code>Off</code> 模式下的 R/G/B Color、Scale、Offset、Roughness、Metallic 参数。</li>
+<li>使用 <code>_EnableTriChannelMask</code> 区分三通道混合的 <code>不启用</code> 和 <code>Off</code> 模式，避免没有三通道信息时保留模板默认 <code>Off</code>。</li>
+</ul>
+<h3 id="0212---2026-06-11">0.2.12 - 2026-06-11</h3>
+<ul>
+<li>同步执行时增加 Blender 进度显示。</li>
+<li>同步完成或失败时增加弹窗反馈。</li>
+<li>模板材质贴图赋值后不再移动节点位置。</li>
+<li>删除未使用的 Shader Editor 节点布局算法和相关测试。</li>
+<li>同步固有色模块的 Shader 节点参数：Tiling、Offset、UV 通道、底色、底色覆盖贴图颜色、固有色变亮。</li>
+<li>同步 NRO 模块的 Shader 节点参数：Tiling、Offset、UV 通道、法线贴图强度、双面材质反转背面法线、使用本体法线。</li>
+<li>同步 PBR 设置模块的 Shader 节点参数：Specular、最小粗糙度、最大粗糙度、AO 强度。</li>
+<li>同步自发光模块的 Shader 节点参数：通道、不受固有色影响、颜色、Emissive Speed。</li>
+<li>同步三通道混合模块的 Shader 节点参数：Tiling、Offset、UV 通道、仅 PC 贴图开关。</li>
+<li>同步透贴模块的 Shader 节点参数：通道、Clip Threshold。</li>
+<li>兼容 Unity Tilling/Tiling 字段拼写差异，修复固有色和 NRO 的 Tiling/Offset 未同步问题。</li>
+<li>支持从 Unity 贴图返回值中的 <code>m_Scale</code>、<code>m_Offset</code>、<code>m_UVSetIndex</code> 读取 Tiling、Offset 和 UV 通道。</li>
+<li>修正自发光通道映射，使用 <code>_EmissiveMaskChannel</code> 对齐 Blender 的 <code>Base Color A</code> / <code>NRO A</code> 选项。</li>
+<li>自发光通道遇到 Blender 暂不支持的 Unity 选项时改为写入 <code>关闭</code>。</li>
+<li>修正三通道 Mask 贴图模式映射，使用 <code>Off</code> / <code>Legacy</code> / <code>G With Normal</code> 对齐 Blender 下拉选项。</li>
+<li>同步流程改为 modal/timer 分步执行，减少一次性阻塞并让 Blender 有机会刷新进度状态。</li>
+<li>点击同步后在校验开始前立即初始化并更新进度为 0，确保耗时校验或同步步骤开始前已有反馈。</li>
+<li>同步过程中在 Blender 状态栏显示 <code>当前/总数 + 步骤说明</code>，例如查询 prefab、同步具体材质。</li>
+</ul>
+<h3 id="0211---2026-06-11">0.2.11 - 2026-06-11</h3>
+<ul>
+<li>在调用 <code>nats.connect</code> 前增加短超时 TCP 预检查，FlowServer 端口不可用时直接给出中文错误，避免 Blender 长时间卡死。</li>
+<li>禁用 NATS 自动重连并限制连接超时，减少底层 traceback 重复输出。</li>
+</ul>
+<h3 id="0210---2026-06-10">0.2.10 - 2026-06-10</h3>
+<ul>
+<li>FlowServer 可连接但没有 Unity 客户端在线时，显示更明确的中文提示。</li>
+</ul>
+<h3 id="029---2026-06-10">0.2.9 - 2026-06-10</h3>
+<ul>
+<li>NATS 连接异常时增加诊断信息，区分地址格式错误、连接超时、端口未监听和 NATS 握手失败。</li>
+<li>构建脚本排除 <code>.git/</code> 目录，避免仓库内部文件进入发布包。</li>
+</ul>
+<h3 id="028---2026-06-10">0.2.8 - 2026-06-10</h3>
+<ul>
+<li>简化使用前提中的 Unity 工程说明。</li>
+</ul>
+<h3 id="027---2026-06-10">0.2.7 - 2026-06-10</h3>
+<ul>
+<li>精简使用前提，移除 NATS 默认地址说明。</li>
+</ul>
+<h3 id="026---2026-06-10">0.2.6 - 2026-06-10</h3>
+<ul>
+<li>HTML 文档改为深色主题。</li>
+<li>HTML 文档增加左侧标题目录，支持快速跳转。</li>
+</ul>
+<h3 id="025---2026-06-10">0.2.5 - 2026-06-10</h3>
+<ul>
+<li>构建时将 <code>README.md</code> 转换为 <code>docs/index.html</code>。</li>
+<li><code>文档</code> / <code>打开文档</code> 改为打开本地 HTML 页面，支持浏览器滚动和更好的 Markdown 展示。</li>
+</ul>
+<h3 id="024---2026-06-10">0.2.4 - 2026-06-10</h3>
+<ul>
+<li>新增 <code>build_package.py</code>，可直接脚本化构建插件安装 zip。</li>
+</ul>
+<h3 id="023---2026-06-10">0.2.3 - 2026-06-10</h3>
+<ul>
+<li>Header 主按钮文案从 <code>同步Unity材质</code> 简化为 <code>同步材质</code>，详细说明保留在 tooltip。</li>
+<li>Header 文档入口改为仅显示图标，减少界面占用。</li>
+</ul>
+<h3 id="022---2026-06-10">0.2.2 - 2026-06-10</h3>
+<ul>
+<li><code>文档</code> / <code>打开文档</code> 改为在 Blender 弹窗内显示 README，不再依赖本机默认 Markdown 打开方式。</li>
+</ul>
+<h3 id="021---2026-06-10">0.2.1 - 2026-06-10</h3>
+<ul>
+<li>在 3D View Header 增加 <code>文档</code> 按钮。</li>
+<li>在插件 Preferences 增加 <code>打开文档</code> 按钮。</li>
+<li>将 Preferences 中的 <code>通信地址</code> 改为只读展示。</li>
+</ul>
+<h3 id="020---2026-06-10">0.2.0 - 2026-06-10</h3>
+<ul>
+<li>接入 Unity NATS 查询流程，按 prefab 名获取材质列表。</li>
+<li>内置 <code>nats-py</code> 到 <code>vendor/</code>，插件可直接安装使用。</li>
+<li>支持 <code>S_</code> / <code>SK_</code> 模型名前缀转换为 <code>P_</code> prefab 前缀。</li>
+<li>仅允许同步 <code>_lod数字</code> 后缀的 Mesh；查询 prefab 时会去掉 <code>_lod数字</code>。</li>
+<li>从 Unity 客户端 service metadata 的 <code>workspace_dir</code> 自动解析 <code>Assets/...</code> 和 <code>Packages/...</code> 贴图路径。</li>
+<li>移除测试数据模式和手动 Unity 工程路径输入。</li>
+<li>使用 <code>ZMD_Lit_Two.blend</code> 模板材质，并写入 <code>Color</code> / <code>NRO</code> / <code>Mask</code> Image Texture 节点。</li>
+<li>支持自动重命名前两个 UV 通道为 <code>1U</code>、<code>2U</code>。</li>
+<li>材质匹配优先按名称，兼容 <code>.001</code> 副本后缀和 <code>_</code> / <code>+</code> 分隔符差异；名称不匹配时按材质槽顺序匹配。</li>
+<li>缺少必需贴图或贴图文件不存在时直接报错，并清空模板默认贴图，避免误用旧图。</li>
+<li>改进 Shader Editor 节点自动布局，按依赖关系和节点高度排布。</li>
+<li>UI 保持在 3D View Header 中，按钮名称为 <code>同步Unity材质</code>。</li>
+<li>文档补充 FlowServer <code>89.0</code> 及以上版本依赖说明和安装入口截图。</li>
+</ul>
+<h3 id="010">0.1.0</h3>
+<ul>
+<li>初版流程：使用 mock 材质数据写入 Blender PBR 材质。</li>
+<li>提供中文 UI 和基础材质同步 operator。</li>
+</ul>
+<h2 id="安装">安装</h2>
+<p>1. 将 <code>unity_material_sync.zip</code> 安装到 Blender：</p>
+<ul>
+<li><code>Edit &gt; Preferences &gt; Add-ons &gt; Install...</code></li>
+<li>选择 zip 文件</li>
+<li>勾选 <code>Unity 材质同步</code></li>
+</ul>
+<p>2. 如果已安装旧版本，建议先禁用再重新启用插件，或重启 Blender。</p>
+<h2 id="配置">配置</h2>
+<p>插件 Preferences 中包含：</p>
+<ul>
+<li><code>通信地址</code>：本地 NATS 地址，只读展示，默认 <code>nats://127.0.0.1:14222</code>。</li>
+<li><code>超时时间</code>：请求 Unity 材质数据时的超时时间。</li>
+<li><code>打开文档</code>：打开插件内置的本地 HTML 文档页面。</li>
+</ul>
+<h2 id="交付内容">交付内容</h2>
+<p>zip 内应包含完整的 <code>unity_material_sync/</code> 文件夹：</p>
+<pre><code>unity_material_sync/
+  __init__.py
+  operators.py
+  panel.py
+  preferences.py
+  material_sync.py
+  template_material.py
+  unity_client.py
+  uv_utils.py
+  documentation.py
+  build_package.py
+  README.md
+  CHANGELOG.md
+  ZMD_Lit_Two.blend
+  docs/
+  vendor/</code></pre>
+<p><code>vendor/</code> 中已内置 <code>nats-py</code>，使用方不需要额外安装 Python 依赖。</p>
+<h2 id="构建发布包">构建发布包</h2>
+<p>在项目根目录执行：</p>
+<pre><code>python addons/unity_material_sync/build_package.py</code></pre>
+<p>构建脚本会先生成 <code>docs/index.html</code>，再打包插件。默认输出到：</p>
+<pre><code>dist/unity_material_sync-&lt;version&gt;.zip</code></pre>
+<p>也可以指定输出目录：</p>
+<pre><code>python addons/unity_material_sync/build_package.py --output-dir D:/Temp</code></pre>
+</main>
+</div>
+</body>
+</html>

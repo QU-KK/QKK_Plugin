@@ -31,9 +31,9 @@ import bpy.utils.previews
 
 addon_keymaps = {}
 _icons = None
-class SNA_PT_UNITY_FBX_82735(bpy.types.Panel):
+class SNA_PT_UNITY_FBX_54DD0(bpy.types.Panel):
     bl_label = '导入Unity_FBX'
-    bl_idname = 'SNA_PT_UNITY_FBX_82735'
+    bl_idname = 'SNA_PT_UNITY_FBX_54DD0'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
@@ -116,17 +116,19 @@ class SNA_OT_Import_Unity_Fbx_D209F(bpy.types.Operator):
             Scene_Name = Mod_Name_Split[2].capitalize()
             Type_Name = Mod_Name_Split[1].capitalize()
             Contents_Name = Name[2:]
-            Contents_Name = Contents_Name[:-3]
+            A = len(Mod_Name_Split[len(Mod_Name_Split)-1])+1
+            Contents_Name = Contents_Name[:-A]
             Contents_Name = Contents_Name.capitalize()
             Ass_Name = Name + Suffix + '.fbx'
             Ass_Path = os.path.join(Project_Path,Scene_Name,Type_Name,Contents_Name,'Models',Ass_Name)
             if os.path.isfile(Ass_Path):
                 bpy.ops.wm.fbx_import(filepath=Ass_Path, mtl_name_collision_mode='REFERENCE_EXISTING', use_anim=False)
                 print(Ass_Name,'导入')
+                print('路径:',Ass_Path)
                 # 应用旋转缩放
                 bpy.ops.object.transform_apply(rotation=True, scale=True)
             else:
-                print(Ass_Name,'不存在')
+                print('不存在:',Ass_Path)
         return {"FINISHED"}
 
     def invoke(self, context, event):
@@ -147,7 +149,7 @@ def register():
     global _icons
     _icons = bpy.utils.previews.new()
     bpy.types.Scene.sna_suffix = bpy.props.EnumProperty(name='Suffix', description='', items=[('_lod0', '_lod0', '', 0, 1), ('_lod1', '_lod1', '', 0, 2), ('_lod2', '_lod2', '', 0, 4), ('_lod3', '_lod3', '', 0, 8), ('_COL1_UM01', '_COL1_UM01', '', 0, 16), ('_shadowProxy', '_shadowProxy', '', 0, 32)], options={'ENUM_FLAG'})
-    bpy.utils.register_class(SNA_PT_UNITY_FBX_82735)
+    bpy.utils.register_class(SNA_PT_UNITY_FBX_54DD0)
     bpy.utils.register_class(SNA_AddonPreferences_026DE)
     bpy.utils.register_class(SNA_OT_Import_Unity_Fbx_D209F)
 
@@ -161,6 +163,6 @@ def unregister():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
     del bpy.types.Scene.sna_suffix
-    bpy.utils.unregister_class(SNA_PT_UNITY_FBX_82735)
+    bpy.utils.unregister_class(SNA_PT_UNITY_FBX_54DD0)
     bpy.utils.unregister_class(SNA_AddonPreferences_026DE)
     bpy.utils.unregister_class(SNA_OT_Import_Unity_Fbx_D209F)
