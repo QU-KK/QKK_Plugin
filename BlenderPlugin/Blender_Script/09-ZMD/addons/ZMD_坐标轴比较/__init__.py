@@ -45,9 +45,9 @@ def string_to_icon(value):
 
 addon_keymaps = {}
 _icons = None
-class SNA_PT_axis_comparison_62587(bpy.types.Panel):
+class SNA_PT_axis_comparison_73E95(bpy.types.Panel):
     bl_label = '坐标轴对比'
-    bl_idname = 'SNA_PT_axis_comparison_62587'
+    bl_idname = 'SNA_PT_axis_comparison_73E95'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
@@ -75,13 +75,13 @@ class SNA_PT_axis_comparison_62587(bpy.types.Panel):
         split_3F517.scale_y = 1.5
         split_3F517.alignment = 'Expand'.upper()
         if not True: split_3F517.operator_context = "EXEC_DEFAULT"
-        op = split_3F517.operator('sna.import_unity_fbx_d209f', text='轴心对比', icon_value=string_to_icon('ORIENTATION_LOCAL'), emboss=True, depress=False)
+        op = split_3F517.operator('sna.import_unity_d209f', text='轴心对比', icon_value=string_to_icon('ORIENTATION_LOCAL'), emboss=True, depress=False)
         op = split_3F517.operator('sna.delete_cache_b7cd7', text='', icon_value=string_to_icon('TRASH'), emboss=True, depress=False)
 
 
-class SNA_OT_Import_Unity_Fbx_D209F(bpy.types.Operator):
-    bl_idname = "sna.import_unity_fbx_d209f"
-    bl_label = "Import_Unity_Fbx"
+class SNA_OT_Import_Unity_D209F(bpy.types.Operator):
+    bl_idname = "sna.import_unity_d209f"
+    bl_label = "Import_Unity"
     bl_description = ""
     bl_options = {"REGISTER", "UNDO"}
 
@@ -92,7 +92,7 @@ class SNA_OT_Import_Unity_Fbx_D209F(bpy.types.Operator):
         return not False
 
     def execute(self, context):
-        Project = bpy.context.preferences.addons[__package__].preferences.sna_project
+        Project_Data = bpy.context.preferences.addons[__package__].preferences.sna_project
         Print = None
         import os
 
@@ -111,11 +111,11 @@ class SNA_OT_Import_Unity_Fbx_D209F(bpy.types.Operator):
             bpy.ops.object.material_slot_add()
             bpy.context.active_object.material_slots[0].material = Mat
         # 项目路径
-        Project = r'E:\v2d0\qukuikui_DM42.Beyond_Beyond_v2d0_project'
+        Project_Data = r'E:\v2d0\qukuikui_DM42.Beyond_Beyond_v2d0_project'
         # Mod名称
-        Mod_Name = bpy.context.active_object.name
+        Mod_Name_Data = bpy.context.active_object.name
         # 资产文件夹名称
-        Folder_Name = Mod_Name.replace('_lod0', '').replace('S_', '').replace('_1_', '+1_')
+        Folder_Name = Mod_Name_Data.replace('_lod0', '').replace('S_', '').replace('_1_', '+1_')
         Data = Folder_Name.split('_')
         Folder_Name = Folder_Name[:-len(Data[4])][:-1].capitalize()
         # 场景名称
@@ -123,9 +123,9 @@ class SNA_OT_Import_Unity_Fbx_D209F(bpy.types.Operator):
         # 资产类别
         Type_Name = Data[0].capitalize()
         # 路径拼接
-        Project_Path = os.path.join(Project,'Assets','Beyond','Arts','Environment','SceneAssets')
+        Project_Path = os.path.join(Project_Data,'Assets','Beyond','Arts','Environment','SceneAssets')
         # 资产最终路径
-        Ass_Path = os.path.join(Project_Path,Scene_Name,Type_Name,Folder_Name,'Models',(Mod_Name+'.fbx'))
+        Ass_Path = os.path.join(Project_Path,Scene_Name,Type_Name,Folder_Name,'Models',(Mod_Name_Data+'.fbx'))
         # 获取位置
         Location = bpy.context.active_object.location
         # 导入fbx
@@ -141,10 +141,10 @@ class SNA_OT_Import_Unity_Fbx_D209F(bpy.types.Operator):
             bpy.context.active_object.location = Location
             # 配置材质
             New_Mat()
-            Print = '导入完成!'
+            Print = '导入完成!  ' + Mod_Name_Data
         else:
             print('不存在:',Ass_Path)
-            Print = '不存在!'
+            Print = '不存在!  ' + Mod_Name_Data
         self.report({'INFO'}, message=Print)
         return {"FINISHED"}
 
@@ -188,9 +188,9 @@ class SNA_AddonPreferences_026DE(bpy.types.AddonPreferences):
 def register():
     global _icons
     _icons = bpy.utils.previews.new()
-    bpy.utils.register_class(SNA_PT_axis_comparison_62587)
+    bpy.utils.register_class(SNA_PT_axis_comparison_73E95)
     bpy.utils.register_class(SNA_AddonPreferences_026DE)
-    bpy.utils.register_class(SNA_OT_Import_Unity_Fbx_D209F)
+    bpy.utils.register_class(SNA_OT_Import_Unity_D209F)
     bpy.utils.register_class(SNA_OT_Delete_Cache_B7Cd7)
 
 
@@ -202,7 +202,7 @@ def unregister():
     for km, kmi in addon_keymaps.values():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
-    bpy.utils.unregister_class(SNA_PT_axis_comparison_62587)
+    bpy.utils.unregister_class(SNA_PT_axis_comparison_73E95)
     bpy.utils.unregister_class(SNA_AddonPreferences_026DE)
-    bpy.utils.unregister_class(SNA_OT_Import_Unity_Fbx_D209F)
+    bpy.utils.unregister_class(SNA_OT_Import_Unity_D209F)
     bpy.utils.unregister_class(SNA_OT_Delete_Cache_B7Cd7)
