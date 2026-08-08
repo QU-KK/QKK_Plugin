@@ -31,9 +31,9 @@ import bpy.utils.previews
 
 addon_keymaps = {}
 _icons = None
-class SNA_PT_UNITY_FBX_54DD0(bpy.types.Panel):
+class SNA_PT_UNITY_FBX_70E2D(bpy.types.Panel):
     bl_label = '导入Unity_FBX'
-    bl_idname = 'SNA_PT_UNITY_FBX_54DD0'
+    bl_idname = 'SNA_PT_UNITY_FBX_70E2D'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
@@ -103,32 +103,36 @@ class SNA_OT_Import_Unity_Fbx_D209F(bpy.types.Operator):
             Mod_Name = bpy.context.preferences.addons[__package__].preferences.sna_mod_name
             Project = bpy.context.preferences.addons[__package__].preferences.sna_project
             Suffix = list(bpy.context.scene.sna_suffix)[i_9B484]
+            Print = None
             import os
-            #Mod_Name = 'S_mod_base02_scaffold+1_006_01'
-            #Suffix = '_lod0'
+            # 项目路径
             #Project = r'E:\v2d0\qukuikui_DM42.Beyond_Beyond_v2d0_project'
+            # Mod名称
+            #Mod_Name = 'S_prop_base02_signal+1_001_01'
+            # 资产文件夹名称
+            Folder_Name = Mod_Name.replace('S_', '').replace('P_', '').replace('_1_', '+1_').replace('_lod0', '').replace('_lod1', '').replace('_lod2', '').replace('_lod3', '')
+            Ass_Name = 'S_'+Folder_Name+Suffix+'.fbx'
+            Data = Folder_Name.split('_')
+            Folder_Name = Folder_Name[:-len(Data[4])][:-1].capitalize()
+            # 场景名称
+            Scene_Name = Data[1].capitalize()
+            # 资产类别
+            Type_Name = Data[0].capitalize()
+            # 路径拼接
             Project_Path = os.path.join(Project,'Assets','Beyond','Arts','Environment','SceneAssets')
-            A=Mod_Name.replace('S_', '')
-            B=A.replace('P_', '')
-            C=B.replace('_1_', '+1_')
-            Name='S_' + C
-            Mod_Name_Split = Name.split('_')
-            Scene_Name = Mod_Name_Split[2].capitalize()
-            Type_Name = Mod_Name_Split[1].capitalize()
-            Contents_Name = Name[2:]
-            A = len(Mod_Name_Split[len(Mod_Name_Split)-1])+1
-            Contents_Name = Contents_Name[:-A]
-            Contents_Name = Contents_Name.capitalize()
-            Ass_Name = Name + Suffix + '.fbx'
-            Ass_Path = os.path.join(Project_Path,Scene_Name,Type_Name,Contents_Name,'Models',Ass_Name)
+            # 资产最终路径
+            Ass_Path = os.path.join(Project_Path,Scene_Name,Type_Name,Folder_Name,'Models',Ass_Name)
             if os.path.isfile(Ass_Path):
                 bpy.ops.wm.fbx_import(filepath=Ass_Path, mtl_name_collision_mode='REFERENCE_EXISTING', use_anim=False)
                 print(Ass_Name,'导入')
                 print('路径:',Ass_Path)
                 # 应用旋转缩放
                 bpy.ops.object.transform_apply(rotation=True, scale=True)
+                Print = '导入完成!  ' + Ass_Name
             else:
                 print('不存在:',Ass_Path)
+                Print = '不存在!  ' + Ass_Name
+            self.report({'INFO'}, message=Print)
         return {"FINISHED"}
 
     def invoke(self, context, event):
@@ -149,7 +153,7 @@ def register():
     global _icons
     _icons = bpy.utils.previews.new()
     bpy.types.Scene.sna_suffix = bpy.props.EnumProperty(name='Suffix', description='', items=[('_lod0', '_lod0', '', 0, 1), ('_lod1', '_lod1', '', 0, 2), ('_lod2', '_lod2', '', 0, 4), ('_lod3', '_lod3', '', 0, 8), ('_COL1_UM01', '_COL1_UM01', '', 0, 16), ('_shadowProxy', '_shadowProxy', '', 0, 32)], options={'ENUM_FLAG'})
-    bpy.utils.register_class(SNA_PT_UNITY_FBX_54DD0)
+    bpy.utils.register_class(SNA_PT_UNITY_FBX_70E2D)
     bpy.utils.register_class(SNA_AddonPreferences_026DE)
     bpy.utils.register_class(SNA_OT_Import_Unity_Fbx_D209F)
 
@@ -163,6 +167,6 @@ def unregister():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
     del bpy.types.Scene.sna_suffix
-    bpy.utils.unregister_class(SNA_PT_UNITY_FBX_54DD0)
+    bpy.utils.unregister_class(SNA_PT_UNITY_FBX_70E2D)
     bpy.utils.unregister_class(SNA_AddonPreferences_026DE)
     bpy.utils.unregister_class(SNA_OT_Import_Unity_Fbx_D209F)
