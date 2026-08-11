@@ -133,8 +133,7 @@ class SNA_OT_Import_Unity_D209F(bpy.types.Operator):
             bpy.ops.wm.fbx_import(filepath=Ass_Path, mtl_name_collision_mode='REFERENCE_EXISTING', use_anim=False)
             name = bpy.context.active_object.name[:-4]
             bpy.context.active_object.name = name + '_轴心对比'
-            print(Ass_Name,'导入')
-            print('路径:',Ass_Path)
+            print('导入路径:',Ass_Path)
             # 应用旋转缩放
             bpy.ops.object.transform_apply(rotation=True, scale=True)
             # 设置位置
