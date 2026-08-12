@@ -55,7 +55,7 @@ def string_to_type(value, to_type, default):
 
 addon_keymaps = {}
 _icons = None
-main = {'sna_py_path': '', }
+main = {'sna_pie_file': [], 'sna_pie_exp_dir': [], }
 
 
 def load_preview_icon(path):
@@ -78,8 +78,8 @@ class SNA_MT_527A6(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout.menu_pie()
-        for i_E3081 in range(len([os.path.join(main['sna_py_path'], f) for f in os.listdir(main['sna_py_path']) if os.path.isfile(os.path.join(main['sna_py_path'], f))])):
-            if ((i_E3081 == 2) and (len([os.path.join(main['sna_py_path'], f) for f in os.listdir(main['sna_py_path']) if os.path.isdir(os.path.join(main['sna_py_path'], f))]) != 0)):
+        for i_E3081 in range(len(main['sna_pie_file'])):
+            if ((i_E3081 == 2) and (len(main['sna_pie_exp_dir']) != 0)):
                 box_8D97E = layout.box()
                 box_8D97E.alert = False
                 box_8D97E.enabled = True
@@ -100,7 +100,7 @@ class SNA_MT_527A6(bpy.types.Menu):
                 col_F4F50.scale_y = 1.2999999523162842
                 col_F4F50.alignment = 'Expand'.upper()
                 col_F4F50.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
-                for i_E598C in range(len([os.path.join(os.path.join(main['sna_py_path'],'扩展'), f) for f in os.listdir(os.path.join(main['sna_py_path'],'扩展')) if os.path.isdir(os.path.join(os.path.join(main['sna_py_path'],'扩展'), f))])):
+                for i_E598C in range(len(main['sna_pie_exp_dir'])):
                     box_3A1FE = col_F4F50.box()
                     box_3A1FE.alert = False
                     box_3A1FE.enabled = True
@@ -111,8 +111,8 @@ class SNA_MT_527A6(bpy.types.Menu):
                     box_3A1FE.scale_x = 1.0
                     box_3A1FE.scale_y = 1.0
                     if not True: box_3A1FE.operator_context = "EXEC_DEFAULT"
-                    if '行' in os.path.basename([os.path.join(os.path.join(main['sna_py_path'],'扩展'), f) for f in os.listdir(os.path.join(main['sna_py_path'],'扩展')) if os.path.isdir(os.path.join(os.path.join(main['sna_py_path'],'扩展'), f))][i_E598C]):
-                        grid_96766 = box_3A1FE.grid_flow(columns=string_to_type(os.path.basename([os.path.join(os.path.join(main['sna_py_path'],'扩展'), f) for f in os.listdir(os.path.join(main['sna_py_path'],'扩展')) if os.path.isdir(os.path.join(os.path.join(main['sna_py_path'],'扩展'), f))][i_E598C]).split('-')[2], int, 0), row_major=True, even_columns=False, even_rows=False, align=True)
+                    if '行' in os.path.basename(main['sna_pie_exp_dir'][i_E598C]):
+                        grid_96766 = box_3A1FE.grid_flow(columns=string_to_type(os.path.basename(main['sna_pie_exp_dir'][i_E598C]).split('-')[2], int, 0), row_major=True, even_columns=False, even_rows=False, align=True)
                         grid_96766.enabled = True
                         grid_96766.active = True
                         grid_96766.use_property_split = False
@@ -121,9 +121,9 @@ class SNA_MT_527A6(bpy.types.Menu):
                         grid_96766.scale_x = 1.0
                         grid_96766.scale_y = 1.0
                         if not True: grid_96766.operator_context = "EXEC_DEFAULT"
-                        for i_6D814 in range(len([os.path.join([os.path.join(os.path.join(main['sna_py_path'],'扩展'), f) for f in os.listdir(os.path.join(main['sna_py_path'],'扩展')) if os.path.isdir(os.path.join(os.path.join(main['sna_py_path'],'扩展'), f))][i_E598C], f) for f in os.listdir([os.path.join(os.path.join(main['sna_py_path'],'扩展'), f) for f in os.listdir(os.path.join(main['sna_py_path'],'扩展')) if os.path.isdir(os.path.join(os.path.join(main['sna_py_path'],'扩展'), f))][i_E598C]) if os.path.isfile(os.path.join([os.path.join(os.path.join(main['sna_py_path'],'扩展'), f) for f in os.listdir(os.path.join(main['sna_py_path'],'扩展')) if os.path.isdir(os.path.join(os.path.join(main['sna_py_path'],'扩展'), f))][i_E598C], f))])):
+                        for i_6D814 in range(len([os.path.join(main['sna_pie_exp_dir'][i_E598C], f) for f in os.listdir(main['sna_pie_exp_dir'][i_E598C]) if os.path.isfile(os.path.join(main['sna_pie_exp_dir'][i_E598C], f))])):
                             layout_function = grid_96766
-                            sna_expansion_panel_C4BF0(layout_function, [os.path.join([os.path.join(os.path.join(main['sna_py_path'],'扩展'), f) for f in os.listdir(os.path.join(main['sna_py_path'],'扩展')) if os.path.isdir(os.path.join(os.path.join(main['sna_py_path'],'扩展'), f))][i_E598C], f) for f in os.listdir([os.path.join(os.path.join(main['sna_py_path'],'扩展'), f) for f in os.listdir(os.path.join(main['sna_py_path'],'扩展')) if os.path.isdir(os.path.join(os.path.join(main['sna_py_path'],'扩展'), f))][i_E598C]) if os.path.isfile(os.path.join([os.path.join(os.path.join(main['sna_py_path'],'扩展'), f) for f in os.listdir(os.path.join(main['sna_py_path'],'扩展')) if os.path.isdir(os.path.join(os.path.join(main['sna_py_path'],'扩展'), f))][i_E598C], f))][i_6D814])
+                            sna_expansion_panel_C4BF0(layout_function, [os.path.join(main['sna_pie_exp_dir'][i_E598C], f) for f in os.listdir(main['sna_pie_exp_dir'][i_E598C]) if os.path.isfile(os.path.join(main['sna_pie_exp_dir'][i_E598C], f))][i_6D814])
                     else:
                         col_87773 = box_3A1FE.column(heading='', align=True)
                         col_87773.alert = False
@@ -135,12 +135,12 @@ class SNA_MT_527A6(bpy.types.Menu):
                         col_87773.scale_y = 1.0
                         col_87773.alignment = 'Expand'.upper()
                         col_87773.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
-                        for i_29312 in range(len([os.path.join([os.path.join(os.path.join(main['sna_py_path'],'扩展'), f) for f in os.listdir(os.path.join(main['sna_py_path'],'扩展')) if os.path.isdir(os.path.join(os.path.join(main['sna_py_path'],'扩展'), f))][i_E598C], f) for f in os.listdir([os.path.join(os.path.join(main['sna_py_path'],'扩展'), f) for f in os.listdir(os.path.join(main['sna_py_path'],'扩展')) if os.path.isdir(os.path.join(os.path.join(main['sna_py_path'],'扩展'), f))][i_E598C]) if os.path.isfile(os.path.join([os.path.join(os.path.join(main['sna_py_path'],'扩展'), f) for f in os.listdir(os.path.join(main['sna_py_path'],'扩展')) if os.path.isdir(os.path.join(os.path.join(main['sna_py_path'],'扩展'), f))][i_E598C], f))])):
+                        for i_29312 in range(len([os.path.join(main['sna_pie_exp_dir'][i_E598C], f) for f in os.listdir(main['sna_pie_exp_dir'][i_E598C]) if os.path.isfile(os.path.join(main['sna_pie_exp_dir'][i_E598C], f))])):
                             layout_function = col_87773
-                            sna_expansion_panel_C4BF0(layout_function, [os.path.join([os.path.join(os.path.join(main['sna_py_path'],'扩展'), f) for f in os.listdir(os.path.join(main['sna_py_path'],'扩展')) if os.path.isdir(os.path.join(os.path.join(main['sna_py_path'],'扩展'), f))][i_E598C], f) for f in os.listdir([os.path.join(os.path.join(main['sna_py_path'],'扩展'), f) for f in os.listdir(os.path.join(main['sna_py_path'],'扩展')) if os.path.isdir(os.path.join(os.path.join(main['sna_py_path'],'扩展'), f))][i_E598C]) if os.path.isfile(os.path.join([os.path.join(os.path.join(main['sna_py_path'],'扩展'), f) for f in os.listdir(os.path.join(main['sna_py_path'],'扩展')) if os.path.isdir(os.path.join(os.path.join(main['sna_py_path'],'扩展'), f))][i_E598C], f))][i_29312])
+                            sna_expansion_panel_C4BF0(layout_function, [os.path.join(main['sna_pie_exp_dir'][i_E598C], f) for f in os.listdir(main['sna_pie_exp_dir'][i_E598C]) if os.path.isfile(os.path.join(main['sna_pie_exp_dir'][i_E598C], f))][i_29312])
             else:
                 layout_function = layout
-                sna_expansion_panel_C4BF0(layout_function, [os.path.join(main['sna_py_path'], f) for f in os.listdir(main['sna_py_path']) if os.path.isfile(os.path.join(main['sna_py_path'], f))][i_E3081])
+                sna_expansion_panel_C4BF0(layout_function, main['sna_pie_file'][i_E3081])
 
 
 class SNA_OT_Run_Py_30311(bpy.types.Operator):
@@ -162,6 +162,7 @@ class SNA_OT_Run_Py_30311(bpy.types.Operator):
             # 打开指定目录并选中
             # 注意：/select, 后面不要有空格
             subprocess.Popen(f'explorer /select, "{Py_Script_Path}"')
+            self.report({'INFO'}, message='调试模式运行完毕！')
         else:
             Py_Script_Path = self.sna_py_script_path
             # 运行指定路径脚本
@@ -193,27 +194,31 @@ class SNA_OT_Qkk_Pie_B6877(bpy.types.Operator):
     def execute(self, context):
         print((self.sna_mode if (self.sna_mode == '全模式-右键') else (bpy.context.mode + '-' + ('点' if bpy.context.tool_settings.mesh_select_mode[0] else '') + ('线' if bpy.context.tool_settings.mesh_select_mode[1] else '') + ('面' if bpy.context.tool_settings.mesh_select_mode[2] else '') if ((self.sna_mode != '空格') and (bpy.context.mode == 'EDIT_MESH')) else bpy.context.mode) + '-' + self.sna_mode))
         Py_Path = None
-        Py_Path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "饼菜单配置")
-        #Py_Path = r'C:\QKK_Plugin\BlenderPlugin\Blender_Script\必装\addons\操作模式\饼菜单\饼菜单配置'
+        #Py_Path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "饼菜单配置")
+        Py_Path = r'C:\QKK_Plugin\BlenderPlugin\Blender_Script\01-必装\addons\操作模式\饼菜单\饼菜单配置'
         #Py_Path = r'D:\QKK_Plugin\BlenderPlugin\Blender_Script\01-必装\addons\操作模式\饼菜单\饼菜单配置'
-        main['sna_py_path'] = os.path.join(Py_Path,(self.sna_mode if (self.sna_mode == '全模式-右键') else (bpy.context.mode + '-' + ('点' if bpy.context.tool_settings.mesh_select_mode[0] else '') + ('线' if bpy.context.tool_settings.mesh_select_mode[1] else '') + ('面' if bpy.context.tool_settings.mesh_select_mode[2] else '') if ((self.sna_mode != '空格') and (bpy.context.mode == 'EDIT_MESH')) else bpy.context.mode) + '-' + self.sna_mode))
+        main['sna_pie_file'] = [os.path.join(os.path.join(Py_Path,(self.sna_mode if (self.sna_mode == '全模式-右键') else (bpy.context.mode + '-' + ('点' if bpy.context.tool_settings.mesh_select_mode[0] else '') + ('线' if bpy.context.tool_settings.mesh_select_mode[1] else '') + ('面' if bpy.context.tool_settings.mesh_select_mode[2] else '') if ((self.sna_mode != '空格') and (bpy.context.mode == 'EDIT_MESH')) else bpy.context.mode) + '-' + self.sna_mode)), f) for f in os.listdir(os.path.join(Py_Path,(self.sna_mode if (self.sna_mode == '全模式-右键') else (bpy.context.mode + '-' + ('点' if bpy.context.tool_settings.mesh_select_mode[0] else '') + ('线' if bpy.context.tool_settings.mesh_select_mode[1] else '') + ('面' if bpy.context.tool_settings.mesh_select_mode[2] else '') if ((self.sna_mode != '空格') and (bpy.context.mode == 'EDIT_MESH')) else bpy.context.mode) + '-' + self.sna_mode))) if os.path.isfile(os.path.join(os.path.join(Py_Path,(self.sna_mode if (self.sna_mode == '全模式-右键') else (bpy.context.mode + '-' + ('点' if bpy.context.tool_settings.mesh_select_mode[0] else '') + ('线' if bpy.context.tool_settings.mesh_select_mode[1] else '') + ('面' if bpy.context.tool_settings.mesh_select_mode[2] else '') if ((self.sna_mode != '空格') and (bpy.context.mode == 'EDIT_MESH')) else bpy.context.mode) + '-' + self.sna_mode)), f))]
+        if os.path.exists(os.path.join(os.path.join(Py_Path,(self.sna_mode if (self.sna_mode == '全模式-右键') else (bpy.context.mode + '-' + ('点' if bpy.context.tool_settings.mesh_select_mode[0] else '') + ('线' if bpy.context.tool_settings.mesh_select_mode[1] else '') + ('面' if bpy.context.tool_settings.mesh_select_mode[2] else '') if ((self.sna_mode != '空格') and (bpy.context.mode == 'EDIT_MESH')) else bpy.context.mode) + '-' + self.sna_mode)),'扩展')):
+            main['sna_pie_exp_dir'] = [os.path.join(os.path.join(os.path.join(Py_Path,(self.sna_mode if (self.sna_mode == '全模式-右键') else (bpy.context.mode + '-' + ('点' if bpy.context.tool_settings.mesh_select_mode[0] else '') + ('线' if bpy.context.tool_settings.mesh_select_mode[1] else '') + ('面' if bpy.context.tool_settings.mesh_select_mode[2] else '') if ((self.sna_mode != '空格') and (bpy.context.mode == 'EDIT_MESH')) else bpy.context.mode) + '-' + self.sna_mode)),'扩展'), f) for f in os.listdir(os.path.join(os.path.join(Py_Path,(self.sna_mode if (self.sna_mode == '全模式-右键') else (bpy.context.mode + '-' + ('点' if bpy.context.tool_settings.mesh_select_mode[0] else '') + ('线' if bpy.context.tool_settings.mesh_select_mode[1] else '') + ('面' if bpy.context.tool_settings.mesh_select_mode[2] else '') if ((self.sna_mode != '空格') and (bpy.context.mode == 'EDIT_MESH')) else bpy.context.mode) + '-' + self.sna_mode)),'扩展')) if os.path.isdir(os.path.join(os.path.join(os.path.join(Py_Path,(self.sna_mode if (self.sna_mode == '全模式-右键') else (bpy.context.mode + '-' + ('点' if bpy.context.tool_settings.mesh_select_mode[0] else '') + ('线' if bpy.context.tool_settings.mesh_select_mode[1] else '') + ('面' if bpy.context.tool_settings.mesh_select_mode[2] else '') if ((self.sna_mode != '空格') and (bpy.context.mode == 'EDIT_MESH')) else bpy.context.mode) + '-' + self.sna_mode)),'扩展'), f))]
         bpy.ops.wm.call_menu_pie(name="SNA_MT_527A6")
         return {"FINISHED"}
 
     def invoke(self, context, event):
+        main['sna_pie_file'] = []
+        main['sna_pie_exp_dir'] = []
         return self.execute(context)
 
 
-def sna_add_to_statusbar_ht_header_1F23E(self, context):
+def sna_add_to_statusbar_ht_header_C4608(self, context):
     if not (False):
         layout = self.layout
-        layout.prop(bpy.context.scene, 'sna_qkk_pie_debug', text='', icon_value=730, emboss=True)
+        layout.prop(bpy.context.scene, 'sna_qkk_pie_debug', text='', icon_value=string_to_icon('SEQ_STRIP_MODIFIER'), emboss=True)
 
 
 def sna_expansion_panel_C4BF0(layout_function, py_file_data):
     if '-操作项=' in os.path.basename(py_file_data):
-        qkk_operator = text=os.path.basename(py_file_data).replace('.py', '').split('-')[3].split('=')[1]
-        op = layout_function.operator(qkk_operator, text=os.path.basename(py_file_data).replace('.py', '').split('-')[1], icon_value=(load_preview_icon(os.path.join(py_file_data.split('饼菜单配置')[0],'图标',os.path.basename(py_file_data).replace('.py', '').split('-')[2].split('=')[1] + '.png')) if '-图标=' in os.path.basename(py_file_data) else string_to_icon(os.path.basename(py_file_data).replace('.py', '').split('-')[2])), emboss=True, depress=False)
+        op = layout_function.operator('sn.dummy_button_operator', text=os.path.basename(py_file_data).replace('.py', '').split('-')[1], icon_value=(load_preview_icon(os.path.join(py_file_data.split('饼菜单配置')[0],'图标',os.path.basename(py_file_data).replace('.py', '').split('-')[2].split('=')[1] + '.png')) if '-图标=' in os.path.basename(py_file_data) else string_to_icon(os.path.basename(py_file_data).replace('.py', '').split('-')[2])), emboss=True, depress=False)
+        layout_function.label(text=os.path.basename(py_file_data).replace('.py', '').split('-')[3].split('=')[1], icon_value=0)
     else:
         op = layout_function.operator('sna.run_py_30311', text=os.path.basename(py_file_data).replace('.py', '').split('-')[1], icon_value=(load_preview_icon(os.path.join(py_file_data.split('饼菜单配置')[0],'图标',os.path.basename(py_file_data).replace('.py', '').split('-')[2].split('=')[1] + '.png')) if '-图标=' in os.path.basename(py_file_data) else string_to_icon(os.path.basename(py_file_data).replace('.py', '').split('-')[2])), emboss=True, depress=False)
         op.sna_py_script_path = py_file_data
@@ -226,7 +231,7 @@ def register():
     bpy.utils.register_class(SNA_MT_527A6)
     bpy.utils.register_class(SNA_OT_Run_Py_30311)
     bpy.utils.register_class(SNA_OT_Qkk_Pie_B6877)
-    bpy.types.STATUSBAR_HT_header.append(sna_add_to_statusbar_ht_header_1F23E)
+    bpy.types.STATUSBAR_HT_header.append(sna_add_to_statusbar_ht_header_C4608)
     kc = bpy.context.window_manager.keyconfigs.addon
     km = kc.keymaps.new(name='3D View', space_type='VIEW_3D')
     kmi = km.keymap_items.new('sna.qkk_pie_b6877', 'RIGHTMOUSE', 'PRESS',
@@ -265,4 +270,4 @@ def unregister():
     bpy.utils.unregister_class(SNA_MT_527A6)
     bpy.utils.unregister_class(SNA_OT_Run_Py_30311)
     bpy.utils.unregister_class(SNA_OT_Qkk_Pie_B6877)
-    bpy.types.STATUSBAR_HT_header.remove(sna_add_to_statusbar_ht_header_1F23E)
+    bpy.types.STATUSBAR_HT_header.remove(sna_add_to_statusbar_ht_header_C4608)
