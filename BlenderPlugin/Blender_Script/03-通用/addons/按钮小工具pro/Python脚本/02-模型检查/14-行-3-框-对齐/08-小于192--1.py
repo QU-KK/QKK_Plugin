@@ -5,4 +5,4 @@ node = bpy.data.node_groups.get(".UV像素密度可视化")
 if node:
     node.nodes["精度显示模式"].inputs['Menu'].default_value = '阈值显示'
     # 显示阈值
-    node.nodes['精度显示'].integer = 124
+    node.nodes['精度显示'].integer = 188
