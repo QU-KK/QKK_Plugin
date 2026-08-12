@@ -1,38 +1,60 @@
 import bpy
+import os
+
+# 获取当前脚本所在目录
+dir_path = os.path.dirname(os.path.abspath(__file__))
+blend_path = os.path.join(dir_path, "资产", "UV像素密度可视化.blend")
+
+node_name = ".UV像素密度可视化"
+
+node = bpy.data.node_groups.get(node_name)
+
+# 追加
+if node:
+    print(f"节点 '{node_name}' 已存在，跳过追加")
+else:
+    bpy.ops.wm.append(directory=blend_path + r'\NodeTree', filename=node_name, link=False)
+
+# 设置修改器
+for obj in bpy.data.objects:
+    if '_lod' in obj.name:
+
+        if node_name not in obj.modifiers:
+            # 添加几何节点修改器
+            mod = obj.modifiers.new(name=node_name, type='NODES')
+            mod.node_group = bpy.data.node_groups[node_name]
+
+
+
+
 # 获取材质
-Mat = bpy.data.materials.get('.UV棋盘格')
+Mat_Name = '.UV像素密度'
+Mat = bpy.data.materials.get(Mat_Name)
 if Mat == None:
     # 创建材质
-    Mat = bpy.context.blend_data.materials.new('.UV棋盘格')
+    Mat = bpy.context.blend_data.materials.new(Mat_Name)
     # 创建节点
     node_tree = Mat.node_tree
     nodes = node_tree.nodes
     links = node_tree.links
     # 清理节点
     nodes.clear()
-    # 创建节点
-    # 创建 "UV 贴图" (UV Map) 节点
-    node_uv = nodes.new(type='ShaderNodeUVMap')
-    # 创建 "棋盘格纹理" (Checker Texture) 节点
-    node_checker = nodes.new(type='ShaderNodeTexChecker')
-    # 创建 "材质输出" (Material Output) 节点
+
+    # 创建属性节点
+    node_attribute = nodes.new(type='ShaderNodeAttribute')
+    # 创建材质输出节点
     node_output = nodes.new(type='ShaderNodeOutputMaterial')
 
-    # 连接节点
-    # 连接: UV 贴图 的 "UV" -> 棋盘格纹理 的 "矢量" (Vector)
-    links.new(node_uv.outputs['UV'], node_checker.inputs['Vector'])
-    # 连接: 棋盘格纹理 的 "颜色" (Color) -> 材质输出 的 "表(曲)面" (Surface)
-    links.new(node_checker.outputs['Color'], node_output.inputs['Surface'])
+    # 连接
+    links.new(node_attribute.outputs['Color'], node_output.inputs['Surface'])
+
 
 # 覆盖全局材质
 bpy.context.view_layer.material_override = Mat
 
-# 参数变量
-Density = 16
-#UV = '1U'
 # 设置参数
 Node = Mat.node_tree
-#Node.nodes['UV Map'].uv_map = UV
-Node.nodes['Checker Texture'].inputs['Scale'].default_value = Density
-Node.nodes['Checker Texture'].inputs['Color1'].default_value = (0.033,0.033,0.033,1)
-Node.nodes['Checker Texture'].inputs['Color2'].default_value = (0.448,0.448,0.448,1)
+Node.nodes['Attribute'].attribute_name = 'UV纹理密度'
+
+
+bpy.context.space_data.shading.type = 'MATERIAL'

@@ -36,3 +36,5 @@ Node = Mat.node_tree
 Node.nodes['Checker Texture'].inputs['Scale'].default_value = Density
 Node.nodes['Checker Texture'].inputs['Color1'].default_value = (0.033,0.033,0.033,1)
 Node.nodes['Checker Texture'].inputs['Color2'].default_value = (0.448,0.448,0.448,1)
+
+bpy.context.space_data.shading.type = 'MATERIAL'
