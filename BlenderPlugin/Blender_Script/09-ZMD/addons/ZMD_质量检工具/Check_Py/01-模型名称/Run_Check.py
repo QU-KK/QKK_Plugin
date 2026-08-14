@@ -2,7 +2,7 @@ import bpy
 
 # 变量
 Check_Item_Name = '模型名称'
-Description = '检查名称是否含有 S_、+1、空格、.0，以及判断是否存在"_lod" "_COL" "_shadowProxy"'
+Description = '检查名称是否含有 S_、+1、空格、.0，以及判断是否存在"_lod" "_COL" "_shadowProxy"，判断名称字段数'
 
 # 名称检查
 Check_Data = [Check_Item_Name]
@@ -30,9 +30,15 @@ for obj in selected_objects:
         Check_Data.append(data)
     
     if "_lod" not in name and "_COL" not in name and "_shadowProxy" not in name:    
-        description = '模型名称不规范'
+        description = '缺少尾缀'
         data = [name,description]
         Check_Data.append(data)
+
+    if len(name.split('_')) != 7 and '+1_' in name:
+        description = '名称字段数量错误'
+        data = [name,description]
+        Check_Data.append(data)
+
 
 # 枚举
 icon = 'NODE_SOCKET_SHADER'

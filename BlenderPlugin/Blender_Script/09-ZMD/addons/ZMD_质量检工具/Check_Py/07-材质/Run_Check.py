@@ -1,8 +1,8 @@
 import bpy
 
 # 变量
-Check_Item_Name = 'lod材质'
-Description = '检查材质名称是否含有 M_、+1、空格、.0'
+Check_Item_Name = '材质'
+Description = '检查材质名称是否含有 M_、+1、空格、.0，判断名称字段数'
 
 # 材质名称检查
 Check_Data = [Check_Item_Name]
@@ -30,6 +30,11 @@ for obj in selected_objects:
                 if ".0" in mat_name:    
                     description = '存在 .0 : ' + mat_name
                     data = [name,description]
+                    Check_Data.append(data)
+
+                if len(mat_name.split('_')) != 6 and '+1_' in mat_name:
+                    description = '名称字段数量错误'
+                    data = [mat_name,description]
                     Check_Data.append(data)
 
 # 枚举

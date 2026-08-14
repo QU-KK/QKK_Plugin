@@ -27,6 +27,7 @@ bl_info = {
 
 import bpy
 import bpy.utils.previews
+import os
 
 
 
@@ -46,6 +47,7 @@ def string_to_icon(value):
 addon_keymaps = {}
 _icons = None
 zmd_ = {'sna_check_overall_ui': [], 'sna_check_overall_data': [], 'sna_check_overall_mod': [], }
+node_tree = {'sna_target_dir': '', }
 _item_map = dict()
 
 
@@ -56,9 +58,9 @@ def make_enum_item(_id, name, descr, preview_id, uid):
     return _item_map[lookup]
 
 
-class SNA_PT_panel_5E14A(bpy.types.Panel):
+class SNA_PT_panel_0E1DA(bpy.types.Panel):
     bl_label = '终末地质检'
-    bl_idname = 'SNA_PT_panel_5E14A'
+    bl_idname = 'SNA_PT_panel_0E1DA'
     bl_space_type = 'PROPERTIES'
     bl_region_type = 'WINDOW'
     bl_context = 'constraint'
@@ -98,10 +100,10 @@ class SNA_OT_Check_65690(bpy.types.Operator):
         return not False
 
     def execute(self, context):
-        script_path = None
         Check_Overall_Data = zmd_['sna_check_overall_data']
         Check_Overall_Ui = zmd_['sna_check_overall_ui']
         selected_objects = None
+        target_dir = None
         import os
         os.system('cls')
         print('开始检查!')
@@ -110,7 +112,7 @@ class SNA_OT_Check_65690(bpy.types.Operator):
         for obj in bpy.context.selected_objects:
             if obj.type == 'MESH':
                 selected_objects.append(obj)
-        #target_dir = r"C:\QKK_Plugin\BlenderPlugin\Blender_Script\ZMD\addons\ZMD_质量检工具\Check_Py"
+        #target_dir = r"D:\QKK_Plugin\BlenderPlugin\Blender_Script\09-ZMD\addons\ZMD_质量检工具\Check_Py"
         target_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Check_Py")
         # 只过滤当前目录下的第一级文件夹
         Contents = [
@@ -136,6 +138,8 @@ class SNA_OT_Check_65690(bpy.types.Operator):
             Check_Overall_Data = namespace.get('Check_Overall_Data')
         print('检查完毕!')
         zmd_['sna_check_overall_mod'] = selected_objects
+        node_tree['sna_target_dir'] = target_dir
+        self.report({'INFO'}, message='检查完毕！')
         return {"FINISHED"}
 
     def invoke(self, context, event):
@@ -284,7 +288,7 @@ def sna_main_529FA(layout_function, ):
                             if not True: box_EAC77.operator_context = "EXEC_DEFAULT"
                             box_EAC77.label(text='检查通过！！！', icon_value=string_to_icon('CHECKMARK'))
         layout_function = split_071AE
-        sna_function_interface_5C46D(layout_function, )
+        sna_repair_panel_5C46D(layout_function, )
 
 
 class SNA_OT_Open_F0C59(bpy.types.Operator):
@@ -311,7 +315,7 @@ class SNA_OT_Open_F0C59(bpy.types.Operator):
         return context.window_manager.invoke_props_dialog(self, width=700)
 
 
-def sna_add_to_view3d_mt_editor_menus_44E7C(self, context):
+def sna_add_to_view3d_mt_editor_menus_75416(self, context):
     if not (False):
         layout = self.layout
         op = layout.operator('sna.open_f0c59', text='质检', icon_value=1013, emboss=True, depress=False)
@@ -365,7 +369,7 @@ class SNA_OT_My_Generic_Operator_2B330(bpy.types.Operator):
         return self.execute(context)
 
 
-def sna_function_interface_5C46D(layout_function, ):
+def sna_repair_panel_5C46D(layout_function, ):
     box_ACA1D = layout_function.box()
     box_ACA1D.alert = False
     box_ACA1D.enabled = True
@@ -376,19 +380,61 @@ def sna_function_interface_5C46D(layout_function, ):
     box_ACA1D.scale_x = 1.0
     box_ACA1D.scale_y = 1.0
     if not True: box_ACA1D.operator_context = "EXEC_DEFAULT"
-    op = box_ACA1D.operator('sn.dummy_button_operator', text=bpy.context.scene.sna_check_category, icon_value=0, emboss=True, depress=False)
+    col_F48D9 = box_ACA1D.column(heading='', align=False)
+    col_F48D9.alert = False
+    col_F48D9.enabled = True
+    col_F48D9.active = True
+    col_F48D9.use_property_split = False
+    col_F48D9.use_property_decorate = False
+    col_F48D9.scale_x = 1.0
+    col_F48D9.scale_y = 1.0
+    col_F48D9.alignment = 'Expand'.upper()
+    col_F48D9.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
+    for i_83740 in range(len([os.path.join(node_tree['sna_target_dir'], f) for f in os.listdir(node_tree['sna_target_dir']) if os.path.isdir(os.path.join(node_tree['sna_target_dir'], f))])):
+        if bpy.context.scene.sna_check_category in os.path.basename([os.path.join(node_tree['sna_target_dir'], f) for f in os.listdir(node_tree['sna_target_dir']) if os.path.isdir(os.path.join(node_tree['sna_target_dir'], f))][i_83740]):
+            if os.path.exists(os.path.join([os.path.join(node_tree['sna_target_dir'], f) for f in os.listdir(node_tree['sna_target_dir']) if os.path.isdir(os.path.join(node_tree['sna_target_dir'], f))][i_83740],'修复')):
+                for i_6EC4E in range(len([os.path.join(os.path.join([os.path.join(node_tree['sna_target_dir'], f) for f in os.listdir(node_tree['sna_target_dir']) if os.path.isdir(os.path.join(node_tree['sna_target_dir'], f))][i_83740],'修复'), f) for f in os.listdir(os.path.join([os.path.join(node_tree['sna_target_dir'], f) for f in os.listdir(node_tree['sna_target_dir']) if os.path.isdir(os.path.join(node_tree['sna_target_dir'], f))][i_83740],'修复')) if os.path.isfile(os.path.join(os.path.join([os.path.join(node_tree['sna_target_dir'], f) for f in os.listdir(node_tree['sna_target_dir']) if os.path.isdir(os.path.join(node_tree['sna_target_dir'], f))][i_83740],'修复'), f))])):
+                    op = col_F48D9.operator('sna.run_repair_f30e1', text=os.path.basename([os.path.join(os.path.join([os.path.join(node_tree['sna_target_dir'], f) for f in os.listdir(node_tree['sna_target_dir']) if os.path.isdir(os.path.join(node_tree['sna_target_dir'], f))][i_83740],'修复'), f) for f in os.listdir(os.path.join([os.path.join(node_tree['sna_target_dir'], f) for f in os.listdir(node_tree['sna_target_dir']) if os.path.isdir(os.path.join(node_tree['sna_target_dir'], f))][i_83740],'修复')) if os.path.isfile(os.path.join(os.path.join([os.path.join(node_tree['sna_target_dir'], f) for f in os.listdir(node_tree['sna_target_dir']) if os.path.isdir(os.path.join(node_tree['sna_target_dir'], f))][i_83740],'修复'), f))][i_6EC4E]).replace('.py', '').split('-')[1], icon_value=0, emboss=True, depress=False)
+                    op.sna_py_path = [os.path.join(os.path.join([os.path.join(node_tree['sna_target_dir'], f) for f in os.listdir(node_tree['sna_target_dir']) if os.path.isdir(os.path.join(node_tree['sna_target_dir'], f))][i_83740],'修复'), f) for f in os.listdir(os.path.join([os.path.join(node_tree['sna_target_dir'], f) for f in os.listdir(node_tree['sna_target_dir']) if os.path.isdir(os.path.join(node_tree['sna_target_dir'], f))][i_83740],'修复')) if os.path.isfile(os.path.join(os.path.join([os.path.join(node_tree['sna_target_dir'], f) for f in os.listdir(node_tree['sna_target_dir']) if os.path.isdir(os.path.join(node_tree['sna_target_dir'], f))][i_83740],'修复'), f))][i_6EC4E]
+            else:
+                col_F48D9.label(text='无', icon_value=0)
+
+
+class SNA_OT_Run_Repair_F30E1(bpy.types.Operator):
+    bl_idname = "sna.run_repair_f30e1"
+    bl_label = "Run_Repair"
+    bl_description = ""
+    bl_options = {"REGISTER", "UNDO"}
+    sna_py_path: bpy.props.StringProperty(name='Py_Path', description='', options={'HIDDEN'}, default='', subtype='NONE', maxlen=0)
+
+    @classmethod
+    def poll(cls, context):
+        if bpy.app.version >= (3, 0, 0) and True:
+            cls.poll_message_set('')
+        return not False
+
+    def execute(self, context):
+        Py_Path = self.sna_py_path
+        # 运行指定路径脚本
+        exec(open(Py_Path).read())
+        self.report({'INFO'}, message='修复完毕！')
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return self.execute(context)
 
 
 def register():
     global _icons
     _icons = bpy.utils.previews.new()
     bpy.types.Scene.sna_check_category = bpy.props.EnumProperty(name='check_category', description='', items=sna_check_category_enum_items)
-    bpy.utils.register_class(SNA_PT_panel_5E14A)
+    bpy.utils.register_class(SNA_PT_panel_0E1DA)
     bpy.utils.register_class(SNA_OT_Check_65690)
     bpy.utils.register_class(SNA_OT_Open_F0C59)
-    bpy.types.VIEW3D_MT_editor_menus.prepend(sna_add_to_view3d_mt_editor_menus_44E7C)
+    bpy.types.VIEW3D_MT_editor_menus.prepend(sna_add_to_view3d_mt_editor_menus_75416)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_46C90)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_2B330)
+    bpy.utils.register_class(SNA_OT_Run_Repair_F30E1)
 
 
 def unregister():
@@ -400,9 +446,10 @@ def unregister():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
     del bpy.types.Scene.sna_check_category
-    bpy.utils.unregister_class(SNA_PT_panel_5E14A)
+    bpy.utils.unregister_class(SNA_PT_panel_0E1DA)
     bpy.utils.unregister_class(SNA_OT_Check_65690)
     bpy.utils.unregister_class(SNA_OT_Open_F0C59)
-    bpy.types.VIEW3D_MT_editor_menus.remove(sna_add_to_view3d_mt_editor_menus_44E7C)
+    bpy.types.VIEW3D_MT_editor_menus.remove(sna_add_to_view3d_mt_editor_menus_75416)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_46C90)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_2B330)
+    bpy.utils.unregister_class(SNA_OT_Run_Repair_F30E1)

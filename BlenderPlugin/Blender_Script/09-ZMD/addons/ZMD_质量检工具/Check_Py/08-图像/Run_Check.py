@@ -1,8 +1,8 @@
 import bpy
 
 # 变量
-Check_Item_Name = '图像名称'
-Description = '检查图像名称是否含有 T_、+1、空格、.0、.tga'
+Check_Item_Name = '图像'
+Description = '检查图像名称是否含有 T_、+1、空格、.0、.tga，判断名称字段数'
 
 
 Check_Data = [Check_Item_Name]
@@ -29,7 +29,7 @@ for obj in selected_objects:
                             description = '图像名称不存在 T_'
                             img_name_check(image_name,description)
 
-                        if "+1_" not in image_name:    
+                        if "+1_" not in image_name:
                             description = '图像名称不存在 +1'
                             img_name_check(image_name,description)
                             
@@ -43,6 +43,10 @@ for obj in selected_objects:
                         
                         if ".tga" not in image_name:    
                             description = '图像格式不为.tga'
+                            img_name_check(image_name,description)
+
+                        if len(image_name.split('_')) != 7 and '+1_' in image_name:
+                            description = '图像名称字段数量错误'
                             img_name_check(image_name,description)
 
 # 枚举

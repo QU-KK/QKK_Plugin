@@ -1,7 +1,7 @@
 import bpy
 
 # 变量
-Check_Item_Name = '顶点色检查'
+Check_Item_Name = '顶点色'
 Description = '顶点色数量大于0报错。'
 
 # 顶点色检查
