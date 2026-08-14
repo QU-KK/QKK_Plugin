@@ -13,23 +13,23 @@ for obj in selected_objects:
             if slot.material:
                 mat_name = slot.material.name
                 if "M_" not in mat_name:
-                    description = '缺少 M_ : ' + mat_name
-                    data = [name,description]
+                    description = '缺少 M_ : '
+                    data = [mat_name,description]
                     Check_Data.append(data)
                     
                 if "+1_" not in mat_name:    
-                    description = '缺少 +1_ : ' + mat_name
-                    data = [name,description]
+                    description = '缺少 +1_ : '
+                    data = [mat_name,description]
                     Check_Data.append(data)
                     
                 if " " in mat_name:    
-                    description = '存在空格 : ' + mat_name
-                    data = [name,description]
+                    description = '存在空格 : '
+                    data = [mat_name,description]
                     Check_Data.append(data)
                     
                 if ".0" in mat_name:    
-                    description = '存在 .0 : ' + mat_name
-                    data = [name,description]
+                    description = '存在 .0 : '
+                    data = [mat_name,description]
                     Check_Data.append(data)
 
                 if len(mat_name.split('_')) != 6 and '+1_' in mat_name:

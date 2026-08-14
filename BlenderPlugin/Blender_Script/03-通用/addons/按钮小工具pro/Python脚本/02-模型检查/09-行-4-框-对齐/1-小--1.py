@@ -37,5 +37,16 @@ Node.nodes['Checker Texture'].inputs['Scale'].default_value = Density
 Node.nodes['Checker Texture'].inputs['Color1'].default_value = (0.033,0.033,0.033,1)
 Node.nodes['Checker Texture'].inputs['Color2'].default_value = (0.448,0.448,0.448,1)
 
-
+# 设置3D显示模式
 bpy.context.space_data.shading.type = 'MATERIAL'
+
+# 重命名UV
+for obj in bpy.context.blend_data.objects:
+    if obj.type == 'MESH':    
+        # 遍历该对象的所有 UV 通道（按通道顺序索引）
+        for index, uv_layer in enumerate(obj.data.uv_layers):
+            # 生成新的名称，例如：1U, 2U, 3U...
+            new_name = f"{index + 1}U"
+            # 修改 UV 通道名称
+            uv_layer.name = new_name
+print("UV通道名称已重命名完成！")

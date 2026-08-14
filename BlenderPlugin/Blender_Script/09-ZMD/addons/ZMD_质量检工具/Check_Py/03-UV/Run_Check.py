@@ -1,8 +1,8 @@
 import bpy
 
 # 变量
-Check_Item_Name = 'UV数'
-Description = '_lod UV数等0或大于2报错。_COL、_shadowProxy UV数大于1报错。'
+Check_Item_Name = 'UV'
+Description = '_lod UV数等0或大于2报错。_COL、_shadowProxy UV数大于1报错，UV名称检查'
 
 # UV数检查
 Check_Data = [Check_Item_Name]
