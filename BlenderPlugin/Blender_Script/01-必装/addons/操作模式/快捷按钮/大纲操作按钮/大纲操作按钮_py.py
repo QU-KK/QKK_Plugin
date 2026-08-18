@@ -33,9 +33,9 @@ def sna_add_to_outliner_ht_header_B09FF(self, context):
         grid_BC2A8.scale_y = 1.0
         if not True: grid_BC2A8.operator_context = "EXEC_DEFAULT"
         op = grid_BC2A8.operator('outliner.show_active', text='', icon_value=string_to_icon('RESTRICT_SELECT_OFF'), emboss=True, depress=False)
-        op = grid_BC2A8.operator('object.select_grouped', text='', icon_value=string_to_icon('PRESET'), emboss=True, depress=False)
-        op.extend = True
-        op.type = 'COLLECTION'
+        #op = grid_BC2A8.operator('object.select_grouped', text='', icon_value=string_to_icon('PRESET'), emboss=True, depress=False)
+        #op.extend = True
+        #op.type = 'COLLECTION'
         op = grid_BC2A8.operator('outliner.show_one_level', text='', icon_value=string_to_icon('OUTLINER_COLLECTION'), emboss=True, depress=False)
         op.open = False
 
