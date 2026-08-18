@@ -88,9 +88,9 @@ def change_viewmode_skd(viewmode):
                         space.shading.type = viewmode
 
 
-class SNA_PT_vegetation_vaking_E0E4B(bpy.types.Panel):
+class SNA_PT_vegetation_vaking_2D8E7(bpy.types.Panel):
     bl_label = '植被工具'
-    bl_idname = 'SNA_PT_vegetation_vaking_E0E4B'
+    bl_idname = 'SNA_PT_vegetation_vaking_2D8E7'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
@@ -127,7 +127,7 @@ class SNA_OT_Spherical_Normal_Run_194D7(bpy.types.Operator):
         bpy.ops.object.select_pattern(pattern=bpy.context.scene.sna_qkk_obj_input_001.name, case_sensitive=False, extend=False)
         bpy.context.scene.sna_qkk_obj_input_001.modifiers.clear()
         before_data = list(bpy.data.node_groups)
-        bpy.ops.wm.append(directory=bpy.path.abspath('') + r'\NodeTree', filename='法线朝向可视化', link=True)
+        bpy.ops.wm.append(directory=bpy.path.abspath(os.path.join(os.path.dirname(__file__), 'assets', 'normal_mod5.2.blend')) + r'\NodeTree', filename='法线朝向可视化', link=True)
         new_data = list(filter(lambda d: not d in before_data, list(bpy.data.node_groups)))
         appended_87EB3 = None if not new_data else new_data[0]
         bpy.ops.object.modifier_add(type='NODES', use_selected_objects=False)
@@ -201,7 +201,7 @@ class SNA_OT_Import_Default_Fb92F(bpy.types.Operator):
 
     def execute(self, context):
         before_data = list(bpy.data.objects)
-        bpy.ops.wm.append(directory=bpy.path.abspath('') + r'\Object', filename=self.sna_mod_name, link=False)
+        bpy.ops.wm.append(directory=bpy.path.abspath(os.path.join(os.path.dirname(__file__), 'assets', 'normal_mod5.2.blend')) + r'\Object', filename=self.sna_mod_name, link=False)
         new_data = list(filter(lambda d: not d in before_data, list(bpy.data.objects)))
         appended_8B3F5 = None if not new_data else new_data[0]
         self.report({'INFO'}, message='导入成功！')
@@ -224,16 +224,16 @@ class SNA_OT_My_Generic_Operator_De403(bpy.types.Operator):
         return not False
 
     def execute(self, context):
-        bpy.ops.wm.call_panel(name="SNA_PT_wap_asset_E00E1", keep_open=False)
+        bpy.ops.wm.call_panel(name="SNA_PT_wap_asset_2E6DB", keep_open=False)
         return {"FINISHED"}
 
     def invoke(self, context, event):
         return self.execute(context)
 
 
-class SNA_PT_wap_asset_E00E1(bpy.types.Panel):
+class SNA_PT_wap_asset_2E6DB(bpy.types.Panel):
     bl_label = '包裹素材'
-    bl_idname = 'SNA_PT_wap_asset_E00E1'
+    bl_idname = 'SNA_PT_wap_asset_2E6DB'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
     bl_context = ''
@@ -258,9 +258,9 @@ class SNA_PT_wap_asset_E00E1(bpy.types.Panel):
         grid_9C999.scale_x = 1.0
         grid_9C999.scale_y = 1.2000000476837158
         if not True: grid_9C999.operator_context = "EXEC_DEFAULT"
-        for i_BDD5E in range(len(get_blend_contents(bpy.path.abspath(''), 'objects'))-1,-1,-1):
-            op = grid_9C999.operator('sna.import_default_fb92f', text=get_blend_contents(bpy.path.abspath(''), 'objects')[i_BDD5E], icon_value=0, emboss=True, depress=False)
-            op.sna_mod_name = get_blend_contents(bpy.path.abspath(''), 'objects')[i_BDD5E]
+        for i_BDD5E in range(len(get_blend_contents(bpy.path.abspath(os.path.join(os.path.dirname(__file__), 'assets', 'normal_mod5.2.blend')), 'objects'))-1,-1,-1):
+            op = grid_9C999.operator('sna.import_default_fb92f', text=get_blend_contents(bpy.path.abspath(os.path.join(os.path.dirname(__file__), 'assets', 'normal_mod5.2.blend')), 'objects')[i_BDD5E], icon_value=0, emboss=True, depress=False)
+            op.sna_mod_name = get_blend_contents(bpy.path.abspath(os.path.join(os.path.dirname(__file__), 'assets', 'normal_mod5.2.blend')), 'objects')[i_BDD5E]
 
 
 def sna_func_57533(layout_function, ):
@@ -480,15 +480,15 @@ def sna_func_854E5(layout_function, ):
     col_7C5CD.prop(bpy.context.scene.sna_qkk_obj_input_001.modifiers['法线朝向可视化'].properties.inputs.Socket_3, 'value', text='长度', icon_value=0, emboss=True)
 
 
-class SNA_PT_check_FF52B(bpy.types.Panel):
+class SNA_PT_check_6DE63(bpy.types.Panel):
     bl_label = '检查器'
-    bl_idname = 'SNA_PT_check_FF52B'
+    bl_idname = 'SNA_PT_check_6DE63'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_order = 2
     bl_options = {'DEFAULT_CLOSED'}
-    bl_parent_id = 'SNA_PT_vegetation_vaking_E0E4B'
+    bl_parent_id = 'SNA_PT_vegetation_vaking_2D8E7'
     bl_ui_units_x=0
 
     @classmethod
@@ -651,7 +651,7 @@ class SNA_OT_Rgb_C9D3C(bpy.types.Operator):
 
     def invoke(self, context, event):
         before_data = list(bpy.data.node_groups)
-        bpy.ops.wm.append(directory=bpy.path.abspath('') + r'\NodeTree', filename='顶点色检查节点', link=True)
+        bpy.ops.wm.append(directory=bpy.path.abspath(os.path.join(os.path.dirname(__file__), 'assets', 'normal_mod5.2.blend')) + r'\NodeTree', filename='顶点色检查节点', link=True)
         new_data = list(filter(lambda d: not d in before_data, list(bpy.data.node_groups)))
         appended_3BC37 = None if not new_data else new_data[0]
         return self.execute(context)
@@ -941,11 +941,11 @@ class SNA_OT_My_Generic_Operator_1B318(bpy.types.Operator):
 
     def invoke(self, context, event):
         before_data = list(bpy.data.node_groups)
-        bpy.ops.wm.append(directory=bpy.path.abspath('') + r'\NodeTree', filename='法线朝向可视化', link=True)
+        bpy.ops.wm.append(directory=bpy.path.abspath(os.path.join(os.path.dirname(__file__), 'assets', 'normal_mod5.2.blend')) + r'\NodeTree', filename='法线朝向可视化', link=True)
         new_data = list(filter(lambda d: not d in before_data, list(bpy.data.node_groups)))
         appended_0C811 = None if not new_data else new_data[0]
         before_data = list(bpy.data.node_groups)
-        bpy.ops.wm.append(directory=bpy.path.abspath('') + r'\NodeTree', filename='顶点色烘焙节点', link=True)
+        bpy.ops.wm.append(directory=bpy.path.abspath(os.path.join(os.path.dirname(__file__), 'assets', 'normal_mod5.2.blend')) + r'\NodeTree', filename='顶点色烘焙节点', link=True)
         new_data = list(filter(lambda d: not d in before_data, list(bpy.data.node_groups)))
         appended_F73EB = None if not new_data else new_data[0]
         return self.execute(context)
@@ -998,15 +998,15 @@ def sna_func_CC744():
     bpy.context.scene.sna_qkk_obj_input_002.modifiers['顶点色烘焙节点'].show_viewport = True
 
 
-class SNA_PT_spherical_normal_29AC8(bpy.types.Panel):
+class SNA_PT_spherical_normal_E2778(bpy.types.Panel):
     bl_label = '球形法线'
-    bl_idname = 'SNA_PT_spherical_normal_29AC8'
+    bl_idname = 'SNA_PT_spherical_normal_E2778'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_order = 0
     bl_options = {'DEFAULT_CLOSED'}
-    bl_parent_id = 'SNA_PT_vegetation_vaking_E0E4B'
+    bl_parent_id = 'SNA_PT_vegetation_vaking_2D8E7'
     bl_ui_units_x=0
 
     @classmethod
@@ -1092,15 +1092,15 @@ class SNA_PT_spherical_normal_29AC8(bpy.types.Panel):
                 op = split_487F6.operator('sna.clear_2824b', text='放弃', icon_value=string_to_icon('X'), emboss=True, depress=False)
 
 
-class SNA_PT_vertex_color_BF948(bpy.types.Panel):
+class SNA_PT_vertex_color_703D0(bpy.types.Panel):
     bl_label = '植被顶点色'
-    bl_idname = 'SNA_PT_vertex_color_BF948'
+    bl_idname = 'SNA_PT_vertex_color_703D0'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_order = 1
     bl_options = {'DEFAULT_CLOSED'}
-    bl_parent_id = 'SNA_PT_vegetation_vaking_E0E4B'
+    bl_parent_id = 'SNA_PT_vegetation_vaking_2D8E7'
     bl_ui_units_x=0
 
     @classmethod
@@ -1122,17 +1122,17 @@ def register():
     bpy.types.Scene.sna_qkk_obj_input_001 = bpy.props.PointerProperty(name='qkk_obj_input_001', description='植被', type=bpy.types.Object)
     bpy.types.Scene.sna_qkk_normal_length = bpy.props.FloatProperty(name='qkk_normal_length', description='法线长度', default=0.20000000298023224, subtype='NONE', unit='LENGTH', min=0.0, soft_max=1.0, step=1, precision=2, update=sna_update_sna_qkk_normal_length_2CBB1)
     bpy.types.Scene.sna_qkk_obj_input_002 = bpy.props.PointerProperty(name='qkk_obj_input_002', description='植被', type=bpy.types.Object)
-    bpy.utils.register_class(SNA_PT_vegetation_vaking_E0E4B)
+    bpy.utils.register_class(SNA_PT_vegetation_vaking_2D8E7)
     bpy.utils.register_class(SNA_OT_Spherical_Normal_Run_194D7)
     bpy.utils.register_class(SNA_OT_Clear_2824B)
     bpy.utils.register_class(SNA_OT_Apply_B79B9)
     bpy.utils.register_class(SNA_OT_Import_Default_Fb92F)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_De403)
-    bpy.utils.register_class(SNA_PT_wap_asset_E00E1)
+    bpy.utils.register_class(SNA_PT_wap_asset_2E6DB)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_943Ba)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_1F75B)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_109Cf)
-    bpy.utils.register_class(SNA_PT_check_FF52B)
+    bpy.utils.register_class(SNA_PT_check_6DE63)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_6Ea10)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_3E61B)
     bpy.utils.register_class(SNA_OT_Rgb_C9D3C)
@@ -1141,8 +1141,8 @@ def register():
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_1B318)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_B45D5)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_79Ad8)
-    bpy.utils.register_class(SNA_PT_spherical_normal_29AC8)
-    bpy.utils.register_class(SNA_PT_vertex_color_BF948)
+    bpy.utils.register_class(SNA_PT_spherical_normal_E2778)
+    bpy.utils.register_class(SNA_PT_vertex_color_703D0)
 
 
 def unregister():
@@ -1156,17 +1156,17 @@ def unregister():
     del bpy.types.Scene.sna_qkk_obj_input_002
     del bpy.types.Scene.sna_qkk_normal_length
     del bpy.types.Scene.sna_qkk_obj_input_001
-    bpy.utils.unregister_class(SNA_PT_vegetation_vaking_E0E4B)
+    bpy.utils.unregister_class(SNA_PT_vegetation_vaking_2D8E7)
     bpy.utils.unregister_class(SNA_OT_Spherical_Normal_Run_194D7)
     bpy.utils.unregister_class(SNA_OT_Clear_2824B)
     bpy.utils.unregister_class(SNA_OT_Apply_B79B9)
     bpy.utils.unregister_class(SNA_OT_Import_Default_Fb92F)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_De403)
-    bpy.utils.unregister_class(SNA_PT_wap_asset_E00E1)
+    bpy.utils.unregister_class(SNA_PT_wap_asset_2E6DB)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_943Ba)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_1F75B)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_109Cf)
-    bpy.utils.unregister_class(SNA_PT_check_FF52B)
+    bpy.utils.unregister_class(SNA_PT_check_6DE63)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_6Ea10)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_3E61B)
     bpy.utils.unregister_class(SNA_OT_Rgb_C9D3C)
@@ -1175,5 +1175,5 @@ def unregister():
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_1B318)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_B45D5)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_79Ad8)
-    bpy.utils.unregister_class(SNA_PT_spherical_normal_29AC8)
-    bpy.utils.unregister_class(SNA_PT_vertex_color_BF948)
+    bpy.utils.unregister_class(SNA_PT_spherical_normal_E2778)
+    bpy.utils.unregister_class(SNA_PT_vertex_color_703D0)
