@@ -1,7 +1,21 @@
 import bpy
 
+# 设置模型UV名称
+for obj in bpy.context.blend_data.objects:
+    if obj.type == 'MESH':    
+        # 遍历该对象的所有 UV 通道（按通道顺序索引）
+        for index, uv_layer in enumerate(obj.data.uv_layers):
+            # 生成新的名称，例如：1U, 2U, 3U...
+            new_name = f"{index + 1}U"
+            # 修改 UV 通道名称
+            uv_layer.name = new_name
+print("UV通道名称已重命名完成！")
+
+
+# 获取文件
 Shader_Name = 'ZMD_Lit_Two'
-Blender_Path = 'C:\\Blender_Shader\\ZMD_Lit_Two.blend\\Material\\'
+Dir_path = os.path.dirname(os.path.abspath(__file__))
+Blender_Path=Dir_path.split('Blender_Script')[0]+'Blender_Shader\\ZMD_Lit_Two.blend\\Material\\'
 
 # 清理重名的旧材质，防止冲突
 Old_Mat = bpy.data.materials.get(Shader_Name)
