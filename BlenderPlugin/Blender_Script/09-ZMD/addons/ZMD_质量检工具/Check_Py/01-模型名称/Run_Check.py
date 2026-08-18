@@ -34,7 +34,12 @@ for obj in selected_objects:
         data = [name,description]
         Check_Data.append(data)
 
-    if len(name.split('_')) != 7 and '+1_' in name:
+    if len(name.split('_')) != 7 and '+1_' in name and "_COL" not in name:
+        description = '名称字段数量错误'
+        data = [name,description]
+        Check_Data.append(data)
+
+    if len(name.split('_')) != 8 and '+1_' in name and "_COL" in name:
         description = '名称字段数量错误'
         data = [name,description]
         Check_Data.append(data)
