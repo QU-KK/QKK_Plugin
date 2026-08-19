@@ -607,7 +607,8 @@ def sna_func_3C3A3(layout_function, ):
         if '贴图包' in bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].label:
             pass
         else:
-            if '    ' in bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].label:
+            qkk_data = bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].label
+            if '    ' in qkk_data or 'PBR通道' in qkk_data:
                 col_B3203.label(text='', icon_value=0)
             else:
                 if bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].is_inactive:
