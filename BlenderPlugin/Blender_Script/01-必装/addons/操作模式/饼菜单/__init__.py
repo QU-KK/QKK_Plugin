@@ -97,7 +97,7 @@ class SNA_MT_527A6(bpy.types.Menu):
                 col_F4F50.use_property_split = False
                 col_F4F50.use_property_decorate = False
                 col_F4F50.scale_x = 1.0
-                col_F4F50.scale_y = 1.2999999523162842
+                col_F4F50.scale_y = 1.3
                 col_F4F50.alignment = 'Expand'.upper()
                 col_F4F50.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
                 for i_E598C in range(len(main['sna_pie_exp_dir'])):
@@ -195,7 +195,7 @@ class SNA_OT_Qkk_Pie_B6877(bpy.types.Operator):
         print((self.sna_mode if (self.sna_mode == '全模式-右键') else (bpy.context.mode + '-' + ('点' if bpy.context.tool_settings.mesh_select_mode[0] else '') + ('线' if bpy.context.tool_settings.mesh_select_mode[1] else '') + ('面' if bpy.context.tool_settings.mesh_select_mode[2] else '') if ((self.sna_mode != '空格') and (bpy.context.mode == 'EDIT_MESH')) else bpy.context.mode) + '-' + self.sna_mode))
         Py_Path = None
         Py_Path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "饼菜单配置")
-        Py_Path = r'C:\QKK_Plugin\BlenderPlugin\Blender_Script\01-必装\addons\操作模式\饼菜单\饼菜单配置'
+        #Py_Path = r'C:\QKK_Plugin\BlenderPlugin\Blender_Script\01-必装\addons\操作模式\饼菜单\饼菜单配置'
         #Py_Path = r'D:\QKK_Plugin\BlenderPlugin\Blender_Script\01-必装\addons\操作模式\饼菜单\饼菜单配置'
         main['sna_pie_file'] = [os.path.join(os.path.join(Py_Path,(self.sna_mode if (self.sna_mode == '全模式-右键') else (bpy.context.mode + '-' + ('点' if bpy.context.tool_settings.mesh_select_mode[0] else '') + ('线' if bpy.context.tool_settings.mesh_select_mode[1] else '') + ('面' if bpy.context.tool_settings.mesh_select_mode[2] else '') if ((self.sna_mode != '空格') and (bpy.context.mode == 'EDIT_MESH')) else bpy.context.mode) + '-' + self.sna_mode)), f) for f in os.listdir(os.path.join(Py_Path,(self.sna_mode if (self.sna_mode == '全模式-右键') else (bpy.context.mode + '-' + ('点' if bpy.context.tool_settings.mesh_select_mode[0] else '') + ('线' if bpy.context.tool_settings.mesh_select_mode[1] else '') + ('面' if bpy.context.tool_settings.mesh_select_mode[2] else '') if ((self.sna_mode != '空格') and (bpy.context.mode == 'EDIT_MESH')) else bpy.context.mode) + '-' + self.sna_mode))) if os.path.isfile(os.path.join(os.path.join(Py_Path,(self.sna_mode if (self.sna_mode == '全模式-右键') else (bpy.context.mode + '-' + ('点' if bpy.context.tool_settings.mesh_select_mode[0] else '') + ('线' if bpy.context.tool_settings.mesh_select_mode[1] else '') + ('面' if bpy.context.tool_settings.mesh_select_mode[2] else '') if ((self.sna_mode != '空格') and (bpy.context.mode == 'EDIT_MESH')) else bpy.context.mode) + '-' + self.sna_mode)), f))]
         if os.path.exists(os.path.join(os.path.join(Py_Path,(self.sna_mode if (self.sna_mode == '全模式-右键') else (bpy.context.mode + '-' + ('点' if bpy.context.tool_settings.mesh_select_mode[0] else '') + ('线' if bpy.context.tool_settings.mesh_select_mode[1] else '') + ('面' if bpy.context.tool_settings.mesh_select_mode[2] else '') if ((self.sna_mode != '空格') and (bpy.context.mode == 'EDIT_MESH')) else bpy.context.mode) + '-' + self.sna_mode)),'扩展')):
