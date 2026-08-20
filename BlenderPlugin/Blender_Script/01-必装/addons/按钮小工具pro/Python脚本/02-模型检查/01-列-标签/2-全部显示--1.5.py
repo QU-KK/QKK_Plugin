@@ -1,10 +1,7 @@
 import bpy
-#lod3
+#lod全显示
 data = ['_lod0','_lod1','_lod2','_lod3','_COL','_shadowProxy']
 for obj in bpy.data.objects:
     for i in data:
         if i in obj.name:
-            obj.hide_set(True)
-
-    if '_lod3' in obj.name:
-        obj.hide_set(False)
+            obj.hide_set(False)

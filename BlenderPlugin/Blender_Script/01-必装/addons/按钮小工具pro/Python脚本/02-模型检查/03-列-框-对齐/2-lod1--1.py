@@ -1,6 +1,6 @@
 import bpy
 #lod1
-data = ['_lod0','_lod1','_lod2','_lod3']
+data = ['_lod0','_lod1','_lod2','_lod3','_COL','_shadowProxy']
 for obj in bpy.data.objects:
     for i in data:
         if i in obj.name:
