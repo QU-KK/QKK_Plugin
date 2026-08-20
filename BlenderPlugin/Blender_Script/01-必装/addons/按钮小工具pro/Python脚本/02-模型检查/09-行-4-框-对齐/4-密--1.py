@@ -15,6 +15,7 @@ if Mat == None:
     node_uv = nodes.new(type='ShaderNodeUVMap')
     # 创建 "棋盘格纹理" (Checker Texture) 节点
     node_checker = nodes.new(type='ShaderNodeTexChecker')
+    node_checker.name = 'Checker Texture'
     # 创建 "材质输出" (Material Output) 节点
     node_output = nodes.new(type='ShaderNodeOutputMaterial')
 
