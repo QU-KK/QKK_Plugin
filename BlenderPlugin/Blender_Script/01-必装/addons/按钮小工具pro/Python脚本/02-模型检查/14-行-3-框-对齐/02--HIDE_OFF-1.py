@@ -18,8 +18,10 @@ if node:
 
         # 创建属性节点
         node_attribute = nodes.new(type='ShaderNodeAttribute')
+        node_attribute.name = 'Attribute'
         # 创建材质输出节点
         node_output = nodes.new(type='ShaderNodeOutputMaterial')
+        node_output.name = 'Material Output'   
 
         # 连接
         links.new(node_attribute.outputs['Color'], node_output.inputs['Surface'])
