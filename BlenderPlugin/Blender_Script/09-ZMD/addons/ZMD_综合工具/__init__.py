@@ -47,15 +47,14 @@ def string_to_icon(value):
 addon_keymaps = {}
 _icons = None
 node_tree_001 = {'sna_zmd_mat_list': [], 'sna_zmd_img_list': [], }
-class SNA_PT_ZMD_MAYA_B9FC3(bpy.types.Panel):
+class SNA_PT_ZMD_MAYA_F454C(bpy.types.Panel):
     bl_label = 'ZMD_互导Maya'
-    bl_idname = 'SNA_PT_ZMD_MAYA_B9FC3'
+    bl_idname = 'SNA_PT_ZMD_MAYA_F454C'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_category = 'ZMD'
     bl_order = 2
-    #bl_options = {'DEFAULT_CLOSED'}
     bl_ui_units_x=0
 
     @classmethod
@@ -171,12 +170,14 @@ class SNA_OT_Blender_To_Maya_4A904(bpy.types.Operator):
                             node_normal = nodes.new(type='ShaderNodeNormalMap')
                             node_normal.name = "ZMD_法线贴图"   # 内部系统名称
                             node_normal.label = "ZMD_法线贴图"  # 界面显示标签
-                            # 执行连线
-                            links.new(node_normal.outputs['Normal'], node_principled.inputs['Normal'])
+                            # 执行连线 
                             node_color = nodes.get('Color')
                             node_nro = nodes.get('NRO')
+                            node_emission = nodes.get('自发光')
                             links.new(node_color.outputs['Color'], node_principled.inputs['Base Color'])
+                            links.new(node_emission.outputs['Color'], node_principled.inputs['Emission Color'])
                             links.new(node_nro.outputs['Color'], node_normal.inputs['Color'])
+                            links.new(node_normal.outputs['Normal'], node_principled.inputs['Normal'])
                             links.new(node_principled.outputs['BSDF'], node_out.inputs['Surface'])
                         else:
                             links.new(node_shader.outputs['BSDF'], node_out.inputs['Surface'])
@@ -266,15 +267,15 @@ class SNA_OT_Maya_To_Blender_1F248(bpy.types.Operator):
         return self.execute(context)
 
 
-class SNA_PT_excel_mat_1FE88(bpy.types.Panel):
+class SNA_PT_excel_mat_32282(bpy.types.Panel):
     bl_label = '材质读表'
-    bl_idname = 'SNA_PT_excel_mat_1FE88'
+    bl_idname = 'SNA_PT_excel_mat_32282'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_category = 'ZMD'
     bl_order = 4
-    #bl_options = {'DEFAULT_CLOSED'}
+    bl_options = {'DEFAULT_CLOSED'}
     bl_ui_units_x=0
 
     @classmethod
@@ -593,10 +594,10 @@ def register():
     bpy.types.Scene.sna_zmd_obj_mat_name = bpy.props.BoolProperty(name='zmd_obj_mat_name', description='', default=True)
     bpy.types.Scene.sna_zmd_mat_excel_path = bpy.props.StringProperty(name='zmd_mat_excel_path', description='', default='', subtype='FILE_PATH', maxlen=0)
     bpy.types.Scene.sna_zmd_mat_img_check = bpy.props.EnumProperty(name='zmd_mat_img_check', description='', items=[('材质', '材质', '', 0, 0), ('图像', '图像', '', 0, 1)])
-    bpy.utils.register_class(SNA_PT_ZMD_MAYA_B9FC3)
+    bpy.utils.register_class(SNA_PT_ZMD_MAYA_F454C)
     bpy.utils.register_class(SNA_OT_Blender_To_Maya_4A904)
     bpy.utils.register_class(SNA_OT_Maya_To_Blender_1F248)
-    bpy.utils.register_class(SNA_PT_excel_mat_1FE88)
+    bpy.utils.register_class(SNA_PT_excel_mat_32282)
     bpy.utils.register_class(SNA_OT_Read_Excle_73Eb5)
 
 
@@ -612,8 +613,8 @@ def unregister():
     del bpy.types.Scene.sna_zmd_mat_excel_path
     del bpy.types.Scene.sna_zmd_obj_mat_name
     del bpy.types.Scene.sna_zmd_tex_export
-    bpy.utils.unregister_class(SNA_PT_ZMD_MAYA_B9FC3)
+    bpy.utils.unregister_class(SNA_PT_ZMD_MAYA_F454C)
     bpy.utils.unregister_class(SNA_OT_Blender_To_Maya_4A904)
     bpy.utils.unregister_class(SNA_OT_Maya_To_Blender_1F248)
-    bpy.utils.unregister_class(SNA_PT_excel_mat_1FE88)
+    bpy.utils.unregister_class(SNA_PT_excel_mat_32282)
     bpy.utils.unregister_class(SNA_OT_Read_Excle_73Eb5)

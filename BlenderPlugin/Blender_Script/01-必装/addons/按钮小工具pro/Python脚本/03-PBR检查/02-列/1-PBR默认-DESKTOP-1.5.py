@@ -1,6 +1,9 @@
 import bpy
 #设置PBR通道
-bpy.context.scene.view_settings.view_transform = 'ACES 2.0'
+#bpy.context.scene.view_settings.view_transform = 'ACES 2.0'
+bpy.context.scene.view_settings.view_transform = 'Khronos PBR Neutral'
+
+bpy.context.scene.render.filter_size = 0
 
 for mat in bpy.data.materials:
     nodes = mat.node_tree.nodes.get('Shader')

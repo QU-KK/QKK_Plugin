@@ -366,7 +366,8 @@ class SNA_OT_My_Generic_Operator_B64C6(bpy.types.Operator):
 
     def execute(self, context):
         # 色彩空间
-        bpy.context.scene.view_settings.view_transform = 'ACES 2.0'
+        #bpy.context.scene.view_settings.view_transform = 'ACES 2.0'
+        bpy.context.scene.view_settings.view_transform = 'Khronos PBR Neutral'
         # 渲染像素精度
         bpy.context.scene.render.filter_size = 0
 
