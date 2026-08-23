@@ -1,5 +1,5 @@
 import bpy
-Path = 'C:\Blender_Cache\BlenderToMaya\Qkk_BlenderToMaya.FBX'
+Path = 'C:\\Blender_Cache\\BlenderToMaya\\Qkk_BlenderToMaya.FBX'
 
 def replace_names(old_str, new_str):
     # 获取当前选中的所有物体

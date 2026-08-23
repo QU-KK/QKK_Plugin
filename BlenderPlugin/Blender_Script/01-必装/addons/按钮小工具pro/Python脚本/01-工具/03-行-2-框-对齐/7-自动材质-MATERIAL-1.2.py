@@ -1,0 +1,98 @@
+import bpy
+
+# 储存图像
+tex_img_list = []
+material = bpy.context.active_object.active_material
+
+for node in material.node_tree.nodes:
+    if node.type == 'TEX_IMAGE':
+        img = node.image
+        if img:
+            # 统一将A通道设置为 “通道打包”
+            img.alpha_mode = 'CHANNEL_PACKED'
+            
+            img_name = img.name
+            if '_D.' in img_name:
+                tex_img_list.append(['Color',img])
+                img.colorspace_settings.name = 'sRGB'
+                
+            if '_NRO.' in img_name:
+                tex_img_list.append(['NRO',img])
+                img.colorspace_settings.name = 'Non-Color'
+                
+            if '_E.' in img_name:
+                tex_img_list.append(['自发光',img])
+                img.colorspace_settings.name = 'sRGB'
+                
+            if '_rgb_MASK.' in img_name:
+                tex_img_list.append(['三通道_MASK',img])
+                img.colorspace_settings.name = 'Non-Color'
+                
+            if '_N.' in img_name:
+                tex_img_list.append(['本体法线',img])
+                img.colorspace_settings.name = 'Non-Color'
+
+
+
+# 设置Shader材质
+# 获取文件
+Shader_Name = 'ZMD_Lit_Two'
+Dir_path = os.path.dirname(os.path.abspath(__file__))
+Blender_Path = Dir_path.split('Blender_Script')[0]+'Blender_Shader\\ZMD_Lit_Two.blend\\Material\\'
+
+# 清理重名的旧材质，防止冲突
+Old_Mat = bpy.data.materials.get(Shader_Name)
+if Old_Mat:
+    bpy.data.materials.remove(Old_Mat)
+
+# 追加外部材质并修正节点组引用
+bpy.ops.wm.append(directory=Blender_Path, filename=Shader_Name, link=False)
+New_Mat = bpy.data.materials.get(Shader_Name)
+Node_Name = New_Mat.node_tree.nodes['Shader'].node_tree.name
+if Node_Name != Shader_Name:
+    New_Mat.node_tree.nodes['Shader'].node_tree = bpy.data.node_groups[Shader_Name]
+    bpy.data.node_groups.remove(bpy.data.node_groups[Node_Name])
+
+# 记录当前物体材质，并临时替换为新材质
+Active_Mat = bpy.context.active_object.active_material
+bpy.context.active_object.active_material = New_Mat
+
+# 切换至材质编辑器，复制新材质的节点
+bpy.context.area.ui_type = 'ShaderNodeTree'
+bpy.ops.node.select_all(action='SELECT')
+bpy.ops.node.clipboard_copy()
+# 删除临时材质，清空原材质节点
+bpy.context.blend_data.materials.remove(material=New_Mat)
+
+# 将复制的节点粘贴到原材质中，并切回3D视图
+Active_Mat.node_tree.nodes.clear()
+bpy.context.active_object.active_material = Active_Mat
+bpy.context.area.ui_type = 'ShaderNodeTree'
+bpy.ops.node.select_all(action='SELECT')
+bpy.ops.node.clipboard_paste()
+bpy.context.area.ui_type = 'VIEW_3D'
+
+bpy.context.view_layer.objects.active.select_set(True)
+
+
+# 应用贴图
+for data in tex_img_list:
+    Active_Mat.node_tree.nodes[data[0]].image = data[1]
+tex_img_list = []
+
+
+
+
+
+
+
+# 设置模型UV名称
+for obj in bpy.context.blend_data.objects:
+    if obj.type == 'MESH':    
+        # 遍历该对象的所有 UV 通道（按通道顺序索引）
+        for index, uv_layer in enumerate(obj.data.uv_layers):
+            # 生成新的名称，例如：1U, 2U, 3U...
+            new_name = f"{index + 1}U"
+            # 修改 UV 通道名称
+            uv_layer.name = new_name
+print("UV通道名称已重命名完成！")

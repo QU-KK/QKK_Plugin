@@ -1,6 +1,8 @@
 import bpy
-Path = 'C:\Blender_Cache\BlenderToMaya\Qkk_BlenderToMaya.FBX'
+Path = 'C:\\Blender_Cache\\BlenderToMaya\\Qkk_BlenderToMaya.FBX'
 
+
+# 处理模型 材质名称
 def replace_names(old_str, new_str):
     # 获取当前选中的所有物体
     selected_objects = bpy.context.selected_objects
@@ -13,13 +15,13 @@ def replace_names(old_str, new_str):
     processed_materials = set()
 
     for obj in selected_objects:
-        # 1. 替换物体名称
+        # 替换物体名称
         if old_str in obj.name:
             old_obj_name = obj.name
             obj.name = obj.name.replace(old_str, new_str)
             print(f"物体改名: {old_obj_name} -> {obj.name}")
             
-        # 2. 遍历物体关联的材质槽
+        # 遍历物体关联的材质槽
         if obj.material_slots:
             for slot in obj.material_slots:
                 mat = slot.material
@@ -32,6 +34,9 @@ def replace_names(old_str, new_str):
                         mat.name = mat.name.replace(old_str, new_str)
                         print(f"  材质改名: {old_mat_name} -> {mat.name}")
 
+
+
+# 处理贴图链接
 def mat_tex(switch):
     #处理材质贴图链接
     selected_meshes = [obj for obj in bpy.context.selected_objects if obj.type == 'MESH']
@@ -95,6 +100,8 @@ def mat_tex(switch):
 #切换至fbx贴图链接模式
 mat_tex(True)
 replace_names('+1_','_1_')
+
+
 
 #导出fbx
 bpy.ops.export_scene.fbx(

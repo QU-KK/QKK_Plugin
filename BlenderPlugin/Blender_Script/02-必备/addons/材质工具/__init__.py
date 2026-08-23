@@ -80,9 +80,9 @@ def get_id_preview_id(data):
     return 0
 
 
-class SNA_PT_material_tools_1D1DD(bpy.types.Panel):
+class SNA_PT_material_tools_61532(bpy.types.Panel):
     bl_label = '材质工具_2026.8.3'
-    bl_idname = 'SNA_PT_material_tools_1D1DD'
+    bl_idname = 'SNA_PT_material_tools_61532'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
@@ -114,7 +114,7 @@ class SNA_OT_Shader_Mat_2F193(bpy.types.Operator):
         return not False
 
     def execute(self, context):
-        bpy.ops.wm.call_panel(name="SNA_PT_material_tools_1D1DD", keep_open=True)
+        bpy.ops.wm.call_panel(name="SNA_PT_material_tools_61532", keep_open=True)
         return {"FINISHED"}
 
     def invoke(self, context, event):
@@ -136,6 +136,32 @@ class SNA_OT_Shader_649Db(bpy.types.Operator):
 
     def execute(self, context):
         Blender_Path = self.sna_shader_path
+        # 储存图像
+        tex_img_list = []
+        material = bpy.context.active_object.active_material
+        for node in material.node_tree.nodes:
+            if node.type == 'TEX_IMAGE':
+                img = node.image
+                if img:
+                    # 统一将A通道设置为 “通道打包”
+                    img.alpha_mode = 'CHANNEL_PACKED'
+                    img_name = img.name
+                    if '_D.' in img_name:
+                        tex_img_list.append(['Color',img])
+                        img.colorspace_settings.name = 'sRGB'
+                    if '_NRO.' in img_name:
+                        tex_img_list.append(['NRO',img])
+                        img.colorspace_settings.name = 'Non-Color'
+                    if '_E.' in img_name:
+                        tex_img_list.append(['自发光',img])
+                        img.colorspace_settings.name = 'sRGB'
+                    if '_rgb_MASK.' in img_name:
+                        tex_img_list.append(['三通道_MASK',img])
+                        img.colorspace_settings.name = 'Non-Color'
+                    if '_N.' in img_name:
+                        tex_img_list.append(['本体法线',img])
+                        img.colorspace_settings.name = 'Non-Color'
+        # 设置Shader材质
         #Shader_Name = 'ZMD_Lit_Two'
         #Blender_Path = 'C:\\Blender_Shader\\ZMD_Lit_Two.blend\\Material\\'
         # 清理重名的旧材质，防止冲突
@@ -166,6 +192,19 @@ class SNA_OT_Shader_649Db(bpy.types.Operator):
         bpy.ops.node.clipboard_paste()
         bpy.context.area.ui_type = 'VIEW_3D'
         bpy.context.view_layer.objects.active.select_set(True)
+        # 应用贴图
+        for data in tex_img_list:
+            Active_Mat.node_tree.nodes[data[0]].image = data[1]
+        tex_img_list = []
+        # 设置模型UV名称
+        for obj in bpy.context.blend_data.objects:
+            if obj.type == 'MESH':    
+                # 遍历该对象的所有 UV 通道（按通道顺序索引）
+                for index, uv_layer in enumerate(obj.data.uv_layers):
+                    # 生成新的名称，例如：1U, 2U, 3U...
+                    new_name = f"{index + 1}U"
+                    # 修改 UV 通道名称
+                    uv_layer.name = new_name
         bpy.ops.file.make_paths_absolute()
         self.report({'INFO'}, message='OK！')
         return {"FINISHED"}
@@ -199,16 +238,16 @@ class SNA_OT_Shader_D6429(bpy.types.Operator):
                 if os.path.isfile(path) and file.endswith('.blend'):
                     shader_list.append(path)
             shader['sna_shader_list'] = shader_list
-        bpy.ops.wm.call_panel(name="SNA_PT_SHADER_LIST_EC7B5", keep_open=False)
+        bpy.ops.wm.call_panel(name="SNA_PT_SHADER_LIST_0D7A0", keep_open=False)
         return {"FINISHED"}
 
     def invoke(self, context, event):
         return self.execute(context)
 
 
-class SNA_PT_SHADER_LIST_EC7B5(bpy.types.Panel):
+class SNA_PT_SHADER_LIST_0D7A0(bpy.types.Panel):
     bl_label = 'Shader_List'
-    bl_idname = 'SNA_PT_SHADER_LIST_EC7B5'
+    bl_idname = 'SNA_PT_SHADER_LIST_0D7A0'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
     bl_context = ''
@@ -254,22 +293,35 @@ class SNA_OT_Input_Shader_21057(bpy.types.Operator):
             cls.poll_message_set('')
         return not False
 
-    def execute(self, context):        
-        
-        # 全局UV命名
-        for obj in bpy.context.blend_data.objects:
-            if obj.type == 'MESH':    
-                # 遍历该对象的所有 UV 通道（按通道顺序索引）
-                for index, uv_layer in enumerate(obj.data.uv_layers):
-                    # 生成新的名称，例如：1U, 2U, 3U...
-                    new_name = f"{index + 1}U"
-                    # 修改 UV 通道名称
-                    uv_layer.name = new_name
-                print("UV通道名称已重命名完成！")
-    
-        # 设置Shader
+    def execute(self, context):
         Shader_Name = self.sna_shader_name
         Blender_Path = self.sna_blender_path
+        # 储存图像
+        tex_img_list = []
+        material = bpy.context.active_object.active_material
+        for node in material.node_tree.nodes:
+            if node.type == 'TEX_IMAGE':
+                img = node.image
+                if img:
+                    # 统一将A通道设置为 “通道打包”
+                    img.alpha_mode = 'CHANNEL_PACKED'
+                    img_name = img.name
+                    if '_D.' in img_name:
+                        tex_img_list.append(['Color',img])
+                        img.colorspace_settings.name = 'sRGB'
+                    if '_NRO.' in img_name:
+                        tex_img_list.append(['NRO',img])
+                        img.colorspace_settings.name = 'Non-Color'
+                    if '_E.' in img_name:
+                        tex_img_list.append(['自发光',img])
+                        img.colorspace_settings.name = 'sRGB'
+                    if '_rgb_MASK.' in img_name:
+                        tex_img_list.append(['三通道_MASK',img])
+                        img.colorspace_settings.name = 'Non-Color'
+                    if '_N.' in img_name:
+                        tex_img_list.append(['本体法线',img])
+                        img.colorspace_settings.name = 'Non-Color'
+        # 设置Shader材质
         #Shader_Name = 'ZMD_Lit_Two'
         #Blender_Path = 'C:\\Blender_Shader\\ZMD_Lit_Two.blend\\Material\\'
         # 清理重名的旧材质，防止冲突
@@ -300,6 +352,19 @@ class SNA_OT_Input_Shader_21057(bpy.types.Operator):
         bpy.ops.node.clipboard_paste()
         bpy.context.area.ui_type = 'VIEW_3D'
         bpy.context.view_layer.objects.active.select_set(True)
+        # 应用贴图
+        for data in tex_img_list:
+            Active_Mat.node_tree.nodes[data[0]].image = data[1]
+        tex_img_list = []
+        # 设置模型UV名称
+        for obj in bpy.context.blend_data.objects:
+            if obj.type == 'MESH':    
+                # 遍历该对象的所有 UV 通道（按通道顺序索引）
+                for index, uv_layer in enumerate(obj.data.uv_layers):
+                    # 生成新的名称，例如：1U, 2U, 3U...
+                    new_name = f"{index + 1}U"
+                    # 修改 UV 通道名称
+                    uv_layer.name = new_name
         return {"FINISHED"}
 
     def invoke(self, context, event):
@@ -607,8 +672,7 @@ def sna_func_3C3A3(layout_function, ):
         if '贴图包' in bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].label:
             pass
         else:
-            qkk_data = bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].label
-            if '    ' in qkk_data or 'PBR通道' in qkk_data:
+            if '    ' in bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].label:
                 col_B3203.label(text='', icon_value=0)
             else:
                 if bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].is_inactive:
@@ -953,15 +1017,15 @@ class SNA_OT_Uv_Name_Set_3Ead6(bpy.types.Operator):
         return self.execute(context)
 
 
-class SNA_PT_material_tools_parameter_38332(bpy.types.Panel):
+class SNA_PT_material_tools_parameter_0112D(bpy.types.Panel):
     bl_label = '参数'
-    bl_idname = 'SNA_PT_material_tools_parameter_38332'
+    bl_idname = 'SNA_PT_material_tools_parameter_0112D'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_order = 2
     bl_options = {'DEFAULT_CLOSED'}
-    bl_parent_id = 'SNA_PT_material_tools_1D1DD'
+    bl_parent_id = 'SNA_PT_material_tools_61532'
     bl_ui_units_x=0
 
     @classmethod
@@ -1003,14 +1067,14 @@ class SNA_PT_material_tools_parameter_38332(bpy.types.Panel):
                 sna_func_3C3A3(layout_function, )
 
 
-class SNA_PT_SHADER__F2352(bpy.types.Panel):
+class SNA_PT_SHADER__42DAE(bpy.types.Panel):
     bl_label = 'Shader '
-    bl_idname = 'SNA_PT_SHADER__F2352'
+    bl_idname = 'SNA_PT_SHADER__42DAE'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_order = 1
-    bl_parent_id = 'SNA_PT_material_tools_1D1DD'
+    bl_parent_id = 'SNA_PT_material_tools_61532'
     bl_ui_units_x=0
 
     @classmethod
@@ -1128,11 +1192,11 @@ def register():
     global _icons
     _icons = bpy.utils.previews.new()
     bpy.types.Scene.sna_mat_ui_switch = bpy.props.EnumProperty(name='mat_ui_switch', description='', items=[('图像', '图像', '', 0, 0), ('参数', '参数', '', 0, 1)])
-    bpy.utils.register_class(SNA_PT_material_tools_1D1DD)
+    bpy.utils.register_class(SNA_PT_material_tools_61532)
     bpy.utils.register_class(SNA_OT_Shader_Mat_2F193)
     bpy.utils.register_class(SNA_OT_Shader_649Db)
     bpy.utils.register_class(SNA_OT_Shader_D6429)
-    bpy.utils.register_class(SNA_PT_SHADER_LIST_EC7B5)
+    bpy.utils.register_class(SNA_PT_SHADER_LIST_0D7A0)
     bpy.utils.register_class(SNA_OT_Input_Shader_21057)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_246A7)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_2A3Bd)
@@ -1144,8 +1208,8 @@ def register():
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_6F86E)
     bpy.utils.register_class(SNA_OT_Image_Color_Space_Abdf8)
     bpy.utils.register_class(SNA_OT_Uv_Name_Set_3Ead6)
-    bpy.utils.register_class(SNA_PT_material_tools_parameter_38332)
-    bpy.utils.register_class(SNA_PT_SHADER__F2352)
+    bpy.utils.register_class(SNA_PT_material_tools_parameter_0112D)
+    bpy.utils.register_class(SNA_PT_SHADER__42DAE)
 
 
 def unregister():
@@ -1157,11 +1221,11 @@ def unregister():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
     del bpy.types.Scene.sna_mat_ui_switch
-    bpy.utils.unregister_class(SNA_PT_material_tools_1D1DD)
+    bpy.utils.unregister_class(SNA_PT_material_tools_61532)
     bpy.utils.unregister_class(SNA_OT_Shader_Mat_2F193)
     bpy.utils.unregister_class(SNA_OT_Shader_649Db)
     bpy.utils.unregister_class(SNA_OT_Shader_D6429)
-    bpy.utils.unregister_class(SNA_PT_SHADER_LIST_EC7B5)
+    bpy.utils.unregister_class(SNA_PT_SHADER_LIST_0D7A0)
     bpy.utils.unregister_class(SNA_OT_Input_Shader_21057)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_246A7)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_2A3Bd)
@@ -1173,5 +1237,5 @@ def unregister():
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_6F86E)
     bpy.utils.unregister_class(SNA_OT_Image_Color_Space_Abdf8)
     bpy.utils.unregister_class(SNA_OT_Uv_Name_Set_3Ead6)
-    bpy.utils.unregister_class(SNA_PT_material_tools_parameter_38332)
-    bpy.utils.unregister_class(SNA_PT_SHADER__F2352)
+    bpy.utils.unregister_class(SNA_PT_material_tools_parameter_0112D)
+    bpy.utils.unregister_class(SNA_PT_SHADER__42DAE)
