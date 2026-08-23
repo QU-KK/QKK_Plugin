@@ -80,9 +80,9 @@ def get_id_preview_id(data):
     return 0
 
 
-class SNA_PT_material_tools_61532(bpy.types.Panel):
+class SNA_PT_material_tools_2674E(bpy.types.Panel):
     bl_label = '材质工具_2026.8.3'
-    bl_idname = 'SNA_PT_material_tools_61532'
+    bl_idname = 'SNA_PT_material_tools_2674E'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
@@ -114,7 +114,7 @@ class SNA_OT_Shader_Mat_2F193(bpy.types.Operator):
         return not False
 
     def execute(self, context):
-        bpy.ops.wm.call_panel(name="SNA_PT_material_tools_61532", keep_open=True)
+        bpy.ops.wm.call_panel(name="SNA_PT_material_tools_2674E", keep_open=True)
         return {"FINISHED"}
 
     def invoke(self, context, event):
@@ -238,16 +238,16 @@ class SNA_OT_Shader_D6429(bpy.types.Operator):
                 if os.path.isfile(path) and file.endswith('.blend'):
                     shader_list.append(path)
             shader['sna_shader_list'] = shader_list
-        bpy.ops.wm.call_panel(name="SNA_PT_SHADER_LIST_0D7A0", keep_open=False)
+        bpy.ops.wm.call_panel(name="SNA_PT_SHADER_LIST_CDC4B", keep_open=False)
         return {"FINISHED"}
 
     def invoke(self, context, event):
         return self.execute(context)
 
 
-class SNA_PT_SHADER_LIST_0D7A0(bpy.types.Panel):
+class SNA_PT_SHADER_LIST_CDC4B(bpy.types.Panel):
     bl_label = 'Shader_List'
-    bl_idname = 'SNA_PT_SHADER_LIST_0D7A0'
+    bl_idname = 'SNA_PT_SHADER_LIST_CDC4B'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
     bl_context = ''
@@ -669,7 +669,7 @@ def sna_func_3C3A3(layout_function, ):
     col_B3203.alignment = 'Expand'.upper()
     col_B3203.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
     for i_E6069 in range(len(bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs)):
-        if '贴图包' in bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].label:
+        if ('贴图包' in bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].label or 'PBR通道' in bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].label):
             pass
         else:
             if '    ' in bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].label:
@@ -1017,15 +1017,15 @@ class SNA_OT_Uv_Name_Set_3Ead6(bpy.types.Operator):
         return self.execute(context)
 
 
-class SNA_PT_material_tools_parameter_0112D(bpy.types.Panel):
+class SNA_PT_material_tools_parameter_7F101(bpy.types.Panel):
     bl_label = '参数'
-    bl_idname = 'SNA_PT_material_tools_parameter_0112D'
+    bl_idname = 'SNA_PT_material_tools_parameter_7F101'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_order = 2
     bl_options = {'DEFAULT_CLOSED'}
-    bl_parent_id = 'SNA_PT_material_tools_61532'
+    bl_parent_id = 'SNA_PT_material_tools_2674E'
     bl_ui_units_x=0
 
     @classmethod
@@ -1067,14 +1067,14 @@ class SNA_PT_material_tools_parameter_0112D(bpy.types.Panel):
                 sna_func_3C3A3(layout_function, )
 
 
-class SNA_PT_SHADER__42DAE(bpy.types.Panel):
+class SNA_PT_SHADER__C7CA7(bpy.types.Panel):
     bl_label = 'Shader '
-    bl_idname = 'SNA_PT_SHADER__42DAE'
+    bl_idname = 'SNA_PT_SHADER__C7CA7'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
     bl_order = 1
-    bl_parent_id = 'SNA_PT_material_tools_61532'
+    bl_parent_id = 'SNA_PT_material_tools_2674E'
     bl_ui_units_x=0
 
     @classmethod
@@ -1192,11 +1192,11 @@ def register():
     global _icons
     _icons = bpy.utils.previews.new()
     bpy.types.Scene.sna_mat_ui_switch = bpy.props.EnumProperty(name='mat_ui_switch', description='', items=[('图像', '图像', '', 0, 0), ('参数', '参数', '', 0, 1)])
-    bpy.utils.register_class(SNA_PT_material_tools_61532)
+    bpy.utils.register_class(SNA_PT_material_tools_2674E)
     bpy.utils.register_class(SNA_OT_Shader_Mat_2F193)
     bpy.utils.register_class(SNA_OT_Shader_649Db)
     bpy.utils.register_class(SNA_OT_Shader_D6429)
-    bpy.utils.register_class(SNA_PT_SHADER_LIST_0D7A0)
+    bpy.utils.register_class(SNA_PT_SHADER_LIST_CDC4B)
     bpy.utils.register_class(SNA_OT_Input_Shader_21057)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_246A7)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_2A3Bd)
@@ -1208,8 +1208,8 @@ def register():
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_6F86E)
     bpy.utils.register_class(SNA_OT_Image_Color_Space_Abdf8)
     bpy.utils.register_class(SNA_OT_Uv_Name_Set_3Ead6)
-    bpy.utils.register_class(SNA_PT_material_tools_parameter_0112D)
-    bpy.utils.register_class(SNA_PT_SHADER__42DAE)
+    bpy.utils.register_class(SNA_PT_material_tools_parameter_7F101)
+    bpy.utils.register_class(SNA_PT_SHADER__C7CA7)
 
 
 def unregister():
@@ -1221,11 +1221,11 @@ def unregister():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
     del bpy.types.Scene.sna_mat_ui_switch
-    bpy.utils.unregister_class(SNA_PT_material_tools_61532)
+    bpy.utils.unregister_class(SNA_PT_material_tools_2674E)
     bpy.utils.unregister_class(SNA_OT_Shader_Mat_2F193)
     bpy.utils.unregister_class(SNA_OT_Shader_649Db)
     bpy.utils.unregister_class(SNA_OT_Shader_D6429)
-    bpy.utils.unregister_class(SNA_PT_SHADER_LIST_0D7A0)
+    bpy.utils.unregister_class(SNA_PT_SHADER_LIST_CDC4B)
     bpy.utils.unregister_class(SNA_OT_Input_Shader_21057)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_246A7)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_2A3Bd)
@@ -1237,5 +1237,5 @@ def unregister():
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_6F86E)
     bpy.utils.unregister_class(SNA_OT_Image_Color_Space_Abdf8)
     bpy.utils.unregister_class(SNA_OT_Uv_Name_Set_3Ead6)
-    bpy.utils.unregister_class(SNA_PT_material_tools_parameter_0112D)
-    bpy.utils.unregister_class(SNA_PT_SHADER__42DAE)
+    bpy.utils.unregister_class(SNA_PT_material_tools_parameter_7F101)
+    bpy.utils.unregister_class(SNA_PT_SHADER__C7CA7)
