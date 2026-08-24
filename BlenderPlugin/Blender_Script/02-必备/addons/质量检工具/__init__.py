@@ -186,7 +186,7 @@ def sna_main_529FA(layout_function, ):
         row_4C932.label(text='当前选中 = ' + str(len(bpy.context.view_layer.objects.selected)), icon_value=0)
         row_4C932.label(text='检查模型数 = ' + str(len(zmd_['sna_check_overall_mod'])), icon_value=0)
         op = row_4C932.operator('sna.my_generic_operator_2b330', text='选中', icon_value=string_to_icon('FILE_3D'), emboss=True, depress=False)
-        split_071AE = col_B20DF.split(factor=0.800000011920929, align=True)
+        split_071AE = col_B20DF.split(factor=0.9, align=True)
         split_071AE.alert = False
         split_071AE.enabled = True
         split_071AE.active = True
@@ -196,7 +196,7 @@ def sna_main_529FA(layout_function, ):
         split_071AE.scale_y = 1.0
         split_071AE.alignment = 'Expand'.upper()
         if not True: split_071AE.operator_context = "EXEC_DEFAULT"
-        split_02767 = split_071AE.split(factor=0.20000000298023224, align=True)
+        split_02767 = split_071AE.split(factor=0.15, align=True)
         split_02767.alert = False
         split_02767.enabled = True
         split_02767.active = True
@@ -263,7 +263,7 @@ def sna_main_529FA(layout_function, ):
                         row_988BC.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
                         op = row_988BC.operator('sna.my_generic_operator_46c90', text='', icon_value=30, emboss=True, depress=(bpy.context.view_layer.objects.active.name == zmd_['sna_check_overall_data'][i_E6AD3][i_DBCC1][0]))
                         op.sna_obj_name = zmd_['sna_check_overall_data'][i_E6AD3][i_DBCC1][0]
-                        split_299B6 = row_988BC.split(factor=0.6000000238418579, align=True)
+                        split_299B6 = row_988BC.split(factor=0.5, align=True)
                         split_299B6.alert = False
                         split_299B6.enabled = True
                         split_299B6.active = True
@@ -313,13 +313,13 @@ class SNA_OT_Open_F0C59(bpy.types.Operator):
         sna_main_529FA(layout_function, )
 
     def invoke(self, context, event):
-        return context.window_manager.invoke_props_dialog(self, width=700)
+        return context.window_manager.invoke_props_dialog(self, width=900)
 
 
 def sna_add_to_view3d_mt_editor_menus_3CF62(self, context):
     if not (False):
         layout = self.layout
-        op = layout.operator('sna.open_f0c59', text='质检', icon_value=1013, emboss=True, depress=False)
+        op = layout.operator('sna.open_f0c59', text='质检', icon='NODE_SOCKET_SHADER', emboss=True, depress=False)
 
 
 class SNA_OT_My_Generic_Operator_46C90(bpy.types.Operator):
