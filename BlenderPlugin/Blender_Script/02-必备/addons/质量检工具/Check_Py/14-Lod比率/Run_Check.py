@@ -36,7 +36,7 @@ for name in Obj_Name_List:
 
             lod2_1 = round((1-lod2_face/lod1_face)*100)
             if lod2_1 < 35:
-                description = '比率='+ str(lod2_1)+'%'    +'    不满足35%    ' + '面数=' + str(lod2_face) +'    建议面数=' + str(int(lod1_face*0.6))
+                description = '比率='+ str(lod2_1)+'%'    +'    不满足35%    ' + '面数=' + str(lod2_face) +'    建议面数=' + str(int(lod1_face*0.65))
                 data = [name,description]
                 Check_Data.append(data)
 
@@ -49,7 +49,7 @@ for name in Obj_Name_List:
 
             lod3_2 = round((1-lod3_face/lod2_face)*100)
             if lod3_2 < 30:
-                description = '比率='+ str(lod3_2)+'%'    +'    不满足35%    ' + '面数=' + str(lod3_face) +'    建议面数=' + str(int(lod2_face*0.6))
+                description = '比率='+ str(lod3_2)+'%'    +'    不满足30%    ' + '面数=' + str(lod3_face) +'    建议面数=' + str(int(lod2_face*0.7))
                 data = [name,description]
                 Check_Data.append(data)
 
