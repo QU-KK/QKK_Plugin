@@ -29,6 +29,8 @@ for name in Obj_Name_List:
                 Check_Data.append(data)
 
 
+#_shadowProxy
+
 # 枚举
 icon = 'NODE_SOCKET_SHADER'
 if len(Check_Data) > 1:
