@@ -8,11 +8,6 @@ Description = '检查图像名称是否含有 T_、+1、空格、.0、.tga，判
 Check_Data = [Check_Item_Name]
 img_list =[]
 
-def img_name_check(image_name,description):
-    data = [image_name,description]
-    Check_Data.append(data)
-    img_list.append(image_name)
-
 for obj in selected_objects:
     # 遍历物体上的所有材质槽
     for slot in obj.material_slots:
@@ -21,41 +16,40 @@ for obj in selected_objects:
             # 遍历材质节点树中的所有节点
             for node in mat.node_tree.nodes:            
                 if node.type == 'TEX_IMAGE' and node.image:
-                    image_name = node.image.name
+                    image_name = node.image.name                    
                     if image_name not in img_list:
+                        img_list.append(image_name)
+                        description = ''
 
                         # 判断图像名称中是否包含 '+1'
                         if 'T_' not in image_name:
-                            description = '图像名称不存在 T_'
-                            img_name_check(image_name,description)
+                            description = description + '缺少T_    '
 
                         if "+1_" not in image_name:
-                            description = '图像名称不存在 +1'
-                            img_name_check(image_name,description)
+                            description = description + '缺少+1    '
                             
                         if " " in image_name:    
-                            description = '图像名称存在空格'
-                            img_name_check(image_name,description)
+                            description = description + '存在空格    '
                             
                         if ".0" in image_name:    
-                            description = '图像名称存在 .0 '
-                            img_name_check(image_name,description)
+                            description = description + '存在 .0    '
                         
                         if ".tga" not in image_name:    
-                            description = '图像格式不为.tga'
-                            img_name_check(image_name,description)
+                            description = description + '格式不为.tga    '
 
                         if len(image_name.split('_')) != 7 and '+1_' in image_name:
-                            description = '图像名称字段数量错误'
-                            img_name_check(image_name,description)
-                        
+                            description = description + '字段数错误'            
                         
                         X=node.image.size[0]
                         Y=node.image.size[1]
                         if X>2048 or Y>2048:
+                            description = '尺寸大于2048    ' + str(X) +'*'+ str(Y)
 
-                            description = '贴图尺寸大于2048    ' + str(X) +'*'+ str(Y)
-                            img_name_check(image_name,description)
+
+                        if description != '':
+                            data = [image_name,description]
+                            Check_Data.append(data)
+
 # 枚举
 icon = 'NODE_SOCKET_SHADER'
 if len(Check_Data) > 1:

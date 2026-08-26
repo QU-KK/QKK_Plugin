@@ -10,30 +10,25 @@ for obj in selected_objects:
     name = obj.name
     if '_lod' in name:
         for slot in obj.material_slots:
-            if slot.material:
+            if slot.material:                
                 mat_name = slot.material.name
+                description = ''
                 if "M_" not in mat_name:
-                    description = '缺少 M_ : '
-                    data = [mat_name,description]
-                    Check_Data.append(data)
+                    description = description +  '缺少M_    '
                     
                 if "+1_" not in mat_name:    
-                    description = '缺少 +1_ : '
-                    data = [mat_name,description]
-                    Check_Data.append(data)
+                    description = description +  '缺少+1_    '
                     
                 if " " in mat_name:    
-                    description = '存在空格 : '
-                    data = [mat_name,description]
-                    Check_Data.append(data)
+                    description = description +  '存在空格    '
                     
                 if ".0" in mat_name:    
-                    description = '存在 .0 : '
-                    data = [mat_name,description]
-                    Check_Data.append(data)
+                    description = description +  '存在 .0    '
 
                 if len(mat_name.split('_')) != 6 and '+1_' in mat_name:
-                    description = '名称字段数量错误'
+                    description = description +  '字段数错误    '
+
+                if description != '':
                     data = [mat_name,description]
                     Check_Data.append(data)
 

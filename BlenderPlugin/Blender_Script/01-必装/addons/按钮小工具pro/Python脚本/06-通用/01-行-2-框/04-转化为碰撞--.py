@@ -38,14 +38,22 @@ for obj in selected_objects:
         for i in new_obj.material_slots:
             bpy.ops.object.material_slot_remove()
         # 增加材质
-        bpy.ops.object.material_slot_add()    
+        bpy.ops.object.material_slot_add()
             
-        
         # 取消选择当前新物体，为下一次循环做准备
-        new_obj.select_set(False)
-        
-        print(f"已成功复制并重命名: {obj.name} -> {new_obj.name}")
-    else:
-        print(f"跳过物体（不包含 _lod0）: {obj.name}")
+        new_obj.select_set(True)
+
+
+Mat_Name = 'M_shadowproxy_static_opaque'
+Mat = bpy.data.materials.get(Mat_Name)
+if Mat == None:
+    # 创建材质
+    Mat = bpy.context.blend_data.materials.new(Mat_Name)
+
+# 激活的材质槽ID
+Mat_ID = bpy.context.active_object.active_material_index
+# 设置材质
+bpy.context.active_object.material_slots[Mat_ID].material = Mat
+
 
 print("批量复制与重命名完成！")
