@@ -28,7 +28,7 @@ for obj in bpy.data.objects:
 
 
 # 获取材质
-Mat_Name = '.UV像素密度'
+Mat_Name = '.UV像素密度可视化'
 Mat = bpy.data.materials.get(Mat_Name)
 if Mat == None:
     # 创建材质

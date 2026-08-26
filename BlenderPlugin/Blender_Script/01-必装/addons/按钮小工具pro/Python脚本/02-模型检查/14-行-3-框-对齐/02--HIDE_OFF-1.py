@@ -4,7 +4,7 @@ node = bpy.data.node_groups.get(".UV像素密度可视化")
 if node:
     # 新建UV像素密度材质
     # 获取材质
-    Mat_Name = '.UV像素密度'
+    Mat_Name = '.UV像素密度可视化'
     Mat = bpy.data.materials.get(Mat_Name)
     if Mat == None:
         # 创建材质
