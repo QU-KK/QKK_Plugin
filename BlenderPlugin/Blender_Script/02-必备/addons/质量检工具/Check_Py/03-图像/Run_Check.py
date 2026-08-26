@@ -48,7 +48,14 @@ for obj in selected_objects:
                         if len(image_name.split('_')) != 7 and '+1_' in image_name:
                             description = '图像名称字段数量错误'
                             img_name_check(image_name,description)
+                        
+                        
+                        X=node.image.size[0]
+                        Y=node.image.size[1]
+                        if X>2048 or Y>2048:
 
+                            description = '贴图尺寸大于2048    ' + str(X) +'*'+ str(Y)
+                            img_name_check(image_name,description)
 # 枚举
 icon = 'NODE_SOCKET_SHADER'
 if len(Check_Data) > 1:
