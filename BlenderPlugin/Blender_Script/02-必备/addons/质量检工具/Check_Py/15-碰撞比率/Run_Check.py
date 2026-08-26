@@ -1,8 +1,8 @@
 import bpy
 
 # 变量
-Check_Item_Name = '碰撞、投影比率'
-Description = '碰撞、投影比率'
+Check_Item_Name = '碰撞比率'
+Description = '碰撞比率'
 Check_Data = [Check_Item_Name]
 
 # 储存物体名称
