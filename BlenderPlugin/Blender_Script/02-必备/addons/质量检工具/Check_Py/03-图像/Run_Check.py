@@ -37,10 +37,10 @@ for obj in selected_objects:
                         if ".tga" not in image_name:    
                             description = description + '格式不为.tga    '
 
-                        if len(image_name.split('_')) != 7 and '+1_' in image_name '_rbg_M' not in image_name:
+                        if len(image_name.split('_')) != 7 and '+1_' in image_name '_rgb_M' not in image_name:
                             description = description + '字段数错误'
 
-                        if len(image_name.split('_')) != 8 and '+1_' in image_name '_rbg_M' in image_name:
+                        if len(image_name.split('_')) != 8 and '+1_' in image_name '_rgb_M' in image_name:
                             description = description + '字段数错误'
                         
                         X=node.image.size[0]
