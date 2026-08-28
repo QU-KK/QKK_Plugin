@@ -31,6 +31,14 @@ import bpy.utils.previews
 
 addon_keymaps = {}
 _icons = None
+_item_map = dict()
+
+
+def make_enum_item(_id, name, descr, preview_id, uid):
+    lookup = str(_id)+"\0"+str(name)+"\0"+str(descr)+"\0"+str(preview_id)+"\0"+str(uid)
+    if not lookup in _item_map:
+        _item_map[lookup] = (_id, name, descr, preview_id, uid)
+    return _item_map[lookup]
 
 
 def sna_update_sna_project_a_AAF72(self, context):
@@ -53,9 +61,9 @@ def sna_update_sna_project_d_C341A(self, context):
     bpy.ops.wm.save_userpref()
 
 
-class SNA_PT_UNITY_FBX_E5BE0(bpy.types.Panel):
+class SNA_PT_UNITY_FBX_B58E9(bpy.types.Panel):
     bl_label = '导入Unity_FBX'
-    bl_idname = 'SNA_PT_UNITY_FBX_E5BE0'
+    bl_idname = 'SNA_PT_UNITY_FBX_B58E9'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
@@ -188,7 +196,8 @@ class SNA_OT_Import_Unity_Fbx_D209F(bpy.types.Operator):
 
 
 def sna_branch_unity_fbx_enum_items(self, context):
-    return [("No Items", "No Items", "No generate enum items node found to create items!", "ERROR", 0)]
+    enum_items = [[bpy.context.preferences.addons[__package__].preferences.sna_project_a, bpy.context.preferences.addons[__package__].preferences.sna_project_a, '', 0], [bpy.context.preferences.addons[__package__].preferences.sna_project_b, bpy.context.preferences.addons[__package__].preferences.sna_project_b, '', 0], [bpy.context.preferences.addons[__package__].preferences.sna_project_c, bpy.context.preferences.addons[__package__].preferences.sna_project_c, '', 0], [bpy.context.preferences.addons[__package__].preferences.sna_project_d, bpy.context.preferences.addons[__package__].preferences.sna_project_d, '', 0]]
+    return [make_enum_item(item[0], item[1], item[2], item[3], i) for i, item in enumerate(enum_items)]
 
 
 class SNA_AddonPreferences_026DE(bpy.types.AddonPreferences):
@@ -210,7 +219,7 @@ def register():
     bpy.types.Scene.sna_suffix_unity_fbx = bpy.props.EnumProperty(name='Suffix_Unity_Fbx', description='', items=[('_lod0', '_lod0', '', 0, 1), ('_lod1', '_lod1', '', 0, 2), ('_lod2', '_lod2', '', 0, 4), ('_lod3', '_lod3', '', 0, 8), ('_COL1_UM01', '_COL1_UM01', '', 0, 16), ('_shadowProxy', '_shadowProxy', '', 0, 32)], options={'ENUM_FLAG'})
     bpy.types.Scene.sna_branch_unity_fbx = bpy.props.EnumProperty(name='Branch_Unity_Fbx', description='', items=sna_branch_unity_fbx_enum_items)
     bpy.types.Scene.sna_switch_unity_fbx = bpy.props.BoolProperty(name='Switch_Unity_Fbx', description='', default=False)
-    bpy.utils.register_class(SNA_PT_UNITY_FBX_E5BE0)
+    bpy.utils.register_class(SNA_PT_UNITY_FBX_B58E9)
     bpy.utils.register_class(SNA_AddonPreferences_026DE)
     bpy.utils.register_class(SNA_OT_Import_Unity_Fbx_D209F)
 
@@ -226,6 +235,6 @@ def unregister():
     del bpy.types.Scene.sna_switch_unity_fbx
     del bpy.types.Scene.sna_branch_unity_fbx
     del bpy.types.Scene.sna_suffix_unity_fbx
-    bpy.utils.unregister_class(SNA_PT_UNITY_FBX_E5BE0)
+    bpy.utils.unregister_class(SNA_PT_UNITY_FBX_B58E9)
     bpy.utils.unregister_class(SNA_AddonPreferences_026DE)
     bpy.utils.unregister_class(SNA_OT_Import_Unity_Fbx_D209F)
