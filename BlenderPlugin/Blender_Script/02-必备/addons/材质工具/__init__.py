@@ -315,7 +315,7 @@ class SNA_OT_Input_Shader_21057(bpy.types.Operator):
                     if '_E.' in img_name:
                         tex_img_list.append(['自发光',img])
                         img.colorspace_settings.name = 'sRGB'
-                    if '_rgb_MASK.' in img_name:
+                    if '_rgb_M.' in img_name:
                         tex_img_list.append(['三通道_MASK',img])
                         img.colorspace_settings.name = 'Non-Color'
                     if '_N.' in img_name:

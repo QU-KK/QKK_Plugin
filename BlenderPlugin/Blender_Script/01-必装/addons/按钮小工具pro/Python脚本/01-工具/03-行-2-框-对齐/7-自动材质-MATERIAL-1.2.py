@@ -24,7 +24,7 @@ for node in material.node_tree.nodes:
                 tex_img_list.append(['自发光',img])
                 img.colorspace_settings.name = 'sRGB'
                 
-            if '_rgb_MASK.' in img_name:
+            if '_rgb_M.' in img_name:
                 tex_img_list.append(['三通道_MASK',img])
                 img.colorspace_settings.name = 'Non-Color'
                 
