@@ -13,7 +13,7 @@
 
 bl_info = {
     "name" : "Import_Unity_FBX",
-    "author" : "去奎奎", 
+    "author" : "渠奎奎", 
     "description" : "",
     "blender" : (5, 2, 0),
     "version" : (1, 0, 0),
@@ -31,14 +31,6 @@ import bpy.utils.previews
 
 addon_keymaps = {}
 _icons = None
-_item_map = dict()
-
-
-def make_enum_item(_id, name, descr, preview_id, uid):
-    lookup = str(_id)+"\0"+str(name)+"\0"+str(descr)+"\0"+str(preview_id)+"\0"+str(uid)
-    if not lookup in _item_map:
-        _item_map[lookup] = (_id, name, descr, preview_id, uid)
-    return _item_map[lookup]
 
 
 def sna_update_sna_project_a_AAF72(self, context):
@@ -61,9 +53,9 @@ def sna_update_sna_project_d_C341A(self, context):
     bpy.ops.wm.save_userpref()
 
 
-class SNA_PT_UNITY_FBX_8D117(bpy.types.Panel):
+class SNA_PT_UNITY_FBX_E5BE0(bpy.types.Panel):
     bl_label = '导入Unity_FBX'
-    bl_idname = 'SNA_PT_UNITY_FBX_8D117'
+    bl_idname = 'SNA_PT_UNITY_FBX_E5BE0'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
@@ -80,8 +72,8 @@ class SNA_PT_UNITY_FBX_8D117(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(bpy.context.scene, 'sna_switch', text='项目', icon_value=0, emboss=True)
-        if bpy.context.scene.sna_switch:
+        layout.prop(bpy.context.scene, 'sna_switch_unity_fbx', text='项目', icon_value=0, emboss=True)
+        if bpy.context.scene.sna_switch_unity_fbx:
             box_EF6DB = layout.box()
             box_EF6DB.alert = False
             box_EF6DB.enabled = True
@@ -106,7 +98,7 @@ class SNA_PT_UNITY_FBX_8D117(bpy.types.Panel):
             col_52C3C.prop(bpy.context.preferences.addons[__package__].preferences, 'sna_project_b', text='', icon_value=0, emboss=True)
             col_52C3C.prop(bpy.context.preferences.addons[__package__].preferences, 'sna_project_c', text='', icon_value=0, emboss=True)
             col_52C3C.prop(bpy.context.preferences.addons[__package__].preferences, 'sna_project_d', text='', icon_value=0, emboss=True)
-        layout.prop(bpy.context.scene, 'sna_branch', text='', icon_value=0, emboss=True)
+        layout.prop(bpy.context.scene, 'sna_branch_unity_fbx', text='', icon_value=0, emboss=True)
         layout.prop(bpy.context.preferences.addons[__package__].preferences, 'sna_mod_name', text='', icon_value=0, emboss=True)
         split_F350F = layout.split(factor=0.5, align=True)
         split_F350F.alert = False
@@ -139,7 +131,7 @@ class SNA_PT_UNITY_FBX_8D117(bpy.types.Panel):
         col_F17FE.scale_y = 1.0
         col_F17FE.alignment = 'Expand'.upper()
         col_F17FE.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
-        col_F17FE.prop(bpy.context.scene, 'sna_suffix', text=str(list(bpy.context.scene.sna_suffix)), icon_value=0, emboss=True, expand=True)
+        col_F17FE.prop(bpy.context.scene, 'sna_suffix_unity_fbx', text=str(list(bpy.context.scene.sna_suffix_unity_fbx)), icon_value=0, emboss=True, expand=True)
 
 
 class SNA_OT_Import_Unity_Fbx_D209F(bpy.types.Operator):
@@ -155,10 +147,10 @@ class SNA_OT_Import_Unity_Fbx_D209F(bpy.types.Operator):
         return not False
 
     def execute(self, context):
-        for i_9B484 in range(len(list(bpy.context.scene.sna_suffix))):
+        for i_9B484 in range(len(list(bpy.context.scene.sna_suffix_unity_fbx))):
             Mod_Name = bpy.context.preferences.addons[__package__].preferences.sna_mod_name
-            Project = bpy.context.scene.sna_branch
-            Suffix = list(bpy.context.scene.sna_suffix)[i_9B484]
+            Project = bpy.context.scene.sna_branch_unity_fbx
+            Suffix = list(bpy.context.scene.sna_suffix_unity_fbx)[i_9B484]
             Print = None
             import os
             # 项目路径
@@ -195,9 +187,8 @@ class SNA_OT_Import_Unity_Fbx_D209F(bpy.types.Operator):
         return self.execute(context)
 
 
-def sna_branch_enum_items(self, context):
-    enum_items = [[bpy.context.preferences.addons[__package__].preferences.sna_project_a, bpy.context.preferences.addons[__package__].preferences.sna_project_a, '', 0], [bpy.context.preferences.addons[__package__].preferences.sna_project_b, bpy.context.preferences.addons[__package__].preferences.sna_project_b, '', 0], [bpy.context.preferences.addons[__package__].preferences.sna_project_c, bpy.context.preferences.addons[__package__].preferences.sna_project_c, '', 0], [bpy.context.preferences.addons[__package__].preferences.sna_project_d, bpy.context.preferences.addons[__package__].preferences.sna_project_d, '', 0]]
-    return [make_enum_item(item[0], item[1], item[2], item[3], i) for i, item in enumerate(enum_items)]
+def sna_branch_unity_fbx_enum_items(self, context):
+    return [("No Items", "No Items", "No generate enum items node found to create items!", "ERROR", 0)]
 
 
 class SNA_AddonPreferences_026DE(bpy.types.AddonPreferences):
@@ -216,10 +207,10 @@ class SNA_AddonPreferences_026DE(bpy.types.AddonPreferences):
 def register():
     global _icons
     _icons = bpy.utils.previews.new()
-    bpy.types.Scene.sna_suffix = bpy.props.EnumProperty(name='Suffix', description='', items=[('_lod0', '_lod0', '', 0, 1), ('_lod1', '_lod1', '', 0, 2), ('_lod2', '_lod2', '', 0, 4), ('_lod3', '_lod3', '', 0, 8), ('_COL1_UM01', '_COL1_UM01', '', 0, 16), ('_shadowProxy', '_shadowProxy', '', 0, 32)], options={'ENUM_FLAG'})
-    bpy.types.Scene.sna_branch = bpy.props.EnumProperty(name='Branch', description='', items=sna_branch_enum_items)
-    bpy.types.Scene.sna_switch = bpy.props.BoolProperty(name='Switch', description='', default=False)
-    bpy.utils.register_class(SNA_PT_UNITY_FBX_8D117)
+    bpy.types.Scene.sna_suffix_unity_fbx = bpy.props.EnumProperty(name='Suffix_Unity_Fbx', description='', items=[('_lod0', '_lod0', '', 0, 1), ('_lod1', '_lod1', '', 0, 2), ('_lod2', '_lod2', '', 0, 4), ('_lod3', '_lod3', '', 0, 8), ('_COL1_UM01', '_COL1_UM01', '', 0, 16), ('_shadowProxy', '_shadowProxy', '', 0, 32)], options={'ENUM_FLAG'})
+    bpy.types.Scene.sna_branch_unity_fbx = bpy.props.EnumProperty(name='Branch_Unity_Fbx', description='', items=sna_branch_unity_fbx_enum_items)
+    bpy.types.Scene.sna_switch_unity_fbx = bpy.props.BoolProperty(name='Switch_Unity_Fbx', description='', default=False)
+    bpy.utils.register_class(SNA_PT_UNITY_FBX_E5BE0)
     bpy.utils.register_class(SNA_AddonPreferences_026DE)
     bpy.utils.register_class(SNA_OT_Import_Unity_Fbx_D209F)
 
@@ -232,9 +223,9 @@ def unregister():
     for km, kmi in addon_keymaps.values():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
-    del bpy.types.Scene.sna_switch
-    del bpy.types.Scene.sna_branch
-    del bpy.types.Scene.sna_suffix
-    bpy.utils.unregister_class(SNA_PT_UNITY_FBX_8D117)
+    del bpy.types.Scene.sna_switch_unity_fbx
+    del bpy.types.Scene.sna_branch_unity_fbx
+    del bpy.types.Scene.sna_suffix_unity_fbx
+    bpy.utils.unregister_class(SNA_PT_UNITY_FBX_E5BE0)
     bpy.utils.unregister_class(SNA_AddonPreferences_026DE)
     bpy.utils.unregister_class(SNA_OT_Import_Unity_Fbx_D209F)
