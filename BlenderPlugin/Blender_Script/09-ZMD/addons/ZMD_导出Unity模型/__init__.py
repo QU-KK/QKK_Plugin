@@ -31,9 +31,39 @@ import bpy.utils.previews
 
 addon_keymaps = {}
 _icons = None
-class SNA_PT_UNITY_FBX_70E2D(bpy.types.Panel):
+_item_map = dict()
+
+
+def make_enum_item(_id, name, descr, preview_id, uid):
+    lookup = str(_id)+"\0"+str(name)+"\0"+str(descr)+"\0"+str(preview_id)+"\0"+str(uid)
+    if not lookup in _item_map:
+        _item_map[lookup] = (_id, name, descr, preview_id, uid)
+    return _item_map[lookup]
+
+
+def sna_update_sna_project_a_AAF72(self, context):
+    sna_updated_prop = self.sna_project_a
+    bpy.ops.wm.save_userpref()
+
+
+def sna_update_sna_project_b_CEFF9(self, context):
+    sna_updated_prop = self.sna_project_b
+    bpy.ops.wm.save_userpref()
+
+
+def sna_update_sna_project_c_E356F(self, context):
+    sna_updated_prop = self.sna_project_c
+    bpy.ops.wm.save_userpref()
+
+
+def sna_update_sna_project_d_C341A(self, context):
+    sna_updated_prop = self.sna_project_d
+    bpy.ops.wm.save_userpref()
+
+
+class SNA_PT_UNITY_FBX_8D117(bpy.types.Panel):
     bl_label = '导入Unity_FBX'
-    bl_idname = 'SNA_PT_UNITY_FBX_70E2D'
+    bl_idname = 'SNA_PT_UNITY_FBX_8D117'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
@@ -50,7 +80,33 @@ class SNA_PT_UNITY_FBX_70E2D(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(bpy.context.preferences.addons[__package__].preferences, 'sna_project', text='', icon_value=0, emboss=True)
+        layout.prop(bpy.context.scene, 'sna_switch', text='项目', icon_value=0, emboss=True)
+        if bpy.context.scene.sna_switch:
+            box_EF6DB = layout.box()
+            box_EF6DB.alert = False
+            box_EF6DB.enabled = True
+            box_EF6DB.active = True
+            box_EF6DB.use_property_split = False
+            box_EF6DB.use_property_decorate = False
+            box_EF6DB.alignment = 'Expand'.upper()
+            box_EF6DB.scale_x = 1.0
+            box_EF6DB.scale_y = 1.0
+            if not True: box_EF6DB.operator_context = "EXEC_DEFAULT"
+            col_52C3C = box_EF6DB.column(heading='', align=False)
+            col_52C3C.alert = False
+            col_52C3C.enabled = True
+            col_52C3C.active = True
+            col_52C3C.use_property_split = False
+            col_52C3C.use_property_decorate = False
+            col_52C3C.scale_x = 1.0
+            col_52C3C.scale_y = 1.0
+            col_52C3C.alignment = 'Expand'.upper()
+            col_52C3C.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
+            col_52C3C.prop(bpy.context.preferences.addons[__package__].preferences, 'sna_project_a', text='', icon_value=0, emboss=True)
+            col_52C3C.prop(bpy.context.preferences.addons[__package__].preferences, 'sna_project_b', text='', icon_value=0, emboss=True)
+            col_52C3C.prop(bpy.context.preferences.addons[__package__].preferences, 'sna_project_c', text='', icon_value=0, emboss=True)
+            col_52C3C.prop(bpy.context.preferences.addons[__package__].preferences, 'sna_project_d', text='', icon_value=0, emboss=True)
+        layout.prop(bpy.context.scene, 'sna_branch', text='', icon_value=0, emboss=True)
         layout.prop(bpy.context.preferences.addons[__package__].preferences, 'sna_mod_name', text='', icon_value=0, emboss=True)
         split_F350F = layout.split(factor=0.5, align=True)
         split_F350F.alert = False
@@ -101,7 +157,7 @@ class SNA_OT_Import_Unity_Fbx_D209F(bpy.types.Operator):
     def execute(self, context):
         for i_9B484 in range(len(list(bpy.context.scene.sna_suffix))):
             Mod_Name = bpy.context.preferences.addons[__package__].preferences.sna_mod_name
-            Project = bpy.context.preferences.addons[__package__].preferences.sna_project
+            Project = bpy.context.scene.sna_branch
             Suffix = list(bpy.context.scene.sna_suffix)[i_9B484]
             Print = None
             import os
@@ -139,9 +195,17 @@ class SNA_OT_Import_Unity_Fbx_D209F(bpy.types.Operator):
         return self.execute(context)
 
 
+def sna_branch_enum_items(self, context):
+    enum_items = [[bpy.context.preferences.addons[__package__].preferences.sna_project_a, bpy.context.preferences.addons[__package__].preferences.sna_project_a, '', 0], [bpy.context.preferences.addons[__package__].preferences.sna_project_b, bpy.context.preferences.addons[__package__].preferences.sna_project_b, '', 0], [bpy.context.preferences.addons[__package__].preferences.sna_project_c, bpy.context.preferences.addons[__package__].preferences.sna_project_c, '', 0], [bpy.context.preferences.addons[__package__].preferences.sna_project_d, bpy.context.preferences.addons[__package__].preferences.sna_project_d, '', 0]]
+    return [make_enum_item(item[0], item[1], item[2], item[3], i) for i, item in enumerate(enum_items)]
+
+
 class SNA_AddonPreferences_026DE(bpy.types.AddonPreferences):
     bl_idname = __package__
-    sna_project: bpy.props.StringProperty(name='Project', description='', options={'HIDDEN'}, default='', subtype='DIR_PATH', maxlen=0)
+    sna_project_a: bpy.props.StringProperty(name='Project_A', description='', options={'HIDDEN'}, default='无', subtype='DIR_PATH', maxlen=0, update=sna_update_sna_project_a_AAF72)
+    sna_project_b: bpy.props.StringProperty(name='Project_B', description='', options={'HIDDEN'}, default='无', subtype='DIR_PATH', maxlen=0, update=sna_update_sna_project_b_CEFF9)
+    sna_project_c: bpy.props.StringProperty(name='Project_C', description='', options={'HIDDEN'}, default='无', subtype='DIR_PATH', maxlen=0, update=sna_update_sna_project_c_E356F)
+    sna_project_d: bpy.props.StringProperty(name='Project_D', description='', options={'HIDDEN'}, default='无', subtype='DIR_PATH', maxlen=0, update=sna_update_sna_project_d_C341A)
     sna_mod_name: bpy.props.StringProperty(name='Mod_Name', description='', options={'HIDDEN'}, default='', subtype='NONE', maxlen=0)
 
     def draw(self, context):
@@ -153,7 +217,9 @@ def register():
     global _icons
     _icons = bpy.utils.previews.new()
     bpy.types.Scene.sna_suffix = bpy.props.EnumProperty(name='Suffix', description='', items=[('_lod0', '_lod0', '', 0, 1), ('_lod1', '_lod1', '', 0, 2), ('_lod2', '_lod2', '', 0, 4), ('_lod3', '_lod3', '', 0, 8), ('_COL1_UM01', '_COL1_UM01', '', 0, 16), ('_shadowProxy', '_shadowProxy', '', 0, 32)], options={'ENUM_FLAG'})
-    bpy.utils.register_class(SNA_PT_UNITY_FBX_70E2D)
+    bpy.types.Scene.sna_branch = bpy.props.EnumProperty(name='Branch', description='', items=sna_branch_enum_items)
+    bpy.types.Scene.sna_switch = bpy.props.BoolProperty(name='Switch', description='', default=False)
+    bpy.utils.register_class(SNA_PT_UNITY_FBX_8D117)
     bpy.utils.register_class(SNA_AddonPreferences_026DE)
     bpy.utils.register_class(SNA_OT_Import_Unity_Fbx_D209F)
 
@@ -166,7 +232,9 @@ def unregister():
     for km, kmi in addon_keymaps.values():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
+    del bpy.types.Scene.sna_switch
+    del bpy.types.Scene.sna_branch
     del bpy.types.Scene.sna_suffix
-    bpy.utils.unregister_class(SNA_PT_UNITY_FBX_70E2D)
+    bpy.utils.unregister_class(SNA_PT_UNITY_FBX_8D117)
     bpy.utils.unregister_class(SNA_AddonPreferences_026DE)
     bpy.utils.unregister_class(SNA_OT_Import_Unity_Fbx_D209F)

@@ -45,9 +45,39 @@ def string_to_icon(value):
 
 addon_keymaps = {}
 _icons = None
-class SNA_PT_axis_comparison_73E95(bpy.types.Panel):
+_item_map = dict()
+
+
+def make_enum_item(_id, name, descr, preview_id, uid):
+    lookup = str(_id)+"\0"+str(name)+"\0"+str(descr)+"\0"+str(preview_id)+"\0"+str(uid)
+    if not lookup in _item_map:
+        _item_map[lookup] = (_id, name, descr, preview_id, uid)
+    return _item_map[lookup]
+
+
+def sna_update_sna_project_a_a_94840(self, context):
+    sna_updated_prop = self.sna_project_a_a
+    bpy.ops.wm.save_userpref()
+
+
+def sna_update_sna_project_b_b_692A6(self, context):
+    sna_updated_prop = self.sna_project_b_b
+    bpy.ops.wm.save_userpref()
+
+
+def sna_update_sna_project_c_c_9CF6B(self, context):
+    sna_updated_prop = self.sna_project_c_c
+    bpy.ops.wm.save_userpref()
+
+
+def sna_update_sna_project_d_d_69857(self, context):
+    sna_updated_prop = self.sna_project_d_d
+    bpy.ops.wm.save_userpref()
+
+
+class SNA_PT_axis_comparison_C96AE(bpy.types.Panel):
     bl_label = '坐标轴对比'
-    bl_idname = 'SNA_PT_axis_comparison_73E95'
+    bl_idname = 'SNA_PT_axis_comparison_C96AE'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
@@ -64,7 +94,33 @@ class SNA_PT_axis_comparison_73E95(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(bpy.context.preferences.addons[__package__].preferences, 'sna_project', text='', icon_value=0, emboss=True)
+        layout.prop(bpy.context.scene, 'sna_switch_a', text='项目', icon_value=0, emboss=True)
+        layout.prop(bpy.context.scene, 'sna_branch_a', text='', icon_value=0, emboss=True)
+        if bpy.context.scene.sna_switch_a:
+            box_923A3 = layout.box()
+            box_923A3.alert = False
+            box_923A3.enabled = True
+            box_923A3.active = True
+            box_923A3.use_property_split = False
+            box_923A3.use_property_decorate = False
+            box_923A3.alignment = 'Expand'.upper()
+            box_923A3.scale_x = 1.0
+            box_923A3.scale_y = 1.0
+            if not True: box_923A3.operator_context = "EXEC_DEFAULT"
+            col_59649 = box_923A3.column(heading='', align=False)
+            col_59649.alert = False
+            col_59649.enabled = True
+            col_59649.active = True
+            col_59649.use_property_split = False
+            col_59649.use_property_decorate = False
+            col_59649.scale_x = 1.0
+            col_59649.scale_y = 1.0
+            col_59649.alignment = 'Expand'.upper()
+            col_59649.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
+            col_59649.prop(bpy.context.preferences.addons[__package__].preferences, 'sna_project_a_a', text='', icon_value=0, emboss=True)
+            col_59649.prop(bpy.context.preferences.addons[__package__].preferences, 'sna_project_b_b', text='', icon_value=0, emboss=True)
+            col_59649.prop(bpy.context.preferences.addons[__package__].preferences, 'sna_project_c_c', text='', icon_value=0, emboss=True)
+            col_59649.prop(bpy.context.preferences.addons[__package__].preferences, 'sna_project_d_d', text='', icon_value=0, emboss=True)
         split_3F517 = layout.split(factor=0.8299999833106995, align=True)
         split_3F517.alert = False
         split_3F517.enabled = True
@@ -92,7 +148,7 @@ class SNA_OT_Import_Unity_D209F(bpy.types.Operator):
         return not False
 
     def execute(self, context):
-        Project_Data = bpy.context.preferences.addons[__package__].preferences.sna_project
+        Project_Data = bpy.context.scene.sna_branch_a
         Print = None
         import os
 
@@ -133,7 +189,8 @@ class SNA_OT_Import_Unity_D209F(bpy.types.Operator):
             bpy.ops.wm.fbx_import(filepath=Ass_Path, mtl_name_collision_mode='REFERENCE_EXISTING', use_anim=False)
             name = bpy.context.active_object.name[:-4]
             bpy.context.active_object.name = name + '_轴心对比'
-            print('导入路径:',Ass_Path)
+            print(Ass_Name,'导入')
+            print('路径:',Ass_Path)
             # 应用旋转缩放
             bpy.ops.object.transform_apply(rotation=True, scale=True)
             # 设置位置
@@ -175,9 +232,17 @@ class SNA_OT_Delete_Cache_B7Cd7(bpy.types.Operator):
         return self.execute(context)
 
 
+def sna_branch_a_enum_items(self, context):
+    enum_items = [[bpy.context.preferences.addons[__package__].preferences.sna_project_a_a, bpy.context.preferences.addons[__package__].preferences.sna_project_a_a, '', 0], [bpy.context.preferences.addons[__package__].preferences.sna_project_b_b, bpy.context.preferences.addons[__package__].preferences.sna_project_b_b, '', 0], [bpy.context.preferences.addons[__package__].preferences.sna_project_c_c, bpy.context.preferences.addons[__package__].preferences.sna_project_c_c, '', 0], [bpy.context.preferences.addons[__package__].preferences.sna_project_d_d, bpy.context.preferences.addons[__package__].preferences.sna_project_d_d, '', 0]]
+    return [make_enum_item(item[0], item[1], item[2], item[3], i) for i, item in enumerate(enum_items)]
+
+
 class SNA_AddonPreferences_026DE(bpy.types.AddonPreferences):
     bl_idname = __package__
-    sna_project: bpy.props.StringProperty(name='Project', description='', options={'HIDDEN'}, default='', subtype='DIR_PATH', maxlen=0)
+    sna_project_a_a: bpy.props.StringProperty(name='Project_A_A', description='', options={'HIDDEN'}, default='无', subtype='DIR_PATH', maxlen=0, update=sna_update_sna_project_a_a_94840)
+    sna_project_b_b: bpy.props.StringProperty(name='Project_B_B', description='', options={'HIDDEN'}, default='无', subtype='DIR_PATH', maxlen=0, update=sna_update_sna_project_b_b_692A6)
+    sna_project_c_c: bpy.props.StringProperty(name='Project_C_C', description='', options={'HIDDEN'}, default='无', subtype='DIR_PATH', maxlen=0, update=sna_update_sna_project_c_c_9CF6B)
+    sna_project_d_d: bpy.props.StringProperty(name='Project_D_D', description='', options={'HIDDEN'}, default='无', subtype='DIR_PATH', maxlen=0, update=sna_update_sna_project_d_d_69857)
 
     def draw(self, context):
         if not (False):
@@ -187,7 +252,9 @@ class SNA_AddonPreferences_026DE(bpy.types.AddonPreferences):
 def register():
     global _icons
     _icons = bpy.utils.previews.new()
-    bpy.utils.register_class(SNA_PT_axis_comparison_73E95)
+    bpy.types.Scene.sna_branch_a = bpy.props.EnumProperty(name='Branch_A', description='', items=sna_branch_a_enum_items)
+    bpy.types.Scene.sna_switch_a = bpy.props.BoolProperty(name='Switch_A', description='', default=False)
+    bpy.utils.register_class(SNA_PT_axis_comparison_C96AE)
     bpy.utils.register_class(SNA_AddonPreferences_026DE)
     bpy.utils.register_class(SNA_OT_Import_Unity_D209F)
     bpy.utils.register_class(SNA_OT_Delete_Cache_B7Cd7)
@@ -201,7 +268,9 @@ def unregister():
     for km, kmi in addon_keymaps.values():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
-    bpy.utils.unregister_class(SNA_PT_axis_comparison_73E95)
+    del bpy.types.Scene.sna_switch_a
+    del bpy.types.Scene.sna_branch_a
+    bpy.utils.unregister_class(SNA_PT_axis_comparison_C96AE)
     bpy.utils.unregister_class(SNA_AddonPreferences_026DE)
     bpy.utils.unregister_class(SNA_OT_Import_Unity_D209F)
     bpy.utils.unregister_class(SNA_OT_Delete_Cache_B7Cd7)
