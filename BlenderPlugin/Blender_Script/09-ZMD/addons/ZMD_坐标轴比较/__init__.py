@@ -75,9 +75,9 @@ def sna_update_sna_project_d_d_69857(self, context):
     bpy.ops.wm.save_userpref()
 
 
-class SNA_PT_axis_comparison_C96AE(bpy.types.Panel):
+class SNA_PT_axis_comparison_67845(bpy.types.Panel):
     bl_label = '坐标轴对比'
-    bl_idname = 'SNA_PT_axis_comparison_C96AE'
+    bl_idname = 'SNA_PT_axis_comparison_67845'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
@@ -167,7 +167,7 @@ class SNA_OT_Import_Unity_D209F(bpy.types.Operator):
             bpy.ops.object.material_slot_add()
             bpy.context.active_object.material_slots[0].material = Mat
         # 项目路径
-        Project_Data = r'E:\v2d0\qukuikui_DM42.Beyond_Beyond_v2d0_project'
+        #Project_Data = r'E:\v2d0\qukuikui_DM42.Beyond_Beyond_v2d0_project'
         # Mod名称
         Mod_Name_Data = bpy.context.active_object.name
         # 资产文件夹名称
@@ -254,7 +254,7 @@ def register():
     _icons = bpy.utils.previews.new()
     bpy.types.Scene.sna_branch_a = bpy.props.EnumProperty(name='Branch_A', description='', items=sna_branch_a_enum_items)
     bpy.types.Scene.sna_switch_a = bpy.props.BoolProperty(name='Switch_A', description='', default=False)
-    bpy.utils.register_class(SNA_PT_axis_comparison_C96AE)
+    bpy.utils.register_class(SNA_PT_axis_comparison_67845)
     bpy.utils.register_class(SNA_AddonPreferences_026DE)
     bpy.utils.register_class(SNA_OT_Import_Unity_D209F)
     bpy.utils.register_class(SNA_OT_Delete_Cache_B7Cd7)
@@ -270,7 +270,7 @@ def unregister():
     addon_keymaps.clear()
     del bpy.types.Scene.sna_switch_a
     del bpy.types.Scene.sna_branch_a
-    bpy.utils.unregister_class(SNA_PT_axis_comparison_C96AE)
+    bpy.utils.unregister_class(SNA_PT_axis_comparison_67845)
     bpy.utils.unregister_class(SNA_AddonPreferences_026DE)
     bpy.utils.unregister_class(SNA_OT_Import_Unity_D209F)
     bpy.utils.unregister_class(SNA_OT_Delete_Cache_B7Cd7)
