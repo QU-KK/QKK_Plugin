@@ -26,7 +26,7 @@ for name in Obj_Name_List:
             if lod1_0 < 40:
                 description = '比率='+ str(lod1_0)+'%'    +'    不满足40%    ' +'面数=' + str(lod1_face) + '    建议面数=' + str(int(lod0_face*0.6))
                 data = [name,description]
-                Check_Data.append(data)
+                #Check_Data.append(data)
 
 
 #_shadowProxy

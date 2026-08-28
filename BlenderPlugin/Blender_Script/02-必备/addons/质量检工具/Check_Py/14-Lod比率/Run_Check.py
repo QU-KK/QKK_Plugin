@@ -17,85 +17,87 @@ Obj_Name_List.sort()
 for name in Obj_Name_List:
     obj = bpy.data.objects.get(name)
 
-    #  'S_mod_'   'S_imod_'
-    if '_lod1' in name and 'S_mod_' in name or 'S_imod_' in name:
-        lod0 = bpy.data.objects.get(name.replace('_lod1', '_lod0'))
-        if lod0:
-            lod0_face = len(lod0.data.loop_triangles)
-            lod1_face = len(obj.data.loop_triangles)
+    # 'S_mod_'   'S_imod_'
+    if 'S_mod_' in name or 'S_imod_' in name:
+        if '_lod1' in name:
+            lod0 = bpy.data.objects.get(name.replace('_lod1', '_lod0'))
+            if lod0:
+                lod0_face = len(lod0.data.loop_triangles)
+                lod1_face = len(obj.data.loop_triangles)
 
-            lod1_0 = round((1-lod1_face/lod0_face)*100)
-            if lod1_0 < 25:
-                description = '当前='+ str(lod1_0)+'%'+'  不满足25%—40%,  ' +'面数=' + str(lod1_face) + '    建议面数=' + str(int(lod0_face*0.75)) +'-'+  str(int(lod0_face*0.6))
-                data = [name,description]
-                Check_Data.append(data)
+                lod1_0 = round((1-lod1_face/lod0_face)*100)
+                if lod1_0 < 25:
+                    description = '当前='+ str(lod1_0)+'%'+'  不满足25%—40%,  ' +'面数=' + str(lod1_face) + '    建议面数=' + str(int(lod0_face*0.75)) +'-'+  str(int(lod0_face*0.6))
+                    data = [name,description]
+                    Check_Data.append(data)
 
-    if '_lod2' in name and 'S_mod_' in name or 'S_imod_' in name:
-        lod1 = bpy.data.objects.get(name.replace('_lod2', '_lod1'))
-        if lod1:
-            lod1_face = len(lod1.data.loop_triangles)
-            lod2_face = len(obj.data.loop_triangles)
+        if '_lod2' in name:
+            lod1 = bpy.data.objects.get(name.replace('_lod2', '_lod1'))
+            if lod1:
+                lod1_face = len(lod1.data.loop_triangles)
+                lod2_face = len(obj.data.loop_triangles)
 
-            lod2_1 = round((1-lod2_face/lod1_face)*100)
-            if lod2_1 < 25:
-                description = '当前='+ str(lod2_1)+'%'+'  不满足25%—35%,  ' + '面数=' + str(lod2_face) +'  建议面数=' + str(int(lod1_face*0.75)) +'-'+ str(int(lod1_face*0.65))
-                data = [name,description]
-                Check_Data.append(data)
-
-
-    if '_lod3' in name and 'S_mod_' in name or 'S_imod_' in name:
-        lod2 = bpy.data.objects.get(name.replace('_lod3', '_lod2'))
-        if lod2:
-            lod2_face = len(lod2.data.loop_triangles)
-            lod3_face = len(obj.data.loop_triangles)
-
-            lod3_2 = round((1-lod3_face/lod2_face)*100)
-            if lod3_2 < 20:
-                description = '当前='+ str(lod3_2)+'%'+'  不满足20%—30%,  ' + '面数=' + str(lod3_face) +'    建议面数=' + str(int(lod2_face*0.8)) +'-'+ str(int(lod2_face*0.7))
-                data = [name,description]
-                Check_Data.append(data)
+                lod2_1 = round((1-lod2_face/lod1_face)*100)
+                if lod2_1 < 25:
+                    description = '当前='+ str(lod2_1)+'%'+'  不满足25%—35%,  ' + '面数=' + str(lod2_face) +'  建议面数=' + str(int(lod1_face*0.75)) +'-'+ str(int(lod1_face*0.65))
+                    data = [name,description]
+                    Check_Data.append(data)
 
 
+        if '_lod3' in name:
+            lod2 = bpy.data.objects.get(name.replace('_lod3', '_lod2'))
+            if lod2:
+                lod2_face = len(lod2.data.loop_triangles)
+                lod3_face = len(obj.data.loop_triangles)
+
+                lod3_2 = round((1-lod3_face/lod2_face)*100)
+                if lod3_2 < 20:
+                    description = '当前='+ str(lod3_2)+'%'+'  不满足20%—30%,  ' + '面数=' + str(lod3_face) +'    建议面数=' + str(int(lod2_face*0.8)) +'-'+ str(int(lod2_face*0.7))
+                    data = [name,description]
+                    Check_Data.append(data)
 
 
 
-    #  'S_prop_'   'S_iprop_'   
-    if '_lod1' in name and 'S_prop_' in name or 'S_iprop_' in name:
-        lod0 = bpy.data.objects.get(name.replace('_lod1', '_lod0'))
-        if lod0:
-            lod0_face = len(lod0.data.loop_triangles)
-            lod1_face = len(obj.data.loop_triangles)
-
-            lod1_0 = round((1-lod1_face/lod0_face)*100)
-            if lod1_0 < 35:
-                description = '当前='+ str(lod1_0)+'%'+'  不满足35%—50%,  ' +'面数=' + str(lod1_face) + '    建议面数=' + str(int(lod0_face*0.65)) +'-'+ str(int(lod0_face*0.5))
-                data = [name,description]
-                Check_Data.append(data)
-
-    if '_lod2' in name and 'S_prop_' in name or 'S_iprop_' in name:
-        lod1 = bpy.data.objects.get(name.replace('_lod2', '_lod1'))
-        if lod1:
-            lod1_face = len(lod1.data.loop_triangles)
-            lod2_face = len(obj.data.loop_triangles)
-
-            lod2_1 = round((1-lod2_face/lod1_face)*100)
-            if lod2_1 < 35:
-                description = '当前='+ str(lod2_1)+'%'+'  不满足35%—50%,  ' + '面数=' + str(lod2_face) +'  建议面数=' + str(int(lod1_face*0.65)) +'-'+ str(int(lod1_face*0.5))
-                data = [name,description]
-                Check_Data.append(data)
 
 
-    if '_lod3' in name and 'S_prop_' in name or 'S_iprop_' in name:
-        lod2 = bpy.data.objects.get(name.replace('_lod3', '_lod2'))
-        if lod2:
-            lod2_face = len(lod2.data.loop_triangles)
-            lod3_face = len(obj.data.loop_triangles)
+    # 'S_prop_'   'S_iprop_'
+    if 'S_prop_' in name or 'S_iprop_' in name:
+        if '_lod1' in name:
+            lod0 = bpy.data.objects.get(name.replace('_lod1', '_lod0'))
+            if lod0:
+                lod0_face = len(lod0.data.loop_triangles)
+                lod1_face = len(obj.data.loop_triangles)
 
-            lod3_2 = round((1-lod3_face/lod2_face)*100)
-            if lod3_2 < 30:
-                description = '当前='+ str(lod3_2)+'%'+'  不满足30%—45%,  ' + '面数=' + str(lod3_face) +'    建议面数=' + str(int(lod2_face*0.70)) +'-'+ str(int(lod2_face*0.55))
-                data = [name,description]
-                Check_Data.append(data)
+                lod1_0 = round((1-lod1_face/lod0_face)*100)
+                if lod1_0 < 35:
+                    description = '当前='+ str(lod1_0)+'%'+'  不满足35%—50%,  ' +'面数=' + str(lod1_face) + '    建议面数=' + str(int(lod0_face*0.65)) +'-'+ str(int(lod0_face*0.5))
+                    data = [name,description]
+                    Check_Data.append(data)
+
+        if '_lod2' in name:
+            lod1 = bpy.data.objects.get(name.replace('_lod2', '_lod1'))
+            if lod1:
+                lod1_face = len(lod1.data.loop_triangles)
+                lod2_face = len(obj.data.loop_triangles)
+
+                lod2_1 = round((1-lod2_face/lod1_face)*100)
+                if lod2_1 < 35:
+                    description = '当前='+ str(lod2_1)+'%'+'  不满足35%—50%,  ' + '面数=' + str(lod2_face) +'  建议面数=' + str(int(lod1_face*0.65)) +'-'+ str(int(lod1_face*0.5))
+                    data = [name,description]
+                    Check_Data.append(data)
+
+
+        if '_lod3' in name:
+            lod2 = bpy.data.objects.get(name.replace('_lod3', '_lod2'))
+            if lod2:
+                lod2_face = len(lod2.data.loop_triangles)
+                lod3_face = len(obj.data.loop_triangles)
+
+                lod3_2 = round((1-lod3_face/lod2_face)*100)
+                if lod3_2 < 30:
+                    description = '当前='+ str(lod3_2)+'%'+'  不满足30%—45%,  ' + '面数=' + str(lod3_face) +'    建议面数=' + str(int(lod2_face*0.70)) +'-'+ str(int(lod2_face*0.55))
+                    data = [name,description]
+                    Check_Data.append(data)
 
 
 # 枚举
