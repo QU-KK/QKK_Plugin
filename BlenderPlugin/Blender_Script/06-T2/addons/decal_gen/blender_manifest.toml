@@ -1,0 +1,29 @@
+schema_version = "1.0.0"
+
+id = "decal_gen"
+version = "1.2.1"
+name = "Edge Decal Generator"
+tagline = "Generate customizable decals along mesh edges"
+maintainer = "MKLK, iBlender®taobao.com"
+type = "add-on"
+
+tags = ["Mesh"]
+blender_version_min = "4.5.0"
+
+license = [
+  "SPDX:GPL-2.0-or-later",
+]
+copyright = [
+  "2026 MKLK",
+]
+
+[build]
+paths_exclude_pattern = [
+  "__pycache__/",
+  ".*",
+  "*.py[cod]",
+  "*.blend1",
+  "*.blend2",
+  "*.tmp",
+  "*.zip",
+]
