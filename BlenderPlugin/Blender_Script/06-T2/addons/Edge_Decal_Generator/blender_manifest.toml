@@ -1,0 +1,12 @@
+schema_version = "1.0.0"
+id = "Edge_Decal_Generator"
+version = "1.2.1"
+name = "🌸 边缘贴花 (Edge Decal Generator) 🆕"
+tagline = "沿网格边生成可自定义贴花"
+maintainer = "MKLK 汉化：GJJ"
+website = "https://space.bilibili.com/454791153/upload/video"
+type = "add-on"
+blender_version_min = "4.5.0"
+license = [ "SPDX:GPL-3.0-or-later",]
+tags = [ "Mesh",]
+copyright = [ "MKLK 汉化：GJJ",]

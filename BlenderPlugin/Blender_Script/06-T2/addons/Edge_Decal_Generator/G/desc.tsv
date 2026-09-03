@@ -1,0 +1,286 @@
+on	bl_description= "Regenerate the active decal from stored source data"	bl_description= "重新生成活动贴花"	CEW
+on	bl_description=("Refresh this layer's Base Color,Metallic,Roughness,and matched  \\n source UVs from its stored source material and mesh"	bl_description=("刷新此层的基础颜色、金属度、粗糙度和匹配\\n 从其存储的源材质和网格源UV"	CEW
+on	bl_description=("Create an edge decal and adjust Face Width and Surface Offset  \\n interactively from Blender's Adjust Last Operation panel"	bl_description=("创建边贴花并调整面宽度和表面偏移\\n 从Blender的调整最后操作面板交互"	CEW
+on	bl_description= "Generate adjustable decal strips through selected quad faces"	bl_description= "通过选定的四边面生成可调整的贴花条"	CEW
+on	bl_description=("In Edit Mode,generate from selected faces or manually selected edges.  \\n In Object Mode,generate automatically by face angle"	bl_description=("在编辑模式中，从选定的面或手动选定的边生成。  \\n 在对象模式下，按面角度自动生成"	CEW
+on	bl_description= "Automatically generate decal strips from sharp manifold edges"	bl_description= "从锐边流行边自动生成贴花条"	CEW
+on	bl_description=("Hover source mesh edges and click to generate decals without manually selecting them"	bl_description=("悬停源网格边并单击以生成贴花，而无需手动选择它们"	CEW
+on	bl_description=("Generate a wrapped edge decal where exactly two selected mesh objects intersect"	bl_description=("在正好两个选定的网格对象相交的位置生成包裹边贴花"	CEW
+on	bl_description=("Generate one combined decal from all enabled Object Boolean  \\n modifiers already present on the selected source mesh"	bl_description=("从所有全部启用对象布尔生成一合成贴花\\n 选定的源网格上已存在修改器"	CEW
+on	bl_description=("Enter an interactive mode with one red target per disconnected decal  \\n section; click a target to delete that section"	bl_description=("进入交互式模式，每个断开的贴花有一红色目标\\n 截面；单击目标以删除该节"	CEW
+on	bl_description=("Lock all current decals generated from the selected source mesh so future generation keeps them untouched"	bl_description=("锁定从选定的源网格生成的全部当前贴花，以便下一代保持它们不变"	CEW
+on	bl_description= "Create a new empty active decal layer for this source mesh"	bl_description= "为此源网格创建新建空物体活动贴花层"	CEW
+on	bl_description= "Delete the selected decal layer"	bl_description= "删除选定的贴花层"	CEW
+on	bl_description= "Change the stack order of decal layers"	bl_description= "更改贴花层的堆栈排序"	CEW
+on	bl_description=("Regenerate only the selected layer,then remove the footprint of its  \\n chosen upper mask layer"	bl_description=("重新生成仅选定的层，然后移除其足迹\\n 选定的上遮罩层"	CEW
+on	bl_description= "Remove the mask assignment and regenerate the full selected layer"	bl_description= "移除遮罩分配，重新生成整个选定的层"	CEW
+on	bl_description=("Save the current settings and bundle the assigned material and its  \\n textures for use in any blend file"	bl_description=("保存当前设置并捆绑指定的材质及其\\n 用于任何混合文件的纹理"	CEW
+on	bl_description= "Apply the selected preset to the current settings"	bl_description= "应用选定的预设应用于当前设置"	CEW
+on	bl_description= "Permanently delete the selected reusable preset"	bl_description= "永久删除所选的可重复使用的预设"	CEW
+on	bl_description=("Create a solid-black mask for this layer; paint white where decals  \\n are allowed to generate"	bl_description=("为这个层创建一个实心黑色遮罩；绘制白色贴花\\n 允许生成"	CEW
+on	bl_description= "Detach the texture mask and restore unmasked generation"	bl_description= "分离纹理遮罩并恢复无遮罩生成"	CEW
+on	bl_description= "Erase the whole mask so this layer generates nowhere"	bl_description= "擦除整个遮罩，这样层就不会生成任何内容"	CEW
+on	bl_description=("Use this mask as Blender's Texture Paint canvas on the source mesh"	bl_description=("使用该遮罩作为源网格上Blender的纹理绘制画布"	CEW
+on	bl_description= "Export the active source and its populated decals,then set them up in the open Unreal project"	bl_description= "导出活动源及其填充的贴花，然后在开放的Unreal投射中对其进行上"	CEW
+on	bl_description= "Combine the evaluated source and decal layers into one FBX mesh"	bl_description= "将评估的源层和贴花层组合到一FBX网格中"	CEW
+on	bl_description= "Export FBX files,textures,and a manifest without contacting Unreal Editor"	bl_description= "导出FBX文件、纹理和清单无联系Unreal编辑器"	CEW
+on	bl_description=("Enable or disable UV Pin Edit Mode so decal pin shortcuts  \\n do not interfere with normal Blender UV editing"	bl_description=("启用或禁用UV固定编辑模式，以便贴花固定快捷方式\\n 不干扰法线Blender UV编辑"	CEW
+on	bl_description= "Add a slice position to the selected UV pin"	bl_description= "将切片位置添加到选定的UV固定"	CEW
+on	bl_description= "Add a UV placement pin at the mouse position"	bl_description= "在鼠标位置添加UV放置固定"	CEW
+on	bl_description= "Remove the decal pin under the mouse cursor"	bl_description= "移除鼠标游标下的贴花固定"	CEW
+on	bl_description=("Left-click and drag the pin center to move it,or a top/bottom  \\n handle to change its vertical UV width. Hold Ctrl to snap to the UV grid"	bl_description=("左键单击并拖动固定中心以移动它，或顶部/底部\\n 手柄来更改其垂直UV宽度。保持Ctrl捕捉到UV栅格"	CEW
+on	bl_description=("Shift + Left Click creates a pin; drag existing pins to move them.  \\n Hold Ctrl while dragging to snap to the UV grid. "	bl_description=("Shift+左键单击创建固定；拖动现有固定以移动它们。  \\n 保持Ctrl键，同时拖动以捕捉到UV栅格. "	CEW
+on	bl_description= "Add a UV placement pin at the center of the UV tile"	bl_description= "在UV平铺的中心添加UV放置固定"	CEW
+on	bl_description=("Replace the current pins with evenly spaced rows covering the UV tile"	bl_description=("替换当前固定"	CEW
+on	bl_description=("Uniformly scale UV islands to match pin width without stretching,then  \\n center their tracked decal centerline on the pins"	bl_description=("均匀缩放UV孤岛，以匹配固定宽度无拉伸，然后\\n 将他们的跟踪贴花中心线中心在固定上"	CEW
+on	bl_description=("Run the decal UV pipeline on the current layer without regenerating  \\n or replacing its manually edited topology"	bl_description=("运行UV贴花管道，无再生\\n 或替换其手动编辑的拓扑"	CEW
+on	description=("Folder containing user presets,material libraries,and copied  \\n textures; leave empty to use Blender's configuration directory"	description=("包含用户预设、材质资产库和拷贝的文件夹\\n 纹理；保留空物体以使用Blender的配置目录"	CEW
+on	description="Regenerate after a short pause while changing settings"	description="更改设置时短暂暂停后重新生成"	CEW
+on	description=("Decal layer above this one whose visible footprint is removed  \\n from this layer during regeneration"	description=("此一上方的贴花层，其可视足迹已删除\\n 再生期间从该层开始"	CEW
+on	description=("Source mesh material used for Base Color,Metallic,and Roughness"	description=("用于基础颜色、金属度和粗糙度的源网格材质"	CEW
+on	description="Edge decal material template used by this layer"	description="此层使用的边缘贴花材质模板"	CEW
+on	description="Material assigned to this generated decal object"	description="指定给此生成贴花对象的材质"	CEW
+on	description=("Match Base Color,Metallic,and Roughness to the source mesh;  \\n when disabled,use the decal material's authored values"	description=("匹配基础颜色、金属度和粗糙度到源网格；  \\n 当禁用时，使用贴花材质的编写值"	CEW
+on	description=("Comma-separated UV pin indices used by this decal layer.  \\n Leave empty to cycle through all pins automatically"	description=("此贴花层使用逗号分隔的UV固定指数。  \\n 保留空物体以自动循环通过全部固定"	CEW
+on	description=("Limit this layer to white areas of its painted source-UV mask;  \\n black areas do not generate decals"	description=("限制该层到其绘制源UV遮罩的白色区域；  \\n 黑区域不会生成贴花"	CEW
+on	description="Black-and-white source-UV image controlling layer generation"	description="黑白源紫外图像控制层生成"	CEW
+on	description="Minimum painted brightness that permits decal generation"	description="允许生成贴花的最小涂漆亮度"	CEW
+on	description="Width as a fraction of the source object's largest world-space dimension when Relative Width is enabled"	description="“宽度”(Width)是源对象最大世界空间维度当相对宽度时)的一小部分"	CEW
+on	description="Interpret Face Width as a fraction of the source object's largest world-space dimension"	description="将面宽度解释为源对象最大世界空间维度的一小部分"	CEW
+on	description="How often retained open chains use their UV pin slice points"	description="保留的开链使用其UV固定切片点的频率"	CEW
+on	description="Maximum continuous decal length; zero disables the limit"	description="最大连续贴花长度；零禁用限制"	CEW
+on	description="Narrow only endpoints created by Decal Amount slicing"	description="通过贴花数量切片创建的窄仅端点"	CEW
+on	description="World-space distance used to widen a sliced endpoint back to full width"	description="世界空间距离用于将切片端点加宽回完整宽度"	CEW
+on	description=("Shorten only decal endpoints that stop beside a turning manifold edge"	description=("缩短停止在旋转流行边旁边的仅贴花端点"	CEW
+on	description="Endpoint trim distance relative to the source object's last Bevel width"	description="端点相对于源对象的最后个斜边宽度修剪距离"	CEW
+on	description=("Maximum ray distance. Zero automatically uses four times  \\n the decal width"	description=("最大射线距离。Zero自动使用四次次数\\n 贴花宽度"	CEW
+on	description="Ray samples per test point"	description="每个测试点的射线采样"	CEW
+on	description=("Enabled for automatic generation so short source segments are  \\n removed individually. Disabled for manual generation so the \\n complete selected chain is measured and preserved"	description=("启用自动生成，因此短源分段\\n 单独拆下。禁用用于手动生成，因此\\n 测量并保存完整的选定链"	CEW
+on	description="Choose a repeatable random width for each disconnected decal path"	description="为每个断开连接的贴花路径选择可重复的随机宽度"	CEW
+on	description=("Build a connected curve-graph strip and locally reduce its width  \\n before it reaches another selected decal edge"	description=("建立连通曲线图条并局部缩小其宽度\\n 在它到达另一个选定的贴花边缘之前"	CEW
+on	description=("Fraction of the shared gap used by two opposing decal strips"	description=("两个相对的贴花条使用的共享间隙的分数"	CEW
+on	description=("Build separate geometry islands where a connected edge path  \\n turns farther than Split Angle"	description=("构建单独的几何孤岛，其中连接的边路径\\n 转向比拆分角度更远"	CEW
+on	description="Split when the actual path turn exceeds this angle"	description="当实际路径转弯超过该角度时拆分"	CEW
+on	description=("Prefer a real connected support-face edge at safe endpoints,\\n and fall back to the existing miter solver when no suitable rail exists"	description=("首选安全端点处的真实连接支撑面边缘，\\n 当不存在合适的轨道时，回退到现有斜接解算器"	CEW
+on	description="Add the Weld modifier to this decal layer"	description="将“焊接修改器”添加到此贴花层"	CEW
+on	description="Merge overlapping vertices before the final bevel modifier"	description="合并最终斜边修改器之前重叠的顶点"	CEW
+on	description="Add a source-targeted Shrinkwrap modifier to this layer"	description="将以源为目标的收缩包裹修改器添加到此层"	CEW
+on	description="Displace only the EdgeDecal_Center vertex group"	description="置换仅EdgeDecal_Center顶点组"	CEW
+on	description="Normal displacement applied to EdgeDecal_Center"	description="应用于EdgeDecal_Center的法线置换"	CEW
+on	description="Add the final Bevel modifier to this layer"	description="将最终斜边修改器添加到此层"	CEW
+on	description="Limit the Bevel modifier to EdgeDecal_Center"	description="限制斜边修改器为EdgeDecal_Center"	CEW
+on	description="Width of the angle-limited bevel"	description="角度限制斜边的宽度"	CEW
+on	description="Number of segments used by the bevel"	description="斜边使用的分段的数字"	CEW
+on	description="Shape of the bevel profile"	description="斜边轮廓的形状"	CEW
+on	description="Harden normals on the generated decal's Bevel modifier"	description="在生成贴花的斜边修改器上硬化法线"	CEW
+on	description="Only edges sharper than this angle are beveled"	description="仅比这个角度更尖锐的边是斜面的"	CEW
+on	description="Add a Subdivision Surface modifier to this layer"	description="将细分表面修改器添加到此层"	CEW
+on	description="Add a Decimate modifier to this layer"	description="将精简修改器添加到此层"	CEW
+on	description="Show settings stored on the selected decal object"	description="显示存储在选定贴花对象上的设置"	CEW
+on	description="Show the selected decal geometry settings"	description="显示选定的贴花几何设置"	CEW
+on	description="Show geometry settings that are changed less frequently"	description="显示几何设置"	CEW
+on	description="Show the selected decal UV settings"	description="显示所选贴花UV设置"	CEW
+on	description="Show UV settings that are changed less frequently"	description="显示较少更改的UV设置"	CEW
+on	description="Show normal shading settings for the selected decal"	description="显示选定贴花的法线着色设置"	CEW
+on	description="Show detailed normal modifier settings"	description="显示详细的法线修改器设置"	CEW
+on	description="Scale Face Width from the source object's largest world-space dimension so differently sized assets get proportional decals"	description="从源对象的最大世界空间维度缩放面宽度，使大小不同的资产获得衰减贴花"	CEW
+on	description=("Remove damage from inward concave edges. 0 keeps all crevice edges;  \\n 1 removes all detected concave edges"	description=("移除破损。0保持全部缝隙边；  \\n 1 删除全部检测到的凹形边"	CEW
+on	description=("Ambient Occlusion uses local raycasts and is more reliable on  \\n Geometry keeps the older angle test"	description=("环境光遮蔽使用局部光线投射，并且在\\n 几何保持旧的角度测试"	CEW
+on	description=("Maximum local occlusion distance. Zero automatically uses four  \\n times Face Width"	description=("最大局部堵塞距离。零自动使用四个\\n 次数面宽度"	CEW
+on	description=("Number of cross-section rays per test point. Higher values are  \\n more stable but slower"	description=("每个测试点的数字。更高的值是\\n 更稳定但较慢"	CEW
+on	description=("Ignore eligible edges shorter than the Minimum Edge Length"	description=("忽略比最小边长度短的合格边"	CEW
+on	description=("World-space edge length below which edges are excluded from decal generation"	description=("世界空间边长度，低于该长度的边将被从贴花生成中排除"	CEW
+on	description=("World-space minimum used only by Generate Automatically.  \\n Automatic mode measures individual source edges to reject tiny " "segments that can create unstable geometry"	description=("世界空间最小值仅由“自动生成”仅使用。  \\n 自动模式测量个体源边以拒绝微小" "可以创建不稳定几何的分段"	CEW
+on	description=("Controls total decal coverage and slice intensity. Lower values  \\n retain less edge wear and shorten continuous decal chains more aggressively"	description=("控制全部贴花覆盖和切片强度。较低的值\\n 保持较少的边缘磨损，并更积极地缩短连续贴花链"	CEW
+on	description="Legacy compatibility value; Decal Amount now continuously controls slicing"	description="旧版兼容性值；贴花数量现在持续控制切片"	CEW
+on	description="Internal interactive mode flag: taper only visually exposed endpoints on full selected edges"	description="内部交互式模式标志：在完全选定的边上仅锥度仅视觉暴露的端点"	CEW
+on	description=("Maximum continuous generated decal length. Zero disables the limit"	description=("最大连续生成贴花长度。零禁用限制"	CEW
+on	description=("Taper only endpoints introduced by Decal Amount slicing;  \\n original decal endpoints remain unchanged"	description=("贴花数量切片引入的锥度仅端点；  \\n 原点贴花端点保持不变的"	CEW
+on	description="Distance from a sliced tip to full decal width"	description="从切片尖端到全贴花宽度的距离"	CEW
+on	description=("Trim only open decal ends that stop beside a real turning continuation"	description=("修剪仅开放式贴花端点，停止在真实转弯延续线旁边"	CEW
+on	description="Trim distance relative to the last source Bevel modifier width"	description="相对于最后源斜边修改器宽度修剪距离相对"	CEW
+on	description="Lower values are faster; higher values detect nearby edges more reliably"	description="较低的值更快；更高的值探测附近的边更可靠"	CEW
+on	description=("Reduce the width per edge side when the requested Face Width  \\n would reach a nearby edge on the same surface"	description=("当请求的面宽度时，减少每边侧的宽度\\n 会到达相同表面上的附近边缘"	CEW
+on	description=("Percentage of the detected free space that the decal is allowed to use"	description=("允许贴花使用的检测到的免费空间的百分比"	CEW
+on	description=("Fraction of the shared space used by two opposing strips;  \\n lower values leave a larger gap"	description=("两个相对条带使用的共享空间的分数；  \\n 值越低，间隙越大"	CEW
+on	description="Small world-space offset used to prevent z-fighting"	description="用于防止z战斗的小世界空间偏移"	CEW
+on	description="Limits very long planar miters at acute corners"	description="限制锐角处非常长的平面斜接"	CEW
+on	description=("In Object Mode,use manifold edges whose angle between adjacent  \\n faces is at least this value as automatic generation seeds"	description=("在对象模式中，使用流行边，相邻边之间的角度\\n 作为自动生成种子，面至少为该值"	CEW
+on	description="Smallest width used when Random Width is enabled"	description="当随机宽度被启用时使用的最小宽度"	CEW
+on	description="Largest width used when Random Width is enabled"	description="当随机宽度被启用时使用的最大宽度"	CEW
+on	description=("Follow connected quad-topology loops without including edges  \\n below Auto Edge Angle"	description=("跟随连接的四元拓扑回路无包括边\\n 低于自动边缘角度"	CEW
+on	description=("Split only when the actual path turn exceeds this angle;  \\n straight continuations remain connected even at topology junctions"	description=("仅在当实际路径转弯超过该角度时仅拆分；  \\n 直延拓即使在拓扑结处也保持连接"	CEW
+on	description="Add the Weld modifier to generated decals"	description="将“焊接修改器”添加到生成贴花"	CEW
+on	description=("Add a final Bevel modifier; copy the source Bevel when available,\\n otherwise use the custom bevel settings below"	description=("添加最终斜边修改器；复制源斜边当可用，\\n 否则，请使用下面的自定义斜边设置"	CEW
+on	description=("Add a Displace modifier restricted to the EdgeDecal_Center  \\n vertex group and place it before the Bevel modifier"	description=("添加限制为EdgeDecal_Center的置换修改器\\n 顶点组，并将其放置在斜边修改器之前"	CEW
+on	description=("Limit the Bevel modifier to the EdgeDecal_Center vertex group"	description=("限制斜边修改器为EdgeDecal_Center顶点组"	CEW
+on	description=("Add a Shrinkwrap modifier to generated decals and automatically  \\n use the source mesh as its target,with Surface Offset as its offset"	description=("将收缩包裹修改器添加到生成贴花并自动\\n 使用源网格作为其目标，表面偏移作为其偏移"	CEW
+on	description="Add a Subdivision Surface modifier to generated decals"	description="将细分表面修改器添加到生成贴花"	CEW
+on	description="Add a Decimate modifier to generated decals"	description="将精简修改器添加到生成贴花"	CEW
+on	description=("Normal displacement strength applied only to EdgeDecal_Center"	description=("法线置换强度仅仅于EdgeDecal_Center"	CEW
+on	description="Number of segments used by the angle-limited bevel"	description="角度限制斜边使用的分段的数字"	CEW
+on	description="Shape of the bevel profile; 0.5 creates a circular arc"	description="斜边轮廓的形状；0.5创建圆形弧形"	CEW
+on	description="Normal shading used by newly generated decals"	description="新生成的贴花使用的法线着色"	CEW
+on	description="Preserve sharp edge boundaries in the normal modifier"	description="保留法线修改器中的锐边边边界"	CEW
+on	description="Weight used by the Weighted Normals mode"	description="加权法线模式使用的权重"	CEW
+on	description="Ignore normal contributions below this threshold"	description="忽略低于此阈值的法线贡献"	CEW
+on	description=("Append newly generated decal geometry to the existing edge decal  \\n object for this source mesh instead of creating separate objects"	description=("追加新生成的贴花几何附加到现有边缘贴花\\n 此源网格的对象，而不是创建单独的对象"	CEW
+on	description=("Automatically center and vertically scale newly generated decal  \\n UV islands to the existing UV pins"	description=("自动中心和垂直缩放新生成贴花\\n UV岛到现有UV固定"	CEW
+on	description=("Skip quadrify,texel-density processing,UV strip placement,\\n random UV offsets,and automatic UV-pin fitting without changing " "the saved UV-pin preference"	description=("跳过四边形，纹理密度进程，UV条放置，\\n 随机UV偏移，自动UV引脚适配，无更改" "保存的UV接点首选项"	CEW
+on	description=("Generate and process UVs for the created decal strips"	description=("为创建的贴花条带生成和处理UV"	CEW
+on	description=("Create UVMap.001; Match Material projects the source object's  \\n first UV map onto it,otherwise Blender's Conformal unwrap and " "the Texel Density target are used"	description=("创建UVMap.001；匹配材质投影源对象的\\n 首先UV映射到它上，否则Blender的保形解包和" "使用纹素密度目标"	CEW
+on	description=("Use the self-contained GPL quadrify implementation built into  \\n this add-on"	description=("使用内置于\\n 此加载项"	CEW
+on	description=("Average corresponding mesh edge-loop lengths before quadrifying"	description=("四边形化之前平均对应的网格边循环长度"	CEW
+on	description=("Use square UV quads instead of preserving mesh proportions"	description=("使用平方UV四边形，而不是保留网格比例"	CEW
+on	description=("Use Blender Follow Active Quads only when Quadrify UV Strips  \\n is disabled"	description=("使用Blender Follow活动四边形仅当四边形UV条纹时\\n 是禁用"	CEW
+on	description=("Additional UV scale multiplier applied after unwrap,alignment,\\n texel density,and strip placement"	description=("在解包、对齐、，\\n 纹素密度和条带放置"	CEW
+on	description=("Scale generated UV islands to an exact pixels-per-centimeter target;  \\n quarter-strip placement will not resize them afterward"	description=("缩放生成UV岛到每厘米精确像素目标；  \\n 四分之一条放置后不会调整它们的大小"	CEW
+on	description="Target UV density in pixels per centimeter"	description="目标UV密度，像素/厘米"	CEW
+on	description=("Resolution of the square decal texture used to convert px/cm  \\n into UV scale"	description=("用于转换px/cm的平方贴花纹理的分辨率\\n 进入UV缩放"	CEW
+on	description=("Equalize texel density across generated UV islands before  \\n horizontal alignment and quarter-strip placement"	description=("在之前，在生成UV岛上相等纹素密度\\n 水平对齐和四分之一条放置"	CEW
+on	description=("Rotate each UV island so its longest dimension runs horizontally"	description=("旋转每个UV岛，使其最长的维度水平运行"	CEW
+on	description=("Fit each UV island into one of four horizontal 0.25-high bands  \\n inside the 0-1 UV space"	description=("将每个UV岛安装到四个水平0.25高波段中的一中\\n 在0-1 UV空间的内部"	CEW
+on	description=("Randomly choose which of the four 0.25-high bands receives each island"	description=("随机选择四个0.25高频带中的哪一个接收每个岛屿"	CEW
+on	description=("Give every UV island a distinct randomized U position; wide  \\n islands may tile beyond 0-1 so their horizontal phase can change"	description=("给每个UV岛一个不同的随机U位置；宽的，宽的\\n 岛屿可以平铺超过0-1，因此它们的水平阶段可以改变"	CEW
+on	description="Total U-space span used to separate randomized UV islands"	description="用于分离随机UV岛的全部U空间跨度"	CEW
+on	description=("Controls independently mixed per-path Decal Amount cuts,\\n slice selection,and random UV placement"	description=("独立控制每路径混合贴花数量切割，\\n 切片选择和随机UV放置"	CEW
+on	description=("Padding inside each 0.25-high UV strip,measured in UV space"	description=("填充内部每个0.25高UV条，在UV空间中测量"	CEW
+on	description="Assign the selected decal material to generated decals"	description="指定选定的贴花材质指定给生成贴花"	CEW
+on	description="Material assigned to newly generated decal objects"	description="指定给新生成贴花对象的材质"	CEW
+on	description="Show geometry generation settings"	description="显示几何生成设置"	CEW
+on	description="Show generated decal modifier settings"	description="显示生成贴花修改器设置"	CEW
+on	description="Show detailed Weld and Bevel modifier settings"	description="显示详细的焊接和斜边修改器设置"	CEW
+on	description="Show normal shading settings"	description="显示法线着色设置"	CEW
+on	description="Show UV generation and placement settings"	description="显示UV生成和放置设置"	CEW
+on	description="Show general generation options"	description="显示常规生成选项"	CEW
+on	description="Show options that are changed less frequently"	description="显示较少更改的选项"	CEW
+on	description="Show manual or automatic edge generation actions"	description="显示手动或自动边缘生成动作"	CEW
+on	description="Show the active layer's material and UV pin assignments"	description="显示活动层的材质和UV固定指定"	CEW
+on	description="Show material assignment controls"	description="显示材质分配控件"	CEW
+on	description="Show painted texture and crevice masking controls"	description="显示绘制的纹理和缝隙遮蔽控件"	CEW
+on	description="Show UV placement controls"	description="显示UV放置控件"	CEW
+on	description="Show the interactive generation shortcut reference"	description="显示交互式生成快捷方式引用"	CEW
+on	description="Give every generated UV island a distinct randomized U position"	description="为每个生成的UV岛提供一个不同的随机U位置"	CEW
+on	description=("Controls independently mixed per-path cuts and random UV placement"	description=("独立控制每路径混合切割和随机UV放置"	CEW
+on	description="Interactive multiplier for the generated UV islands"	description="生成UV岛的交互式倍增"	CEW
+on	description="Relative decal width; with Relative Width enabled,0.01 means 1% of the source object's largest dimension"	description="相对贴花宽度；在启用“相对宽度”的情况下，0.01表示源对象最大尺寸的1%"	CEW
+on	description="Reduce decals on inward concave/crevice edges"	description="减少向内凹形/缝隙边上的贴花"	CEW
+on	description="Zero automatically uses four times Face Width"	description="Zero自动使用四个次数面宽度"	CEW
+on	description="Ignore edges shorter than the minimum length"	description="忽略比最小长度短的边"	CEW
+on	description="World-space minimum length for eligible decal edges"	description="合格贴花边的世界空间最小长度"	CEW
+on	description=("Automatic mode filters individual source edges; manual mode  \\n filters the total connected selected chain"	description=("自动模式滤波器个体源边；手动模式\\n 过滤全部连接的选定链"	CEW
+on	description=("Controls total coverage and automatic chain shortening intensity"	description=("控制全部覆盖和自动链缩短强度"	CEW
+on	description="Internal partial-edge start fraction used by Interactive Generate"	description="Interactive Generate使用的内部部分边缘开始分数"	CEW
+on	description="Internal partial-edge end fraction used by Interactive Generate"	description="Interactive Generate使用的内部局部边结束分数"	CEW
+on	description="Internal interactive mode flag: taper every open endpoint on newly placed edges"	description="内部交互式模式标志：锥度新放置的边上的每个开放端点"	CEW
+on	description="Internal interactive flag: taper the open start of a merged chain"	description="内部交互标志：锥度合并链的开放起点"	CEW
+on	description="Internal interactive flag: taper the open end of a merged chain"	description="内部交互标志：锥度合并链的开放端"	CEW
+on	description="Internal interactive flag: generate from unchanged source topology"	description="内部交互标志：从不变的源拓扑生成"	CEW
+on	description=("Build all selected full edges in one branch-aware topology pass"	description=("在一分支感知拓扑过程中构建全部选定的完整边"	CEW
+on	description="Use selected quad faces as virtual center paths"	description="使用选定的四边面作为虚拟中心路径"	CEW
+on	description="Taper endpoints created by Decal Amount slicing"	description="通过贴花数量切片创建的锥度端点"	CEW
+on	description="Lower is faster; higher is more accurate"	description="越低越快；越高越准确"	CEW
+on	description=("Automatically clamp the width per edge side to nearby surface edges"	description=("自动钳制每个边缘的宽度侧到附近的表面边"	CEW
+on	description="Fraction of detected free space used by the decal"	description="贴花使用的检测到的免费空间的分数"	CEW
+on	description=("Build a connected curve-graph strip and locally reduce its width  \\n before selected decal paths overlap"	description=("建立连通曲线图条并局部缩小其宽度\\n 在选定贴花路径重叠之前"	CEW
+on	description="Fraction of the shared gap used by opposing strips"	description="相反板条使用的共享间隙的分数"	CEW
+on	description=("At safe open endpoints,follow a connected support-face edge.  \\n Corners and junctions continue using the bounded miter solver"	description=("在安全的开放端点处，遵循连接的支撑面边缘。  \\n 夹角和连接继续使用有界斜接解算器"	CEW
+on	description="Skip expensive final UV processing"	description="跳过昂贵的最终UV进程"	CEW
+on	description="Interactive distance above the source surface"	description="源表面上方的交互式距离"	CEW
+on	description="Distance above the selected source faces"	description="选定源面上方的距离"	CEW
+on	description="Skip optional UV placement processing"	description="跳过可选UV放置进程"	CEW
+on	description="Generate only edges selected by the inverted crevice mask"	description="仅生成倒置缝隙遮罩选择的仅边"	CEW
+on	description="Generate from manifold edges at or above this face angle"	description="在该面角度或其上从流行边生成"	CEW
+on	description="Interactive world-space decal width"	description="交互式世界空间贴花宽度"	CEW
+on	description="Interactive multiplier for generated UV islands"	description="生成UV岛的交互式倍增"	CEW
+on	description="Reduce automatically generated decals on inward crevice edges"	description="减少向内裂缝边上自动生成的生成贴花"	CEW
+on	description="Prefer connected support-face rails at strip endpoints"	description="首选带端点处连接的支撑面轨道"	CEW
+on	description="Ignore automatically detected edges shorter than the minimum length"	description="忽略自动检测到的短于最小长度的边"	CEW
+on	description=("World-space minimum for Generate Automatically. Each detected  \\n source edge is measured separately"	description=("自动生成的世界空间最小值。每个检测到的\\n 单独测量源边缘"	CEW
+on	description="Percentage of automatically detected sharp edges kept at random"	description="随机保留的自动检测到的锐边边的百分比"	CEW
+on	description="Clamp width automatically near neighboring source edges"	description="在邻近源边附近自动钳制宽度"	CEW
+on	description="Fraction of detected free space used by adaptive width"	description="适配宽度使用的检测到的免费空间的分数"	CEW
+on	description=("Build connected curve-graph strips and locally reduce their width  \\n before generated sharp-edge paths overlap"	description=("构建连通曲线图条并局部缩小其宽度\\n 在生成锐边路径重叠之前"	CEW
+on	description="Fraction of the shared gap used by opposing sharp-edge strips"	description="相对锐边条使用的共享间隙的分数"	CEW
+on	description="Selected row in the Decal Layers list"	description="贴花层列表中的选定行"	CEW
+on	description="Edit the persistent UV pin set for this material"	description="编辑该材质的保持UV固定集"	CEW
+on	description="Display all decal pins in the UV Editor"	description="在UV编辑器中显示全部贴花固定"	CEW
+on	description="Reusable Edge Decal preset"	description="可重复使用边缘贴花预设"	CEW
+on	description="Name used when saving the current settings"	description="保存当前设置时使用的名称"	CEW
+on	description="Show mesh and engine export controls"	description="显示网格和引擎导出控件"	CEW
+on	description="Show Send to Unreal settings"	description="显示发送到Unreal设置"	CEW
+on	description="Folder for the combined evaluated FBX mesh"	description="合成评估FBX网格的文件夹"	CEW
+on	description=("Import source and decal separately,enable Nanite only on the source,\\n and assemble both in an Actor Blueprint"	description=("导入源和贴花分开，启用Nanite仅对源，\\n 并将两者结合在演员蓝图中"	CEW
+on	description="Leave empty to use an UnrealExports folder beside the current blend file"	description="保留空物体以使用当前混合文件旁边的UnrealExports文件夹"	CEW
+on	description="Content Browser destination path"	description="内容浏览器目标路径"	CEW
+on	description="Unreal path where the bundled master is created,or an existing parameterized material"	description="创建捆绑主控形状的Unreal路径，或现有参数化材质"	CEW
+on	description=("Create the bundled Deferred Decal / Translucent NormalTexture + Opacity  \\n master at Decal Master when that asset does not exist"	description=("创建捆绑的延迟贴花/半透明NormalTexture+不透明度\\n 当资产不存在时，当的大师"	CEW
+on	description="Unreal material assigned to source geometry"	description="指定给源几何的Unreal材质"	CEW
+on	description="Leave empty to auto-detect the newest Epic Games Unreal Engine install"	description="保留空物体以自动检测最新的史诗游戏Unreal引擎安装"	CEW
+on	description="Normalized position along the decal chain used as a valid cut"	description="沿用作有效切割的贴花链的标准化位置"	CEW
+on	description=("Optional name shown for this UV pin; an empty name uses its  \\n number"	description=("为该UV固定显示的可选名称；空物体名称使用其\\n 数字"	CEW
+on	description="Material whose decal layers use this UV pin"	description="其贴花层使用此UV固定的材质"	CEW
+on	description=("Target vertical UV height for decal islands assigned to this pin"	description=("指定给该固定的贴花孤岛的目标垂直UV高度"	CEW
+on	description="Number of equally sized UV pin rows to create"	description="要创建的等大小UV固定行的数字"	CEW
+on	class EDGEDECAL_OT_generate_selected_faces(Operator):\n\t"""Route selected quad faces through the regular edge-strip pipeline."	class EDGEDECAL_OT_generate_selected_faces(Operator):\n\t"""通过规则边缘带管线路由选定的四边面."	CEW
+on	"""Blender-to-Unreal export bundle generation and remote execution bridge."""	"""Blender到Unreal导出捆绑包生成和远程执行桥接."""	C
+on	"""Bundled factory materials,textures,and preset asset discovery."""	"""捆绑工厂材质、纹理和预设资产发现."""	C
+on	"'" in value and value.endswith("'"	"'" 以值和价值结尾("'"	C
+on	"""Route selected quad faces through the regular edge-strip pipeline."""	"""通过规则边缘带管线路由选定的四边面."""	C
+on	"edge(s)"	"边缘(s))"	C
+on	"description":"Generate customizable decals along mesh edges",	"description":"沿网格边生成可自定义贴花",	C
+on	("SHADE_SMOOTH","Shade Smooth","Use standard smooth shading without a custom normal modifier",)	("SHADE_SMOOTH","Shade Smooth","使用标准平滑着色无自定义法线修改器",)	C
+on	("FACE_AREA","Face Area Averaged","Shade smooth and average normals using neighboring face areas",)	("FACE_AREA","Face Area Averaged","使用相邻面区域着色平滑和平均法线",)	C
+on	("WEIGHTED","Weighted Normals", "Shade smooth and use face-area plus corner-angle weighted normals",)	("WEIGHTED","Weighted Normals", "着色平滑并使用面区域加角角度加权法线",)	C
+on	("AO","Ambient Occlusion","Use local raycast occlusion around each edge or bevel band",)	("AO","Ambient Occlusion","围绕每个边或斜边带使用局部光线投射堵塞",)	C
+on	("GEOMETRY","Geometry", "Use the previous face-normal and corner-angle classification",)	("GEOMETRY","Geometry", "使用上一个面法线和角角度分类",)	C
+on	("UP", "Up", "Move layer up in the stack")	("UP", "Up", "在堆栈中上移动层")	C
+on	("DOWN", "Down", "Move layer down in the stack")	("DOWN", "Down", "在堆栈中向下移动层")	C
+on	("SHADE_SMOOTH","Shade Smooth","Use standard smooth shading without a custom normal modifier",),("FACE_AREA","Face Area Averaged","Shade smooth and average normals using neighboring face areas",)	("SHADE_SMOOTH","Shade Smooth","使用标准平滑着色无自定义法线修改器",),("FACE_AREA","Face Area Averaged","Shade smooth and average normals using neighboring face areas",)	C
+on	("AO","Ambient Occlusion","Use local raycast occlusion around each edge or bevel band",),("GEOMETRY","Geometry", "Use the previous face-normal and corner-angle classification",)	("AO","Ambient Occlusion","围绕每个边或斜边带使用局部光线投射堵塞",),("GEOMETRY","Geometry", "Use the previous face-normal and corner-angle classification",)	C
+on	RuntimeError(f"Operator category not found: {category}")	RuntimeError(f"找不到运算符类别: {category}")	C
+on	RuntimeError(f"Operator not found: {bl_idname}")	RuntimeError(f"找不到运算符: {bl_idname}")	C
+on	RuntimeError("The UV pipeline unexpectedly changed decal topology.")	RuntimeError("UV管道意外更改了贴花拓扑.")	C
+on	ValueError(f"Image '{image.name_full}' must be file-based or packed")	ValueError(f"图像 '{image.name_full}' 必须基于文件或打包")	C
+on	ValueError(f"Image '{image.name_full}' has no saved file")	ValueError(f"图像 '{image.name_full}' 没有保存的文件")	C
+on	ValueError(f"Image '{image.name_full}' file was not found: {source_path}")	ValueError(f"图像 '{image.name_full}' 找不到文件: {source_path}")	C
+on	OSError("Could not resolve the user texture directory")	OSError("无法解析用户纹理目录")	C
+on	OSError("Could not resolve the user texture path")	OSError("无法解析用户纹理路径")	C
+on	OSError("Could not resolve the user material library directory")	OSError("无法解析用户材质资产库目录")	C
+on	RuntimeError(f'{label} was not found at "{path}".')	RuntimeError(f'{label} 在处找不到 "{path}".')	C
+on	RuntimeError(f'Invalid decal master material path: "{path}".')	RuntimeError(f'无效贴花主材质路径: "{path}".')	C
+on	RuntimeError(f'Could not create decal master material at "{package_path}".')	RuntimeError(f'无法在创建贴花主材质 "{package_path}".')	C
+on	RuntimeError("Could not connect NormalTexture to the master material Normal input.")	RuntimeError("无法将NormalTexture连接到主材质法线输入.")	C
+on	RuntimeError("Could not connect Opacity to the master material Opacity input.")	RuntimeError("无法将不透明度连接到主材质不透明度输入.")	C
+on	RuntimeError(f"Could not create material instance {instance_package}.")	RuntimeError(f"无法创建材质实例 {instance_package}.")	C
+on	RuntimeError(f'Imported asset "{asset_name}" is not a Static Mesh.')	RuntimeError(f'进口资产 "{asset_name}" 不是静态网格.')	C
+on	RuntimeError(f'Could not map imported material slots for {mesh.get_name()}. Slots: {names or "none"}.')	RuntimeError(f'无法映射导入的材质槽 {mesh.get_name()}. 插槽: {names or "none"}.')	C
+on	RuntimeError("The Blueprint has no subobject root.")	RuntimeError("蓝图没有子对象根.")	C
+on	RuntimeError(f"Could not add {variable_name} component: {fail_reason}")	RuntimeError(f"无法添加 {variable_name} 成分: {fail_reason}")	C
+on	RuntimeError(f"Could not rename Blueprint component to {variable_name}.")	RuntimeError(f"无法将Blueprint组件重命名为 {variable_name}.")	C
+on	RuntimeError(f"Could not resolve Blueprint component {variable_name}.")	RuntimeError(f"无法解析蓝图组件 {variable_name}.")	C
+on	RuntimeError(f"Could not create Blueprint {blueprint_package}.")	RuntimeError(f"无法创建蓝图 {blueprint_package}.")	C
+on	RuntimeError(f"Edge Decal manifest does not exist: {manifest_path}")	RuntimeError(f"边缘贴花清单不存在: {manifest_path}")	C
+on	RuntimeError("Unsupported Edge Decal Unreal manifest version.")	RuntimeError("不支持的边缘贴花Unreal清单版本.")	C
+on	RuntimeError("Nanite workflow requires both source and decal meshes.")	RuntimeError("Nanite工作流需要源网格和贴花网格.")	C
+on	RuntimeError("The Unreal import completed without a result asset.")	RuntimeError("Unreal导入完成无结果资产.")	C
+on	ValueError("Preset root must be a JSON object")	ValueError("预设根目录必须是JSON对象")	C
+on	ValueError("Unsupported preset version")	ValueError("不支持的预设版本")	C
+on	ValueError("Preset has no name")	ValueError("预设没有名称")	C
+on	ValueError("Preset has no settings")	ValueError("预设没有设置")	C
+on	ValueError("Enter a preset name")	ValueError("输入预设名称")	C
+on	OSError("Blender did not provide a user configuration directory")	OSError("Blender未提供用户配置目录")	C
+on	ValueError("Surface Voronoi sites must have non-zero length.")	ValueError("表面Voronoi场地必须具有非零长度.")	C
+on	ValueError("Surface Voronoi requires a planar support face.")	ValueError("表面Voronoi需要平面支撑面.")	C
+on	ValueError("Surface Voronoi currently requires a convex support face.")	ValueError("表面Voronoi当前需要凸包支撑面.")	C
+on	ValueError("Surface Voronoi could not parameterize a support face.")	ValueError("表面Voronoi无法参数化支撑面.")	C
+on	ValueError("Surface Voronoi could not triangulate a support face.")	ValueError("表面Voronoi无法三角化支持面.")	C
+on	RuntimeError(f'Texture "{image.name}" is neither packed nor available on disk: {error}')	RuntimeError(f'纹理 "{image.name}" 磁盘上既没有打包也不可用: {error}')	C
+on	RuntimeError("Blender's FBX exporter is unavailable.")	RuntimeError("Blender的FBX导出不可用.")	C
+on	RuntimeError(f"FBX export failed: {filepath}")	RuntimeError(f"FBX导出失败: {filepath}")	C
+on	RuntimeError("Choose a mesh export folder.")	RuntimeError("选择网格导出文件夹.")	C
+on	RuntimeError("Could not combine the source and decal meshes.")	RuntimeError("无法组合源网格和贴花网格.")	C
+on	RuntimeError("Could not find Unreal's remote_execution.py. Set Unreal Engine Root in Advanced.")	RuntimeError("找不到Unreal的remote_execution.py。在高级中设置Unreal引擎根目录.")	C
+on	RuntimeError("The bundled Unreal importer script is missing.")	RuntimeError("捆绑的Unreal导入脚本丢失.")	C
+on	No Unreal Editor remote node found. Enable Python Editor Script Plugin and \n Project Settings > Plugins > Python > Enable Remote Execution,then keep " "the project open	找不到Unreal编辑器远程节点。启用Python编辑器脚本插件和\n 投射设置>插件>Python>启用远程执行，然后保留" "投射开始了	CW
+on	RuntimeError("More than one Unreal Editor remote node was found. Close the other editors and retry.")	RuntimeError("找到多个一Unreal编辑器远程节点。关闭其它编辑器并重试.")	C

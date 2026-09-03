@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "material_library": "materials/edge_decal_materials.blend",
+  "presets_directory": "presets",
+  "textures": {
+    "T_EdgeDecal01_Normal.png": "textures/T_EdgeDecal01_Normal.png",
+    "T_EdgeDecal01_Opacity.png": "textures/T_EdgeDecal01_Opacity.png",
+    "T_WeldingDecals_normal.png": "textures/T_WeldingDecals_normal.png",
+    "T_WeldingDecals_Opacity.png": "textures/T_WeldingDecals_Opacity.png",
+    "T_ConcreteDecals_normal.png": "textures/T_ConcreteDecals_normal.png",
+    "T_ConcreteDecals_opacity.png": "textures/T_ConcreteDecals_opacity.png"
+  },
+  "uv_pins": {
+    "M_EdgeDecal_Damage_01": [
+      {
+        "name": "EdgeWear_Mid",
+        "u": 0.496905088,
+        "v": 0.877400994,
+        "width": 0.076284289
+      },
+      {
+        "name": "EdgeWear_Small",
+        "u": 0.535303771,
+        "v": 0.624206543,
+        "width": 0.03255415
+      },
+      {
+        "name": "EdgeWear_Layered",
+        "u": 0.576563299,
+        "v": 0.379523754,
+        "width": 0.104583263
+      },
+      {
+        "name": "EdgeWear_Scraped",
+        "u": 0.516074002,
+        "v": 0.062511839,
+        "width": 0.059682548
+      }
+    ],
+    "M_EdgeDecal_Welds_01": [
+      {
+        "name": "Weld1",
+        "u": 0.550233066,
+        "v": 0.849992752,
+        "width": 0.075959682
+      },
+      {
+        "name": "Weld2",
+        "u": 0.537313938,
+        "v": 0.606375217,
+        "width": 0.079975486
+      },
+      {
+        "name": "Weld3",
+        "u": 0.545311451,
+        "v": 0.367679268,
+        "width": 0.084896982
+      },
+      {
+        "name": "Weld4",
+        "u": 0.54592663,
+        "v": 0.161588699,
+        "width": 0.084896982
+      }
+    ],
+    "M_EdgeDecal_Concrete_01": [
+      {
+        "name": "",
+        "u": 0.557080328,
+        "v": 0.872552276,
+        "width": 0.131651878
+      },
+      {
+        "name": "",
+        "u": 0.579227448,
+        "v": 0.624013186,
+        "width": 0.082436323
+      },
+      {
+        "name": "",
+        "u": 0.570614696,
+        "v": 0.375474125,
+        "width": 0.028298855
+      },
+      {
+        "name": "",
+        "u": 0.535548627,
+        "v": 0.05741784,
+        "width": 0.051676452
+      }
+    ]
+  }
+}

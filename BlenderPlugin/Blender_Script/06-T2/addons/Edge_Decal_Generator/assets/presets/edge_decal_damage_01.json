@@ -1,0 +1,16 @@
+{
+  "addon_version": [
+    27,
+    228,
+    27
+  ],
+  "material": "M_EdgeDecal_Damage_01",
+  "name": "Edge Decal Damage 01",
+  "schema_version": 1,
+  "settings": {
+    "auto_use_uv_pins": true,
+    "match_source_material": true,
+    "use_edge_split": true,
+    "use_material": true
+  }
+}
