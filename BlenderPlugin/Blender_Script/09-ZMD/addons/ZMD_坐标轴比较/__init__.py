@@ -81,7 +81,7 @@ class SNA_PT_axis_comparison_4C680(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
-    bl_category = '坐标轴'
+    bl_category = 'Unity'
     bl_order = 0
     bl_ui_units_x=0
 
