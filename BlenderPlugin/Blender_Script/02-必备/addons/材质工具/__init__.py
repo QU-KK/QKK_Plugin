@@ -669,7 +669,7 @@ def sna_func_3C3A3(layout_function, ):
     col_B3203.alignment = 'Expand'.upper()
     col_B3203.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
     for i_E6069 in range(len(bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs)):
-        if ('贴图包' in bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].label or 'PBR通道' in bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].label):
+        if ('贴图包' in bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].label or 'PBR通道' in bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].label or '混合独显' in bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].label):
             pass
         else:
             if '    ' in bpy.context.view_layer.objects.active.active_material.node_tree.nodes['Shader'].inputs[i_E6069].label:
