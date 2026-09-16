@@ -1,7 +1,7 @@
 import bpy
 
 # 变量
-Check_Item_Name = '图像'
+Check_Item_Name = '图像名称'
 Description = '检查图像名称是否含有 T_、+1、空格、.0、.tga，判断名称字段数'
 
 
