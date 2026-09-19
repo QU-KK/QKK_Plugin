@@ -1,0 +1,13 @@
+schema_version = "1.0.0"
+
+id = "es_tools_hub"
+version = "2.7.0"
+name = "ES Tools Hub"
+tagline = "Floating icon palettes that launch any add-on you add to them"
+maintainer = "Linh@Enterspace"
+type = "add-on"
+
+license = ["SPDX:GPL-3.0-or-later"]
+blender_version_min = "4.2.0"
+
+tags = ["User Interface"]

@@ -1,0 +1,152 @@
+on	bl_description=("Let macOS run the bundled Organic engine. Clears the  \\n quarantine flag on the add-on's own bin folder"	bl_description=("让苹果系统运行捆绑的有机引擎。清除\\n 加载项自己的bin文件夹上的隔离标志"	CEW
+on	bl_description=("Rebuild the active mesh as quads using our own  \\n cross-field solver"	bl_description=("使用我们自己的四边形重构活动网格\\n 交叉场解算器"	CEW
+on	bl_description=("Undo every remesh and every cleaning in this file,on  \\n all objects,and delete the result objects"	bl_description=("撤消此文件中的每个重构和每个清理，在\\n 全部对象，并删除结果对象"	CEW
+on	bl_description=("Put the selected results back the way they were. Works  \\n on anything this add-on made: a result object is \\n deleted and its source unhidden,and a mesh that was "	bl_description=("将所选结果放回原样。工程\\n 在这个附加组件所做的任何事情上：结果对象是\\n 删除并取消隐藏其源，以及 "	CEW
+on	bl_description=("Store the current settings under a name. Saved presets  \\n live in Blender's config folder,so they follow you "	bl_description=("存储当前设置。保存的预设\\n 实时在Blender的配置文件夹，所以他们跟踪你 "	CEW
+on	bl_description= "Remove the saved preset that is currently selected"	bl_description= "移除当前选定的已保存预设"	CEW
+on	bl_description= "Build a line object from the current thresholds"	bl_description= "根据当前阈值构建线段对象"	CEW
+on	bl_description=("Colour the panels the current lines carve out. Each  \\n colour is one region the rebuild will treat as a single "	bl_description=("为当前线路雕刻出来的面板上色。每个\\n 颜色是重构将作为单处理的一子区域 "	CEW
+on	bl_description=("Turn the panels into geometry. Every edge of the result  \\n is a detected line - holes are cut open and bores get a "	bl_description=("将面板转换为几何。结果的每个边缘\\n 是检测到的线段-孔洞被切割打开，孔得到 "	CEW
+on	bl_description= "Remove the line preview object"	bl_description= "移除线段预览对象"	CEW
+on	bl_description=("Keep the lines you marked and dissolve everything  \\n between them,leaving one n-gon per panel. Mark lines "	bl_description=("保持你标记的线条，溶解一切\\n 在它们之间，每个面板留有一n-gon。标记线 "	CEW
+on	bl_description=("Mark the selected edges Sharp. They turn cyan,are  \\n saved with the mesh,and are what Dissolve Between "	bl_description=("标记选定的边锐边。它们变成青色，是\\n 与网格一起保存，并且是“溶解于” "	CEW
+on	bl_description=("Clean the area enclosed by the edges you have selected.  \\n Other lines,and anything outside that area,are left "	bl_description=("清理选定的边包围的区域。  \\n 其它线路，以及该区域之外的任何东西都被留下 "	CEW
+on	bl_description=("Undo the cleaning entirely and forget it,so the next  \\n slider move starts again from the mesh as it is now"	bl_description=("完全撤消清理并忘记它，因此下一步\\n 滑块移动再次从现在的网格从"	CEW
+on	bl_description=("Keep this area as it is now. The slider stops affecting  \\n it and stays off until you select the next area"	bl_description=("保持这个区域现在的样子。滑块停止影响\\n 它并保持关，直到您选择下一个区域"	CEW
+on	bl_description=("Put this object back the way it was before any cleaning,\\n including areas already confirmed"	bl_description=("把这个对象放回清理前的样子，\\n 包括已确认的区域"	CEW
+on	bl_description=("Remove the edge loops that carry no shape,over the  \\n whole model. Nothing has to be marked first,and "	bl_description=("移除没有形状的循环边，在\\n 整个模型。首先不需要标记任何内容，并且 "	CEW
+on	bl_description=("Click an edge in the viewport to cut a loop through  \\n it,exactly where you clicked - and unlike Blender's \\n loop cut it keeps going through n-gons. Escape or "	bl_description=("单击视口中的边以切割循环\\n 它，就在你点击的地方-不像Blender的\\n 循环-切割-它一直通过n-gons。逃逸或 "	CEW
+on	bl_description=("Restore the materials and the UV map this model had  \\n before the bake,and delete the baked images"	bl_description=("恢复该模型的材质和UV映射\\n 在烘焙之前，删除烘焙图像"	CEW
+on	bl_description=("Unwrap the remeshed model afresh and bake the original  \\n model's colour (and optionally its normals) onto it.  \\n Independent of UV islands,so it works even where the "	bl_description=("解包重新包装的模型，并烘焙原点\\n 模型的颜色(以及可选的法线)。\\n 独立于UV岛，因此即使在 "	CEW
+on	bl_description=("Return to the mesh as it was before the very first  \\n drop,wiping every confirmed stage on the way"	bl_description=("回到首先之前的网格\\n 落下，擦拭途中的每个确认阶段"	CEW
+on	bl_description=("Keep the current result. The sliders start fresh from  \\n here,so the next drop stacks on top instead of redoing "	bl_description=("保留当前结果。滑块从从\\n 在这里，因此下一个拖放堆栈在顶部，而不是重做 "	CEW
+on	bl_description= "Undo Drop Useless Loops on this object"	bl_description= "撤消删除此对象上的无用循环"	CEW
+on	bl_description=("Clear out every vertex with fewer than three edges:  \\n stray points and spurs are deleted,and a vertex "	bl_description=("清理外面每个顶点少于三个边：\\n 将删除杂散点和马刺，并删除顶点 "	CEW
+on	description="Path to the Instant Meshes executable. Leave empty to  \\n use the copy bundled with the add-on. Only needed on " "macOS and Linux,where no copy is bundled"	description="即时网格可执行的路径。将空物体保留为\\n 使用与加载项捆绑的副本。仅需要" "苹果系统和Linux，其中没有绑定副本"	CEW
+on	description="Which solver rebuilds the surface"	description="哪个解算器重建表面"	CEW
+on	description="Read the crease angle off the model's own dihedral  \\n histogram instead of using the value below"	description="读取模型自身二面体的折痕角度关\\n 直方图，而不是使用下面的值"	CEW
+on	description="Instant Meshes treats the face target as a hint and  \\n routinely overshoots it several times over. This probes " "once and corrects for it"	description="即时网格将面目标视为提示，并\\n 通常会超过它几次次数。这个探测器" "一次，并为其更正"	CEW
+on	description="Try several crease angles and keep whichever scores best.  \\n Costs a few extra runs"	description="尝试几个折痕角度，并保持最好的分数。  \\n 需要几次额外跑步"	CEW
+on	description="Instant Meshes only. Off gives a quad-dominant mesh that  \\n hits the target face count more closely"	description="仅限即时网格。关提供四边形主导网格\\n 更近地击中目标面数量"	CEW
+on	description="Approximate number of quads to produce"	description="要生成的四边形的近似数字"	CEW
+on	description="Approximate quad side length,in object units"	description="近似四边侧长度，以对象单位表示"	CEW
+on	description="Dihedral angle in degrees above which an edge is treated  \\n as a crease and preserved"	description="处理边的二面角角度，以度为单位\\n 作为折痕保存"	CEW
+on	description="Smoothing passes for the direction field. Raise this if  \\n the flow looks noisy"	description="平滑为方向域通过。如果出现以下情况，请提出此问题\\n 水流看起来很吵"	CEW
+on	description="Smoothing passes for the lattice positions"	description="晶格位置的平滑过程"	CEW
+on	description="Relaxation of the output. For our engine this has no  \\n reprojection,so it only pulls vertices off the surface -  \\n leave at 0. For Instant Meshes it is the reprojection " "step count and 2 is a good value"	description="放松输出。我们的引擎没有\\n 重投影，因此它仅将顶点关表面-\\n 在0离开。对于即时网格，它是重投影" "步骤数量和2是一个好的值"	CEW
+on	description="Put smaller quads where the model is thin,so a sheet  \\n of cloth or a fingernail is never spanned by a quad " "wider than it is thick. 0 turns it off"	description="将较小的四边形放在模型较薄的位置，以便板材\\n 布料或指甲永远不会被四边跨越" "比它的厚度还宽。0转向它关"	CEW
+on	description="With Adaptive Density on the bundled engine,build this  \\n many times the face count you asked for and then drop  \\n the loops that carry no shape. Higher gives the drop " "more to choose from,and takes longer"	description="在捆绑引擎上安装适配密度\\n 许多次数你要的面数量然后掉下来\\n 没有形状的环。越高越容易下降" "更多可供选择，并且需要更长的时间"	CEW
+on	description="Put smaller quads near creases and in curved regions.  \\n Our engine only - Instant Meshes has no equivalent"	description="在褶皱附近和弯曲区域放置较小的四边形。  \\n 我们的引擎仅仅-即时网格没有等效的"	CEW
+on	description="How strongly to refine around sharp edges"	description="围绕锐边边进行细化的强度"	CEW
+on	description="How strongly to refine where the surface bends"	description="细化表面弯曲处的强度"	CEW
+on	description="Refine concave edges - inside corners,grooves,the  \\n places an AO bake goes dark"	description="细化凹形边-内部夹角、凹槽、\\n 放置AO烘焙变为暗"	CEW
+on	description="Refine convex edges - outside corners,ridges,rims"	description="细化凸包边-外部夹角、脊、边"	CEW
+on	description="Smallest quad as a fraction of the base size. Below 0.35  \\n quad quality drops sharply"	description="最小的四边是基本尺寸的一小部分。0.35以下\\n 四边质量急剧下降"	CEW
+on	description="How fast quad size may change with distance. Low is  \\n smoother and measurably better - 0.1 scored 75 against " "55 for 0.4 in testing"	description="四边尺寸的快速可能会随着距离的变化而变化。Low是\\n 更流畅和可测量的更好-0.1对75分" "55 用于测试中的0.4"	CEW
+on	description="Seed the direction field from principal curvature. Turn  \\n off for a purely crease-driven flow"	description="种子方向域从主曲率。转弯\\n 关，用于纯粹的折痕驱动流"	CEW
+on	description="Replace the source object instead of adding a new one  \\n beside it"	description="替换源对象，而不是添加新建一\\n 在它旁边"	CEW
+on	description="Built-in presets,then anything you have saved"	description="内置预设，然后保存任何内容"	CEW
+on	description="Add the edges you marked Sharp to the lines the detector  \\n found. They then go through the same rebuild as every " "other line"	description="将标记为锐边的边添加到检测器的线条中\\n 找到。然后他们会像以前一样进行相同的重构" "其它线段"	CEW
+on	description="How much of the geometry inside your lines to remove.  \\n 100 leaves one face per region; lower keeps some of the " "grid,the loops holding least shape going first"	description="要移除的线内部几何的多少。  \\n 100 每个子区域留一面；较低的保留了一些" "栅格，保持最小形状的回路首先"	CEW
+on	description="Go over what is left again and take every other line.  \\n Plain and predictable,unlike the angle-based merge this  \\n replaced,which wandered across the grid and broke round " "forms. 0 is off,100 takes every alternate line"	description="把剩下的东西再检查一遍，隔其它线段走。  \\n 简单而可预测，不像基于角度的合并\\n 被替换了，它在栅格上徘徊并折断" "表单。0为关，每个备用线段100个"	CEW
+on	description="Keep every change inside the area you marked. Off lets a  \\n loop be followed wherever it runs,which tidies the ends  \\n but can reach into another part of the model that the " "same loop was shaping and take that apart too"	description="把每一个变化都放在你标记的区域内。关让\\n 循环无论在哪里运行，都会跟随它，它整理了端点\\n 但可以进入模型的另一部分，即" "相同循环正在成形，并将其拆开"	CEW
+on	description="A loop is carrying no shape when the surface turns less  \\n than this many degrees across it. A loop is always taken  \\n whole or not at all - one that would stop mid-surface is " "left alone"	description="当表面转向较少时，循环没有形状\\n 比这许多度还高。总是做循环\\n 完整或根本不完整-一将停止中间曲面是" "独自留下来"	CEW
+on	description="For every loop kept,remove this many: 1 takes every  \\n other loop,2 leaves one in three,3 one in four. 0 is  \\n off. Respects the axis ticks and never touches marked " "lines"	description="对于保持的每个循环，移除这个许多：1取每个\\n 其它循环，三分之二离开一，四分之三离开一。0是\\n 关。尊重轴勾选，从不接触标记" "lines"	CEW
+on	description="Bake onto the UV layout the model already has,UDIM  \\n tiles and all,instead of unwrapping it afresh. Only  \\n affects Bake From Original - the remesh itself is " "untouched"	description="烘焙到模型已有的UV布局上，UDIM\\n 瓷砖和全部，而不是重新解包它。仅\\n 影响烘焙从原点-重构本身是" "未被触及的"	CEW
+on	description="Show the edges where the UV map is cut as red seam lines"	description="显示UV映射切割为红色接缝线的边"	CEW
+on	description="Mark the UV seams Sharp - the blue lines the remesh keeps  \\n - so the texture lands on the rebuilt faces unbroken"	description="标记UV缝线锐边-重构保持的蓝线\\n - 所以纹理落在重建的面上，没有断裂"	CEW
+on	description="Texture size for Bake From Original"	description="纹理尺寸用于烘焙从原点"	CEW
+on	description="Bake every channel the original's material drives with  \\n a texture - roughness,metallic,height,alpha,emission,\\n whatever is there - so nothing of the old material is " "left behind"	description="烘焙原点的材质驱动器的每个通道\\n 纹理-粗糙度，金属度，高度，阿尔法，自发光，\\n 那里有什么-所以没有旧材质" "落在后面"	CEW
+on	description="Force Edge Loop direction: Auto walks the grid from the  \\n clicked edge; X,Y or Z slices dead straight through the " "whole model at the clicked point"	description="力度边循环方向：自动从\\n 点击边缘；X、Y或Z直接穿过" "单击点处的整个模型"	CEW
+on	description="Allow dropping the loops that run along world X"	description="允许删除沿世界X运行的运行"	CEW
+on	description="Allow dropping the loops that run along world Y"	description="允许删除沿世界Y运行的运行"	CEW
+on	description="Allow dropping the loops that run along world Z"	description="允许删除沿世界Z运行的运行"	CEW
+on	description="Never drop a loop you marked Sharp or have selected"	description="切勿丢弃标记为锐边或已选择的循环"	CEW
+on	description="Ignore the detector entirely and build from your marked  \\n edges alone. The mesh border is still kept,or the " "rebuild would have no outline to work from"	description="完全忽略检测器，从你的标记从\\n 只有边。仍然保留网格边界，或者" "重构将没有从工作的轮廓"	CEW
+on	description="Treat edges marked Sharp as panel borders. Mark them in  \\n Edit Mode with Edge ▸ Mark Sharp; they show up cyan " "and are saved with the mesh"	description="将标有锐边的边视为面板边界。标记他们进来了\\n 带边编辑模式▸ 标记·锐边；他们显示上青色" "并与网格一起保存"	CEW
+on	description="Also treat the current edge selection as panel borders.  \\n Useful for a one-off without marking anything"	description="还将当前边选择视为面板边界。  \\n 适用于一次性无标记"	CEW
+on	description="Never dissolve the mesh's own border. Turning this off  \\n lets the silhouette collapse"	description="永远不要溶解网格自己的边界。关这个\\n 让轮廓折叠"	CEW
+on	description="Also keep edges carrying a subdivision crease"	description="还保持边具有细分折痕"	CEW
+on	description="Also keep edges marked as UV seams"	description="同时保持边标记为UV缝线"	CEW
+on	description="Keep an unmarked edge when its two faces bend by more  \\n than this many degrees,so curvature is not flattened by  \\n accident. 0 removes everything between your lines,which " "is the literal behaviour"	description="保持未标记的边当其两个面弯曲更多时\\n 比这个许多度，所以曲率不会被\\n 事故。0删除行之间的所有内容，这" "是字面上的行为"	CEW
+on	description="Also drop vertices left mid-run with nothing attached.  \\n Without this the panel keeps a fringe of vertices that " "do nothing"	description="还可以在没有附加的情况下放置中间管路左侧的顶点。  \\n 无，面板保持顶点的边缘" "什么都不做"	CEW
+on	description="Pick both thresholds from the model with Otsu. Turn off  \\n to set them by hand and watch the lines move"	description="拾取两个阈值从与大通的模型。关闭关\\n 用手放好，看着线移动"	CEW
+on	description="How much sharper than its neighbours a bend has to be to  \\n count as a crease. Low values start marking the facets of  \\n curved surfaces. The measure is relative,so it can go  \\n negative in principle - but 0 already takes 74k of the " "espresso machine's 187k edges and -5 takes 157k,so the " "floor is kept at 0 to stop a slider drag landing there"	description="一个弯曲要比它的邻居锋利多少\\n 数量为折痕。低值开始标记的面\\n 曲面。度量是相对的，因此可以\\n 原则上是负向-但0已经占用74k的" "浓缩咖啡机的187k边和-5需要157k，因此" "地板保持在0以停止滑块拖动着陆"	CEW
+on	description="How far two faces may disagree and still count as the  \\n same flat panel. The line where a flat panel meets a  \\n curved shell is found by asking which side is flat,not " "by any angle across the line itself - that line often has " "almost no dihedral angle at all"	description="两张面可能不一致的程度，但仍然数量\\n 相同平直面板。平直面板与\\n 通过询问哪一侧是平直的，而不是曲面壳，可以找到曲面壳" "通过线段本身的任何角度-线段通常具有" "几乎完全没有二面角角度"	CEW
+on	description="A region flatter than this becomes one n-gon; anything  \\n curved keeps its own faces instead. Flattening a curved  \\n region is not a simplification,it is a dent - measured " "at 5.5% of the model on the grenade fuze"	description="一个比这更平坦的子区域成为一n-gon；什么都可以\\n curved保留自己的面。展平曲线\\n 子区域不是一个简化，它是一个凹痕-测量" "手榴弹引信模型的5.5%"	CEW
+on	description="Drop line chains shorter than this fraction of the model"	description="丢弃比模型这一部分短的线段链"	CEW
+on	description="How far the surface may move when a loop is dropped,as a  \\n fraction of the model. A loop is removed only when every  \\n vertex on it is within this of the line its neighbours  \\n make without it,so the form cannot collapse however far  \\n this is raised - the fillets simply stop qualifying. " "0 turns it off. The ceiling is 5,which is far past the " "size of the model itself; the slider still steps in the " "useful range and anything above about 0.02 rarely finds " "another loop to take"	description="丢弃循环时，表面可以移动多远当，作为\\n 模型的分数。循环仅在以下情况下被删除：\\n 它上面的顶点在它的邻居线段的这个范围内\\n 制作没有它，所以形式不能折叠无论多远\\n 这是提高-圆角简单停止资格。 " "0 转向。天花板是5，远远超过" "模型本身的尺寸；滑块仍然步长在" "有用的范围和任何超过0.02的东西很少被发现" "另一个要执行的循环"	CEW
+on	description="After loops are dropped,put the vertices of a circular  \\n ring back on the circle they came from. Fewer segments  \\n leave a polygon inscribed inside the original circle,so  \\n the part reads thinner than it is; this splits the error " "either side of the true radius instead of all inside. " "Same idea as LoopTools 'Circle'. Rings that are not " "actually round are left untouched"	description="丢弃循环后，放置圆形的顶点\\n 按回他们从的圆形。更少的分段\\n 在原点圆形的内部内切一个多边形，因此\\n 零件读数比实际厚度薄；这拆分了错误" "真半径的任一侧，而不是内部的全部。 " "与LoopTools“圆形”的相同想法。不是的循环" "实际上，圆是保持不变的"	CEW
+on	description="Build one half and reflect it,for a model that is  \\n already symmetric. Remeshing the whole thing gives the  \\n two halves different edge flow,and the seam down the " "middle is where that shows worst"	description="构建一并反映它，对于\\n 已经对称。重新考虑整个事情会给\\n 两半不同的边流动，接缝沿着" "中间是最糟糕的地方"	CEW
+on	description="Which plane to fold across. Auto tests all three and  \\n picks the one the model actually matches"	description="哪个平面要折叠。自动测试全部三个和\\n 选择模型实际匹配的一"	CEW
+on	description="After a remesh,turn on the wireframe overlay so the  \\n new topology is visible. Off leaves the viewport " "overlays exactly as they were"	description="在重构后，启用线框覆盖，以便\\n 新建拓扑是可视的。关离开视口" "覆盖完全相同"	CEW
+on	description="Write the result into the original object instead of  \\n leaving it beside it. The mesh it displaces is kept,so  \\n Restore Original can still undo it,and every rebuild is " "measured from that kept mesh rather than from the last " "result - so the reduction cannot compound as you drag"	description="将结果写入原点对象，而不是\\n 将其放在旁边。它置换的网格保持不变，因此\\n 恢复原点仍然可以撤消它，并且每次重构都是" "从保持网格的从而不是从最后的从来衡量" "结果-因此，拖动时减少不能复合"	CEW
+on	description="Merge two lines that run closer together than this  \\n fraction of the model. The strip between them is all  \\n border and no surface - a chamfer has no room to fit  \\n there,so the bevel collapses into edges a fraction of a " "millimetre long that read as loose vertices. Measured on " "the barrier,38 such lines held the chamfer of the whole " "model to 1.2 mm. 0 turns it off"	description="合并两条运行比这更近的线\\n 模型的分数。他们之间的地带是全部\\n 边界和无表面-倒角没有适合的空间\\n 在那里，所以斜边塌陷成边是a的一小部分" "毫米长，读取为松散的顶点。测量日期：" "屏障，38条这样的线支撑着整个的倒角" "型号设置为1.2 mm.0转向关"	CEW
+on	description="After the thresholds run,test every line by what the  \\n rebuild does with it rather than by how sharp it is. A  \\n line separates two regions,so deleting it merges them,\\n and it is only worth keeping when the merged region would " "rebuild differently. Measured on the espresso machine, " "this took 3073 lines down to 506 with the result still " "sitting exactly on the original surface"	description="在阈值运行后，测试每个线段的\\n 重构需要它，而不是它有多锋利。A\\n 线段分隔了两个区域，因此删除它会合并它们，\\n 只有在当合并的子区域将" "以不同的方式重构。在浓缩咖啡机上测量，" "这采取3073行下降到506行，结果仍然如此" "就坐在原点表面上"	CEW
+on	description="Include the boundary between flat and curved areas. These  \\n have almost no dihedral angle,so the crease test alone " "never finds them"	description="包括平直和弯曲区域之间的边界。这些\\n 几乎没有二面角角度，因此仅折痕测试" "永远找不到他们"	CEW
+on	description="How far a dangling end may reach to find another one,as  \\n a fraction of the model. Raise it while 'open ends' is  \\n not zero - an open line leaves a hole in the rebuild.  \\n Above 1.0 the march is allowed to wander further than the " "model is wide,which a line that curves round the form " "needs. The other gate is the turn limit: a continuation " "more than about 56 degrees off course is never taken"	description="一个悬垂的一端可以走多远才能找到另一个一，就像\\n 模型的一小部分。在“打开端点”时将其升高\\n 不是零-开放的线段在重构中留下了一个洞。  \\n 在1.0以上，行进可以比" "模型是宽的，它是一条围绕形状弯曲的线段" "需要。其它是转弯限制：延续" "超过56度的关从未发生"	CEW
+on	description="Drop line vertices that lie on a straight run,as a  \\n fraction of the model. A detected line carries every  \\n vertex of the mesh it crossed,and each one becomes a rung " "across the chamfer with nothing to justify it. Raise it " "too far and hole rims start losing roundness"	description="放置位于直运行上的线段顶点，作为\\n 模型的分数。检测到的线段每\\n 它穿过的网格的顶点，每个一成为一个梯级" "穿过倒角，没有任何东西来调整它。升高它" "太远，孔边开始失去圆度"	CEW
+on	description="Chamfer width as a fraction of the model,applied only to  \\n the detected lines. 0 leaves the edges sharp. Past a few  \\n hundredths the bands from neighbouring lines start " "meeting; Clamp Overlap keeps them from cutting through " "each other,which is what makes a wide setting usable"	description="倒角宽度作为模型的一部分，仅应用于\\n 检测到的线。0使边锐边。过去的一些\\n 百分之一的频带从从开始" "会议；钳制重叠防止它们从" "彼此其它，这使得宽设置可用"	CEW
+on	description="Rows across the chamfer. Keep it even: an odd count  \\n leaves a triangle in the middle of every three-way corner, " "measured at 36 of them on the reference body"	description="穿过倒角的行。保持平衡：奇数数量\\n 在每个三向角的中间留下一个三角形，" "在基准体上测量36个"	CEW
+on	description="0.5 is a circular arc,lower is flatter,higher bulges out"	description="0.5是圆形弧形，越低越平，越高的凸起外面"	CEW
+on	description="Hold the width back where a panel is too narrow to carry  \\n it,instead of letting the chamfer fold through itself"	description="保持宽度在面板太窄而无法携带的位置\\n 而不是让倒角自己折叠"	CEW
+on	description="Distance from the chamfer to the holding loop,as a  \\n fraction of the model. The loop runs parallel to the  \\n lines all the way round the panel,so a subdivision " "cannot pull the edge open. 0 adds none"	description="从倒角到保持循环的距离，作为\\n 模型的分数。循环与\\n 沿面板全部排列，因此是细分" "无法打开边缘。0添加无"	CEW
+on	description="How many holding loops to lay inside each panel. Each one  \\n sits the same distance in from the one before it"	description="每个面板内部有多少个许多。每个一\\n 坐在它前面的一的从距离"	CEW
+on	description="Bridge dangling ends along existing mesh edges. A line  \\n with a gap stops its region closing,and that region is " "then skipped and leaves a hole"	description="沿现有网格边悬垂的桥接端点。A线段\\n 间隙使其子区域停止关闭，而子区域是" "然后跳过，留下一个洞"	CEW
+on	description="Do it for every object in the file that has been cleaned,\\n not just this one"	description="对文件中已清理的每个对象执行该操作，\\n 不仅仅是这个一"	CEW
+on	"location": "View3D > Sidebar (N) > Smart Remesh"	"location": "3D视图>边栏(N)>智能重构"	C
+on	class QUADREMESH_OT_unquarantine(Operator):\n\t"""Clear the macOS quarantine flag from the bundled Organic engine.\n\tThe engine is redistributed unmodified from its authors and carries no\n\tApple signature,so macOS flags it like anything else that arrived in a\n\tdownload. Opened from Finder that would be the usual "Open Anyway"	class QUADREMESH_OT_unquarantine(Operator):\n\t"""清理捆绑有机引擎的苹果系统隔离标志。\n\t引擎从其作者处重新发布，未经从，并且不携带\n\t苹果签名，因此苹果系统将其标记为与到达的任何否则一样\n\t下载。从从打开，这将是通常的"无论如何打开"	CEW
+on	class QUADREMESH_OT_spread(Operator):\n\t"""Thin a freshly built mesh to its face budget,a round per tick."	class QUADREMESH_OT_spread(Operator):\n\t"""将新构建的网格细化到其面预算，每勾选一轮."	CEW
+on	class QUADREMESH_OT_reset_all(Operator):\n\t"""Put the whole file back: every remesh and every cleaning.\n\tThe per-step buttons each undo one thing,which is right while working but\n\tuseless when the answer is "start over"	class QUADREMESH_OT_reset_all(Operator):\n\t"""把整个文件放回原处：每次重构和每次清理。\n\t每一步按钮都会撤消一事情，这在工作时是右的，但\n\t当答案是"重新开始，重新开始"	CEW
+on	class suspend_live:\n\t"""Batch several property writes into one rebuild."	class suspend_live:\n\t"""批将多个属性写入一重构."	CEW
+on	class QUADREMESH_OT_panelize_mark(Operator):\n\t"""Mark the selected edges Sharp so they survive a later dissolve."	class QUADREMESH_OT_panelize_mark(Operator):\n\t"""标记选定的边锐边，使他们生存图层解散."	CEW
+on	class QUADREMESH_OT_force_loop(Operator):\n\t"""Cut an edge loop that carries on through n-gons and poles alike."	class QUADREMESH_OT_force_loop(Operator):\n\t"""切割一个通过n个gon和极点进行类似操作的边循环."	CEW
+on	class QUADREMESH_OT_unbake(Operator):\n\t"""Put the model back the way it was before Bake From Original."	class QUADREMESH_OT_unbake(Operator):\n\t"""将模型放回烘焙从原点之前的样子."	CEW
+on	class QUADREMESH_OT_bake_from_original(Operator):\n\t"""Give the remeshed model a fresh UV and bake the original's texture onto it."	class QUADREMESH_OT_bake_from_original(Operator):\n\t"""为重新绘制的模型提供新的UV，并烘焙原点的纹理到其上."	CEW
+on	class QUADREMESH_OT_drop_original(Operator):\n\t"""All the way back: undo every drop and every Confirm on this object."	class QUADREMESH_OT_drop_original(Operator):\n\t"""全部返回：撤消该对象上的每个拖放和每个确认."	CEW
+on	class QUADREMESH_OT_drop_confirm(Operator):\n\t"""Accept the drop as it stands and make it the new starting point."	class QUADREMESH_OT_drop_confirm(Operator):\n\t"""接受跌落，并制作成为新建开始点."	CEW
+on	class QUADREMESH_OT_drop_reset(Operator):\n\t"""Put back everything Drop Useless Loops removed."	class QUADREMESH_OT_drop_reset(Operator):\n\t"""放回所有东西删除无用的循环."	CEW
+on	class QUADREMESH_OT_min_valence(Operator):\n\t"""Remove every vertex with fewer than three edges."	class QUADREMESH_OT_min_valence(Operator):\n\t"""移除每个少于三条边的顶点."	CEW
+on	"""Thin a freshly built mesh to its face budget,a round per tick."""	"""将新构建的网格细化到其面预算，每勾选一轮."""	C
+on	"""Batch several property writes into one rebuild."""	"""批将多个属性写入一重构."""	C
+on	"""Mark the selected edges Sharp so they survive a later dissolve."""	"""标记选定的边锐边，使他们生存图层解散."""	C
+on	"""Cut an edge loop that carries on through n-gons and poles alike."""	"""切割一个通过n个gon和极点进行类似操作的边循环."""	C
+on	"""Put the model back the way it was before Bake From Original."""	"""将模型放回烘焙从原点之前的样子."""	C
+on	"""Give the remeshed model a fresh UV and bake the original's texture onto it."""	"""为重新绘制的模型提供新的UV，并烘焙原点的纹理到其上."""	C
+on	"""All the way back: undo every drop and every Confirm on this object."""	"""全部返回：撤消该对象上的每个拖放和每个确认."""	C
+on	"""Accept the drop as it stands and make it the new starting point."""	"""接受跌落，并制作成为新建开始点."""	C
+on	"""Put back everything Drop Useless Loops removed."""	"""放回所有东西删除无用的循环."""	C
+on	"""Remove every vertex with fewer than three edges."""	"""移除每个少于三条边的顶点."""	C
+on	"or a path set in Preferences > Add-ons > Smart Remesh. "	"或在首选项>加载项>智能重构中设置的路径. "	C
+on	"either way."	"无论哪种方式."	C
+on	"description": "Quad remesher for hard-surface and organic models. Rebuilds " "flat panels as n-gons and drops the edge loops that carry " "no shape,without moving the surface",	"description": "硬表面和有机模型的四边重熔机。将“”平直面板重建为n个多边形，并丢弃“”无形状的循环边，无移动表面",	C
+on	Crease 23,Coplanar 2.00,Min Length 1.0,Loops 0.0020. The setting \n four of the eight prototypes converged on	折痕23，共面2.00，最小长度1.0，回路0.0020。设置\n 八个原型中的四个收敛于	CW
+on	("DETAIL", "Detail","Crease 0,Coplanar 4.90,Min Length 0,Loops 0.0015. Takes every " "line and lets the coplanar test and the prune sort them out")	("DETAIL", "Detail","折痕0，共面4.90，最小长度0，回路0.0015。采取每个" "线段，让共面测试和修剪将它们外面")	C
+on	("FLAT", "Flat Panels","Crease 40,Coplanar 2.00,Min Length 0.1,Loops 0.0010,prune off. " "For a model that is nearly all flat panel")	("FLAT", "Flat Panels","折痕40，共面2.00，最小长度0.1，循环0.0010，修剪关。" "对于几乎是全部平直面板的模型")	C
+on	("CUSTOM", "Custom", "Values set by hand")	("CUSTOM", "Custom", "手动设置的值")	C
+on	("AUTO", "Auto", "Follow the surface from the clicked edge")	("AUTO", "Auto", "从单击的边跟随表面")	C
+on	("X", "X", "A straight cut in the world YZ plane")	("X", "X", "世界上的一条直线切割YZ平面")	C
+on	("Y", "Y", "A straight cut in the world XZ plane")	("Y", "Y", "世界上的直线切割XZ平面")	C
+on	("Z", "Z", "A straight cut in the world XY plane")	("Z", "Z", "世界上的直线切割XY平面")	C
+on	("AUTO", "Auto", "Find the plane the model is symmetric across")	("AUTO", "Auto", "找到模型对称的平面")	C
+on	("X", "X", "Mirror across the local YZ plane")	("X", "X", "跨局部YZ平面的镜像")	C
+on	("Y", "Y", "Mirror across the local XZ plane")	("Y", "Y", "跨局部XZ平面的镜像")	C
+on	("Z", "Z", "Mirror across the local XY plane")	("Z", "Z", "跨局部XY平面的镜像")	C
+on	("Base Color", "Normal", "Tangent","Coat Normal", "Weight")	("Base Color", "Normal", "切线","Coat Normal", "Weight")	C
+on	Analyse the model,derive the crease angle from it,calibrate \n the face count,then try several settings and keep the best	分析模型，从中导出折痕角度，校准\n 面数量，然后尝试几个设置并保持最佳	CW
+on	("STABLE", "Manual", "One pass with exactly the settings below,no analysis")	("STABLE", "Manual", "一通过，设置如下，无分析")	C
+on	Pure Python,no binary. The engine used on platforms the \n Instant Meshes build does not cover. Slower,and its output is " "rougher - expect non-manifold edges and a lower quad ratio	纯净Python，没有二进制。平台上使用的引擎\n 即时网格构建不涵盖。较慢，其输出为" "更粗糙-期望非流形边和较低的四边比	CW
+on	("FACES", "Face Count", "Aim for a number of output faces")	("FACES", "Face Count", "目标为数字的输出面")	C
+on	("EDGE", "Edge Length", "Aim for an absolute quad size")	("EDGE", "Edge Length", "目标是绝对四边尺寸")	C
+on	("quadremesh_clean_orig", "quadremesh_clean_base","quadremesh_drop_orig")	("quadremesh_clean_orig", "quadremesh_clean_base","四边形_拖放_装配")	C
+on	RuntimeError(f"unknown engine {st.backend!r}")	RuntimeError(f"未知引擎 {st.backend!r}")	C
+on	RuntimeError("every candidate failed - see the attempts log")	RuntimeError("每个候选人都失败-请参阅尝试日志")	C
+on	ValueError("inset collapsed")	ValueError("插入折叠")	C
+on	ValueError("annulus split failed")	ValueError("环空拆分失败")	C
+on	ValueError("annulus split produced a degenerate face")	ValueError("环裂产生退化的面")	C
+on	Instant Meshes produced no output	即时网格未生成输出	CW
+on	ValueError("mesh has no faces")	ValueError("网格没有面")	C
+on	ValueError(f"invalid target scale {scale}")	ValueError(f"无效目标缩放 {scale}")	C
+on	ValueError("no lattice adjacencies survived - the position field " "did not converge; try more position iterations")	ValueError("没有晶格邻接幸存-位置域" "不收敛；尝试更多位置迭代")	C
+on	ValueError("face extraction produced nothing - try a smaller " "target size or more position iterations")	ValueError("面提取无效-尝试较小的" "目标尺寸或更多位置迭代")	C
+on	face {i} still has an odd split count({k_split}); " "parity balancing did not converge	面 {i} 还有一个奇数分裂数量({k_split}); " "奇偶校验平衡未收敛	C
