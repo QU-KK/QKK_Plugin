@@ -1,0 +1,12 @@
+schema_version = "1.0.0"
+id = "Smart_Remesh"
+version = "2.0.5"
+name = "🌐 智能重构 (Smart Remesh) 🆕"
+tagline = "硬表面和有机模型的四边重构。将平直面板重建为n个多边形，并丢弃无形状的循环边，无移动表面"
+maintainer = "Milad Kambari - 3DRedbox Studio 汉化：GJJ"
+website = "https://discord.gg/EC8d7nPsYj"
+type = "add-on"
+blender_version_min = "4.2.0"
+license = [ "SPDX:GPL-3.0-or-later",]
+tags = [ "Mesh",]
+copyright = [ "Milad Kambari - 3DRedbox Studio 汉化：GJJ",]

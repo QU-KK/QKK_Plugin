@@ -1,0 +1,26 @@
+schema_version = "1.0.0"
+
+id = "keymapper"
+name = "Keymapper"
+tagline = "A modern, non-destructive shortcut manager for Blender"
+version = "1.3.3"
+type = "add-on"
+
+maintainer = "JFW"
+
+blender_version_min = "5.1.0"
+
+license = ["SPDX:GPL-2.0-or-later"]
+
+tags = ["Interface"]
+
+# Declared capabilities (Blender extension permissions).
+#   files     — import/export shortcut catalogs chosen by the user, and the
+#               keyconfig-store fallback written into the add-on's own folder.
+#   clipboard — "Copy Shortcut Entry" / "Paste" share entries as text.
+# No network permission: the Documentation button hands a URL to the OS
+# browser via wm.url_open, and the update check reads the repository index
+# Blender itself has already cached on disk.
+[permissions]
+files = "Import and export shortcut entries, and store the keymap snapshot"
+clipboard = "Copy and paste shortcut entries as shareable text"
