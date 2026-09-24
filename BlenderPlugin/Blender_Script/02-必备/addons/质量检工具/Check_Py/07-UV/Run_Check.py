@@ -2,7 +2,7 @@ import bpy
 
 # 变量
 Check_Item_Name = 'UV'
-Description = '_lod UV数等0或大于2报错。_COL、_shadowProxy UV数大于1报错，UV名称检查'
+Description = '_lod UV数大于2报错。_COL、_shadowProxy UV数大于0报错，UV名称检查'
 
 # UV数检查
 Check_Data = [Check_Item_Name]
@@ -11,15 +11,27 @@ for obj in selected_objects:
     uvs = len(obj.data.uv_layers)
     
     if '_lod' in name:
-        if uvs == 0 or uvs > 2:
-            description = 'UV数=' + str(uvs)
+        # 检查UV数量
+        if uvs > 2:
+            description = 'UV数未<2    当前=' + str(uvs)
+            data = [name,description]
+            Check_Data.append(data)
+
+        # 检查UV名称
+        name_error = False
+        if uvs > 0 and obj.data.uv_layers[0].name != '1U':
+            name_error = True
+        if uvs > 1 and obj.data.uv_layers[1].name != '2U':
+            name_error = True            
+        if name_error:
+            description = "UV名称不规范"
             data = [name,description]
             Check_Data.append(data) 
 
 
     if "_COL" in name or "_shadowProxy" in name:
-        if uvs > 1:
-            description = 'UV数=' + str(uvs)
+        if uvs > 0:
+            description = 'UV数未=0     当前=' + str(uvs)
             data = [name,description]
             Check_Data.append(data)
 

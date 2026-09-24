@@ -222,3 +222,1201 @@ PXR_USD_WINDOWS_DLL_PATH: D:\blender5.2\blender.shared
 OIIO_LOAD_DLLS_FROM_PATH: 0
 MATERIALX_SEARCH_PATH: D:\blender5.2\blender.shared\materialx\libraries
 PXR_MTLX_STDLIB_SEARCH_PATHS: D:\blender5.2\blender.shared\materialx\libraries
+
+DECALmachine: Installing PIL 10.1.0
+
+Platform: Windows
+Python Binary: D:\blender5.2\5.2\python\bin\python.exe True
+Python Library: D:\blender5.2\5.2\python\lib True
+Ensurepip: D:\blender5.2\5.2\python\lib\ensurepip True
+
+Modules: D:\blender5.2\5.2\scripts\modules True
+Modules: C:\Users\qukuikui\AppData\Roaming\Blender Foundation\Blender\5.2\scripts\modules False
+Site-Packages: D:\blender5.2\5.2\python\lib\site-packages True
+User Site-Packages: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages True
+EasyInstall Path: D:\blender5.2\5.2\python\lib\site-packages\easy_install.py False
+EasyInstall User Path: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\easy_install.py False
+
+
+
+Looking in links: c:\Users\qukuikui\AppData\Local\Temp\tmpucztofos
+Requirement already satisfied: pip in C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages (26.2.1)
+Requirement already satisfied: pip in C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages (26.2.1)
+Requirement already satisfied: wheel in C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages (0.48.0)
+Requirement already satisfied: packaging>=24.0 in .\5.2\python\Lib\site-packages (from wheel) (25.0)
+Collecting Pillow==10.1.0
+Using cached Pillow-10.1.0.tar.gz (50.8 MB)
+Installing build dependencies: started
+Installing build dependencies: finished with status 'done'
+Getting requirements to build wheel: started
+Getting requirements to build wheel: finished with status 'error'
+error: subprocess-exited-with-error
+
+Getting requirements to build wheel did not run successfully.
+exit code: 1
+
+[21 lines of output]
+Traceback (most recent call last):
+File "C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\pip\_vendor\pyproject_hooks\_in_process\_in_process.py", line 389, in <module>
+main()
+~~~~^^
+File "C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\pip\_vendor\pyproject_hooks\_in_process\_in_process.py", line 373, in main
+json_out["return_val"] = hook(**hook_input["kwargs"])
+~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+File "C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\pip\_vendor\pyproject_hooks\_in_process\_in_process.py", line 143, in get_requires_for_build_wheel
+return hook(config_settings)
+File "C:\Users\qukuikui\AppData\Local\Temp\pip-build-env-bbko9m9z\overlay\Lib\site-packages\setuptools\build_meta.py", line 333, in get_requires_for_build_wheel
+return self._get_build_requires(config_settings, requirements=[])
+~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "C:\Users\qukuikui\AppData\Local\Temp\pip-build-env-bbko9m9z\overlay\Lib\site-packages\setuptools\build_meta.py", line 301, in _get_build_requires
+self.run_setup()
+~~~~~~~~~~~~~~^^
+File "C:\Users\qukuikui\AppData\Local\Temp\pip-build-env-bbko9m9z\overlay\Lib\site-packages\setuptools\build_meta.py", line 317, in run_setup
+exec(code, locals())  # noqa: S102 # exec is intentional here
+~~~~^^^^^^^^^^^^^^^^
+File "<string>", line 30, in <module>
+File "<string>", line 27, in get_version
+KeyError: '__version__'
+[end of output]
+
+note: This error originates from a subprocess, and is likely not a problem with pip.
+ERROR: Failed to build 'Pillow' when getting requirements to build wheel
+
+ENVIRONMENT
+ADSK_3DSMAX_X64_2024: C:\Program Files\Autodesk\3ds Max 2024\
+ALLUSERSPROFILE: C:\ProgramData
+APPDATA: C:\Users\qukuikui\AppData\Roaming
+BSPRINT_CLIENT: C:/Users/Administrator/AppData/Roaming/Brocadesoft
+CODEX_CLI_PATH: C:\Users\qukuikui\AppData\Local\OpenAI\Codex\bin\12219cbfbcbddde7\codex.exe
+COMMONPROGRAMFILES: C:\Program Files\Common Files
+COMMONPROGRAMFILES(X86): C:\Program Files (x86)\Common Files
+COMMONPROGRAMW6432: C:\Program Files\Common Files
+COMPUTERNAME: IT-DES004-00631
+COMSPEC: C:\windows\system32\cmd.exe
+DRIVERDATA: C:\Windows\System32\Drivers\DriverData
+EFC_11404_1262719628: 1
+EFC_11404_1592913036: 1
+EFC_11404_2283032206: 1
+EFC_11404_2775293581: 1
+EFC_11404_3789132940: 1
+EFC_11404_4126798990: 0
+FFMPEG_BINARY: D:\Oasis\ffmpeg\ffmpeg.exe
+FPS_BROWSER_APP_PROFILE_STRING: Internet Explorer
+FPS_BROWSER_USER_PROFILE_STRING: Default
+HOMEDRIVE: C:
+HOMEPATH: \Users\qukuikui
+LOCALAPPDATA: C:\Users\qukuikui\AppData\Local
+LOGONSERVER: \\DC-CHJB-07
+NUMBER_OF_PROCESSORS: 24
+OCIO: D:\blender5.2\5.2\datafiles\colormanagement\config.ocio
+ONEDRIVE: C:\Users\qukuikui\OneDrive
+OS: Windows_NT
+PATH: D:\blender5.2\;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\Program Files\Common Files\Autodesk Shared\;C:\Program Files\Perforce\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\dotnet\;C:\Users\qukuikui\AppData\Local\FlowServer;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\CorpLink\current\tools;C:\Users\qukuikui\.local\bin;C:\Users\qukuikui\AppData\Local\Programs\OpenAI\Codex\bin;C:\Users\qukuikui\AppData\Local\Microsoft\WindowsApps;D:\Microsoft VS Code\bin;D:\CodeBuddy\bin;C:\Users\qukuikui\AppData\Local\GitHubDesktop\bin
+PATHEXT: .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+PROCESSOR_ARCHITECTURE: AMD64
+PROCESSOR_IDENTIFIER: AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD
+PROCESSOR_LEVEL: 26
+PROCESSOR_REVISION: 4400
+PROGRAMDATA: C:\ProgramData
+PROGRAMFILES: C:\Program Files
+PROGRAMFILES(X86): C:\Program Files (x86)
+PROGRAMW6432: C:\Program Files
+PSMODULEPATH: C:\Program Files\WindowsPowerShell\Modules;C:\windows\system32\WindowsPowerShell\v1.0\Modules
+PUBLIC: C:\Users\Public
+SESSIONNAME: Console
+SUBSTANCE_PAINTER_PLUGINS_PATH: E:\RM42_SP_Resource_qukuikui\plugins\python
+SYSTEMDRIVE: C:
+SYSTEMROOT: C:\windows
+TEMP: C:\Users\qukuikui\AppData\Local\Temp
+TMP: C:\Users\qukuikui\AppData\Local\Temp
+USERDNSDOMAIN: INT.HYPERGRYPH.COM
+USERDOMAIN: HG
+USERDOMAIN_ROAMINGPROFILE: HG
+USERNAME: qukuikui
+USERPROFILE: C:\Users\qukuikui
+WINDIR: C:\windows
+PXR_USD_WINDOWS_DLL_PATH: D:\blender5.2\blender.shared
+OIIO_LOAD_DLLS_FROM_PATH: 0
+MATERIALX_SEARCH_PATH: D:\blender5.2\blender.shared\materialx\libraries
+PXR_MTLX_STDLIB_SEARCH_PATHS: D:\blender5.2\blender.shared\materialx\libraries
+
+DECALmachine: Installing PIL 10.1.0
+
+Platform: Windows
+Python Binary: D:\blender5.2\5.2\python\bin\python.exe True
+Python Library: D:\blender5.2\5.2\python\lib True
+Ensurepip: D:\blender5.2\5.2\python\lib\ensurepip True
+
+Modules: D:\blender5.2\5.2\scripts\modules True
+Modules: C:\Users\qukuikui\AppData\Roaming\Blender Foundation\Blender\5.2\scripts\modules False
+Site-Packages: D:\blender5.2\5.2\python\lib\site-packages True
+User Site-Packages: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages True
+EasyInstall Path: D:\blender5.2\5.2\python\lib\site-packages\easy_install.py False
+EasyInstall User Path: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\easy_install.py False
+
+
+
+Looking in links: c:\Users\qukuikui\AppData\Local\Temp\tmpy1y2xzno
+Requirement already satisfied: pip in C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages (26.2.1)
+Requirement already satisfied: pip in C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages (26.2.1)
+Requirement already satisfied: wheel in C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages (0.48.0)
+Requirement already satisfied: packaging>=24.0 in .\5.2\python\Lib\site-packages (from wheel) (25.0)
+Collecting Pillow==10.1.0
+Using cached Pillow-10.1.0.tar.gz (50.8 MB)
+Installing build dependencies: started
+Installing build dependencies: finished with status 'done'
+Getting requirements to build wheel: started
+Getting requirements to build wheel: finished with status 'error'
+error: subprocess-exited-with-error
+
+Getting requirements to build wheel did not run successfully.
+exit code: 1
+
+[21 lines of output]
+Traceback (most recent call last):
+File "C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\pip\_vendor\pyproject_hooks\_in_process\_in_process.py", line 389, in <module>
+main()
+~~~~^^
+File "C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\pip\_vendor\pyproject_hooks\_in_process\_in_process.py", line 373, in main
+json_out["return_val"] = hook(**hook_input["kwargs"])
+~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+File "C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\pip\_vendor\pyproject_hooks\_in_process\_in_process.py", line 143, in get_requires_for_build_wheel
+return hook(config_settings)
+File "C:\Users\qukuikui\AppData\Local\Temp\pip-build-env-stfx64sz\overlay\Lib\site-packages\setuptools\build_meta.py", line 333, in get_requires_for_build_wheel
+return self._get_build_requires(config_settings, requirements=[])
+~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "C:\Users\qukuikui\AppData\Local\Temp\pip-build-env-stfx64sz\overlay\Lib\site-packages\setuptools\build_meta.py", line 301, in _get_build_requires
+self.run_setup()
+~~~~~~~~~~~~~~^^
+File "C:\Users\qukuikui\AppData\Local\Temp\pip-build-env-stfx64sz\overlay\Lib\site-packages\setuptools\build_meta.py", line 317, in run_setup
+exec(code, locals())  # noqa: S102 # exec is intentional here
+~~~~^^^^^^^^^^^^^^^^
+File "<string>", line 30, in <module>
+File "<string>", line 27, in get_version
+KeyError: '__version__'
+[end of output]
+
+note: This error originates from a subprocess, and is likely not a problem with pip.
+ERROR: Failed to build 'Pillow' when getting requirements to build wheel
+
+ENVIRONMENT
+ADSK_3DSMAX_X64_2024: C:\Program Files\Autodesk\3ds Max 2024\
+ALLUSERSPROFILE: C:\ProgramData
+APPDATA: C:\Users\qukuikui\AppData\Roaming
+BSPRINT_CLIENT: C:/Users/Administrator/AppData/Roaming/Brocadesoft
+CODEX_CLI_PATH: C:\Users\qukuikui\AppData\Local\OpenAI\Codex\bin\12219cbfbcbddde7\codex.exe
+COMMONPROGRAMFILES: C:\Program Files\Common Files
+COMMONPROGRAMFILES(X86): C:\Program Files (x86)\Common Files
+COMMONPROGRAMW6432: C:\Program Files\Common Files
+COMPUTERNAME: IT-DES004-00631
+COMSPEC: C:\windows\system32\cmd.exe
+DRIVERDATA: C:\Windows\System32\Drivers\DriverData
+EFC_11404_1262719628: 1
+EFC_11404_1592913036: 1
+EFC_11404_2283032206: 1
+EFC_11404_2775293581: 1
+EFC_11404_3789132940: 1
+EFC_11404_4126798990: 0
+FFMPEG_BINARY: D:\Oasis\ffmpeg\ffmpeg.exe
+FPS_BROWSER_APP_PROFILE_STRING: Internet Explorer
+FPS_BROWSER_USER_PROFILE_STRING: Default
+HOMEDRIVE: C:
+HOMEPATH: \Users\qukuikui
+LOCALAPPDATA: C:\Users\qukuikui\AppData\Local
+LOGONSERVER: \\DC-CHJB-07
+NUMBER_OF_PROCESSORS: 24
+OCIO: D:\blender5.2\5.2\datafiles\colormanagement\config.ocio
+ONEDRIVE: C:\Users\qukuikui\OneDrive
+OS: Windows_NT
+PATH: D:\blender5.2\;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\Program Files\Common Files\Autodesk Shared\;C:\Program Files\Perforce\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\dotnet\;C:\Users\qukuikui\AppData\Local\FlowServer;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\CorpLink\current\tools;C:\Users\qukuikui\.local\bin;C:\Users\qukuikui\AppData\Local\Programs\OpenAI\Codex\bin;C:\Users\qukuikui\AppData\Local\Microsoft\WindowsApps;D:\Microsoft VS Code\bin;D:\CodeBuddy\bin;C:\Users\qukuikui\AppData\Local\GitHubDesktop\bin
+PATHEXT: .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+PROCESSOR_ARCHITECTURE: AMD64
+PROCESSOR_IDENTIFIER: AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD
+PROCESSOR_LEVEL: 26
+PROCESSOR_REVISION: 4400
+PROGRAMDATA: C:\ProgramData
+PROGRAMFILES: C:\Program Files
+PROGRAMFILES(X86): C:\Program Files (x86)
+PROGRAMW6432: C:\Program Files
+PSMODULEPATH: C:\Program Files\WindowsPowerShell\Modules;C:\windows\system32\WindowsPowerShell\v1.0\Modules
+PUBLIC: C:\Users\Public
+SESSIONNAME: Console
+SUBSTANCE_PAINTER_PLUGINS_PATH: E:\RM42_SP_Resource_qukuikui\plugins\python
+SYSTEMDRIVE: C:
+SYSTEMROOT: C:\windows
+TEMP: C:\Users\qukuikui\AppData\Local\Temp
+TMP: C:\Users\qukuikui\AppData\Local\Temp
+USERDNSDOMAIN: INT.HYPERGRYPH.COM
+USERDOMAIN: HG
+USERDOMAIN_ROAMINGPROFILE: HG
+USERNAME: qukuikui
+USERPROFILE: C:\Users\qukuikui
+WINDIR: C:\windows
+PXR_USD_WINDOWS_DLL_PATH: D:\blender5.2\blender.shared
+OIIO_LOAD_DLLS_FROM_PATH: 0
+MATERIALX_SEARCH_PATH: D:\blender5.2\blender.shared\materialx\libraries
+PXR_MTLX_STDLIB_SEARCH_PATHS: D:\blender5.2\blender.shared\materialx\libraries
+
+DECALmachine: Installing PIL 10.1.0
+
+Platform: Windows
+Python Binary: D:\blender5.2\5.2\python\bin\python.exe True
+Python Library: D:\blender5.2\5.2\python\lib True
+Ensurepip: D:\blender5.2\5.2\python\lib\ensurepip True
+
+Modules: D:\blender5.2\5.2\scripts\modules True
+Modules: C:\Users\qukuikui\AppData\Roaming\Blender Foundation\Blender\5.2\scripts\modules False
+Site-Packages: D:\blender5.2\5.2\python\lib\site-packages True
+User Site-Packages: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages True
+EasyInstall Path: D:\blender5.2\5.2\python\lib\site-packages\easy_install.py False
+EasyInstall User Path: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\easy_install.py False
+
+
+
+Looking in links: c:\Users\qukuikui\AppData\Local\Temp\tmpdf68l75f
+Requirement already satisfied: pip in C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages (26.2.1)
+Requirement already satisfied: pip in C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages (26.2.1)
+Requirement already satisfied: wheel in C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages (0.48.0)
+Requirement already satisfied: packaging>=24.0 in .\5.2\python\Lib\site-packages (from wheel) (25.0)
+Collecting Pillow==10.1.0
+Using cached Pillow-10.1.0.tar.gz (50.8 MB)
+Installing build dependencies: started
+Installing build dependencies: finished with status 'done'
+Getting requirements to build wheel: started
+Getting requirements to build wheel: finished with status 'error'
+error: subprocess-exited-with-error
+
+Getting requirements to build wheel did not run successfully.
+exit code: 1
+
+[21 lines of output]
+Traceback (most recent call last):
+File "C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\pip\_vendor\pyproject_hooks\_in_process\_in_process.py", line 389, in <module>
+main()
+~~~~^^
+File "C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\pip\_vendor\pyproject_hooks\_in_process\_in_process.py", line 373, in main
+json_out["return_val"] = hook(**hook_input["kwargs"])
+~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+File "C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\pip\_vendor\pyproject_hooks\_in_process\_in_process.py", line 143, in get_requires_for_build_wheel
+return hook(config_settings)
+File "C:\Users\qukuikui\AppData\Local\Temp\pip-build-env-mqse2v99\overlay\Lib\site-packages\setuptools\build_meta.py", line 333, in get_requires_for_build_wheel
+return self._get_build_requires(config_settings, requirements=[])
+~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "C:\Users\qukuikui\AppData\Local\Temp\pip-build-env-mqse2v99\overlay\Lib\site-packages\setuptools\build_meta.py", line 301, in _get_build_requires
+self.run_setup()
+~~~~~~~~~~~~~~^^
+File "C:\Users\qukuikui\AppData\Local\Temp\pip-build-env-mqse2v99\overlay\Lib\site-packages\setuptools\build_meta.py", line 317, in run_setup
+exec(code, locals())  # noqa: S102 # exec is intentional here
+~~~~^^^^^^^^^^^^^^^^
+File "<string>", line 30, in <module>
+File "<string>", line 27, in get_version
+KeyError: '__version__'
+[end of output]
+
+note: This error originates from a subprocess, and is likely not a problem with pip.
+ERROR: Failed to build 'Pillow' when getting requirements to build wheel
+
+ENVIRONMENT
+ADSK_3DSMAX_X64_2024: C:\Program Files\Autodesk\3ds Max 2024\
+ALLUSERSPROFILE: C:\ProgramData
+APPDATA: C:\Users\qukuikui\AppData\Roaming
+BSPRINT_CLIENT: C:/Users/Administrator/AppData/Roaming/Brocadesoft
+CODEX_CLI_PATH: C:\Users\qukuikui\AppData\Local\OpenAI\Codex\bin\12219cbfbcbddde7\codex.exe
+COMMONPROGRAMFILES: C:\Program Files\Common Files
+COMMONPROGRAMFILES(X86): C:\Program Files (x86)\Common Files
+COMMONPROGRAMW6432: C:\Program Files\Common Files
+COMPUTERNAME: IT-DES004-00631
+COMSPEC: C:\windows\system32\cmd.exe
+DRIVERDATA: C:\Windows\System32\Drivers\DriverData
+EFC_11404_1262719628: 1
+EFC_11404_1592913036: 1
+EFC_11404_2283032206: 1
+EFC_11404_2775293581: 1
+EFC_11404_3789132940: 1
+EFC_11404_4126798990: 0
+FFMPEG_BINARY: D:\Oasis\ffmpeg\ffmpeg.exe
+FPS_BROWSER_APP_PROFILE_STRING: Internet Explorer
+FPS_BROWSER_USER_PROFILE_STRING: Default
+HOMEDRIVE: C:
+HOMEPATH: \Users\qukuikui
+LOCALAPPDATA: C:\Users\qukuikui\AppData\Local
+LOGONSERVER: \\DC-CHJB-07
+NUMBER_OF_PROCESSORS: 24
+OCIO: D:\blender5.2\5.2\datafiles\colormanagement\config.ocio
+ONEDRIVE: C:\Users\qukuikui\OneDrive
+OS: Windows_NT
+PATH: D:\blender5.2\;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\Program Files\Common Files\Autodesk Shared\;C:\Program Files\Perforce\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\dotnet\;C:\Users\qukuikui\AppData\Local\FlowServer;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\CorpLink\current\tools;C:\Users\qukuikui\.local\bin;C:\Users\qukuikui\AppData\Local\Programs\OpenAI\Codex\bin;C:\Users\qukuikui\AppData\Local\Microsoft\WindowsApps;D:\Microsoft VS Code\bin;D:\CodeBuddy\bin;C:\Users\qukuikui\AppData\Local\GitHubDesktop\bin
+PATHEXT: .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+PROCESSOR_ARCHITECTURE: AMD64
+PROCESSOR_IDENTIFIER: AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD
+PROCESSOR_LEVEL: 26
+PROCESSOR_REVISION: 4400
+PROGRAMDATA: C:\ProgramData
+PROGRAMFILES: C:\Program Files
+PROGRAMFILES(X86): C:\Program Files (x86)
+PROGRAMW6432: C:\Program Files
+PSMODULEPATH: C:\Program Files\WindowsPowerShell\Modules;C:\windows\system32\WindowsPowerShell\v1.0\Modules
+PUBLIC: C:\Users\Public
+SESSIONNAME: Console
+SUBSTANCE_PAINTER_PLUGINS_PATH: E:\RM42_SP_Resource_qukuikui\plugins\python
+SYSTEMDRIVE: C:
+SYSTEMROOT: C:\windows
+TEMP: C:\Users\qukuikui\AppData\Local\Temp
+TMP: C:\Users\qukuikui\AppData\Local\Temp
+USERDNSDOMAIN: INT.HYPERGRYPH.COM
+USERDOMAIN: HG
+USERDOMAIN_ROAMINGPROFILE: HG
+USERNAME: qukuikui
+USERPROFILE: C:\Users\qukuikui
+WINDIR: C:\windows
+PXR_USD_WINDOWS_DLL_PATH: D:\blender5.2\blender.shared
+OIIO_LOAD_DLLS_FROM_PATH: 0
+MATERIALX_SEARCH_PATH: D:\blender5.2\blender.shared\materialx\libraries
+PXR_MTLX_STDLIB_SEARCH_PATHS: D:\blender5.2\blender.shared\materialx\libraries
+
+DECALmachine: Purging PIL
+
+Platform: Windows
+Python Binary: D:\blender5.2\5.2\python\bin\python.exe True
+Python Library: D:\blender5.2\5.2\python\lib True
+Ensurepip: D:\blender5.2\5.2\python\lib\ensurepip True
+
+Modules: D:\blender5.2\5.2\scripts\modules True
+Modules: C:\Users\qukuikui\AppData\Roaming\Blender Foundation\Blender\5.2\scripts\modules False
+Site-Packages: D:\blender5.2\5.2\python\lib\site-packages True
+User Site-Packages: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages True
+EasyInstall Path: D:\blender5.2\5.2\python\lib\site-packages\easy_install.py False
+EasyInstall User Path: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\easy_install.py False
+
+
+ENVIRONMENT
+ADSK_3DSMAX_X64_2024: C:\Program Files\Autodesk\3ds Max 2024\
+ALLUSERSPROFILE: C:\ProgramData
+APPDATA: C:\Users\qukuikui\AppData\Roaming
+BSPRINT_CLIENT: C:/Users/Administrator/AppData/Roaming/Brocadesoft
+CODEX_CLI_PATH: C:\Users\qukuikui\AppData\Local\OpenAI\Codex\bin\12219cbfbcbddde7\codex.exe
+COMMONPROGRAMFILES: C:\Program Files\Common Files
+COMMONPROGRAMFILES(X86): C:\Program Files (x86)\Common Files
+COMMONPROGRAMW6432: C:\Program Files\Common Files
+COMPUTERNAME: IT-DES004-00631
+COMSPEC: C:\windows\system32\cmd.exe
+DRIVERDATA: C:\Windows\System32\Drivers\DriverData
+EFC_11404_1262719628: 1
+EFC_11404_1592913036: 1
+EFC_11404_2283032206: 1
+EFC_11404_2775293581: 1
+EFC_11404_3789132940: 1
+EFC_11404_4126798990: 0
+FFMPEG_BINARY: D:\Oasis\ffmpeg\ffmpeg.exe
+FPS_BROWSER_APP_PROFILE_STRING: Internet Explorer
+FPS_BROWSER_USER_PROFILE_STRING: Default
+HOMEDRIVE: C:
+HOMEPATH: \Users\qukuikui
+LOCALAPPDATA: C:\Users\qukuikui\AppData\Local
+LOGONSERVER: \\DC-CHJB-07
+NUMBER_OF_PROCESSORS: 24
+OCIO: D:\blender5.2\5.2\datafiles\colormanagement\config.ocio
+ONEDRIVE: C:\Users\qukuikui\OneDrive
+OS: Windows_NT
+PATH: D:\blender5.2\;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\Program Files\Common Files\Autodesk Shared\;C:\Program Files\Perforce\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\dotnet\;C:\Users\qukuikui\AppData\Local\FlowServer;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\CorpLink\current\tools;C:\Users\qukuikui\.local\bin;C:\Users\qukuikui\AppData\Local\Programs\OpenAI\Codex\bin;C:\Users\qukuikui\AppData\Local\Microsoft\WindowsApps;D:\Microsoft VS Code\bin;D:\CodeBuddy\bin;C:\Users\qukuikui\AppData\Local\GitHubDesktop\bin
+PATHEXT: .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+PROCESSOR_ARCHITECTURE: AMD64
+PROCESSOR_IDENTIFIER: AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD
+PROCESSOR_LEVEL: 26
+PROCESSOR_REVISION: 4400
+PROGRAMDATA: C:\ProgramData
+PROGRAMFILES: C:\Program Files
+PROGRAMFILES(X86): C:\Program Files (x86)
+PROGRAMW6432: C:\Program Files
+PSMODULEPATH: C:\Program Files\WindowsPowerShell\Modules;C:\windows\system32\WindowsPowerShell\v1.0\Modules
+PUBLIC: C:\Users\Public
+SESSIONNAME: Console
+SUBSTANCE_PAINTER_PLUGINS_PATH: E:\RM42_SP_Resource_qukuikui\plugins\python
+SYSTEMDRIVE: C:
+SYSTEMROOT: C:\windows
+TEMP: C:\Users\qukuikui\AppData\Local\Temp
+TMP: C:\Users\qukuikui\AppData\Local\Temp
+USERDNSDOMAIN: INT.HYPERGRYPH.COM
+USERDOMAIN: HG
+USERDOMAIN_ROAMINGPROFILE: HG
+USERNAME: qukuikui
+USERPROFILE: C:\Users\qukuikui
+WINDIR: C:\windows
+PXR_USD_WINDOWS_DLL_PATH: D:\blender5.2\blender.shared
+OIIO_LOAD_DLLS_FROM_PATH: 0
+MATERIALX_SEARCH_PATH: D:\blender5.2\blender.shared\materialx\libraries
+PXR_MTLX_STDLIB_SEARCH_PATHS: D:\blender5.2\blender.shared\materialx\libraries
+
+DECALmachine: Purging PIL
+
+Platform: Windows
+Python Binary: D:\blender5.2\5.2\python\bin\python.exe True
+Python Library: D:\blender5.2\5.2\python\lib True
+Ensurepip: D:\blender5.2\5.2\python\lib\ensurepip True
+
+Modules: D:\blender5.2\5.2\scripts\modules True
+Modules: C:\Users\qukuikui\AppData\Roaming\Blender Foundation\Blender\5.2\scripts\modules False
+Site-Packages: D:\blender5.2\5.2\python\lib\site-packages True
+User Site-Packages: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages True
+EasyInstall Path: D:\blender5.2\5.2\python\lib\site-packages\easy_install.py False
+EasyInstall User Path: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\easy_install.py False
+
+
+ENVIRONMENT
+ADSK_3DSMAX_X64_2024: C:\Program Files\Autodesk\3ds Max 2024\
+ALLUSERSPROFILE: C:\ProgramData
+APPDATA: C:\Users\qukuikui\AppData\Roaming
+BSPRINT_CLIENT: C:/Users/Administrator/AppData/Roaming/Brocadesoft
+CODEX_CLI_PATH: C:\Users\qukuikui\AppData\Local\OpenAI\Codex\bin\12219cbfbcbddde7\codex.exe
+COMMONPROGRAMFILES: C:\Program Files\Common Files
+COMMONPROGRAMFILES(X86): C:\Program Files (x86)\Common Files
+COMMONPROGRAMW6432: C:\Program Files\Common Files
+COMPUTERNAME: IT-DES004-00631
+COMSPEC: C:\windows\system32\cmd.exe
+DRIVERDATA: C:\Windows\System32\Drivers\DriverData
+EFC_11404_1262719628: 1
+EFC_11404_1592913036: 1
+EFC_11404_2283032206: 1
+EFC_11404_2775293581: 1
+EFC_11404_3789132940: 1
+EFC_11404_4126798990: 0
+FFMPEG_BINARY: D:\Oasis\ffmpeg\ffmpeg.exe
+FPS_BROWSER_APP_PROFILE_STRING: Internet Explorer
+FPS_BROWSER_USER_PROFILE_STRING: Default
+HOMEDRIVE: C:
+HOMEPATH: \Users\qukuikui
+LOCALAPPDATA: C:\Users\qukuikui\AppData\Local
+LOGONSERVER: \\DC-CHJB-07
+NUMBER_OF_PROCESSORS: 24
+OCIO: D:\blender5.2\5.2\datafiles\colormanagement\config.ocio
+ONEDRIVE: C:\Users\qukuikui\OneDrive
+OS: Windows_NT
+PATH: D:\blender5.2\;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\Program Files\Common Files\Autodesk Shared\;C:\Program Files\Perforce\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\dotnet\;C:\Users\qukuikui\AppData\Local\FlowServer;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\CorpLink\current\tools;C:\Users\qukuikui\.local\bin;C:\Users\qukuikui\AppData\Local\Programs\OpenAI\Codex\bin;C:\Users\qukuikui\AppData\Local\Microsoft\WindowsApps;D:\Microsoft VS Code\bin;D:\CodeBuddy\bin;C:\Users\qukuikui\AppData\Local\GitHubDesktop\bin
+PATHEXT: .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+PROCESSOR_ARCHITECTURE: AMD64
+PROCESSOR_IDENTIFIER: AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD
+PROCESSOR_LEVEL: 26
+PROCESSOR_REVISION: 4400
+PROGRAMDATA: C:\ProgramData
+PROGRAMFILES: C:\Program Files
+PROGRAMFILES(X86): C:\Program Files (x86)
+PROGRAMW6432: C:\Program Files
+PSMODULEPATH: C:\Program Files\WindowsPowerShell\Modules;C:\windows\system32\WindowsPowerShell\v1.0\Modules
+PUBLIC: C:\Users\Public
+SESSIONNAME: Console
+SUBSTANCE_PAINTER_PLUGINS_PATH: E:\RM42_SP_Resource_qukuikui\plugins\python
+SYSTEMDRIVE: C:
+SYSTEMROOT: C:\windows
+TEMP: C:\Users\qukuikui\AppData\Local\Temp
+TMP: C:\Users\qukuikui\AppData\Local\Temp
+USERDNSDOMAIN: INT.HYPERGRYPH.COM
+USERDOMAIN: HG
+USERDOMAIN_ROAMINGPROFILE: HG
+USERNAME: qukuikui
+USERPROFILE: C:\Users\qukuikui
+WINDIR: C:\windows
+PXR_USD_WINDOWS_DLL_PATH: D:\blender5.2\blender.shared
+OIIO_LOAD_DLLS_FROM_PATH: 0
+MATERIALX_SEARCH_PATH: D:\blender5.2\blender.shared\materialx\libraries
+PXR_MTLX_STDLIB_SEARCH_PATHS: D:\blender5.2\blender.shared\materialx\libraries
+
+DECALmachine: Purging PIL
+
+Platform: Windows
+Python Binary: D:\blender5.2\5.2\python\bin\python.exe True
+Python Library: D:\blender5.2\5.2\python\lib True
+Ensurepip: D:\blender5.2\5.2\python\lib\ensurepip True
+
+Modules: D:\blender5.2\5.2\scripts\modules True
+Modules: C:\Users\qukuikui\AppData\Roaming\Blender Foundation\Blender\5.2\scripts\modules False
+Site-Packages: D:\blender5.2\5.2\python\lib\site-packages True
+User Site-Packages: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages True
+EasyInstall Path: D:\blender5.2\5.2\python\lib\site-packages\easy_install.py False
+EasyInstall User Path: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\easy_install.py False
+
+
+ENVIRONMENT
+ADSK_3DSMAX_X64_2024: C:\Program Files\Autodesk\3ds Max 2024\
+ALLUSERSPROFILE: C:\ProgramData
+APPDATA: C:\Users\qukuikui\AppData\Roaming
+BSPRINT_CLIENT: C:/Users/Administrator/AppData/Roaming/Brocadesoft
+CODEX_CLI_PATH: C:\Users\qukuikui\AppData\Local\OpenAI\Codex\bin\12219cbfbcbddde7\codex.exe
+COMMONPROGRAMFILES: C:\Program Files\Common Files
+COMMONPROGRAMFILES(X86): C:\Program Files (x86)\Common Files
+COMMONPROGRAMW6432: C:\Program Files\Common Files
+COMPUTERNAME: IT-DES004-00631
+COMSPEC: C:\windows\system32\cmd.exe
+DRIVERDATA: C:\Windows\System32\Drivers\DriverData
+EFC_11404_1262719628: 1
+EFC_11404_1592913036: 1
+EFC_11404_2283032206: 1
+EFC_11404_2775293581: 1
+EFC_11404_3789132940: 1
+EFC_11404_4126798990: 0
+FFMPEG_BINARY: D:\Oasis\ffmpeg\ffmpeg.exe
+FPS_BROWSER_APP_PROFILE_STRING: Internet Explorer
+FPS_BROWSER_USER_PROFILE_STRING: Default
+HOMEDRIVE: C:
+HOMEPATH: \Users\qukuikui
+LOCALAPPDATA: C:\Users\qukuikui\AppData\Local
+LOGONSERVER: \\DC-CHJB-07
+NUMBER_OF_PROCESSORS: 24
+OCIO: D:\blender5.2\5.2\datafiles\colormanagement\config.ocio
+ONEDRIVE: C:\Users\qukuikui\OneDrive
+OS: Windows_NT
+PATH: D:\blender5.2\;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\Program Files\Common Files\Autodesk Shared\;C:\Program Files\Perforce\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\dotnet\;C:\Users\qukuikui\AppData\Local\FlowServer;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\CorpLink\current\tools;C:\Users\qukuikui\.local\bin;C:\Users\qukuikui\AppData\Local\Programs\OpenAI\Codex\bin;C:\Users\qukuikui\AppData\Local\Microsoft\WindowsApps;D:\Microsoft VS Code\bin;D:\CodeBuddy\bin;C:\Users\qukuikui\AppData\Local\GitHubDesktop\bin
+PATHEXT: .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+PROCESSOR_ARCHITECTURE: AMD64
+PROCESSOR_IDENTIFIER: AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD
+PROCESSOR_LEVEL: 26
+PROCESSOR_REVISION: 4400
+PROGRAMDATA: C:\ProgramData
+PROGRAMFILES: C:\Program Files
+PROGRAMFILES(X86): C:\Program Files (x86)
+PROGRAMW6432: C:\Program Files
+PSMODULEPATH: C:\Program Files\WindowsPowerShell\Modules;C:\windows\system32\WindowsPowerShell\v1.0\Modules
+PUBLIC: C:\Users\Public
+SESSIONNAME: Console
+SUBSTANCE_PAINTER_PLUGINS_PATH: E:\RM42_SP_Resource_qukuikui\plugins\python
+SYSTEMDRIVE: C:
+SYSTEMROOT: C:\windows
+TEMP: C:\Users\qukuikui\AppData\Local\Temp
+TMP: C:\Users\qukuikui\AppData\Local\Temp
+USERDNSDOMAIN: INT.HYPERGRYPH.COM
+USERDOMAIN: HG
+USERDOMAIN_ROAMINGPROFILE: HG
+USERNAME: qukuikui
+USERPROFILE: C:\Users\qukuikui
+WINDIR: C:\windows
+PXR_USD_WINDOWS_DLL_PATH: D:\blender5.2\blender.shared
+OIIO_LOAD_DLLS_FROM_PATH: 0
+MATERIALX_SEARCH_PATH: D:\blender5.2\blender.shared\materialx\libraries
+PXR_MTLX_STDLIB_SEARCH_PATHS: D:\blender5.2\blender.shared\materialx\libraries
+
+DECALmachine: Purging PIL
+
+Platform: Windows
+Python Binary: D:\blender5.2\5.2\python\bin\python.exe True
+Python Library: D:\blender5.2\5.2\python\lib True
+Ensurepip: D:\blender5.2\5.2\python\lib\ensurepip True
+
+Modules: D:\blender5.2\5.2\scripts\modules True
+Modules: C:\Users\qukuikui\AppData\Roaming\Blender Foundation\Blender\5.2\scripts\modules False
+Site-Packages: D:\blender5.2\5.2\python\lib\site-packages True
+User Site-Packages: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages True
+EasyInstall Path: D:\blender5.2\5.2\python\lib\site-packages\easy_install.py False
+EasyInstall User Path: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\easy_install.py False
+
+
+ENVIRONMENT
+ADSK_3DSMAX_X64_2024: C:\Program Files\Autodesk\3ds Max 2024\
+ALLUSERSPROFILE: C:\ProgramData
+APPDATA: C:\Users\qukuikui\AppData\Roaming
+BSPRINT_CLIENT: C:/Users/Administrator/AppData/Roaming/Brocadesoft
+CODEX_CLI_PATH: C:\Users\qukuikui\AppData\Local\OpenAI\Codex\bin\12219cbfbcbddde7\codex.exe
+COMMONPROGRAMFILES: C:\Program Files\Common Files
+COMMONPROGRAMFILES(X86): C:\Program Files (x86)\Common Files
+COMMONPROGRAMW6432: C:\Program Files\Common Files
+COMPUTERNAME: IT-DES004-00631
+COMSPEC: C:\windows\system32\cmd.exe
+DRIVERDATA: C:\Windows\System32\Drivers\DriverData
+EFC_11404_1262719628: 1
+EFC_11404_1592913036: 1
+EFC_11404_2283032206: 1
+EFC_11404_2775293581: 1
+EFC_11404_3789132940: 1
+EFC_11404_4126798990: 0
+FFMPEG_BINARY: D:\Oasis\ffmpeg\ffmpeg.exe
+FPS_BROWSER_APP_PROFILE_STRING: Internet Explorer
+FPS_BROWSER_USER_PROFILE_STRING: Default
+HOMEDRIVE: C:
+HOMEPATH: \Users\qukuikui
+LOCALAPPDATA: C:\Users\qukuikui\AppData\Local
+LOGONSERVER: \\DC-CHJB-07
+NUMBER_OF_PROCESSORS: 24
+OCIO: D:\blender5.2\5.2\datafiles\colormanagement\config.ocio
+ONEDRIVE: C:\Users\qukuikui\OneDrive
+OS: Windows_NT
+PATH: D:\blender5.2\;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\Program Files\Common Files\Autodesk Shared\;C:\Program Files\Perforce\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\dotnet\;C:\Users\qukuikui\AppData\Local\FlowServer;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\CorpLink\current\tools;C:\Users\qukuikui\.local\bin;C:\Users\qukuikui\AppData\Local\Programs\OpenAI\Codex\bin;C:\Users\qukuikui\AppData\Local\Microsoft\WindowsApps;D:\Microsoft VS Code\bin;D:\CodeBuddy\bin;C:\Users\qukuikui\AppData\Local\GitHubDesktop\bin
+PATHEXT: .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+PROCESSOR_ARCHITECTURE: AMD64
+PROCESSOR_IDENTIFIER: AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD
+PROCESSOR_LEVEL: 26
+PROCESSOR_REVISION: 4400
+PROGRAMDATA: C:\ProgramData
+PROGRAMFILES: C:\Program Files
+PROGRAMFILES(X86): C:\Program Files (x86)
+PROGRAMW6432: C:\Program Files
+PSMODULEPATH: C:\Program Files\WindowsPowerShell\Modules;C:\windows\system32\WindowsPowerShell\v1.0\Modules
+PUBLIC: C:\Users\Public
+SESSIONNAME: Console
+SUBSTANCE_PAINTER_PLUGINS_PATH: E:\RM42_SP_Resource_qukuikui\plugins\python
+SYSTEMDRIVE: C:
+SYSTEMROOT: C:\windows
+TEMP: C:\Users\qukuikui\AppData\Local\Temp
+TMP: C:\Users\qukuikui\AppData\Local\Temp
+USERDNSDOMAIN: INT.HYPERGRYPH.COM
+USERDOMAIN: HG
+USERDOMAIN_ROAMINGPROFILE: HG
+USERNAME: qukuikui
+USERPROFILE: C:\Users\qukuikui
+WINDIR: C:\windows
+PXR_USD_WINDOWS_DLL_PATH: D:\blender5.2\blender.shared
+OIIO_LOAD_DLLS_FROM_PATH: 0
+MATERIALX_SEARCH_PATH: D:\blender5.2\blender.shared\materialx\libraries
+PXR_MTLX_STDLIB_SEARCH_PATHS: D:\blender5.2\blender.shared\materialx\libraries
+
+DECALmachine: Purging PIL
+
+Platform: Windows
+Python Binary: D:\blender5.2\5.2\python\bin\python.exe True
+Python Library: D:\blender5.2\5.2\python\lib True
+Ensurepip: D:\blender5.2\5.2\python\lib\ensurepip True
+
+Modules: D:\blender5.2\5.2\scripts\modules True
+Modules: C:\Users\qukuikui\AppData\Roaming\Blender Foundation\Blender\5.2\scripts\modules False
+Site-Packages: D:\blender5.2\5.2\python\lib\site-packages True
+User Site-Packages: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages True
+EasyInstall Path: D:\blender5.2\5.2\python\lib\site-packages\easy_install.py False
+EasyInstall User Path: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\easy_install.py False
+
+
+ENVIRONMENT
+ADSK_3DSMAX_X64_2024: C:\Program Files\Autodesk\3ds Max 2024\
+ALLUSERSPROFILE: C:\ProgramData
+APPDATA: C:\Users\qukuikui\AppData\Roaming
+BSPRINT_CLIENT: C:/Users/Administrator/AppData/Roaming/Brocadesoft
+CODEX_CLI_PATH: C:\Users\qukuikui\AppData\Local\OpenAI\Codex\bin\12219cbfbcbddde7\codex.exe
+COMMONPROGRAMFILES: C:\Program Files\Common Files
+COMMONPROGRAMFILES(X86): C:\Program Files (x86)\Common Files
+COMMONPROGRAMW6432: C:\Program Files\Common Files
+COMPUTERNAME: IT-DES004-00631
+COMSPEC: C:\windows\system32\cmd.exe
+DRIVERDATA: C:\Windows\System32\Drivers\DriverData
+EFC_11404_1262719628: 1
+EFC_11404_1592913036: 1
+EFC_11404_2283032206: 1
+EFC_11404_2775293581: 1
+EFC_11404_3789132940: 1
+EFC_11404_4126798990: 0
+FFMPEG_BINARY: D:\Oasis\ffmpeg\ffmpeg.exe
+FPS_BROWSER_APP_PROFILE_STRING: Internet Explorer
+FPS_BROWSER_USER_PROFILE_STRING: Default
+HOMEDRIVE: C:
+HOMEPATH: \Users\qukuikui
+LOCALAPPDATA: C:\Users\qukuikui\AppData\Local
+LOGONSERVER: \\DC-CHJB-07
+NUMBER_OF_PROCESSORS: 24
+OCIO: D:\blender5.2\5.2\datafiles\colormanagement\config.ocio
+ONEDRIVE: C:\Users\qukuikui\OneDrive
+OS: Windows_NT
+PATH: D:\blender5.2\;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\Program Files\Common Files\Autodesk Shared\;C:\Program Files\Perforce\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\dotnet\;C:\Users\qukuikui\AppData\Local\FlowServer;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\CorpLink\current\tools;C:\Users\qukuikui\.local\bin;C:\Users\qukuikui\AppData\Local\Programs\OpenAI\Codex\bin;C:\Users\qukuikui\AppData\Local\Microsoft\WindowsApps;D:\Microsoft VS Code\bin;D:\CodeBuddy\bin;C:\Users\qukuikui\AppData\Local\GitHubDesktop\bin
+PATHEXT: .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+PROCESSOR_ARCHITECTURE: AMD64
+PROCESSOR_IDENTIFIER: AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD
+PROCESSOR_LEVEL: 26
+PROCESSOR_REVISION: 4400
+PROGRAMDATA: C:\ProgramData
+PROGRAMFILES: C:\Program Files
+PROGRAMFILES(X86): C:\Program Files (x86)
+PROGRAMW6432: C:\Program Files
+PSMODULEPATH: C:\Program Files\WindowsPowerShell\Modules;C:\windows\system32\WindowsPowerShell\v1.0\Modules
+PUBLIC: C:\Users\Public
+SESSIONNAME: Console
+SUBSTANCE_PAINTER_PLUGINS_PATH: E:\RM42_SP_Resource_qukuikui\plugins\python
+SYSTEMDRIVE: C:
+SYSTEMROOT: C:\windows
+TEMP: C:\Users\qukuikui\AppData\Local\Temp
+TMP: C:\Users\qukuikui\AppData\Local\Temp
+USERDNSDOMAIN: INT.HYPERGRYPH.COM
+USERDOMAIN: HG
+USERDOMAIN_ROAMINGPROFILE: HG
+USERNAME: qukuikui
+USERPROFILE: C:\Users\qukuikui
+WINDIR: C:\windows
+PXR_USD_WINDOWS_DLL_PATH: D:\blender5.2\blender.shared
+OIIO_LOAD_DLLS_FROM_PATH: 0
+MATERIALX_SEARCH_PATH: D:\blender5.2\blender.shared\materialx\libraries
+PXR_MTLX_STDLIB_SEARCH_PATHS: D:\blender5.2\blender.shared\materialx\libraries
+
+DECALmachine: Purging PIL
+
+Platform: Windows
+Python Binary: D:\blender5.2\5.2\python\bin\python.exe True
+Python Library: D:\blender5.2\5.2\python\lib True
+Ensurepip: D:\blender5.2\5.2\python\lib\ensurepip True
+
+Modules: D:\blender5.2\5.2\scripts\modules True
+Modules: C:\Users\qukuikui\AppData\Roaming\Blender Foundation\Blender\5.2\scripts\modules False
+Site-Packages: D:\blender5.2\5.2\python\lib\site-packages True
+User Site-Packages: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages True
+EasyInstall Path: D:\blender5.2\5.2\python\lib\site-packages\easy_install.py False
+EasyInstall User Path: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\easy_install.py False
+
+
+ENVIRONMENT
+ADSK_3DSMAX_X64_2024: C:\Program Files\Autodesk\3ds Max 2024\
+ALLUSERSPROFILE: C:\ProgramData
+APPDATA: C:\Users\qukuikui\AppData\Roaming
+BSPRINT_CLIENT: C:/Users/Administrator/AppData/Roaming/Brocadesoft
+CODEX_CLI_PATH: C:\Users\qukuikui\AppData\Local\OpenAI\Codex\bin\12219cbfbcbddde7\codex.exe
+COMMONPROGRAMFILES: C:\Program Files\Common Files
+COMMONPROGRAMFILES(X86): C:\Program Files (x86)\Common Files
+COMMONPROGRAMW6432: C:\Program Files\Common Files
+COMPUTERNAME: IT-DES004-00631
+COMSPEC: C:\windows\system32\cmd.exe
+DRIVERDATA: C:\Windows\System32\Drivers\DriverData
+EFC_11404_1262719628: 1
+EFC_11404_1592913036: 1
+EFC_11404_2283032206: 1
+EFC_11404_2775293581: 1
+EFC_11404_3789132940: 1
+EFC_11404_4126798990: 0
+FFMPEG_BINARY: D:\Oasis\ffmpeg\ffmpeg.exe
+FPS_BROWSER_APP_PROFILE_STRING: Internet Explorer
+FPS_BROWSER_USER_PROFILE_STRING: Default
+HOMEDRIVE: C:
+HOMEPATH: \Users\qukuikui
+LOCALAPPDATA: C:\Users\qukuikui\AppData\Local
+LOGONSERVER: \\DC-CHJB-07
+NUMBER_OF_PROCESSORS: 24
+OCIO: D:\blender5.2\5.2\datafiles\colormanagement\config.ocio
+ONEDRIVE: C:\Users\qukuikui\OneDrive
+OS: Windows_NT
+PATH: D:\blender5.2\;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\Program Files\Common Files\Autodesk Shared\;C:\Program Files\Perforce\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\dotnet\;C:\Users\qukuikui\AppData\Local\FlowServer;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\CorpLink\current\tools;C:\Users\qukuikui\.local\bin;C:\Users\qukuikui\AppData\Local\Programs\OpenAI\Codex\bin;C:\Users\qukuikui\AppData\Local\Microsoft\WindowsApps;D:\Microsoft VS Code\bin;D:\CodeBuddy\bin;C:\Users\qukuikui\AppData\Local\GitHubDesktop\bin
+PATHEXT: .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+PROCESSOR_ARCHITECTURE: AMD64
+PROCESSOR_IDENTIFIER: AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD
+PROCESSOR_LEVEL: 26
+PROCESSOR_REVISION: 4400
+PROGRAMDATA: C:\ProgramData
+PROGRAMFILES: C:\Program Files
+PROGRAMFILES(X86): C:\Program Files (x86)
+PROGRAMW6432: C:\Program Files
+PSMODULEPATH: C:\Program Files\WindowsPowerShell\Modules;C:\windows\system32\WindowsPowerShell\v1.0\Modules
+PUBLIC: C:\Users\Public
+SESSIONNAME: Console
+SUBSTANCE_PAINTER_PLUGINS_PATH: E:\RM42_SP_Resource_qukuikui\plugins\python
+SYSTEMDRIVE: C:
+SYSTEMROOT: C:\windows
+TEMP: C:\Users\qukuikui\AppData\Local\Temp
+TMP: C:\Users\qukuikui\AppData\Local\Temp
+USERDNSDOMAIN: INT.HYPERGRYPH.COM
+USERDOMAIN: HG
+USERDOMAIN_ROAMINGPROFILE: HG
+USERNAME: qukuikui
+USERPROFILE: C:\Users\qukuikui
+WINDIR: C:\windows
+PXR_USD_WINDOWS_DLL_PATH: D:\blender5.2\blender.shared
+OIIO_LOAD_DLLS_FROM_PATH: 0
+MATERIALX_SEARCH_PATH: D:\blender5.2\blender.shared\materialx\libraries
+PXR_MTLX_STDLIB_SEARCH_PATHS: D:\blender5.2\blender.shared\materialx\libraries
+
+DECALmachine: Purging PIL
+
+Platform: Windows
+Python Binary: D:\blender5.2\5.2\python\bin\python.exe True
+Python Library: D:\blender5.2\5.2\python\lib True
+Ensurepip: D:\blender5.2\5.2\python\lib\ensurepip True
+
+Modules: D:\blender5.2\5.2\scripts\modules True
+Modules: C:\Users\qukuikui\AppData\Roaming\Blender Foundation\Blender\5.2\scripts\modules False
+Site-Packages: D:\blender5.2\5.2\python\lib\site-packages True
+User Site-Packages: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages True
+EasyInstall Path: D:\blender5.2\5.2\python\lib\site-packages\easy_install.py False
+EasyInstall User Path: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\easy_install.py False
+
+
+ENVIRONMENT
+ADSK_3DSMAX_X64_2024: C:\Program Files\Autodesk\3ds Max 2024\
+ALLUSERSPROFILE: C:\ProgramData
+APPDATA: C:\Users\qukuikui\AppData\Roaming
+BSPRINT_CLIENT: C:/Users/Administrator/AppData/Roaming/Brocadesoft
+CODEX_CLI_PATH: C:\Users\qukuikui\AppData\Local\OpenAI\Codex\bin\12219cbfbcbddde7\codex.exe
+COMMONPROGRAMFILES: C:\Program Files\Common Files
+COMMONPROGRAMFILES(X86): C:\Program Files (x86)\Common Files
+COMMONPROGRAMW6432: C:\Program Files\Common Files
+COMPUTERNAME: IT-DES004-00631
+COMSPEC: C:\windows\system32\cmd.exe
+DRIVERDATA: C:\Windows\System32\Drivers\DriverData
+EFC_11404_1262719628: 1
+EFC_11404_1592913036: 1
+EFC_11404_2283032206: 1
+EFC_11404_2775293581: 1
+EFC_11404_3789132940: 1
+EFC_11404_4126798990: 0
+FFMPEG_BINARY: D:\Oasis\ffmpeg\ffmpeg.exe
+FPS_BROWSER_APP_PROFILE_STRING: Internet Explorer
+FPS_BROWSER_USER_PROFILE_STRING: Default
+HOMEDRIVE: C:
+HOMEPATH: \Users\qukuikui
+LOCALAPPDATA: C:\Users\qukuikui\AppData\Local
+LOGONSERVER: \\DC-CHJB-07
+NUMBER_OF_PROCESSORS: 24
+OCIO: D:\blender5.2\5.2\datafiles\colormanagement\config.ocio
+ONEDRIVE: C:\Users\qukuikui\OneDrive
+OS: Windows_NT
+PATH: D:\blender5.2\;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\Program Files\Common Files\Autodesk Shared\;C:\Program Files\Perforce\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\dotnet\;C:\Users\qukuikui\AppData\Local\FlowServer;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\CorpLink\current\tools;C:\Users\qukuikui\.local\bin;C:\Users\qukuikui\AppData\Local\Programs\OpenAI\Codex\bin;C:\Users\qukuikui\AppData\Local\Microsoft\WindowsApps;D:\Microsoft VS Code\bin;D:\CodeBuddy\bin;C:\Users\qukuikui\AppData\Local\GitHubDesktop\bin
+PATHEXT: .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+PROCESSOR_ARCHITECTURE: AMD64
+PROCESSOR_IDENTIFIER: AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD
+PROCESSOR_LEVEL: 26
+PROCESSOR_REVISION: 4400
+PROGRAMDATA: C:\ProgramData
+PROGRAMFILES: C:\Program Files
+PROGRAMFILES(X86): C:\Program Files (x86)
+PROGRAMW6432: C:\Program Files
+PSMODULEPATH: C:\Program Files\WindowsPowerShell\Modules;C:\windows\system32\WindowsPowerShell\v1.0\Modules
+PUBLIC: C:\Users\Public
+SESSIONNAME: Console
+SUBSTANCE_PAINTER_PLUGINS_PATH: E:\RM42_SP_Resource_qukuikui\plugins\python
+SYSTEMDRIVE: C:
+SYSTEMROOT: C:\windows
+TEMP: C:\Users\qukuikui\AppData\Local\Temp
+TMP: C:\Users\qukuikui\AppData\Local\Temp
+USERDNSDOMAIN: INT.HYPERGRYPH.COM
+USERDOMAIN: HG
+USERDOMAIN_ROAMINGPROFILE: HG
+USERNAME: qukuikui
+USERPROFILE: C:\Users\qukuikui
+WINDIR: C:\windows
+PXR_USD_WINDOWS_DLL_PATH: D:\blender5.2\blender.shared
+OIIO_LOAD_DLLS_FROM_PATH: 0
+MATERIALX_SEARCH_PATH: D:\blender5.2\blender.shared\materialx\libraries
+PXR_MTLX_STDLIB_SEARCH_PATHS: D:\blender5.2\blender.shared\materialx\libraries
+
+DECALmachine: Purging PIL
+
+Platform: Windows
+Python Binary: D:\blender5.2\5.2\python\bin\python.exe True
+Python Library: D:\blender5.2\5.2\python\lib True
+Ensurepip: D:\blender5.2\5.2\python\lib\ensurepip True
+
+Modules: D:\blender5.2\5.2\scripts\modules True
+Modules: C:\Users\qukuikui\AppData\Roaming\Blender Foundation\Blender\5.2\scripts\modules False
+Site-Packages: D:\blender5.2\5.2\python\lib\site-packages True
+User Site-Packages: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages True
+EasyInstall Path: D:\blender5.2\5.2\python\lib\site-packages\easy_install.py False
+EasyInstall User Path: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\easy_install.py False
+
+
+ENVIRONMENT
+ADSK_3DSMAX_X64_2024: C:\Program Files\Autodesk\3ds Max 2024\
+ALLUSERSPROFILE: C:\ProgramData
+APPDATA: C:\Users\qukuikui\AppData\Roaming
+BSPRINT_CLIENT: C:/Users/Administrator/AppData/Roaming/Brocadesoft
+CODEX_CLI_PATH: C:\Users\qukuikui\AppData\Local\OpenAI\Codex\bin\12219cbfbcbddde7\codex.exe
+COMMONPROGRAMFILES: C:\Program Files\Common Files
+COMMONPROGRAMFILES(X86): C:\Program Files (x86)\Common Files
+COMMONPROGRAMW6432: C:\Program Files\Common Files
+COMPUTERNAME: IT-DES004-00631
+COMSPEC: C:\windows\system32\cmd.exe
+DRIVERDATA: C:\Windows\System32\Drivers\DriverData
+EFC_11404_1262719628: 1
+EFC_11404_1592913036: 1
+EFC_11404_2283032206: 1
+EFC_11404_2775293581: 1
+EFC_11404_3789132940: 1
+EFC_11404_4126798990: 0
+FFMPEG_BINARY: D:\Oasis\ffmpeg\ffmpeg.exe
+FPS_BROWSER_APP_PROFILE_STRING: Internet Explorer
+FPS_BROWSER_USER_PROFILE_STRING: Default
+HOMEDRIVE: C:
+HOMEPATH: \Users\qukuikui
+LOCALAPPDATA: C:\Users\qukuikui\AppData\Local
+LOGONSERVER: \\DC-CHJB-07
+NUMBER_OF_PROCESSORS: 24
+OCIO: D:\blender5.2\5.2\datafiles\colormanagement\config.ocio
+ONEDRIVE: C:\Users\qukuikui\OneDrive
+OS: Windows_NT
+PATH: D:\blender5.2\;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\Program Files\Common Files\Autodesk Shared\;C:\Program Files\Perforce\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\dotnet\;C:\Users\qukuikui\AppData\Local\FlowServer;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\CorpLink\current\tools;C:\Users\qukuikui\.local\bin;C:\Users\qukuikui\AppData\Local\Programs\OpenAI\Codex\bin;C:\Users\qukuikui\AppData\Local\Microsoft\WindowsApps;D:\Microsoft VS Code\bin;D:\CodeBuddy\bin;C:\Users\qukuikui\AppData\Local\GitHubDesktop\bin
+PATHEXT: .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+PROCESSOR_ARCHITECTURE: AMD64
+PROCESSOR_IDENTIFIER: AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD
+PROCESSOR_LEVEL: 26
+PROCESSOR_REVISION: 4400
+PROGRAMDATA: C:\ProgramData
+PROGRAMFILES: C:\Program Files
+PROGRAMFILES(X86): C:\Program Files (x86)
+PROGRAMW6432: C:\Program Files
+PSMODULEPATH: C:\Program Files\WindowsPowerShell\Modules;C:\windows\system32\WindowsPowerShell\v1.0\Modules
+PUBLIC: C:\Users\Public
+SESSIONNAME: Console
+SUBSTANCE_PAINTER_PLUGINS_PATH: E:\RM42_SP_Resource_qukuikui\plugins\python
+SYSTEMDRIVE: C:
+SYSTEMROOT: C:\windows
+TEMP: C:\Users\qukuikui\AppData\Local\Temp
+TMP: C:\Users\qukuikui\AppData\Local\Temp
+USERDNSDOMAIN: INT.HYPERGRYPH.COM
+USERDOMAIN: HG
+USERDOMAIN_ROAMINGPROFILE: HG
+USERNAME: qukuikui
+USERPROFILE: C:\Users\qukuikui
+WINDIR: C:\windows
+PXR_USD_WINDOWS_DLL_PATH: D:\blender5.2\blender.shared
+OIIO_LOAD_DLLS_FROM_PATH: 0
+MATERIALX_SEARCH_PATH: D:\blender5.2\blender.shared\materialx\libraries
+PXR_MTLX_STDLIB_SEARCH_PATHS: D:\blender5.2\blender.shared\materialx\libraries
+
+DECALmachine: Purging PIL
+
+Platform: Windows
+Python Binary: D:\blender5.2\5.2\python\bin\python.exe True
+Python Library: D:\blender5.2\5.2\python\lib True
+Ensurepip: D:\blender5.2\5.2\python\lib\ensurepip True
+
+Modules: D:\blender5.2\5.2\scripts\modules True
+Modules: C:\Users\qukuikui\AppData\Roaming\Blender Foundation\Blender\5.2\scripts\modules False
+Site-Packages: D:\blender5.2\5.2\python\lib\site-packages True
+User Site-Packages: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages True
+EasyInstall Path: D:\blender5.2\5.2\python\lib\site-packages\easy_install.py False
+EasyInstall User Path: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\easy_install.py False
+
+
+ENVIRONMENT
+ADSK_3DSMAX_X64_2024: C:\Program Files\Autodesk\3ds Max 2024\
+ALLUSERSPROFILE: C:\ProgramData
+APPDATA: C:\Users\qukuikui\AppData\Roaming
+BSPRINT_CLIENT: C:/Users/Administrator/AppData/Roaming/Brocadesoft
+CODEX_CLI_PATH: C:\Users\qukuikui\AppData\Local\OpenAI\Codex\bin\12219cbfbcbddde7\codex.exe
+COMMONPROGRAMFILES: C:\Program Files\Common Files
+COMMONPROGRAMFILES(X86): C:\Program Files (x86)\Common Files
+COMMONPROGRAMW6432: C:\Program Files\Common Files
+COMPUTERNAME: IT-DES004-00631
+COMSPEC: C:\windows\system32\cmd.exe
+DRIVERDATA: C:\Windows\System32\Drivers\DriverData
+EFC_11404_1262719628: 1
+EFC_11404_1592913036: 1
+EFC_11404_2283032206: 1
+EFC_11404_2775293581: 1
+EFC_11404_3789132940: 1
+EFC_11404_4126798990: 0
+FFMPEG_BINARY: D:\Oasis\ffmpeg\ffmpeg.exe
+FPS_BROWSER_APP_PROFILE_STRING: Internet Explorer
+FPS_BROWSER_USER_PROFILE_STRING: Default
+HOMEDRIVE: C:
+HOMEPATH: \Users\qukuikui
+LOCALAPPDATA: C:\Users\qukuikui\AppData\Local
+LOGONSERVER: \\DC-CHJB-07
+NUMBER_OF_PROCESSORS: 24
+OCIO: D:\blender5.2\5.2\datafiles\colormanagement\config.ocio
+ONEDRIVE: C:\Users\qukuikui\OneDrive
+OS: Windows_NT
+PATH: D:\blender5.2\;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\Program Files\Common Files\Autodesk Shared\;C:\Program Files\Perforce\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\dotnet\;C:\Users\qukuikui\AppData\Local\FlowServer;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\CorpLink\current\tools;C:\Users\qukuikui\.local\bin;C:\Users\qukuikui\AppData\Local\Programs\OpenAI\Codex\bin;C:\Users\qukuikui\AppData\Local\Microsoft\WindowsApps;D:\Microsoft VS Code\bin;D:\CodeBuddy\bin;C:\Users\qukuikui\AppData\Local\GitHubDesktop\bin
+PATHEXT: .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+PROCESSOR_ARCHITECTURE: AMD64
+PROCESSOR_IDENTIFIER: AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD
+PROCESSOR_LEVEL: 26
+PROCESSOR_REVISION: 4400
+PROGRAMDATA: C:\ProgramData
+PROGRAMFILES: C:\Program Files
+PROGRAMFILES(X86): C:\Program Files (x86)
+PROGRAMW6432: C:\Program Files
+PSMODULEPATH: C:\Program Files\WindowsPowerShell\Modules;C:\windows\system32\WindowsPowerShell\v1.0\Modules
+PUBLIC: C:\Users\Public
+SESSIONNAME: Console
+SUBSTANCE_PAINTER_PLUGINS_PATH: E:\RM42_SP_Resource_qukuikui\plugins\python
+SYSTEMDRIVE: C:
+SYSTEMROOT: C:\windows
+TEMP: C:\Users\qukuikui\AppData\Local\Temp
+TMP: C:\Users\qukuikui\AppData\Local\Temp
+USERDNSDOMAIN: INT.HYPERGRYPH.COM
+USERDOMAIN: HG
+USERDOMAIN_ROAMINGPROFILE: HG
+USERNAME: qukuikui
+USERPROFILE: C:\Users\qukuikui
+WINDIR: C:\windows
+PXR_USD_WINDOWS_DLL_PATH: D:\blender5.2\blender.shared
+OIIO_LOAD_DLLS_FROM_PATH: 0
+MATERIALX_SEARCH_PATH: D:\blender5.2\blender.shared\materialx\libraries
+PXR_MTLX_STDLIB_SEARCH_PATHS: D:\blender5.2\blender.shared\materialx\libraries
+
+DECALmachine: Purging PIL
+
+Platform: Windows
+Python Binary: D:\blender5.2\5.2\python\bin\python.exe True
+Python Library: D:\blender5.2\5.2\python\lib True
+Ensurepip: D:\blender5.2\5.2\python\lib\ensurepip True
+
+Modules: D:\blender5.2\5.2\scripts\modules True
+Modules: C:\Users\qukuikui\AppData\Roaming\Blender Foundation\Blender\5.2\scripts\modules False
+Site-Packages: D:\blender5.2\5.2\python\lib\site-packages True
+User Site-Packages: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages True
+EasyInstall Path: D:\blender5.2\5.2\python\lib\site-packages\easy_install.py False
+EasyInstall User Path: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\easy_install.py False
+
+
+ENVIRONMENT
+ADSK_3DSMAX_X64_2024: C:\Program Files\Autodesk\3ds Max 2024\
+ALLUSERSPROFILE: C:\ProgramData
+APPDATA: C:\Users\qukuikui\AppData\Roaming
+BSPRINT_CLIENT: C:/Users/Administrator/AppData/Roaming/Brocadesoft
+CODEX_CLI_PATH: C:\Users\qukuikui\AppData\Local\OpenAI\Codex\bin\12219cbfbcbddde7\codex.exe
+COMMONPROGRAMFILES: C:\Program Files\Common Files
+COMMONPROGRAMFILES(X86): C:\Program Files (x86)\Common Files
+COMMONPROGRAMW6432: C:\Program Files\Common Files
+COMPUTERNAME: IT-DES004-00631
+COMSPEC: C:\windows\system32\cmd.exe
+DRIVERDATA: C:\Windows\System32\Drivers\DriverData
+EFC_11404_1262719628: 1
+EFC_11404_1592913036: 1
+EFC_11404_2283032206: 1
+EFC_11404_2775293581: 1
+EFC_11404_3789132940: 1
+EFC_11404_4126798990: 0
+FFMPEG_BINARY: D:\Oasis\ffmpeg\ffmpeg.exe
+FPS_BROWSER_APP_PROFILE_STRING: Internet Explorer
+FPS_BROWSER_USER_PROFILE_STRING: Default
+HOMEDRIVE: C:
+HOMEPATH: \Users\qukuikui
+LOCALAPPDATA: C:\Users\qukuikui\AppData\Local
+LOGONSERVER: \\DC-CHJB-07
+NUMBER_OF_PROCESSORS: 24
+OCIO: D:\blender5.2\5.2\datafiles\colormanagement\config.ocio
+ONEDRIVE: C:\Users\qukuikui\OneDrive
+OS: Windows_NT
+PATH: D:\blender5.2\;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\Program Files\Common Files\Autodesk Shared\;C:\Program Files\Perforce\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\dotnet\;C:\Users\qukuikui\AppData\Local\FlowServer;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\CorpLink\current\tools;C:\Users\qukuikui\.local\bin;C:\Users\qukuikui\AppData\Local\Programs\OpenAI\Codex\bin;C:\Users\qukuikui\AppData\Local\Microsoft\WindowsApps;D:\Microsoft VS Code\bin;D:\CodeBuddy\bin;C:\Users\qukuikui\AppData\Local\GitHubDesktop\bin
+PATHEXT: .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+PROCESSOR_ARCHITECTURE: AMD64
+PROCESSOR_IDENTIFIER: AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD
+PROCESSOR_LEVEL: 26
+PROCESSOR_REVISION: 4400
+PROGRAMDATA: C:\ProgramData
+PROGRAMFILES: C:\Program Files
+PROGRAMFILES(X86): C:\Program Files (x86)
+PROGRAMW6432: C:\Program Files
+PSMODULEPATH: C:\Program Files\WindowsPowerShell\Modules;C:\windows\system32\WindowsPowerShell\v1.0\Modules
+PUBLIC: C:\Users\Public
+SESSIONNAME: Console
+SUBSTANCE_PAINTER_PLUGINS_PATH: E:\RM42_SP_Resource_qukuikui\plugins\python
+SYSTEMDRIVE: C:
+SYSTEMROOT: C:\windows
+TEMP: C:\Users\qukuikui\AppData\Local\Temp
+TMP: C:\Users\qukuikui\AppData\Local\Temp
+USERDNSDOMAIN: INT.HYPERGRYPH.COM
+USERDOMAIN: HG
+USERDOMAIN_ROAMINGPROFILE: HG
+USERNAME: qukuikui
+USERPROFILE: C:\Users\qukuikui
+WINDIR: C:\windows
+PXR_USD_WINDOWS_DLL_PATH: D:\blender5.2\blender.shared
+OIIO_LOAD_DLLS_FROM_PATH: 0
+MATERIALX_SEARCH_PATH: D:\blender5.2\blender.shared\materialx\libraries
+PXR_MTLX_STDLIB_SEARCH_PATHS: D:\blender5.2\blender.shared\materialx\libraries
+
+DECALmachine: Installing PIL 10.1.0
+
+Platform: Windows
+Python Binary: D:\blender5.2\5.2\python\bin\python.exe True
+Python Library: D:\blender5.2\5.2\python\lib True
+Ensurepip: D:\blender5.2\5.2\python\lib\ensurepip True
+
+Modules: D:\blender5.2\5.2\scripts\modules True
+Modules: C:\Users\qukuikui\AppData\Roaming\Blender Foundation\Blender\5.2\scripts\modules False
+Site-Packages: D:\blender5.2\5.2\python\lib\site-packages True
+User Site-Packages: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages True
+EasyInstall Path: D:\blender5.2\5.2\python\lib\site-packages\easy_install.py False
+EasyInstall User Path: C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\easy_install.py False
+
+
+
+Looking in links: c:\Users\qukuikui\AppData\Local\Temp\tmpm0d9uvxi
+Requirement already satisfied: pip in C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages (26.2.1)
+Requirement already satisfied: pip in C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages (26.2.1)
+Requirement already satisfied: wheel in C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages (0.48.0)
+Requirement already satisfied: packaging>=24.0 in .\5.2\python\Lib\site-packages (from wheel) (25.0)
+Collecting Pillow==10.1.0
+Using cached Pillow-10.1.0.tar.gz (50.8 MB)
+Installing build dependencies: started
+Installing build dependencies: finished with status 'done'
+Getting requirements to build wheel: started
+Getting requirements to build wheel: finished with status 'error'
+error: subprocess-exited-with-error
+
+Getting requirements to build wheel did not run successfully.
+exit code: 1
+
+[21 lines of output]
+Traceback (most recent call last):
+File "C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\pip\_vendor\pyproject_hooks\_in_process\_in_process.py", line 389, in <module>
+main()
+~~~~^^
+File "C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\pip\_vendor\pyproject_hooks\_in_process\_in_process.py", line 373, in main
+json_out["return_val"] = hook(**hook_input["kwargs"])
+~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+File "C:\Users\qukuikui\AppData\Roaming\Python\Python313\site-packages\pip\_vendor\pyproject_hooks\_in_process\_in_process.py", line 143, in get_requires_for_build_wheel
+return hook(config_settings)
+File "C:\Users\qukuikui\AppData\Local\Temp\pip-build-env-j2ig7pjn\overlay\Lib\site-packages\setuptools\build_meta.py", line 333, in get_requires_for_build_wheel
+return self._get_build_requires(config_settings, requirements=[])
+~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "C:\Users\qukuikui\AppData\Local\Temp\pip-build-env-j2ig7pjn\overlay\Lib\site-packages\setuptools\build_meta.py", line 301, in _get_build_requires
+self.run_setup()
+~~~~~~~~~~~~~~^^
+File "C:\Users\qukuikui\AppData\Local\Temp\pip-build-env-j2ig7pjn\overlay\Lib\site-packages\setuptools\build_meta.py", line 317, in run_setup
+exec(code, locals())  # noqa: S102 # exec is intentional here
+~~~~^^^^^^^^^^^^^^^^
+File "<string>", line 30, in <module>
+File "<string>", line 27, in get_version
+KeyError: '__version__'
+[end of output]
+
+note: This error originates from a subprocess, and is likely not a problem with pip.
+ERROR: Failed to build 'Pillow' when getting requirements to build wheel
+
+ENVIRONMENT
+ADSK_3DSMAX_X64_2024: C:\Program Files\Autodesk\3ds Max 2024\
+ALLUSERSPROFILE: C:\ProgramData
+APPDATA: C:\Users\qukuikui\AppData\Roaming
+BSPRINT_CLIENT: C:/Users/Administrator/AppData/Roaming/Brocadesoft
+CODEX_CLI_PATH: C:\Users\qukuikui\AppData\Local\OpenAI\Codex\bin\12219cbfbcbddde7\codex.exe
+COMMONPROGRAMFILES: C:\Program Files\Common Files
+COMMONPROGRAMFILES(X86): C:\Program Files (x86)\Common Files
+COMMONPROGRAMW6432: C:\Program Files\Common Files
+COMPUTERNAME: IT-DES004-00631
+COMSPEC: C:\windows\system32\cmd.exe
+DRIVERDATA: C:\Windows\System32\Drivers\DriverData
+EFC_11404_1262719628: 1
+EFC_11404_1592913036: 1
+EFC_11404_2283032206: 1
+EFC_11404_2775293581: 1
+EFC_11404_3789132940: 1
+EFC_11404_4126798990: 0
+FFMPEG_BINARY: D:\Oasis\ffmpeg\ffmpeg.exe
+FPS_BROWSER_APP_PROFILE_STRING: Internet Explorer
+FPS_BROWSER_USER_PROFILE_STRING: Default
+HOMEDRIVE: C:
+HOMEPATH: \Users\qukuikui
+LOCALAPPDATA: C:\Users\qukuikui\AppData\Local
+LOGONSERVER: \\DC-CHJB-07
+NUMBER_OF_PROCESSORS: 24
+OCIO: D:\blender5.2\5.2\datafiles\colormanagement\config.ocio
+ONEDRIVE: C:\Users\qukuikui\OneDrive
+OS: Windows_NT
+PATH: D:\blender5.2\;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\Program Files\Common Files\Autodesk Shared\;C:\Program Files\Perforce\;C:\Program Files\TortoiseSVN\bin;C:\Program Files\dotnet\;C:\Users\qukuikui\AppData\Local\FlowServer;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISR;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\CorpLink\current\tools;C:\Users\qukuikui\.local\bin;C:\Users\qukuikui\AppData\Local\Programs\OpenAI\Codex\bin;C:\Users\qukuikui\AppData\Local\Microsoft\WindowsApps;D:\Microsoft VS Code\bin;D:\CodeBuddy\bin;C:\Users\qukuikui\AppData\Local\GitHubDesktop\bin
+PATHEXT: .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+PROCESSOR_ARCHITECTURE: AMD64
+PROCESSOR_IDENTIFIER: AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD
+PROCESSOR_LEVEL: 26
+PROCESSOR_REVISION: 4400
+PROGRAMDATA: C:\ProgramData
+PROGRAMFILES: C:\Program Files
+PROGRAMFILES(X86): C:\Program Files (x86)
+PROGRAMW6432: C:\Program Files
+PSMODULEPATH: C:\Program Files\WindowsPowerShell\Modules;C:\windows\system32\WindowsPowerShell\v1.0\Modules
+PUBLIC: C:\Users\Public
+SESSIONNAME: Console
+SUBSTANCE_PAINTER_PLUGINS_PATH: E:\RM42_SP_Resource_qukuikui\plugins\python
+SYSTEMDRIVE: C:
+SYSTEMROOT: C:\windows
+TEMP: C:\Users\qukuikui\AppData\Local\Temp
+TMP: C:\Users\qukuikui\AppData\Local\Temp
+USERDNSDOMAIN: INT.HYPERGRYPH.COM
+USERDOMAIN: HG
+USERDOMAIN_ROAMINGPROFILE: HG
+USERNAME: qukuikui
+USERPROFILE: C:\Users\qukuikui
+WINDIR: C:\windows
+PXR_USD_WINDOWS_DLL_PATH: D:\blender5.2\blender.shared
+OIIO_LOAD_DLLS_FROM_PATH: 0
+MATERIALX_SEARCH_PATH: D:\blender5.2\blender.shared\materialx\libraries
+PXR_MTLX_STDLIB_SEARCH_PATHS: D:\blender5.2\blender.shared\materialx\libraries

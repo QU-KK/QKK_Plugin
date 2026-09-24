@@ -1,105 +1,557 @@
 ========================================
-= Blender 4.5.1 LTS System Information =
+= Blender 5.2.0 LTS System Information =
 ========================================
 
 
 Blender:
 ========================================
 
-version: 4.5.1 LTS, branch: blender-v4.5-release, commit date: 2025-07-29 05:31, hash: b0a72b245dcf, revision: 593d50af3db3f07aa84b5529b63d982fdea8f57a, type: Release
-build date: 2025-07-29, 05:38:13
-platform: 'macOS-12.7.6-x86_64-i386-64bit'
-binary path: '/Applications/Blender 4.5.1.app/Contents/MacOS/Blender'
-build cflags:  -Wall -Werror=implicit-function-declaration -Werror=return-type -Wno-tautological-compare -Wno-unknown-pragmas -Wno-char-subscripts -Wstrict-prototypes -Wmissing-prototypes -Wunused-parameter -Wundef -Wundef-prefix -Werror=unguarded-availability-new  -mmacosx-version-min=11.2 -march=x86-64-v2 -std=gnu11  -pipe -funsigned-char -fno-strict-aliasing -ffp-contract=off  
-build cxxflags:  -Wall -Wc++20-designator -Wno-tautological-compare -Wno-unknown-pragmas -Wno-char-subscripts -Wno-overloaded-virtual -Wno-sign-compare -Wno-invalid-offsetof -Wno-suggest-override -Wundef -Wundef-prefix -Wunused-parameter -Wmismatched-tags -Werror=unguarded-availability-new  -mmacosx-version-min=11.2 -ftemplate-depth=1024 -march=x86-64-v2  -pipe -funsigned-char -fno-strict-aliasing -ffp-contract=off  
-build linkflags: -fexceptions -framework CoreServices -framework Foundation -framework IOKit -framework AppKit -framework Cocoa -framework Carbon -framework AudioUnit -framework AudioToolbox -framework CoreAudio -framework Metal -framework QuartzCore -liconv -Wl,-unexported_symbols_list,'/Users/blender/git/blender-v450/blender.git/source/creator/symbols_apple.map' -Wl,-ld_classic
+version: 5.2.0 LTS, branch: blender-v5.2-release, commit date: 2026-07-13 15:20, hash: fbe6228777e7, revision: 593d50af3db3f07aa84b5529b63d982fdea8f57a, type: Release
+build date: 2026-07-14, 01:35:40
+platform: 'Windows-11-10.0.26200-SP0'
+binary path: 'D:\\blender5.2\\blender.exe'
+build cflags:  /W3 -Werror=implicit-function-declaration -Werror=return-type -Wno-tautological-compare -Wno-unknown-pragmas -Wno-char-subscripts -Wstrict-prototypes -Wmissing-prototypes -Wunused-parameter -Wundef -Wundef-prefix -Werror=unguarded-availability-new /DWIN32 /D_WINDOWS /MP /nologo /J /Gy /Gd /showFilenames -Wno-unused-command-line-argument -Wno-microsoft-enum-forward-reference /clang:-funsigned-char /clang:-fno-strict-aliasing /clang:-ffp-contract=off -march=x86-64-v2 
+build cxxflags:  /W3 -Wno-tautological-compare -Wno-unknown-pragmas -Wno-char-subscripts -Wno-overloaded-virtual -Wno-sign-compare -Wno-invalid-offsetof -Wno-suggest-override -Wundef -Wundef-prefix -Wunused-parameter -Wmismatched-tags -Werror=unguarded-availability-new /DWIN32 /D_WINDOWS /EHsc  /Gy /MP /nologo /J /Gd /showFilenames /EHsc -Wno-unused-command-line-argument -Wno-microsoft-enum-forward-reference /clang:-funsigned-char /clang:-fno-strict-aliasing /clang:-ffp-contract=off -march=x86-64-v2 
+build linkflags: /MACHINE:X64  /SUBSYSTEM:CONSOLE /STACK:2097152 /ignore:4049 /ignore:4217 /ignore:4221
 build system: CMake
 
 Python:
 ========================================
 
-version: 3.11.11 (main, Apr 25 2025, 12:39:20) [Clang 17.0.0 (clang-1700.0.13.3)]
-file system encoding: utf-8:surrogateescape
+version: 3.13.13 (main, May  8 2026, 12:37:03) [MSC v.1944 64 bit (AMD64)]
+file system encoding: utf-8:surrogatepass
 paths:
-	'/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/startup'
-	'/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/modules'
-	'/Applications/Blender 4.5.1.app/Contents/Resources/4.5/python/lib/python311.zip'
-	'/Applications/Blender 4.5.1.app/Contents/Resources/4.5/python/lib/python3.11'
-	'/Applications/Blender 4.5.1.app/Contents/Resources/4.5/python/lib/python3.11/lib-dynload'
-	'/Users/mac/Library/Application Support/Blender/4.5/extensions/.local/lib/python3.11/site-packages'
-	'/Applications/Blender 4.5.1.app/Contents/Resources/4.5/python/lib/python3.11/site-packages'
-	'/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/freestyle/modules'
-	'/Users/mac/Library/Application Support/Blender/4.5/scripts/addons/modules'
-	'/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/addons_core'
-	'/Users/mac/Library/Application Support/Blender/4.5/scripts/addons'
-	'/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/modules'
+	'D:\\blender5.2\\5.2\\scripts\\startup'
+	'D:\\blender5.2\\5.2\\scripts\\modules'
+	'D:\\blender5.2\\python313.zip'
+	'D:\\blender5.2\\5.2\\python\\DLLs'
+	'D:\\blender5.2\\5.2\\python\\Lib'
+	'D:\\blender5.2'
+	'D:\\blender5.2\\5.2\\python'
+	'D:\\blender5.2\\5.2\\python\\Lib\\site-packages'
+	'D:\\blender5.2\\5.2\\scripts\\freestyle\\modules'
+	'C:\\Users\\qukuikui\\AppData\\Roaming\\Blender Foundation\\Blender\\5.2\\scripts\\addons\\modules'
+	'D:\\blender5.2\\5.2\\scripts\\addons_core'
+	'C:\\Users\\qukuikui\\AppData\\Roaming\\Blender Foundation\\Blender\\5.2\\scripts\\addons'
+	'D:\\QKK_Plugin\\BlenderPlugin\\addons'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\01-必装\\addons'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\02-必备\\addons'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\03-通用\\addons'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\04-T0\\addons'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\05-T1\\addons'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\06-T2\\addons'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\07-UV\\addons'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\08-翻译\\addons'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\09-ZMD\\addons'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\10-G108\\addons'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\11-PCG\\addons'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\12-开发中\\addons'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\13-其他\\addons'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\14-远景优化\\addons'
+	'D:\\blender5.2\\5.2\\python\\Lib\\site-packages\\setuptools\\_vendor'
+	'C:\\Users\\qukuikui\\AppData\\Roaming\\Python\\Python313\\site-packages'
 
 Python (External Binary):
 ========================================
 
-binary path: '/Applications/Blender 4.5.1.app/Contents/Resources/4.5/python/bin/python3.11'
-version: Python 3.11.11
+binary path: 'D:\\blender5.2\\5.2\\python\\bin\\python.exe'
+version: Python 3.13.13
 
 Directories:
 ========================================
 
 scripts:
-	'/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts'
-	'/Users/mac/Library/Application Support/Blender/4.5/scripts'
-user scripts: '/Users/mac/Library/Application Support/Blender/4.5/scripts'
+	'D:\\blender5.2\\5.2\\scripts'
+	'C:\\Users\\qukuikui\\AppData\\Roaming\\Blender Foundation\\Blender\\5.2\\scripts'
+	'D:\\QKK_Plugin\\BlenderPlugin'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\01-必装'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\02-必备'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\03-通用'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\04-T0'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\05-T1'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\06-T2'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\07-UV'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\08-翻译'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\09-ZMD'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\10-G108'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\11-PCG'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\12-开发中'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\13-其他'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\14-远景优化'
+user scripts: 'C:\\Users\\qukuikui\\AppData\\Roaming\\Blender Foundation\\Blender\\5.2\\scripts'
 pref scripts:
-datafiles: '/Users/mac/Library/Application Support/Blender/4.5/datafiles'
-config: '/Users/mac/Library/Application Support/Blender/4.5/config'
-scripts: '/Users/mac/Library/Application Support/Blender/4.5/scripts'
-extensions: '/Users/mac/Library/Application Support/Blender/4.5/extensions'
-tempdir: '/var/folders/dx/qz5x44fn4nj4qb67mggp_5xr0000gn/T/blender_gWp4Fk/'
+	'D:\\QKK_Plugin\\BlenderPlugin'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\02-blender5'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\01-必装'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\02-必备'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\03-通用'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\04-T0'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\05-T1'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\06-T2'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\07-UV'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\08-翻译'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\09-ZMD'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\10-G108'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\11-PCG'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\12-开发中'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\13-其他'
+	'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\14-远景优化'
+datafiles: 'C:\\Users\\qukuikui\\AppData\\Roaming\\Blender Foundation\\Blender\\5.2\\datafiles'
+config: 'C:\\Users\\qukuikui\\AppData\\Roaming\\Blender Foundation\\Blender\\5.2\\config'
+scripts: 'C:\\Users\\qukuikui\\AppData\\Roaming\\Blender Foundation\\Blender\\5.2\\scripts'
+extensions: 'C:\\Users\\qukuikui\\AppData\\Roaming\\Blender Foundation\\Blender\\5.2\\extensions'
+tempdir: 'C:\\Users\\qukuikui\\AppData\\Local\\Temp\\blender_a10472\\'
 
 FFmpeg:
 ========================================
 
-avcodec:   '61, 19, 101'
-avdevice:  '61,  3, 100'
-avformat:  '61,  7, 100'
-avutil:    '59, 39, 100'
-swscale:   ' 8,  3, 100'
+avcodec:   '62, 28, 100'
+avdevice:  '62,  3, 100'
+avformat:  '62, 12, 100'
+avutil:    '60, 26, 100'
+swscale:   ' 9,  5, 100'
 
 Other Libraries:
 ========================================
 
-OpenColorIO:  2,  4,  1
-OpenImageIO:  3,  0,  6
-OpenShadingLanguage:  1, 14,  4
-OpenSubdiv:  3,  6,  0
-OpenVDB: 12,  0,  0
+OpenColorIO:  2,  5,  0
+OpenImageIO:  3,  1, 13
+OpenShadingLanguage:  1, 15,  3
+OpenSubdiv:  3,  7,  0
+OpenVDB: 13,  0,  0
 Alembic:  1,  8,  3
-USD:  0, 25,  2
+USD:  0, 26,  3
 SDL: Blender was built without SDL support
 
 GPU:
 ========================================
 
-renderer:	'Metal API'
-vendor:		'AMD Radeon Pro 5500 XT'
-version:	'1.2'
-device type:	'AMD'
-backend type:	'METAL'
+renderer:	'NVIDIA GeForce RTX 5070/PCIe/SSE2'
+vendor:		'NVIDIA Corporation'
+version:	'4.6.0 NVIDIA 610.88'
+device type:	'NVIDIA'
+backend type:	'OPENGL'
 extensions:
+	GL_AMD_multi_draw_indirect
+	GL_AMD_seamless_cubemap_per_texture
+	GL_AMD_vertex_shader_layer
+	GL_AMD_vertex_shader_viewport_index
+	GL_ARB_ES2_compatibility
+	GL_ARB_ES3_1_compatibility
+	GL_ARB_ES3_2_compatibility
+	GL_ARB_ES3_compatibility
+	GL_ARB_arrays_of_arrays
+	GL_ARB_base_instance
+	GL_ARB_bindless_texture
+	GL_ARB_blend_func_extended
+	GL_ARB_buffer_storage
+	GL_ARB_clear_buffer_object
+	GL_ARB_clear_texture
+	GL_ARB_clip_control
+	GL_ARB_color_buffer_float
+	GL_ARB_compressed_texture_pixel_storage
+	GL_ARB_compute_shader
+	GL_ARB_compute_variable_group_size
+	GL_ARB_conditional_render_inverted
+	GL_ARB_conservative_depth
+	GL_ARB_copy_buffer
+	GL_ARB_copy_image
+	GL_ARB_cull_distance
+	GL_ARB_debug_output
+	GL_ARB_depth_buffer_float
+	GL_ARB_depth_clamp
+	GL_ARB_depth_texture
+	GL_ARB_derivative_control
+	GL_ARB_direct_state_access
+	GL_ARB_draw_buffers
+	GL_ARB_draw_buffers_blend
+	GL_ARB_draw_elements_base_vertex
+	GL_ARB_draw_indirect
+	GL_ARB_draw_instanced
+	GL_ARB_enhanced_layouts
+	GL_ARB_explicit_attrib_location
+	GL_ARB_explicit_uniform_location
+	GL_ARB_fragment_coord_conventions
+	GL_ARB_fragment_layer_viewport
+	GL_ARB_fragment_program
+	GL_ARB_fragment_program_shadow
+	GL_ARB_fragment_shader
+	GL_ARB_fragment_shader_interlock
+	GL_ARB_framebuffer_no_attachments
+	GL_ARB_framebuffer_object
+	GL_ARB_framebuffer_sRGB
+	GL_ARB_geometry_shader4
+	GL_ARB_get_program_binary
+	GL_ARB_get_texture_sub_image
+	GL_ARB_gl_spirv
+	GL_ARB_gpu_shader5
+	GL_ARB_gpu_shader_fp64
+	GL_ARB_gpu_shader_int64
+	GL_ARB_half_float_pixel
+	GL_ARB_half_float_vertex
+	GL_ARB_imaging
+	GL_ARB_indirect_parameters
+	GL_ARB_instanced_arrays
+	GL_ARB_internalformat_query
+	GL_ARB_internalformat_query2
+	GL_ARB_invalidate_subdata
+	GL_ARB_map_buffer_alignment
+	GL_ARB_map_buffer_range
+	GL_ARB_multi_bind
+	GL_ARB_multi_draw_indirect
+	GL_ARB_multisample
+	GL_ARB_multitexture
+	GL_ARB_occlusion_query
+	GL_ARB_occlusion_query2
+	GL_ARB_parallel_shader_compile
+	GL_ARB_pipeline_statistics_query
+	GL_ARB_pixel_buffer_object
+	GL_ARB_point_parameters
+	GL_ARB_point_sprite
+	GL_ARB_polygon_offset_clamp
+	GL_ARB_post_depth_coverage
+	GL_ARB_program_interface_query
+	GL_ARB_provoking_vertex
+	GL_ARB_query_buffer_object
+	GL_ARB_robust_buffer_access_behavior
+	GL_ARB_robustness
+	GL_ARB_sample_locations
+	GL_ARB_sample_shading
+	GL_ARB_sampler_objects
+	GL_ARB_seamless_cube_map
+	GL_ARB_seamless_cubemap_per_texture
+	GL_ARB_separate_shader_objects
+	GL_ARB_shader_atomic_counter_ops
+	GL_ARB_shader_atomic_counters
+	GL_ARB_shader_ballot
+	GL_ARB_shader_bit_encoding
+	GL_ARB_shader_clock
+	GL_ARB_shader_draw_parameters
+	GL_ARB_shader_group_vote
+	GL_ARB_shader_image_load_store
+	GL_ARB_shader_image_size
+	GL_ARB_shader_objects
+	GL_ARB_shader_precision
+	GL_ARB_shader_storage_buffer_object
+	GL_ARB_shader_subroutine
+	GL_ARB_shader_texture_image_samples
+	GL_ARB_shader_texture_lod
+	GL_ARB_shader_viewport_layer_array
+	GL_ARB_shading_language_100
+	GL_ARB_shading_language_420pack
+	GL_ARB_shading_language_include
+	GL_ARB_shading_language_packing
+	GL_ARB_shadow
+	GL_ARB_sparse_buffer
+	GL_ARB_sparse_texture
+	GL_ARB_sparse_texture2
+	GL_ARB_sparse_texture_clamp
+	GL_ARB_spirv_extensions
+	GL_ARB_stencil_texturing
+	GL_ARB_sync
+	GL_ARB_tessellation_shader
+	GL_ARB_texture_barrier
+	GL_ARB_texture_border_clamp
+	GL_ARB_texture_buffer_object
+	GL_ARB_texture_buffer_object_rgb32
+	GL_ARB_texture_buffer_range
+	GL_ARB_texture_compression
+	GL_ARB_texture_compression_bptc
+	GL_ARB_texture_compression_rgtc
+	GL_ARB_texture_cube_map
+	GL_ARB_texture_cube_map_array
+	GL_ARB_texture_env_add
+	GL_ARB_texture_env_combine
+	GL_ARB_texture_env_crossbar
+	GL_ARB_texture_env_dot3
+	GL_ARB_texture_filter_anisotropic
+	GL_ARB_texture_filter_minmax
+	GL_ARB_texture_float
+	GL_ARB_texture_gather
+	GL_ARB_texture_mirror_clamp_to_edge
+	GL_ARB_texture_mirrored_repeat
+	GL_ARB_texture_multisample
+	GL_ARB_texture_non_power_of_two
+	GL_ARB_texture_query_levels
+	GL_ARB_texture_query_lod
+	GL_ARB_texture_rectangle
+	GL_ARB_texture_rg
+	GL_ARB_texture_rgb10_a2ui
+	GL_ARB_texture_stencil8
+	GL_ARB_texture_storage
+	GL_ARB_texture_storage_multisample
+	GL_ARB_texture_swizzle
+	GL_ARB_texture_view
+	GL_ARB_timer_query
+	GL_ARB_transform_feedback2
+	GL_ARB_transform_feedback3
+	GL_ARB_transform_feedback_instanced
+	GL_ARB_transform_feedback_overflow_query
+	GL_ARB_transpose_matrix
+	GL_ARB_uniform_buffer_object
+	GL_ARB_vertex_array_bgra
+	GL_ARB_vertex_array_object
+	GL_ARB_vertex_attrib_64bit
+	GL_ARB_vertex_attrib_binding
+	GL_ARB_vertex_buffer_object
+	GL_ARB_vertex_program
+	GL_ARB_vertex_shader
+	GL_ARB_vertex_type_10f_11f_11f_rev
+	GL_ARB_vertex_type_2_10_10_10_rev
+	GL_ARB_viewport_array
+	GL_ARB_window_pos
+	GL_ATI_draw_buffers
+	GL_ATI_texture_float
+	GL_ATI_texture_mirror_once
+	GL_EXTX_framebuffer_mixed_formats
+	GL_EXT_Cg_shader
+	GL_EXT_abgr
+	GL_EXT_bgra
+	GL_EXT_bindable_uniform
+	GL_EXT_blend_color
+	GL_EXT_blend_equation_separate
+	GL_EXT_blend_func_separate
+	GL_EXT_blend_minmax
+	GL_EXT_blend_subtract
+	GL_EXT_compiled_vertex_array
+	GL_EXT_depth_bounds_test
+	GL_EXT_direct_state_access
+	GL_EXT_draw_buffers2
+	GL_EXT_draw_instanced
+	GL_EXT_draw_range_elements
+	GL_EXT_fog_coord
+	GL_EXT_framebuffer_blit
+	GL_EXT_framebuffer_multisample
+	GL_EXT_framebuffer_multisample_blit_scaled
+	GL_EXT_framebuffer_object
+	GL_EXT_framebuffer_sRGB
+	GL_EXT_geometry_shader4
+	GL_EXT_gpu_program_parameters
+	GL_EXT_gpu_shader4
+	GL_EXT_import_sync_object
+	GL_EXT_memory_object
+	GL_EXT_memory_object_win32
+	GL_EXT_multi_draw_arrays
+	GL_EXT_multiview_texture_multisample
+	GL_EXT_multiview_timer_query
+	GL_EXT_packed_depth_stencil
+	GL_EXT_packed_float
+	GL_EXT_packed_pixels
+	GL_EXT_pixel_buffer_object
+	GL_EXT_point_parameters
+	GL_EXT_polygon_offset_clamp
+	GL_EXT_post_depth_coverage
+	GL_EXT_provoking_vertex
+	GL_EXT_raster_multisample
+	GL_EXT_rescale_normal
+	GL_EXT_secondary_color
+	GL_EXT_semaphore
+	GL_EXT_semaphore_win32
+	GL_EXT_separate_shader_objects
+	GL_EXT_separate_specular_color
+	GL_EXT_shader_image_load_formatted
+	GL_EXT_shader_image_load_store
+	GL_EXT_shader_integer_mix
+	GL_EXT_shader_realtime_clock
+	GL_EXT_shadow_funcs
+	GL_EXT_sparse_texture2
+	GL_EXT_stencil_two_side
+	GL_EXT_stencil_wrap
+	GL_EXT_texture3D
+	GL_EXT_texture_array
+	GL_EXT_texture_buffer_object
+	GL_EXT_texture_compression_dxt1
+	GL_EXT_texture_compression_latc
+	GL_EXT_texture_compression_rgtc
+	GL_EXT_texture_compression_s3tc
+	GL_EXT_texture_cube_map
+	GL_EXT_texture_edge_clamp
+	GL_EXT_texture_env_add
+	GL_EXT_texture_env_combine
+	GL_EXT_texture_env_dot3
+	GL_EXT_texture_filter_anisotropic
+	GL_EXT_texture_filter_minmax
+	GL_EXT_texture_integer
+	GL_EXT_texture_lod
+	GL_EXT_texture_lod_bias
+	GL_EXT_texture_mirror_clamp
+	GL_EXT_texture_object
+	GL_EXT_texture_sRGB
+	GL_EXT_texture_sRGB_R8
+	GL_EXT_texture_sRGB_decode
+	GL_EXT_texture_shadow_lod
+	GL_EXT_texture_shared_exponent
+	GL_EXT_texture_storage
+	GL_EXT_texture_swizzle
+	GL_EXT_timer_query
+	GL_EXT_transform_feedback2
+	GL_EXT_vertex_array
+	GL_EXT_vertex_array_bgra
+	GL_EXT_vertex_attrib_64bit
+	GL_EXT_win32_keyed_mutex
+	GL_EXT_window_rectangles
+	GL_IBM_rasterpos_clip
+	GL_IBM_texture_mirrored_repeat
+	GL_KHR_blend_equation_advanced
+	GL_KHR_blend_equation_advanced_coherent
+	GL_KHR_context_flush_control
+	GL_KHR_debug
+	GL_KHR_no_error
+	GL_KHR_parallel_shader_compile
+	GL_KHR_robust_buffer_access_behavior
+	GL_KHR_robustness
+	GL_KHR_shader_subgroup
+	GL_KTX_buffer_region
+	GL_NVX_blend_equation_advanced_multi_draw_buffers
+	GL_NVX_conditional_render
+	GL_NVX_gpu_memory_info
+	GL_NVX_gpu_multicast2
+	GL_NVX_linked_gpu_multicast
+	GL_NVX_multigpu_info
+	GL_NVX_nvenc_interop
+	GL_NVX_progress_fence
+	GL_NV_ES1_1_compatibility
+	GL_NV_ES3_1_compatibility
+	GL_NV_alpha_to_coverage_dither_control
+	GL_NV_bindless_multi_draw_indirect
+	GL_NV_bindless_multi_draw_indirect_count
+	GL_NV_bindless_texture
+	GL_NV_blend_equation_advanced
+	GL_NV_blend_equation_advanced_coherent
+	GL_NV_blend_minmax_factor
+	GL_NV_blend_square
+	GL_NV_clip_space_w_scaling
+	GL_NV_command_list
+	GL_NV_compute_program5
+	GL_NV_compute_shader_derivatives
+	GL_NV_conditional_render
+	GL_NV_conservative_raster
+	GL_NV_conservative_raster_dilate
+	GL_NV_conservative_raster_pre_snap
+	GL_NV_conservative_raster_pre_snap_triangles
+	GL_NV_conservative_raster_underestimation
+	GL_NV_copy_depth_to_color
+	GL_NV_copy_image
+	GL_NV_depth_buffer_float
+	GL_NV_depth_clamp
+	GL_NV_draw_texture
+	GL_NV_draw_vulkan_image
+	GL_NV_explicit_multisample
+	GL_NV_feature_query
+	GL_NV_fence
+	GL_NV_fill_rectangle
+	GL_NV_float_buffer
+	GL_NV_fog_distance
+	GL_NV_fragment_coverage_to_color
+	GL_NV_fragment_program
+	GL_NV_fragment_program2
+	GL_NV_fragment_program_option
+	GL_NV_fragment_shader_barycentric
+	GL_NV_fragment_shader_interlock
+	GL_NV_framebuffer_mixed_samples
+	GL_NV_framebuffer_multisample_coverage
+	GL_NV_geometry_shader4
+	GL_NV_geometry_shader_passthrough
+	GL_NV_gpu_multicast
+	GL_NV_gpu_program4
+	GL_NV_gpu_program4_1
+	GL_NV_gpu_program5
+	GL_NV_gpu_program5_mem_extended
+	GL_NV_gpu_program_fp64
+	GL_NV_gpu_program_multiview
+	GL_NV_gpu_shader5
+	GL_NV_half_float
+	GL_NV_internalformat_sample_query
+	GL_NV_light_max_exponent
+	GL_NV_memory_attachment
+	GL_NV_memory_object_sparse
+	GL_NV_mesh_shader
+	GL_NV_multisample_coverage
+	GL_NV_multisample_filter_hint
+	GL_NV_occlusion_query
+	GL_NV_packed_depth_stencil
+	GL_NV_parameter_buffer_object
+	GL_NV_parameter_buffer_object2
+	GL_NV_path_rendering
+	GL_NV_path_rendering_shared_edge
+	GL_NV_pixel_data_range
+	GL_NV_point_sprite
+	GL_NV_primitive_restart
+	GL_NV_primitive_shading_rate
+	GL_NV_query_resource
+	GL_NV_query_resource_tag
+	GL_NV_register_combiners
+	GL_NV_register_combiners2
+	GL_NV_representative_fragment_test
+	GL_NV_sample_locations
+	GL_NV_sample_mask_override_coverage
+	GL_NV_scissor_exclusive
+	GL_NV_shader_atomic_counters
+	GL_NV_shader_atomic_float
+	GL_NV_shader_atomic_float64
+	GL_NV_shader_atomic_fp16_vector
+	GL_NV_shader_atomic_int64
+	GL_NV_shader_buffer_load
+	GL_NV_shader_storage_buffer_object
+	GL_NV_shader_subgroup_partitioned
+	GL_NV_shader_texture_footprint
+	GL_NV_shader_thread_group
+	GL_NV_shader_thread_shuffle
+	GL_NV_shading_rate_image
+	GL_NV_stereo_view_rendering
+	GL_NV_texgen_reflection
+	GL_NV_texture_barrier
+	GL_NV_texture_compression_vtc
+	GL_NV_texture_dirty_tile_map
+	GL_NV_texture_env_combine4
+	GL_NV_texture_multisample
+	GL_NV_texture_rectangle
+	GL_NV_texture_rectangle_compressed
+	GL_NV_texture_shader
+	GL_NV_texture_shader2
+	GL_NV_texture_shader3
+	GL_NV_timeline_semaphore
+	GL_NV_transform_feedback
+	GL_NV_transform_feedback2
+	GL_NV_uniform_buffer_std430_layout
+	GL_NV_uniform_buffer_unified_memory
+	GL_NV_vertex_array_range
+	GL_NV_vertex_array_range2
+	GL_NV_vertex_attrib_integer_64bit
+	GL_NV_vertex_buffer_unified_memory
+	GL_NV_vertex_program
+	GL_NV_vertex_program1_1
+	GL_NV_vertex_program2
+	GL_NV_vertex_program2_option
+	GL_NV_vertex_program3
+	GL_NV_viewport_array2
+	GL_NV_viewport_swizzle
+	GL_OVR_multiview
+	GL_OVR_multiview2
+	GL_S3_s3tc
+	GL_SGIS_generate_mipmap
+	GL_SGIS_texture_lod
+	GL_SGIX_depth_texture
+	GL_SGIX_shadow
+	GL_SUN_slice_accum
+	GL_WIN_swap_hint
+	WGL_EXT_swap_control
 
 Implementation Dependent GPU Limits:
 ========================================
 
-Maximum Batch Vertices:	-2147483648
-Maximum Batch Indices:	-2147483648
+Maximum Batch Vertices:	1048576
+Maximum Batch Indices:	1048576
 
 GLSL:
-Maximum Varying Floats:	60
-Maximum Vertex Attributes:	31
-Maximum Vertex Uniform Components:	1024
-Maximum Fragment Uniform Components:	1024
-Maximum Vertex Image Units:	128
-Maximum Fragment Image Units:	128
-Maximum Pipeline Image Units:	128
-Maximum Image Units:	128
+Maximum Varying Floats:	124
+Maximum Vertex Attributes:	16
+Maximum Vertex Uniform Components:	4096
+Maximum Fragment Uniform Components:	4096
+Maximum Vertex Image Units:	32
+Maximum Fragment Image Units:	32
+Maximum Pipeline Image Units:	32
+Maximum Image Units:	8
 
 Cycles:
 ========================================
@@ -107,54 +559,1687 @@ Cycles:
 
 CPU device capabilities: AVX2
 
-Metal device capabilities:
-Number of devices: 1
-		Device: AMD Radeon Pro 5500 XT (GPU)
+CUDA device capabilities:
+	NVIDIA GeForce RTX 5070
+		CU_DEVICE_ATTRIBUTE_MAX_THREADS_PER_BLOCK			1024
+		CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_X			1024
+		CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_Y			1024
+		CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_Z			64
+		CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_X			2147483647
+		CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_Y			65535
+		CU_DEVICE_ATTRIBUTE_MAX_GRID_DIM_Z			65535
+		CU_DEVICE_ATTRIBUTE_MAX_SHARED_MEMORY_PER_BLOCK			49152
+		CU_DEVICE_ATTRIBUTE_SHARED_MEMORY_PER_BLOCK			49152
+		CU_DEVICE_ATTRIBUTE_TOTAL_CONSTANT_MEMORY			65536
+		CU_DEVICE_ATTRIBUTE_WARP_SIZE			32
+		CU_DEVICE_ATTRIBUTE_MAX_PITCH			2147483647
+		CU_DEVICE_ATTRIBUTE_MAX_REGISTERS_PER_BLOCK			65536
+		CU_DEVICE_ATTRIBUTE_REGISTERS_PER_BLOCK			65536
+		CU_DEVICE_ATTRIBUTE_CLOCK_RATE			2542000
+		CU_DEVICE_ATTRIBUTE_TEXTURE_ALIGNMENT			512
+		CU_DEVICE_ATTRIBUTE_GPU_OVERLAP			1
+		CU_DEVICE_ATTRIBUTE_MULTIPROCESSOR_COUNT			48
+		CU_DEVICE_ATTRIBUTE_KERNEL_EXEC_TIMEOUT			1
+		CU_DEVICE_ATTRIBUTE_INTEGRATED			0
+		CU_DEVICE_ATTRIBUTE_CAN_MAP_HOST_MEMORY			1
+		CU_DEVICE_ATTRIBUTE_COMPUTE_MODE			0
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE1D_WIDTH			131072
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_WIDTH			131072
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_HEIGHT			65536
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_WIDTH			16384
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_HEIGHT			16384
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_DEPTH			16384
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LAYERED_WIDTH			32768
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LAYERED_HEIGHT			32768
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LAYERED_LAYERS			2048
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_ARRAY_WIDTH			32768
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_ARRAY_HEIGHT			32768
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_ARRAY_NUMSLICES			2048
+		CU_DEVICE_ATTRIBUTE_SURFACE_ALIGNMENT			512
+		CU_DEVICE_ATTRIBUTE_CONCURRENT_KERNELS			1
+		CU_DEVICE_ATTRIBUTE_ECC_ENABLED			0
+		CU_DEVICE_ATTRIBUTE_TCC_DRIVER			0
+		CU_DEVICE_ATTRIBUTE_MEMORY_CLOCK_RATE			14001000
+		CU_DEVICE_ATTRIBUTE_GLOBAL_MEMORY_BUS_WIDTH			192
+		CU_DEVICE_ATTRIBUTE_L2_CACHE_SIZE			50331648
+		CU_DEVICE_ATTRIBUTE_MAX_THREADS_PER_MULTIPROCESSOR			1536
+		CU_DEVICE_ATTRIBUTE_ASYNC_ENGINE_COUNT			1
+		CU_DEVICE_ATTRIBUTE_UNIFIED_ADDRESSING			1
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE1D_LAYERED_WIDTH			32768
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE1D_LAYERED_LAYERS			2048
+		CU_DEVICE_ATTRIBUTE_CAN_TEX2D_GATHER			1
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_GATHER_WIDTH			32768
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_GATHER_HEIGHT			32768
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_WIDTH_ALTERNATE			8192
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_HEIGHT_ALTERNATE			8192
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE3D_DEPTH_ALTERNATE			32768
+		CU_DEVICE_ATTRIBUTE_TEXTURE_PITCH_ALIGNMENT			32
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURECUBEMAP_WIDTH			32768
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURECUBEMAP_LAYERED_WIDTH			32768
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURECUBEMAP_LAYERED_LAYERS			2046
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE1D_WIDTH			32768
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE2D_WIDTH			131072
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE2D_HEIGHT			65536
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE3D_WIDTH			16384
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE3D_HEIGHT			16384
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE3D_DEPTH			16384
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE1D_LAYERED_WIDTH			32768
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE1D_LAYERED_LAYERS			2048
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE2D_LAYERED_WIDTH			32768
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE2D_LAYERED_HEIGHT			32768
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACE2D_LAYERED_LAYERS			2048
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACECUBEMAP_WIDTH			32768
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACECUBEMAP_LAYERED_WIDTH			32768
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_SURFACECUBEMAP_LAYERED_LAYERS			2046
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE1D_LINEAR_WIDTH			268435456
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LINEAR_WIDTH			131072
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LINEAR_HEIGHT			65000
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LINEAR_PITCH			2097120
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_MIPMAPPED_WIDTH			32768
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_MIPMAPPED_HEIGHT			32768
+		CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR			12
+		CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MINOR			0
+		CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE1D_MIPMAPPED_WIDTH			32768
+		CU_DEVICE_ATTRIBUTE_STREAM_PRIORITIES_SUPPORTED			1
+		CU_DEVICE_ATTRIBUTE_GLOBAL_L1_CACHE_SUPPORTED			1
+		CU_DEVICE_ATTRIBUTE_LOCAL_L1_CACHE_SUPPORTED			1
+		CU_DEVICE_ATTRIBUTE_MAX_SHARED_MEMORY_PER_MULTIPROCESSOR			102400
+		CU_DEVICE_ATTRIBUTE_MAX_REGISTERS_PER_MULTIPROCESSOR			65536
+		CU_DEVICE_ATTRIBUTE_MANAGED_MEMORY			1
+		CU_DEVICE_ATTRIBUTE_MULTI_GPU_BOARD			0
+		CU_DEVICE_ATTRIBUTE_MULTI_GPU_BOARD_GROUP_ID			0
+
 
 Enabled add-ons:
 ========================================
 
-io_curve_svg (version: (), path: '/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/addons_core/io_curve_svg/__init__.py')
-io_mesh_uv_layout (version: (1, 2, 0), path: '/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/addons_core/io_mesh_uv_layout/__init__.py')
-io_scene_fbx (version: (5, 13, 0), path: '/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/addons_core/io_scene_fbx/__init__.py')
-io_scene_gltf2 (version: (4, 5, 47), path: '/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/addons_core/io_scene_gltf2/__init__.py')
-cycles (version: (), path: '/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/addons_core/cycles/__init__.py')
-pose_library (version: (2, 0), path: '/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/addons_core/pose_library/__init__.py')
-bl_pkg (version: (0, 0, 1), path: '/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/addons_core/bl_pkg/__init__.py')
-bl_ext.user_default.bilingual_translation_toolkit (version: (0, 6, 0), path: '/Users/mac/Library/Application Support/Blender/4.5/extensions/user_default/bilingual_translation_toolkit/__init__.py')
-io_anim_bvh (version: (1, 0, 1), path: '/Applications/Blender 4.5.1.app/Contents/Resources/4.5/scripts/addons_core/io_anim_bvh/__init__.py')
-bl_ext.user_default.mesh_materializer (version: (2, 1, 0), path: '/Users/mac/Library/Application Support/Blender/4.5/extensions/user_default/mesh_materializer/__init__.py')
-user_translate (version: (1, 0, 22), path: '/Users/mac/Library/Application Support/Blender/4.5/scripts/addons/user_translate/__init__.py')
-DECALmachine (version: (2, 15, 0), path: '/Users/mac/Library/Application Support/Blender/4.5/scripts/addons/DECALmachine/__init__.py')
-  Assets Location: /Users/mac/Library/Application Support/Blender/4.5/scripts/addons/DECALmachine/assets/
+io_anim_bvh (version: (1, 0, 1), path: 'D:\\blender5.2\\5.2\\scripts\\addons_core\\io_anim_bvh\\__init__.py')
+io_curve_svg (version: (), path: 'D:\\blender5.2\\5.2\\scripts\\addons_core\\io_curve_svg\\__init__.py')
+io_mesh_uv_layout (version: (1, 2, 0), path: 'D:\\blender5.2\\5.2\\scripts\\addons_core\\io_mesh_uv_layout\\__init__.py')
+io_scene_fbx (version: (5, 15, 0), path: 'D:\\blender5.2\\5.2\\scripts\\addons_core\\io_scene_fbx\\__init__.py')
+io_scene_gltf2 (version: (5, 2, 39), path: 'D:\\blender5.2\\5.2\\scripts\\addons_core\\io_scene_gltf2\\__init__.py')
+cycles (version: (), path: 'D:\\blender5.2\\5.2\\scripts\\addons_core\\cycles\\__init__.py')
+pose_library (version: (2, 0), path: 'D:\\blender5.2\\5.2\\scripts\\addons_core\\pose_library\\__init__.py')
+bl_pkg (version: (0, 0, 1), path: 'D:\\blender5.2\\5.2\\scripts\\addons_core\\bl_pkg\\__init__.py')
+bl_ext.blender_org.EdgeFlow (version: (1, 1, 2), path: 'C:\\Users\\qukuikui\\AppData\\Roaming\\Blender Foundation\\Blender\\5.2\\extensions\\blender_org\\EdgeFlow\\__init__.py')
+bl_ext.blender_org.looptools (version: (4, 7, 7), path: 'C:\\Users\\qukuikui\\AppData\\Roaming\\Blender Foundation\\Blender\\5.2\\extensions\\blender_org\\looptools\\__init__.py')
+UV_Qkk_5_0 (version: (1, 0, 0), path: 'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\07-UV\\addons\\UV_Qkk_5_0\\__init__.py')
+univ_qkk (version: (4, 0, 0, 'beta'), path: 'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\07-UV\\addons\\univ_qkk\\__init__.py')
+uvpackmaster4 (version: (4, 0, 0), path: 'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\07-UV\\addons\\uvpackmaster4\\__init__.py')
+汉化翻译 (version: (1, 0, 22), path: 'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\08-翻译\\addons\\汉化翻译\\__init__.py')
+点点吸附 (version: (1, 4, 9), path: 'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\05-T1\\addons\\点点吸附\\__init__.py')
+blender_visual_scripting_addon_3_5 (version: (3, 5, 0), path: 'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\04-T0\\addons\\blender_visual_scripting_addon_3_5\\__init__.py')
+unity_material_sync (version: (0, 2, 19), path: 'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\09-ZMD\\addons\\unity_material_sync\\__init__.py')
+插件管理器 (version: (6, 0, 0), path: 'D:\\QKK_Plugin\\BlenderPlugin\\addons\\插件管理器\\__init__.py')
+bl_ext.blender_org.auto_sync_object_data_names (version: (1, 0, 0), path: 'C:\\Users\\qukuikui\\AppData\\Roaming\\Blender Foundation\\Blender\\5.2\\extensions\\blender_org\\auto_sync_object_data_names\\__init__.py')
+bl_ext.blender_org.oebs_icon_viewer (version: (1, 4, 0), path: 'C:\\Users\\qukuikui\\AppData\\Roaming\\Blender Foundation\\Blender\\5.2\\extensions\\blender_org\\oebs_icon_viewer\\__init__.py')
+bl_ext.blender_org.omni_outset (version: (1, 2, 1), path: 'C:\\Users\\qukuikui\\AppData\\Roaming\\Blender Foundation\\Blender\\5.2\\extensions\\blender_org\\omni_outset\\__init__.py')
+资产管理器 (version: (2, 0, 0), path: 'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\02-必备\\addons\\资产管理器\\__init__.py')
+环境配置 (version: (3, 0, 0), path: 'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\01-必装\\addons\\环境配置\\__init__.py')
+按钮小工具pro (version: (1, 0, 0), path: 'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\01-必装\\addons\\按钮小工具pro\\__init__.py')
+bl_ext.blender_org.io_scene_max (version: (1, 9, 2), path: 'C:\\Users\\qukuikui\\AppData\\Roaming\\Blender Foundation\\Blender\\5.2\\extensions\\blender_org\\io_scene_max\\__init__.py')
+操作模式 (version: (1, 0, 0), path: 'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\01-必装\\addons\\操作模式\\__init__.py')
+质量检工具 (version: (1, 0, 0), path: 'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\02-必备\\addons\\质量检工具\\__init__.py')
+ZMD_坐标轴比较 (version: (1, 0, 0), path: 'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\09-ZMD\\addons\\ZMD_坐标轴比较\\__init__.py')
+ZMD_导出Unity模型 (version: (1, 0, 0), path: 'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\09-ZMD\\addons\\ZMD_导出Unity模型\\__init__.py')
+HDR旋转 (version: (1, 0, 0), path: 'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\03-通用\\addons\\HDR旋转\\__init__.py')
+材质工具 (version: (1, 0, 0), path: 'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\02-必备\\addons\\材质工具\\__init__.py')
+批量重命名 (version: (1, 0, 0), path: 'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\03-通用\\addons\\批量重命名\\__init__.py')
+bl_ext.lab_blender_org.mcp (version: (1, 0, 3), path: 'C:\\Users\\qukuikui\\AppData\\Roaming\\Blender Foundation\\Blender\\5.2\\extensions\\lab_blender_org\\mcp\\__init__.py')
+全量塌陷 (version: (3, 5, 0), path: 'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\03-通用\\addons\\全量塌陷\\__init__.py')
+Edge_Decal_Generator (version: (1, 2, 1), path: 'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\06-T2\\addons\\Edge_Decal_Generator\\__init__.py')
+DECALmachine_v_2_17 (version: (2, 17, 0), path: 'D:\\QKK_Plugin\\BlenderPlugin\\Blender_Script\\05-T1\\addons\\DECALmachine_v_2_17\\__init__.py')
+  Assets Location: F:\BaiduNetdiskDownload\QKK_2026.5.13_工作工具\贴花插件素材5.2\
           Version: 2.13.0
   
   ✔  Registered Assets =============
   
     Atlases
-      📁 Atlases/Aircraft Atlas
-      📁 Atlases/Example Atlas
+      📁 Atlases\Aircraft Atlas
+      📁 Atlases\Example Atlas
   
     Decals
-      📁 Decals/Aircraft
-      📁 Decals/Example Panels
-      📁 Decals/Examples
-      📁 Decals/MyDecals
+      📁 Decals\Aircraft
+      📁 Decals\Example Panels
+      📁 Decals\Examples
+      📁 Decals\MyDecals
   
     Trims
-      📁 Trims/Example Sheet
+      📁 Trims\Example Sheet
   
   🐵 Updateable/Fixable Assets  ====
   
-    None
+    Legacy
+      📁 Decals\BB June 2022 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+      📁 Decals\Blender Bros 20+1 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+      📁 Decals\Blender Bros 2021 - 2.9
+        📁 001_circle ✔
+        📁 002_ORION_Orbital ✔
+        📁 003_rectangle-01 ✔
+        📁 004_scifi-02 ✔
+        📁 005_square ✔
+        📁 006_triangle-intergalactic ✔
+        📁 007_R-CORP ✔
+        📁 008_remis-systems ✔
+        📁 009_S-04 ✔
+        📁 010_moon-robotics ✔
+        📁 011_sector_8 ✔
+        📁 012_echo-labs ✔
+        📁 013_bool-kinetics ✔
+        📁 014_mars-east ✔
+        📁 015_oval ✔
+        📁 016_scifi-05 ✔
+        📁 017_triangles ✔
+        📁 018_circles ✔
+        📁 019_western-logistics ✔
+        📁 020_orl ✔
+      📁 Decals\Blender Bros April 2022 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+      📁 Decals\Blender Bros August 2021 - 2.9
+        📁 001_001 ✔
+        📁 002_002 ✔
+        📁 003_003 ✔
+        📁 004_004 ✔
+        📁 005_005 ✔
+        📁 006_006 ✔
+        📁 007_007 ✔
+        📁 008_008 ✔
+        📁 009_009 ✔
+        📁 010_010 ✔
+        📁 011_011 ✔
+        📁 012_012 ✔
+        📁 013_013 ✔
+        📁 014_014 ✔
+        📁 015_015 ✔
+        📁 016_016 ✔
+        📁 017_017 ✔
+        📁 018_018 ✔
+        📁 019_019 ✔
+        📁 020_020 ✔
+      📁 Decals\Blender Bros Corp SciFi Decal Pack - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+      📁 Decals\Blender Bros Emissive Pack - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+      📁 Decals\Blender Bros Jan 2021 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+      📁 Decals\Blender Bros January 2022 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+      📁 Decals\Blender Bros July 2021 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+      📁 Decals\Blender Bros May 2021 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+      📁 Decals\Blender Bros Nov 2021 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+        📁 021 ✔
+      📁 Decals\Blender Bros October 2021 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+      📁 Decals\Blender Bros Sci-Fi UI Pack - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+      📁 Decals\Blender Bros Scifi - buttons - 2.9
+        📁 001_Button_01 ✔
+        📁 002_Button_02 ✔
+        📁 003_Button_03 ✔
+        📁 004_Button_04 ✔
+        📁 005_Button_05 ✔
+        📁 006_Button_06 ✔
+        📁 007_Button_07 ✔
+        📁 008_Button_08 ✔
+        📁 009_Button_09 ✔
+        📁 010_Button_10 ✔
+        📁 011_Button_11 ✔
+        📁 012_Button_12 ✔
+        📁 013_Button_13 ✔
+        📁 014_Button_14 ✔
+        📁 015_Button_15 ✔
+        📁 016_Button_16 ✔
+        📁 017_Button_17 ✔
+        📁 018_Button_18 ✔
+        📁 019_Button_19 ✔
+        📁 020_Button_20 ✔
+      📁 Decals\Blender bros May 2022 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+      📁 Decals\BlenderBros February 2021 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+      📁 Decals\BlenderBros June 2021 - 2.9
+        📁 001_01 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012_02 ✔
+        📁 013 ✔
+        📁 014_03 ✔
+        📁 015_04 ✔
+        📁 016_05 ✔
+        📁 017_06 ✔
+        📁 018_07 ✔
+        📁 019_08 ✔
+        📁 020_09 ✔
+      📁 Decals\BlenderBros Nov 2020 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+      📁 Decals\BlenderBros Oct 2020 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+      📁 Decals\Blenderbros Dec 2020 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+      📁 Decals\Blenderbros SciFi Vent Pack - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+        📁 021 ✔
+        📁 022 ✔
+        📁 023 ✔
+        📁 024 ✔
+        📁 025 ✔
+        📁 026 ✔
+        📁 027 ✔
+        📁 028 ✔
+        📁 029 ✔
+        📁 030 ✔
+        📁 031 ✔
+        📁 032 ✔
+        📁 033 ✔
+        📁 034 ✔
+        📁 035 ✔
+        📁 036 ✔
+        📁 037 ✔
+        📁 038 ✔
+        📁 039 ✔
+        📁 040 ✔
+        📁 041 ✔
+        📁 042 ✔
+        📁 043 ✔
+        📁 044 ✔
+        📁 045 ✔
+      📁 Decals\DP01_Kreem - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+      📁 Decals\Litah Length - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+        📁 021 ✔
+        📁 022 ✔
+        📁 023 ✔
+        📁 024 ✔
+        📁 025 ✔
+        📁 026 ✔
+        📁 027 ✔
+        📁 028 ✔
+        📁 029 ✔
+        📁 030 ✔
+        📁 031 ✔
+        📁 032 ✔
+        📁 033 ✔
+        📁 034 ✔
+        📁 035 ✔
+        📁 036 ✔
+        📁 037 ✔
+        📁 038 ✔
+        📁 039 ✔
+        📁 040 ✔
+      📁 Decals\Nux Null - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+      📁 Decals\Orca Circuit - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+      📁 Decals\Oxy Out - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+        📁 021 ✔
+        📁 022 ✔
+        📁 023 ✔
+        📁 024 ✔
+        📁 025 ✔
+        📁 026 ✔
+        📁 027 ✔
+        📁 028 ✔
+        📁 029 ✔
+        📁 030 ✔
+        📁 031 ✔
+        📁 032 ✔
+        📁 033 ✔
+        📁 034 ✔
+        📁 035 ✔
+        📁 036 ✔
+      📁 Decals\Oz Circles - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+        📁 021 ✔
+        📁 022 ✔
+        📁 023 ✔
+        📁 024 ✔
+        📁 025 ✔
+        📁 026 ✔
+        📁 027 ✔
+        📁 028 ✔
+        📁 029 ✔
+        📁 030 ✔
+        📁 031 ✔
+        📁 032 ✔
+        📁 033 ✔
+        📁 034 ✔
+        📁 035 ✔
+        📁 036 ✔
+        📁 037 ✔
+        📁 038 ✔
+      📁 Decals\Oz HardSurface - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+        📁 021 ✔
+        📁 022 ✔
+        📁 023 ✔
+        📁 024 ✔
+        📁 025 ✔
+        📁 026 ✔
+        📁 027 ✔
+        📁 028 ✔
+        📁 029 ✔
+        📁 030 ✔
+        📁 031 ✔
+        📁 032 ✔
+        📁 033 ✔
+        📁 034 ✔
+        📁 035 ✔
+        📁 036 ✔
+        📁 037 ✔
+        📁 038 ✔
+        📁 039 ✔
+        📁 040 ✔
+        📁 041 ✔
+        📁 042 ✔
+        📁 043 ✔
+        📁 044 ✔
+        📁 045 ✔
+        📁 046 ✔
+        📁 047 ✔
+        📁 048 ✔
+        📁 049 ✔
+        📁 050 ✔
+        📁 051 ✔
+        📁 052 ✔
+        📁 053 ✔
+        📁 054 ✔
+        📁 055 ✔
+        📁 056 ✔
+        📁 057 ✔
+        📁 058 ✔
+        📁 059 ✔
+        📁 060 ✔
+        📁 061 ✔
+        📁 062 ✔
+        📁 063 ✔
+        📁 064 ✔
+        📁 065 ✔
+        📁 066 ✔
+        📁 067 ✔
+        📁 068 ✔
+        📁 069 ✔
+        📁 070 ✔
+        📁 071 ✔
+        📁 072 ✔
+        📁 073 ✔
+        📁 074 ✔
+        📁 075 ✔
+        📁 076 ✔
+        📁 077 ✔
+        📁 078 ✔
+        📁 079 ✔
+        📁 080 ✔
+        📁 081 ✔
+        📁 082 ✔
+        📁 083 ✔
+        📁 084 ✔
+        📁 085 ✔
+        📁 086 ✔
+        📁 087 ✔
+        📁 088 ✔
+        📁 089 ✔
+        📁 090 ✔
+        📁 091 ✔
+        📁 092 ✔
+        📁 093 ✔
+        📁 094 ✔
+        📁 095 ✔
+        📁 096 ✔
+        📁 097 ✔
+        📁 098 ✔
+        📁 099 ✔
+        📁 100 ✔
+        📁 101 ✔
+        📁 102 ✔
+        📁 103 ✔
+        📁 104 ✔
+        📁 105 ✔
+        📁 106 ✔
+      📁 Decals\Oz InfoDecals - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+        📁 021 ✔
+        📁 022 ✔
+        📁 023 ✔
+        📁 024 ✔
+        📁 025 ✔
+        📁 026 ✔
+        📁 027 ✔
+        📁 028 ✔
+        📁 029 ✔
+        📁 030 ✔
+        📁 031 ✔
+        📁 032 ✔
+        📁 033 ✔
+        📁 034 ✔
+        📁 035 ✔
+        📁 036 ✔
+        📁 037 ✔
+        📁 038 ✔
+        📁 039 ✔
+        📁 040 ✔
+        📁 041 ✔
+        📁 042 ✔
+        📁 043 ✔
+        📁 044 ✔
+        📁 045 ✔
+        📁 046 ✔
+        📁 047 ✔
+        📁 048 ✔
+        📁 049 ✔
+        📁 050 ✔
+        📁 051 ✔
+        📁 052 ✔
+        📁 053 ✔
+        📁 054 ✔
+        📁 055 ✔
+        📁 056 ✔
+      📁 Decals\Pattern Pix - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+        📁 021 ✔
+        📁 022 ✔
+        📁 023 ✔
+        📁 024 ✔
+        📁 025 ✔
+        📁 026 ✔
+        📁 027 ✔
+        📁 028 ✔
+        📁 029 ✔
+        📁 030 ✔
+        📁 031 ✔
+        📁 032 ✔
+        📁 033 ✔
+        📁 034 ✔
+      📁 Decals\Sanctus-SF01 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+        📁 021 ✔
+        📁 022 ✔
+        📁 023 ✔
+        📁 024 ✔
+        📁 025 ✔
+        📁 026 ✔
+        📁 027 ✔
+        📁 028 ✔
+        📁 029 ✔
+        📁 030 ✔
+        📁 031 ✔
+        📁 032 ✔
+        📁 033 ✔
+        📁 034 ✔
+        📁 035 ✔
+        📁 036 ✔
+        📁 037 ✔
+        📁 038 ✔
+        📁 039 ✔
+        📁 040 ✔
+        📁 041 ✔
+        📁 042 ✔
+        📁 043 ✔
+        📁 044 ✔
+        📁 045 ✔
+        📁 046 ✔
+        📁 047 ✔
+        📁 048 ✔
+        📁 049 ✔
+        📁 050 ✔
+        📁 051 ✔
+        📁 052 ✔
+        📁 053 ✔
+        📁 054 ✔
+        📁 055 ✔
+        📁 056 ✔
+        📁 057 ✔
+        📁 058 ✔
+        📁 059 ✔
+        📁 060 ✔
+        📁 061 ✔
+        📁 062 ✔
+        📁 063 ✔
+        📁 064 ✔
+        📁 065 ✔
+        📁 066 ✔
+        📁 067 ✔
+        📁 068 ✔
+        📁 069 ✔
+        📁 070 ✔
+        📁 071 ✔
+        📁 072 ✔
+        📁 073 ✔
+        📁 074 ✔
+        📁 075 ✔
+        📁 076 ✔
+        📁 077 ✔
+        📁 078 ✔
+        📁 079 ✔
+        📁 080 ✔
+        📁 081 ✔
+        📁 082 ✔
+        📁 083 ✔
+        📁 084 ✔
+        📁 085 ✔
+        📁 086 ✔
+        📁 087 ✔
+        📁 088 ✔
+        📁 089 ✔
+        📁 090 ✔
+        📁 091 ✔
+        📁 092 ✔
+        📁 093 ✔
+        📁 094 ✔
+        📁 095 ✔
+        📁 096 ✔
+        📁 097 ✔
+        📁 098 ✔
+        📁 099 ✔
+        📁 100 ✔
+        📁 101 ✔
+        📁 102 ✔
+        📁 103 ✔
+        📁 104 ✔
+        📁 105 ✔
+        📁 106 ✔
+        📁 107 ✔
+        📁 108 ✔
+        📁 109 ✔
+        📁 110 ✔
+        📁 111 ✔
+        📁 112 ✔
+        📁 113 ✔
+        📁 114 ✔
+        📁 115 ✔
+        📁 116 ✔
+        📁 117 ✔
+        📁 118 ✔
+        📁 119 ✔
+        📁 120 ✔
+        📁 121 ✔
+        📁 122 ✔
+        📁 123 ✔
+        📁 124 ✔
+        📁 125 ✔
+        📁 126 ✔
+        📁 127 ✔
+        📁 128 ✔
+        📁 129 ✔
+        📁 130 ✔
+        📁 131 ✔
+        📁 132 ✔
+        📁 133 ✔
+        📁 134 ✔
+        📁 135 ✔
+        📁 136 ✔
+        📁 137 ✔
+        📁 138 ✔
+        📁 139 ✔
+        📁 140 ✔
+        📁 141 ✔
+        📁 142 ✔
+        📁 143 ✔
+        📁 144 ✔
+        📁 145 ✔
+        📁 146 ✔
+        📁 147 ✔
+        📁 148 ✔
+        📁 149 ✔
+        📁 150 ✔
+        📁 151 ✔
+        📁 152 ✔
+        📁 153 ✔
+        📁 154 ✔
+        📁 155 ✔
+        📁 156 ✔
+        📁 157 ✔
+        📁 158 ✔
+        📁 159 ✔
+        📁 160 ✔
+        📁 161 ✔
+        📁 162 ✔
+        📁 163 ✔
+        📁 164 ✔
+        📁 165 ✔
+        📁 166 ✔
+        📁 167 ✔
+        📁 168 ✔
+        📁 169 ✔
+        📁 170 ✔
+        📁 171 ✔
+        📁 172 ✔
+        📁 173 ✔
+        📁 174 ✔
+        📁 175 ✔
+        📁 176 ✔
+        📁 177 ✔
+        📁 178 ✔
+        📁 179 ✔
+        📁 180 ✔
+        📁 181 ✔
+        📁 182 ✔
+        📁 183 ✔
+        📁 184 ✔
+        📁 185 ✔
+        📁 186 ✔
+        📁 187 ✔
+        📁 188 ✔
+        📁 189 ✔
+        📁 190 ✔
+        📁 191 ✔
+        📁 192 ✔
+        📁 193 ✔
+        📁 194 ✔
+        📁 195 ✔
+        📁 196 ✔
+        📁 197 ✔
+        📁 198 ✔
+        📁 199 ✔
+        📁 200 ✔
+        📁 201 ✔
+        📁 202 ✔
+        📁 203 ✔
+        📁 204 ✔
+        📁 205 ✔
+        📁 206 ✔
+        📁 207 ✔
+        📁 208 ✔
+        📁 209 ✔
+        📁 210 ✔
+        📁 211 ✔
+        📁 212 ✔
+        📁 213 ✔
+        📁 214 ✔
+        📁 215 ✔
+        📁 216 ✔
+        📁 217 ✔
+        📁 218 ✔
+        📁 219 ✔
+        📁 220 ✔
+        📁 221 ✔
+        📁 222 ✔
+        📁 223 ✔
+        📁 224 ✔
+        📁 225 ✔
+        📁 226 ✔
+        📁 227 ✔
+        📁 228 ✔
+        📁 229 ✔
+        📁 230 ✔
+        📁 231 ✔
+        📁 232 ✔
+        📁 233 ✔
+        📁 234 ✔
+        📁 235 ✔
+        📁 236 ✔
+        📁 237 ✔
+        📁 238 ✔
+        📁 239 ✔
+        📁 240 ✔
+        📁 241 ✔
+        📁 242 ✔
+        📁 243 ✔
+        📁 244 ✔
+        📁 245 ✔
+        📁 246 ✔
+        📁 247 ✔
+        📁 248 ✔
+        📁 249 ✔
+        📁 250 ✔
+        📁 251 ✔
+        📁 252 ✔
+        📁 253 ✔
+        📁 254 ✔
+        📁 255 ✔
+        📁 256 ✔
+        📁 257 ✔
+        📁 258 ✔
+        📁 259 ✔
+        📁 260 ✔
+        📁 261 ✔
+        📁 262 ✔
+        📁 263 ✔
+        📁 264 ✔
+        📁 265 ✔
+        📁 266 ✔
+        📁 267 ✔
+        📁 268 ✔
+        📁 269 ✔
+        📁 270 ✔
+        📁 271 ✔
+        📁 272 ✔
+        📁 273 ✔
+        📁 274 ✔
+        📁 275 ✔
+        📁 276 ✔
+        📁 277 ✔
+        📁 278 ✔
+        📁 279 ✔
+        📁 280 ✔
+        📁 281 ✔
+        📁 282 ✔
+        📁 283 ✔
+        📁 284 ✔
+        📁 285 ✔
+        📁 286 ✔
+        📁 287 ✔
+        📁 288 ✔
+        📁 289 ✔
+        📁 290 ✔
+        📁 291 ✔
+        📁 292 ✔
+        📁 293 ✔
+        📁 294 ✔
+        📁 295 ✔
+        📁 296 ✔
+        📁 297 ✔
+        📁 298 ✔
+        📁 299 ✔
+        📁 300 ✔
+        📁 301 ✔
+        📁 302 ✔
+        📁 303 ✔
+        📁 304 ✔
+        📁 305 ✔
+        📁 306 ✔
+        📁 307 ✔
+        📁 308 ✔
+        📁 309 ✔
+        📁 310 ✔
+        📁 311 ✔
+        📁 312 ✔
+        📁 313 ✔
+        📁 314 ✔
+        📁 315 ✔
+        📁 316 ✔
+        📁 317 ✔
+        📁 318 ✔
+        📁 319 ✔
+        📁 320 ✔
+        📁 321 ✔
+        📁 322 ✔
+        📁 323 ✔
+        📁 324 ✔
+        📁 325 ✔
+        📁 326 ✔
+        📁 327 ✔
+        📁 328 ✔
+        📁 329 ✔
+        📁 330 ✔
+        📁 331 ✔
+        📁 332 ✔
+        📁 333 ✔
+        📁 334 ✔
+        📁 335 ✔
+        📁 336 ✔
+        📁 337 ✔
+        📁 338 ✔
+        📁 339 ✔
+        📁 340 ✔
+        📁 341 ✔
+        📁 342 ✔
+        📁 343 ✔
+        📁 344 ✔
+        📁 345 ✔
+        📁 346 ✔
+        📁 347 ✔
+        📁 348 ✔
+        📁 349 ✔
+        📁 350 ✔
+      📁 Trims\BB Trim 1 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+        📁 021 ✔
+        📁 022 ✔
+        📁 023 ✔
+        📁 024 ✔
+        📁 025 ✔
+        📁 026 ✔
+      📁 Trims\BB Trim 10 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+        📁 021 ✔
+        📁 022 ✔
+        📁 023 ✔
+        📁 024 ✔
+        📁 025 ✔
+        📁 026 ✔
+        📁 027 ✔
+        📁 028 ✔
+        📁 029 ✔
+      📁 Trims\BB Trim 11 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+        📁 021 ✔
+        📁 022 ✔
+        📁 023 ✔
+      📁 Trims\BB Trim 12 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+        📁 021 ✔
+        📁 022 ✔
+      📁 Trims\BB Trim 2 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+        📁 021 ✔
+        📁 022 ✔
+        📁 023 ✔
+        📁 024 ✔
+      📁 Trims\BB Trim 3 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+        📁 021 ✔
+        📁 022 ✔
+        📁 023 ✔
+        📁 024 ✔
+        📁 025 ✔
+      📁 Trims\BB Trim 4 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+      📁 Trims\BB Trim 5 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+      📁 Trims\BB Trim 6 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+        📁 021 ✔
+        📁 022 ✔
+        📁 023 ✔
+        📁 024 ✔
+        📁 025 ✔
+      📁 Trims\BB Trim 7 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+        📁 021 ✔
+        📁 022 ✔
+        📁 023 ✔
+        📁 024 ✔
+      📁 Trims\BB Trim 8 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+      📁 Trims\BB Trim 9 - 2.9
+        📁 001 ✔
+        📁 002 ✔
+        📁 003 ✔
+        📁 004 ✔
+        📁 005 ✔
+        📁 006 ✔
+        📁 007 ✔
+        📁 008 ✔
+        📁 009 ✔
+        📁 010 ✔
+        📁 011 ✔
+        📁 012 ✔
+        📁 013 ✔
+        📁 014 ✔
+        📁 015 ✔
+        📁 016 ✔
+        📁 017 ✔
+        📁 018 ✔
+        📁 019 ✔
+        📁 020 ✔
+        📁 021 ✔
+        📁 022 ✔
+        📁 023 ✔
+        📁 024 ✔
   
   ❌ Deferred Assets  ==============
   
-    None
+    Collided
+      📁 Atlases_Collision\Aircraft Atlas
+      📁 Atlases_Collision\Example Atlas
+      📁 Atlases_Collision_001\Aircraft Atlas
+      📁 Atlases_Collision_001\Example Atlas
+      📁 Decals_Collision\Aircraft
+      📁 Decals_Collision\Example Panels
+      📁 Decals_Collision\Examples
+      📁 Decals_Collision\MyDecals
+      📁 Decals_Collision_001\Aircraft
+      📁 Decals_Collision_001\Example Panels
+      📁 Decals_Collision_001\Examples
+      📁 Decals_Collision_001\MyDecals
+      📁 Trims_Collision\Example Sheet
+      📁 Trims_Collision_001\Example Sheet
   
   🖌 Color Management ==============
   
-    View Transform: AgX
+    View Transform: Khronos PBR Neutral
               Look: None
          Sequencer: sRGB
   
