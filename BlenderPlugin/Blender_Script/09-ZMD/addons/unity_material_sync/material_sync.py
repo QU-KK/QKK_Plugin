@@ -122,10 +122,10 @@ def _apply_shader_parameters(material, parameters):
             _set_input_value(shader_node, "NRO_Offset", nro.get("offset"))
             _set_input_value(shader_node, "NRO_UV通道", nro.get("uv_set"))
             _set_input_value(shader_node, "NRO_法线贴图强度", nro.get("normal_scale"))
-            _set_input_value(shader_node, "NRO_双面材质反转背面法线", nro.get("two_sided_normal"))
-            _set_input_value(shader_node, "NRO_使用本体法线", nro.get("use_macro_normal"))
-            _set_input_value(shader_node, "本体法线贴图强度", nro.get("macro_normal_scale"))
-            _set_input_value(shader_node, "本体法线AO强度", nro.get("macro_normal_ao_strength"))
+            #_set_input_value(shader_node, "NRO_双面材质反转背面法线", nro.get("two_sided_normal"))
+            _set_input_value(shader_node, "本体法线_开关", nro.get("use_macro_normal"))
+            _set_input_value(shader_node, "本体法线_贴图强度", nro.get("macro_normal_scale"))
+            _set_input_value(shader_node, "本体法线_AO强度", nro.get("macro_normal_ao_strength"))
 
         if pbr:
             _set_input_value(shader_node, "PBR_Specular(Default 0.5)", pbr.get("specular"))
@@ -146,6 +146,11 @@ def _apply_shader_parameters(material, parameters):
             _set_input_value(shader_node, "混合_Offset", trichannel_blend.get("offset"))
             _set_input_value(shader_node, "混合_UV通道", trichannel_blend.get("uv_set"))
             _set_input_value(shader_node, "混合_三通道Mask贴图 - 仅PC", trichannel_blend.get("pc_texture"))
+
+            _set_input_value(shader_node, "混合_R通道单独选UV和Tiling", trichannel_blend.get("mask_r_uv"))
+            _set_input_value(shader_node, "混合_Mask R Tiling Scale", trichannel_blend.get("mask_r_uv_tiling"))
+            #_set_input_value(shader_node, "混合_Mask R UV通道", trichannel_blend.get("mask_r_uv_channel"))
+
             _set_input_value(shader_node, "混合_Mask R Color", trichannel_blend.get("mask_r_color"))
             _set_input_value(shader_node, "混合_Mask R Scale", trichannel_blend.get("mask_r_scale"))
             _set_input_value(shader_node, "混合_Mask R Offset", trichannel_blend.get("mask_r_offset"))

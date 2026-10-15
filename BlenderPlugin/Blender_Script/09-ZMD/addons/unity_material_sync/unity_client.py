@@ -523,6 +523,11 @@ def _extract_parameters_from_properties(properties):
                 by_name.get("_EnableTriChannelMask"),
                 by_name.get("_SwitchTriChannelTexture"),
             ),
+            "mask_r_uv": _bool_value(by_name.get("_UseMaskRUVSetAndTilingScale"), False),
+            "mask_r_uv_tiling": _float_value(by_name.get("_MaskRTilingScale"), 1.0),
+            #"mask_r_uv_channel": _bool_value(by_name.get(""), False),
+
+
             "mask_r_color": _color_value(by_name.get("_MaskAlbedoR"), [1.0, 0.0, 0.0, 1.0]),
             "mask_r_scale": _float_value(by_name.get("_MaskRScale"), 0.0),
             "mask_r_offset": _float_value(by_name.get("_MaskROffset"), 0.0),
