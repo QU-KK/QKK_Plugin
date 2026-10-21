@@ -77,5 +77,17 @@ if model_panels:
     for panel in model_panels:
         # 开启每个面板的纹理显示 (displayTextures)
         cmds.modelEditor(panel, edit=True, displayTextures=True)
-        
+
+
+
+
+#名称处理
+for node in sorted(cmds.ls(long=True), key=lambda x: x.count('|'), reverse=True):
+    leaf = node.split('|')[-1]
+    if 'FBXASC0431' in leaf:
+        cmds.rename(node, leaf.replace('FBXASC0431', '_1'))
+
+
+
+  
 print("已成功开启视图的带纹理显示。")

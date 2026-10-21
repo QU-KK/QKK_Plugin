@@ -26,25 +26,25 @@ for name in Obj_Name_List:
 
                 if lod1_face < 400:
                     if col1_face >= lod1_face:
-                        description = '当前碰撞面数=' + str(col1_face) + '      需要小于'+ str(lod1_face)
+                        description = '当前碰撞面数=' + str(col1_face) + '      需要小于'+ str(int(lod1_face))
                         data = [name,description]
                         Check_Data.append(data)
 
                 if 401 < lod1_face < 1500:
-                    if col1_face >= 400 or col1_face >= lod1_face*0.55:
-                        description = '当前碰撞面数=' + str(col1_face) + '      需要小于400或小于'+ str(lod1_face*0.55)
+                    if col1_face >= 400 and col1_face >= lod1_face*0.55:
+                        description = '当前碰撞面数=' + str(col1_face) + '      需要小于400或小于'+ str(int(lod1_face*0.55))
                         data = [name,description]
                         Check_Data.append(data)
                 
                 if 1501 < lod1_face < 3000:
-                    if col1_face >= 750 or col1_face >= lod1_face*0.35:
-                        description = '当前碰撞面数=' + str(col1_face) + '      需要小于750或小于'+ str(lod1_face*0.35)
+                    if col1_face >= 750 and col1_face >= lod1_face*0.35:
+                        description = '当前碰撞面数=' + str(col1_face) + '      需要小于750或小于'+ str(int(lod1_face*0.35))
                         data = [name,description]
                         Check_Data.append(data)
                 
                 if 3000 < lod1_face:
-                    if col1_face >= 900 or col1_face >= lod1_face*0.2:
-                        description = '当前碰撞面数=' + str(col1_face) + '      需要小于900或小于'+ str(lod1_face*0.2)
+                    if col1_face >= 900 and col1_face >= lod1_face*0.2:
+                        description = '当前碰撞面数=' + str(col1_face) + '      需要小于900或小于'+ str(int(lod1_face*0.2))
                         data = [name,description]
                         Check_Data.append(data)                
 
@@ -59,25 +59,25 @@ for name in Obj_Name_List:
 
                 if lod1_face < 400:
                     if col1_face >= lod1_face:
-                        description = '当前碰撞面数=' + str(col1_face) + '      需要小于'+ str(lod1_face)
+                        description = '当前碰撞面数=' + str(col1_face) + '      需要小于'+ str(int(lod1_face))
                         data = [name,description]
                         Check_Data.append(data)
 
                 if 401 < lod1_face < 1500:
-                    if col1_face >= 400 or col1_face >= lod1_face*0.5:
-                        description = '当前碰撞面数=' + str(col1_face) + '      需要小于400或小于'+ str(lod1_face*0.5)
+                    if col1_face >= 400 and col1_face >= lod1_face*0.5:
+                        description = '当前碰撞面数=' + str(col1_face) + '      需要小于400或小于'+ str(int(lod1_face*0.5))
                         data = [name,description]
                         Check_Data.append(data)
                 
                 if 1501 < lod1_face < 6000:
-                    if col1_face >= 750 or col1_face >= lod1_face*0.3:
-                        description = '当前碰撞面数=' + str(col1_face) + '      需要小于750或小于'+ str(lod1_face*0.3)
+                    if col1_face >= 750 and col1_face >= lod1_face*0.3:
+                        description = '当前碰撞面数=' + str(col1_face) + '      需要小于750或小于'+ str(int(lod1_face*0.3))
                         data = [name,description]
                         Check_Data.append(data)
                 
                 if 6000 < lod1_face:
-                    if col1_face >= 1800 or col1_face >= lod1_face*0.1:
-                        description = '当前碰撞面数=' + str(col1_face) + '      需要小于900或小于'+ str(lod1_face*0.1)
+                    if col1_face >= 1800 and col1_face >= lod1_face*0.1:
+                        description = '当前碰撞面数=' + str(col1_face) + '      需要小于900或小于'+ str(int(lod1_face*0.1))
                         data = [name,description]
                         Check_Data.append(data)  
 
