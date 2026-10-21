@@ -293,8 +293,8 @@ def sna_main_529FA(layout_function, ):
 
 
 class SNA_OT_Open_F0C59(bpy.types.Operator):
-    bl_idname = "sna.open_f0c59"
-    bl_label = "Open"
+    bl_idname = "sna.check_f0c59"
+    bl_label = "质检工具"
     bl_description = ""
     bl_options = {"REGISTER", "UNDO"}
 
@@ -319,7 +319,7 @@ class SNA_OT_Open_F0C59(bpy.types.Operator):
 def sna_add_to_view3d_mt_editor_menus_3CF62(self, context):
     if not (False):
         layout = self.layout
-        op = layout.operator('sna.open_f0c59', text='质检', icon='NODE_SOCKET_SHADER', emboss=True, depress=False)
+        op = layout.operator('sna.check_f0c59', text='质检', icon='NODE_SOCKET_SHADER', emboss=True, depress=False)
 
 
 class SNA_OT_My_Generic_Operator_46C90(bpy.types.Operator):
