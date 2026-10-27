@@ -99,6 +99,7 @@ def _normalize_node_name(name):
 
 
 def _apply_shader_parameters(material, parameters):
+    shader_mode = parameters.get("shader_mode", {}) if isinstance(parameters, dict) else {}
     base_color = parameters.get("base_color", {}) if isinstance(parameters, dict) else {}
     nro = parameters.get("nro", {}) if isinstance(parameters, dict) else {}
     pbr = parameters.get("pbr", {}) if isinstance(parameters, dict) else {}
@@ -109,6 +110,14 @@ def _apply_shader_parameters(material, parameters):
         return
 
     for shader_node in _find_shader_nodes(material):
+        
+        if shader_mode:
+            mode = 'Two_有金属'
+            if shader_mode.get("shader") == 2:
+                mode = 'Two_无金属'
+            _set_input_value(shader_node, "Shader模式", mode)
+
+            
         if base_color:
             _set_input_value(shader_node, "Color_Tiling", base_color.get("tiling"))
             _set_input_value(shader_node, "Color_Offset", base_color.get("offset"))
@@ -128,6 +137,7 @@ def _apply_shader_parameters(material, parameters):
             _set_input_value(shader_node, "本体法线_AO强度", nro.get("macro_normal_ao_strength"))
 
         if pbr:
+            _set_input_value(shader_node, "PBR_金属度", pbr.get("metallic"))
             _set_input_value(shader_node, "PBR_Specular(Default 0.5)", pbr.get("specular"))
             _set_input_value(shader_node, "PBR_最小粗糙度", pbr.get("roughness_min"))
             _set_input_value(shader_node, "PBR_最大粗糙度", pbr.get("roughness_max"))
@@ -149,19 +159,30 @@ def _apply_shader_parameters(material, parameters):
 
             _set_input_value(shader_node, "混合_R通道单独选UV和Tiling", trichannel_blend.get("mask_r_uv"))
             _set_input_value(shader_node, "混合_Mask R Tiling Scale", trichannel_blend.get("mask_r_uv_tiling"))
-            #_set_input_value(shader_node, "混合_Mask R UV通道", trichannel_blend.get("mask_r_uv_channel"))
+            _set_input_value(shader_node, "混合_Mask R UV通道", trichannel_blend.get("mask_r_uv_set"))
 
-            _set_input_value(shader_node, "混合_Mask R Color", trichannel_blend.get("mask_r_color"))
+            get_mask_r_color = trichannel_blend.get("mask_r_color")
+            mask_r_color = (get_mask_r_color[0], get_mask_r_color[1], get_mask_r_color[2], 1)
+            _set_input_value(shader_node, "混合_Mask R Color", mask_r_color)
+            _set_input_value(shader_node, "混合_Mask R 透明", get_mask_r_color[3])
             _set_input_value(shader_node, "混合_Mask R Scale", trichannel_blend.get("mask_r_scale"))
             _set_input_value(shader_node, "混合_Mask R Offset", trichannel_blend.get("mask_r_offset"))
             _set_input_value(shader_node, "混合_Mask R Roughness", trichannel_blend.get("mask_r_roughness"))
             _set_input_value(shader_node, "混合_Mask R Metallic", trichannel_blend.get("mask_r_metallic"))
-            _set_input_value(shader_node, "混合_Mask G Color", trichannel_blend.get("mask_g_color"))
+            
+            get_mask_g_color = trichannel_blend.get("mask_g_color")
+            mask_g_color = (get_mask_g_color[0], get_mask_g_color[1], get_mask_g_color[2], 1)
+            _set_input_value(shader_node, "混合_Mask G Color", mask_g_color)
+            _set_input_value(shader_node, "混合_Mask G 透明", get_mask_g_color[3])
             _set_input_value(shader_node, "混合_Mask G Scale", trichannel_blend.get("mask_g_scale"))
             _set_input_value(shader_node, "混合_Mask G Offset", trichannel_blend.get("mask_g_offset"))
             _set_input_value(shader_node, "混合_Mask G Roughness", trichannel_blend.get("mask_g_roughness"))
             _set_input_value(shader_node, "混合_Mask G Metallic", trichannel_blend.get("mask_g_metallic"))
-            _set_input_value(shader_node, "混合_Mask B Color", trichannel_blend.get("mask_b_color"))
+            
+            get_mask_b_color = trichannel_blend.get("mask_b_color")
+            mask_b_color = (get_mask_b_color[0], get_mask_b_color[1], get_mask_b_color[2], 1)
+            _set_input_value(shader_node, "混合_Mask B Color", mask_b_color)
+            _set_input_value(shader_node, "混合_Mask B 透明", get_mask_b_color[3])
             _set_input_value(shader_node, "混合_Mask B Scale", trichannel_blend.get("mask_b_scale"))
             _set_input_value(shader_node, "混合_Mask B Offset", trichannel_blend.get("mask_b_offset"))
             _set_input_value(shader_node, "混合_Mask B Roughness", trichannel_blend.get("mask_b_roughness"))

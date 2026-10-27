@@ -433,6 +433,10 @@ def _extract_parameters_from_properties(properties):
         if isinstance(prop, dict)
     }
     return {
+        "shader_mode": { 
+            "shader": _float_value(by_name.get("_BaseTextureMapCount"), 1),
+        },
+
         "base_color": {
             "tiling": _first_vector2_value(
                 by_name,
@@ -480,6 +484,7 @@ def _extract_parameters_from_properties(properties):
             "macro_normal_ao_strength": _float_value(by_name.get("_MacroNormalMapAOStrength"), 0.0),
         },
         "pbr": {
+            "metallic": _float_value(by_name.get("_Metallic"), 0),
             "specular": _float_value(by_name.get("_Specular"), 0.5),
             "roughness_min": _float_value(by_name.get("_RoughnessMin"), 0.0),
             "roughness_max": _float_value(by_name.get("_RoughnessMax"), 1.0),
@@ -524,10 +529,14 @@ def _extract_parameters_from_properties(properties):
                 by_name.get("_SwitchTriChannelTexture"),
             ),
             "mask_r_uv": _bool_value(by_name.get("_UseMaskRUVSetAndTilingScale"), False),
-            "mask_r_uv_tiling": _float_value(by_name.get("_MaskRTilingScale"), 1.0),
-            #"mask_r_uv_channel": _bool_value(by_name.get(""), False),
-
-
+            "mask_r_uv_tiling": _float_value(by_name.get("_MaskRTilingScale"), 1.0),        
+            "mask_r_uv_set": _uv_set_name(
+                _first_existing_value(
+                    by_name,
+                    ("_MaskRUVSet",),
+                    _texture_uv_set_value(by_name.get("_MaskMap")),
+                )
+            ),
             "mask_r_color": _color_value(by_name.get("_MaskAlbedoR"), [1.0, 0.0, 0.0, 1.0]),
             "mask_r_scale": _float_value(by_name.get("_MaskRScale"), 0.0),
             "mask_r_offset": _float_value(by_name.get("_MaskROffset"), 0.0),
@@ -552,7 +561,6 @@ def _extract_parameters_from_properties(properties):
             "clip_threshold": _float_value(by_name.get("_AlphaClipThreshold"), 0.5),
         },
     }
-
 
 def _vector2_value(value, default):
     if isinstance(value, dict):
@@ -680,6 +688,8 @@ def _emissive_channel_name(enable_emissive_map, emissive_mask_channel):
         return "Emissive Map"
     if channel == 1:
         return "Base Color A"
+    if channel == 2:
+        return "Normal Map B"
     if channel == 3:
         return "Normal Map A"
     return "不启用"
