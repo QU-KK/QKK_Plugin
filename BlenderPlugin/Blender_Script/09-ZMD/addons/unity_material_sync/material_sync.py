@@ -147,8 +147,18 @@ def _apply_shader_parameters(material, parameters):
             _set_input_value(shader_node, "自发光_通道", emissive.get("channel"))
             _set_input_value(shader_node, "自发光_UV", emissive.get("uv_set"))
             _set_input_value(shader_node, "自发光_UV通道", emissive.get("uv_set"))
+            
+            type_name = 'Channel R'
+            if emissive.get("type") == 1:
+                type_name = 'Channel RGBA'
+            _set_input_value(shader_node, "自发光_单/四通道", type_name)
+            
             _set_input_value(shader_node, "自发光_不受固有色影响", emissive.get("albedo_affect_emissive"))
             _set_input_value(shader_node, "自发光_颜色", emissive.get("color"))
+            _set_input_value(shader_node, "自发光_颜色(R通道)", emissive.get("color"))
+            _set_input_value(shader_node, "自发光_颜色(G通道)", emissive.get("color_g"))
+            _set_input_value(shader_node, "自发光_颜色(B通道)", emissive.get("color_b"))
+            _set_input_value(shader_node, "自发光_颜色(A通道)", emissive.get("color_a"))
             _set_input_value(shader_node, "自发光_Emissive Speed", emissive.get("speed"))
 
         if trichannel_blend:

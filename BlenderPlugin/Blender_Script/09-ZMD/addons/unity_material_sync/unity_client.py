@@ -480,15 +480,15 @@ def _extract_parameters_from_properties(properties):
             "normal_scale": _float_value(by_name.get("_NormalScale"), 1.0),
             "two_sided_normal": _bool_value(by_name.get("_TwoSidedNormal"), False),
             "use_macro_normal": _macro_normal_use_name(by_name.get("_UseMacroNormalMap")),
-            "macro_normal_scale": _float_value(by_name.get("_MacroNormalMapScale"), 1.0),
-            "macro_normal_ao_strength": _float_value(by_name.get("_MacroNormalMapAOStrength"), 0.0),
+            "macro_normal_scale": _float_value(by_name.get("_MacroNormalMapScale"), 1),
+            "macro_normal_ao_strength": _float_value(by_name.get("_MacroNormalMapAOStrength"), 0),
         },
         "pbr": {
             "metallic": _float_value(by_name.get("_Metallic"), 0),
             "specular": _float_value(by_name.get("_Specular"), 0.5),
-            "roughness_min": _float_value(by_name.get("_RoughnessMin"), 0.0),
-            "roughness_max": _float_value(by_name.get("_RoughnessMax"), 1.0),
-            "occlusion_strength": _float_value(by_name.get("_OcclusionStrength"), 1.0),
+            "roughness_min": _float_value(by_name.get("_RoughnessMin"), 0),
+            "roughness_max": _float_value(by_name.get("_RoughnessMax"), 1),
+            "occlusion_strength": _float_value(by_name.get("_OcclusionStrength"), 1),
         },
         "emissive": {
             "channel": _emissive_channel_name(
@@ -501,21 +501,27 @@ def _extract_parameters_from_properties(properties):
                     ("_EmissiveUVSet",),
                     _texture_uv_set_value(by_name.get("_EmissiveMap")),
                 )
-            ),
+            ),            
+
+            "type": _float_value(by_name.get("_EmissiveType"), 1), 
+
             "albedo_affect_emissive": _bool_value(by_name.get("_AlbedoAffectEmissive"), False),
-            "color": _hdr_color_value(by_name.get("_EmissiveColor"), [1.0, 1.0, 1.0, 1.0]),
-            "speed": _vector4_value(by_name.get("_EmissiveSpeed"), [0.0, 0.0, 0.0, 0.0]),
+            "color": _hdr_color_value(by_name.get("_EmissiveColor"), [1, 1, 1, 1]),
+            "color_g": _hdr_color_value(by_name.get("_EmissiveColorG"), [0, 0, 0, 1]),
+            "color_b": _hdr_color_value(by_name.get("_EmissiveColorB"), [0, 0, 0, 1]),
+            "color_a": _hdr_color_value(by_name.get("_EmissiveColorA"), [0, 0, 0, 1]),
+            "speed": _vector4_value(by_name.get("_EmissiveSpeed"), [0, 0, 0, 0]),
         },
         "trichannel_blend": {
             "tiling": _first_vector2_value(
                 by_name,
                 ("_MaskMapTiling", "_MaskMapTilling", "_MaskTiling", "_MaskTilling"),
-                _texture_scale_value(by_name.get("_MaskMap"), [1.0, 1.0]),
+                _texture_scale_value(by_name.get("_MaskMap"), [1, 1]),
             ),
             "offset": _first_vector2_value(
                 by_name,
                 ("_MaskMapOffset", "_MaskOffset"),
-                _texture_offset_value(by_name.get("_MaskMap"), [0.0, 0.0]),
+                _texture_offset_value(by_name.get("_MaskMap"), [0, 0]),
             ),
             "uv_set": _uv_set_name(
                 _first_existing_value(
