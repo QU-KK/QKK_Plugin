@@ -2,12 +2,15 @@ import bpy
 # 获取材质
 Mat = bpy.data.materials.get('.UV棋盘格')
 if Mat:
-    UV = '1U'
+    UV = '2U'
     # 设置参数
     Node = Mat.node_tree
     Node.nodes['UV Map'].uv_map = UV
 
-
+# 获取节点
+Nod_group = bpy.data.node_groups.get(".UV像素密度可视化")
+if Nod_group:
+    Nod_group.nodes["UV_名称"].inputs[0].default_value = "2U"
 
 for obj in bpy.context.blend_data.objects:
     if obj.type == 'MESH':    
