@@ -1,0 +1,330 @@
+"""Shared machinery for nodes that invoke an operator (Run Operator + Button).
+
+Both nodes need the same three things:
+
+  1. A picker that toggles between an SN operator (referenced by node) and a
+     built-in Blender operator (picked in a search field).
+  2. Dynamic input sockets that mirror the chosen operator's properties.
+     Each socket name = property name; type chosen from the prop's Blender
+     type. Reconciliation preserves links across operator changes when the
+     same-named socket survives.
+  3. The arguments as (name, expression) pairs for the node's own template.
+
+The `OperatorCallMixin` provides all of that. Concrete nodes declare
+`fixed_inputs`; one socket per operator property follows them.
+"""
+
+import math
+from typing import List, Optional, Tuple
+
+import bpy
+
+from ..core import references
+from ..core.references import Reference
+from ..sockets.data.socket_string import encode_enum_items
+from ..sockets.spec import Socket
+from ._reference_types import OPERATOR_NODES
+
+
+# -----------------------------------------------------------------------------
+# Property-type → socket mapping
+# -----------------------------------------------------------------------------
+
+
+def _prop_spec(prop) -> Optional[Tuple[str, str, object, int, str]]:
+    """Map a Blender RNA property to (socket_idname, default, vector_dim, enum_data).
+
+    `enum_data` is the encoded items string for enum props (consumed by the
+    StringSocket's enum-dropdown mode), or "" for other types.
+
+    Returns None for prop types we don't support (Pointer, Collection,
+    size>4 vectors). Caller should skip those.
+    """
+    # Skip operator-internal props that aren't meant to be set from outside.
+    if "HIDDEN" in getattr(prop, "options", set()):
+        return None
+
+    ptype = prop.type
+    if ptype == "BOOLEAN":
+        if prop.is_array:
+            return None  # bool arrays are rare on operators, punt
+        return ("ScriptingBooleanSocket", bool(prop.default), 0, "")
+    if ptype == "INT":
+        if prop.is_array:
+            return None
+        return ("ScriptingIntegerSocket", int(prop.default), 0, "")
+    if ptype == "FLOAT":
+        if prop.is_array:
+            size = prop.array_length
+            if size < 2 or size > 4:
+                return None
+            subtype = getattr(prop, "subtype", "NONE")
+            default = tuple(prop.default_array)
+            if subtype in {"COLOR", "COLOR_GAMMA"}:
+                return ("ScriptingColorSocket", default, size, "")
+            return ("ScriptingVectorSocket", default, size, "")
+        return ("ScriptingFloatSocket", float(prop.default), 0, "")
+    if ptype == "STRING":
+        return ("ScriptingStringSocket", str(prop.default), 0, "")
+    if ptype == "ENUM":
+        if prop.is_enum_flag:
+            return None  # takes a set of items, a single string won't do
+        # String socket in enum-dropdown mode: identifier stored in `value`,
+        # items list serialized into `enum_items_data` so the socket renders
+        # a dropdown instead of a free text field.
+        items = [
+            (item.identifier, item.name or item.identifier) for item in prop.enum_items
+        ]
+        return ("ScriptingStringSocket", str(prop.default), 0, encode_enum_items(items))
+    # POINTER / COLLECTION fall through.
+    return None
+
+
+# -----------------------------------------------------------------------------
+# Blender operators (search field of the picker)
+# -----------------------------------------------------------------------------
+
+_operator_choices = None
+
+
+def blender_operator_choices():
+    """(display, bl_idname) of every Blender operator. Display is
+    "Add Cube  [mesh.primitive_cube_add]", so search finds the label and the
+    bl_idname. Cached, the operator list rarely changes."""
+    global _operator_choices
+    if _operator_choices is None:
+        entries = []
+        for cat_name in dir(bpy.ops):
+            if cat_name.startswith("_"):
+                continue
+            cat = getattr(bpy.ops, cat_name)
+            for op_name in dir(cat):
+                if op_name.startswith("_"):
+                    continue
+                rna = _operator_rna(f"{cat_name}.{op_name}")
+                if rna is None:
+                    continue
+                bl_idname = f"{cat_name}.{op_name}"
+                entries.append((blender_operator_display(bl_idname, rna), bl_idname))
+        entries.sort(key=lambda e: e[0].lower())
+        _operator_choices = entries
+    return _operator_choices
+
+
+def _operator_rna(bl_idname):
+    if not bl_idname or bl_idname.count(".") != 1:
+        return None
+    cat_name, op_name = bl_idname.split(".")
+    if not (cat_name.isidentifier() and op_name.isidentifier()):
+        return None
+    try:
+        return getattr(getattr(bpy.ops, cat_name), op_name).get_rna_type()
+    except (AttributeError, KeyError, RuntimeError):
+        return None
+
+
+def blender_operator_display(bl_idname, rna=None):
+    """Text the picker shows (and stores) for an operator, "" if unknown."""
+    rna = rna or _operator_rna(bl_idname)
+    if rna is None:
+        return ""
+    return f"{rna.name or bl_idname}  [{bl_idname}]"
+
+
+def _blender_operator_idname(value: str) -> str:
+    """bl_idname of the picker value, "" unless it's an existing operator."""
+    if value.endswith("]") and "  [" in value:
+        value = value[value.rindex("  [") + 3 : -1]
+    return value if _operator_rna(value) is not None else ""
+
+
+def _search_blender_operators(self, context, edit_text):
+    return [display for display, _ in blender_operator_choices()]
+
+
+# -----------------------------------------------------------------------------
+# Operator-prop introspection (SN + Blender, unified result format)
+# -----------------------------------------------------------------------------
+
+
+def _sn_operator_prop_specs(op_node) -> List[Tuple[str, str, object, int, str]]:
+    """Specs from the properties of an SN Operator node."""
+    from ..core import properties
+
+    specs = []
+    if op_node is None:
+        return specs
+    names = properties.python_names(op_node.properties)
+    for prop in op_node.properties:
+        if prop.property_type in {"GROUP", "COLLECTION"}:
+            continue
+        idname = properties.socket_type(prop)
+        dim = prop.vector_size if prop.property_type == "VECTOR" else 0
+        enum_data = ""
+        if prop.property_type == "ENUM" and prop.items_function is None:
+            enum_data = encode_enum_items(
+                [(item.value, item.name) for item in prop.enum_items]
+            )
+        default = properties.default_value(prop)
+        if prop.property_type == "VECTOR":
+            default = default[:dim]
+        specs.append((names[prop.id], idname, default, dim, enum_data))
+    return specs
+
+
+def _blender_operator_prop_specs(
+    bl_idname: str,
+) -> List[Tuple[str, str, object, int, str]]:
+    """Specs derived from a Blender operator's RNA properties."""
+    rna = _operator_rna(bl_idname)
+    if rna is None:
+        return []
+
+    specs = []
+    for prop in rna.properties:
+        if prop.identifier == "rna_type":
+            continue
+        spec = _prop_spec(prop)
+        if spec is None:
+            continue
+        idname, default, vector_dim, enum_data = spec
+        specs.append((prop.identifier, idname, default, vector_dim, enum_data))
+    return specs
+
+
+def _equals_default(socket, default) -> bool:
+    """True if the socket's own value is the operator property's default."""
+    value = getattr(socket, "value", None)
+    if value is None or default is None:
+        return False
+    if isinstance(default, (tuple, list)):
+        values = tuple(value)[: len(default)]
+        return len(values) == len(default) and all(
+            math.isclose(a, b, rel_tol=1e-6, abs_tol=1e-6)
+            for a, b in zip(values, default)
+        )
+    if isinstance(default, float):
+        return math.isclose(value, default, rel_tol=1e-6, abs_tol=1e-6)
+    return value == default
+
+
+# -----------------------------------------------------------------------------
+# Mixin
+# -----------------------------------------------------------------------------
+
+
+# Execution-context flags accepted by bpy.ops calls. Useful for Run Operator
+# only; Button takes its context from the UI.
+EXEC_CONTEXT_ITEMS = [
+    ("EXEC_DEFAULT", "Exec Default", "Run execute() directly"),
+    (
+        "INVOKE_DEFAULT",
+        "Invoke Default",
+        "Run invoke() then execute() (uses UI context)",
+    ),
+    ("EXEC_REGION_WIN", "Exec Region Win", "Run execute() in window region context"),
+    ("INVOKE_REGION_WIN", "Invoke Region Win", "Run invoke() in window region context"),
+    ("EXEC_AREA", "Exec Area", "Run execute() in area context"),
+    ("INVOKE_AREA", "Invoke Area", "Run invoke() in area context"),
+    ("EXEC_SCREEN", "Exec Screen", "Run execute() in screen context"),
+    ("INVOKE_SCREEN", "Invoke Screen", "Run invoke() in screen context"),
+]
+
+ARG_PREFIX = "arg_"
+
+
+class OperatorCallMixin:
+    """Operator picker + one input socket per operator property.
+
+    Subclasses define `fixed_inputs` / `fixed_outputs` (socket specs) and use
+    `operator_idname()` and `operator_args(ctx)` in emit()."""
+
+    fixed_inputs: list = []
+    fixed_outputs: list = []
+
+    mode: bpy.props.EnumProperty(
+        name="Mode",
+        items=[
+            ("CUSTOM", "This Add-on", "An Operator node of this add-on"),
+            ("BLENDER", "Blender", "Call a built-in Blender operator"),
+        ],
+        default="CUSTOM",
+    )
+    operator_sn: Reference(
+        OPERATOR_NODES, name="Operator", description="An Operator node"
+    )
+    operator_blender: bpy.props.StringProperty(
+        name="Blender Operator",
+        description="A built-in Blender operator",
+        search=_search_blender_operators,
+    )
+
+    def operator_idname(self) -> str:
+        """Dotted bl_idname of the chosen operator, or ""."""
+        if self.mode == "CUSTOM":
+            target = self.resolve_reference("operator_sn")
+            return target.operator_idname if target else ""
+        return _blender_operator_idname(self.operator_blender)
+
+    def setup_hint(self):
+        if self.mode == "BLENDER" and not self.operator_blender:
+            return "Pick an operator"
+        if self.mode == "CUSTOM" and not references.target_id(self, "operator_sn"):
+            return "Pick an operator"
+        return super().setup_hint()
+
+    def _target_prop_specs(self):
+        if self.mode == "CUSTOM":
+            return _sn_operator_prop_specs(self.resolve_reference("operator_sn"))
+        return _blender_operator_prop_specs(self.operator_idname())
+
+    def socket_specs(self):
+        inputs = list(self.fixed_inputs)
+        for name, idname, default, vector_dim, enum_data in self._target_prop_specs():
+            spec = Socket(idname, ARG_PREFIX + name, name)
+            if default is not None:
+                if idname in {"ScriptingVectorSocket", "ScriptingColorSocket"}:
+                    filler = 1.0 if idname == "ScriptingColorSocket" else 0.0
+                    default = tuple(default) + (filler,) * (4 - len(default))
+                spec.default = default
+            if idname == "ScriptingVectorSocket" and vector_dim:
+                spec.attrs["dimension"] = str(vector_dim)
+            if idname == "ScriptingColorSocket":
+                spec.attrs["use_alpha"] = vector_dim == 4
+            if enum_data:
+                spec.attrs["enum_items_data"] = enum_data
+            inputs.append(spec)
+        return inputs, list(self.fixed_outputs)
+
+    def operator_args(self, ctx) -> list[tuple[str, str]]:
+        """(property name, expression) for every operator property socket.
+
+        Unconnected sockets still at the operator's default are left out:
+        that's less code, and Blender operators often behave differently when
+        a property isn't set (Add Cube places the cube at the 3D cursor
+        unless `location` is given)."""
+        defaults = {spec[0]: spec[2] for spec in self._target_prop_specs()}
+        args = []
+        for socket in self.inputs:
+            if not socket.identifier.startswith(ARG_PREFIX):
+                continue
+            name = socket.identifier[len(ARG_PREFIX) :]
+            if (
+                not socket.is_linked
+                and name in defaults
+                and _equals_default(socket, defaults[name])
+            ):
+                continue
+            args.append((name, ctx.input(socket.identifier)))
+        return args
+
+    def draw_operator_picker(self, layout) -> None:
+        row = layout.row(align=True)
+        if self.mode == "CUSTOM":
+            self.draw_reference(row, "operator_sn")
+            row.prop(self, "mode", icon="NODETREE", icon_only=True, text="")
+        else:
+            sub = row.row(align=True)
+            sub.alert = bool(self.operator_blender) and not self.operator_idname()
+            sub.prop(self, "operator_blender", text="", placeholder="Search Blender's")
+            row.prop(self, "mode", icon="BLENDER", icon_only=True, text="")

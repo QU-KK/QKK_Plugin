@@ -1,0 +1,66 @@
+import bpy
+
+from ...node_tree.editor import in_sn_tree
+from ...settings.preferences import get_preferences
+from .. import server
+
+
+class SNA_PT_MCPServer(bpy.types.Panel):
+    bl_idname = "SNA_PT_MCPServer"
+    bl_label = "MCP Server"
+    bl_space_type = "NODE_EDITOR"
+    bl_region_type = "UI"
+    bl_category = "Scripting Nodes"
+    bl_options = {"DEFAULT_CLOSED"}
+    bl_order = 5
+
+    @classmethod
+    def poll(cls, context):
+        return in_sn_tree(context)
+
+    def draw(self, context):
+        layout = self.layout
+        prefs = get_preferences()
+        running = server.is_running()
+
+        col = layout.column(align=True)
+        col.active = False
+        col.label(text="Lets AI agents (Claude, Codex, ...) build")
+        col.label(text="and test your add-on in this Blender.")
+
+        row = layout.row(align=True)
+        if running:
+            row.label(text=f"Running on :{prefs.mcp_port}", icon="CHECKMARK")
+        else:
+            row.label(text="Stopped", icon="X")
+
+        row = layout.row(align=True)
+        row.scale_y = 2.0
+        if running:
+            row.operator("sna.stop_mcp_server", text="Stop", icon="CANCEL")
+        else:
+            row.operator("sna.start_mcp_server", text="Start", icon="PLAY")
+
+        layout.label(text="Copy the setup for:")
+        copy_row = layout.row(align=True)
+        op = copy_row.operator(
+            "sna.copy_mcp_snippet", text="Claude Code", icon="COPYDOWN"
+        )
+        op.target = "CLAUDE_CODE"
+        op = copy_row.operator("sna.copy_mcp_snippet", text="Codex", icon="COPYDOWN")
+        op.target = "CODEX"
+        copy_row = layout.row(align=True)
+        op = copy_row.operator(
+            "sna.copy_mcp_snippet", text="Claude Desktop", icon="COPYDOWN"
+        )
+        op.target = "CLAUDE_DESKTOP"
+        op = copy_row.operator("sna.copy_mcp_snippet", text="JSON", icon="COPYDOWN")
+        op.target = "JSON"
+
+        col = layout.column()
+        col.use_property_split = True
+        col.enabled = not running
+        col.prop(prefs, "mcp_port", text="Port")
+        col = layout.column()
+        col.use_property_split = True
+        col.prop(prefs, "mcp_allow_python", text="Agents Run Python")

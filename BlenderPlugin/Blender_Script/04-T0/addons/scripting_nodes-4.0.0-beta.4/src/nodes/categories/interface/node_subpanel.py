@@ -1,0 +1,35 @@
+import bpy
+
+from ....core import naming
+from ....sockets.spec import Boolean, Interface
+from ...base_node import ScriptingBaseNode
+
+
+class SNA_Node_Subpanel(ScriptingBaseNode, bpy.types.Node):
+    """A collapsible section inside a panel (layout.panel)."""
+
+    bl_idname = "SNA_Node_Subpanel"
+    bl_label = "Subpanel"
+    sn_inputs = [Interface(), Boolean("default_closed", "Default Closed")]
+    sn_outputs = [
+        Interface("header", "Header"),
+        Interface("content", "Panel"),
+        Interface("next", "After"),
+    ]
+
+    def sn_names(self):
+        return [naming.Class("panel_id", "PT", naming.label(self, socket=None))]
+
+    def emit(self, ctx):
+        # layout.panel() only needs a unique id to remember the open state,
+        # no Panel class is registered for it
+        panel_id = ctx.name("panel_id")
+        header = ctx.var("header")
+        body = ctx.var("panel")
+        ctx.code(f"""
+            {header}, {body} = {ctx.layout}.panel({ctx.args(repr(panel_id), ctx.keyword("default_closed", "default_closed", False))})
+            {ctx.flow("header", layout=header, horizontal=True)}
+            if {body}:
+                {ctx.flow("content", layout=body)}
+            {ctx.flow("next")}
+        """)
