@@ -1,0 +1,945 @@
+为什么插件需要它（最多 64 个字符）,Why the add-on needs it (at most 64 characters)
+插件名称,Addon Name
+插件的名称,The name of the addon
+标语,Tagline
+关于插件的一行说明（最多 64 个字符）,One line about the add-on (at most 64 characters)
+作者,Author
+你的名字,Your name
+邮箱,Email
+与你的名字一起显示（可选）,Shown with your name (optional)
+版本,Version
+插件版本（主版本、次版本、补丁版本）,"Version of the add-on (major, minor, patch)"
+网站,Website
+文档或项目页面,Documentation or project page
+位置,Location
+在 Blender 中哪里可以找到该插件，例如,"Where to find the add-on in Blender, e.g. "
+标签,Tags
+插件的分类（第一个是它的类别）,Categories of the add-on (the first is its category)
+版权,Copyright
+谁持有版权；当前年份会添加在前面,Who holds the copyright; the current year is added in front
+最低 Blender 版本,Blender Minimum
+最高,Maximum
+限制该插件可安装的 Blender 版本,Limit the Blender versions the add-on can be installed in
+最高 Blender 版本,Blender Maximum
+该插件不支持的首个 Blender 版本,First Blender version the add-on doesn
+实时,Live
+在编辑时于 Blender 中运行该插件，重建于,"Run the add-on in Blender while you edit it, rebuilt on "
+模块名称,Module Name
+插件应创建于其中的文件夹的可选名称,An optional name for the folder the addon should be created in
+类前缀,Class Prefix
+Idname 命名空间,Idname Namespace
+持久化插件,Persist Addon
+切换文件时保持插件启用,Keep the addon enabled when switching files
+UID,UID
+此文件的唯一标识符,Unique identifier for this file
+获取或为此文件生成唯一 ID。,Get or generate a unique ID for this file.
+插件,Addon
+一行，标签列中有 `text`（类似 use_property_split）。,A row with `text` in the label column (like use_property_split).
+主版本、次版本、补丁版本并排显示（分割布局会堆叠数组）。,"Major, minor, patch side by side (split layouts stack arrays)."
+Blender 显示的关于该插件的信息（blender_manifest.toml、bl_info）。,"What Blender shows about the add-on (blender_manifest.toml, bl_info)."
+元数据,Metadata
+供节点使用,Used by nodes
+覆盖,Overrides
+导出按钮，位于其使用的设置之后。,"The export button, after the settings it uses."
+导出,Export
+extensions.blender.org 的审核者会要求更改的内容。,What reviewers of extensions.blender.org would ask to change.
+扩展平台,Extensions Platform
+导出时勾选,Checked when you export
+无需修复,Nothing to fix
+每行最多 `width` 个字符（标签不换行）。,Lines of at most `width` characters (labels don't wrap).
+在界面中选取,Pick in the Interface
+选取要在 Blender 中绘制到的菜单、面板或标题栏,"Pick the menu, panel or header to draw into in Blender"
+选取,Pick
+绘制节点,Draw the node
+取消选取,Cancel Picker
+停止选取,Stop picking
+Slugify,Slugify
+插件的一个文件包含什么（str、bytes 或一个 FileCopy）。,"What a file of the add-on contains (str, bytes or a FileCopy)."
+文件或文件夹的绝对路径，未设置则为 None。,"Absolute path of the file or folder, None if not set."
+文件名：没有分隔符，前后没有空格或点。,"A file name: no separators, no surrounding spaces or dots."
+为什么 `asset` 不能被随附，若能则返回 None。,"Why `asset` can't be shipped, None if it can."
+选取 `asset` 的资产节点。,Asset nodes picking `asset`.
+资产的来源或名称已更改：重建（使用它的节点也重建）。,The asset's source or name changed: rebuild (nodes using it too).
+每当资产的一个文件更改、添加或移除时就会变化。,"Changes whenever a file of the asset changes, is added or removed."
+确定性顺序：数据类型和树/套接字先于节点。,Deterministic order: data types and trees/sockets before nodes.
+每个节点属性更改时都会重新生成代码——无需 update=。,Every node property regenerates code when changed - no update= needed.
+通过 `ctx`（core/context.NodeContext）写入此节点的代码。,Write this node's code through `ctx` (core/context.NodeContext).
+此节点在 `sn_names()` 中声明的名称。,A name this node declared in `sn_names()`.
+在套接字创建后调用一次。,Called once after the sockets were created.
+此节点的某些内容已更改：重新检查套接字，尽快重建。,"Something about this node changed: re-check sockets, rebuild soon."
+按声明的键（标识符）获取套接字，或 None。,"Socket by its declared key (identifier), or None."
+"动态组的套接字，不含末尾的 +"" 占位符。","Sockets of a dynamic group, without the trailing \+\"" placeholder."""
+使节点的套接字匹配 `socket_specs()`，同时保留链接。,"Make the node's sockets match `socket_specs()`, keeping links."
+"将 +"" 套接字的 `identifier` 转换为普通套接字","Turn the \+\"" socket `identifier` into a normal one"
+"链接组的 +"" 套接字会使其成为真实套接字。","Linking the \+\"" socket of a group makes it a real one."""
+`attr` 属性所指向的节点引用字段，或 None。,"The node reference field `attr` points to, or None."
+`text` 按节点宽度换行。,`text` wrapped to the node's width.
+侧边栏：节点的设置，然后是引用它的节点。,"Sidebar: the node's settings, then the nodes referencing it."
+列出引用 `target`（节点或树）的节点，并带有跳转按钮。,List the nodes referencing `target` (a node or a tree) with jump buttons.
+此套接字自身值的 Python 表达式（未连接时）。,Python expression of this socket's own value (when unconnected).
+Blender 通用：运行 Python、查看屏幕、撤销、读取日志。,"Blender in general: run Python, look at the screen, undo, read the log."
+泵送待处理的可调用对象。返回下一个轮询间隔（秒）。,Pump pending callables. Returns the next poll interval (seconds).
+注册主线程计时器。幂等。,Register the main-thread timer. Idempotent.
+注销主线程计时器。幂等。,Unregister the main-thread timer. Idempotent.
+选取路径的起始位置,Pick where the path starts
+生成的代码写入的路径（Data 输入为 `data.`）。,The path as the generated code writes it (`data.` for the Data input).
+布局,Layout
+框架,Frame
+转接点,Reroute
+菜单顺序中的类别文件夹名称。,Category folder names in menu order.
+类别文件夹的显示名称：`blender_data` -> `Blender Data`。,Display name for a category folder: `blender_data` -> `Blender Data`.
+类似 `data.blender_data` 的类别路径的唯一菜单 idname。,Unique menu idname for a category path like `data.blender_data`.
+node_tree,node_tree
+如果 `expr` 可以嵌入更大的表达式而无需括号，则为 True。,True if `expr` can be embedded in a bigger expression without parens.
+将 `expr` 包裹在括号中，除非它是原子表达式（保持优先级不变）。,Wrap `expr` in parentheses unless it is atomic (keeps precedence intact).
+一组字符串的 Python 源代码，具有稳定顺序。,Python source of a set of strings with a stable order.
+`expr` 去掉括号和字符串内的内容。,`expr` without what's inside brackets and strings.
+isort 按类型排序：常量、类、函数。,"isort's order by type: CONSTANTS, Classes, functions."
+脚本模块在插件中的文件，例如 `scripts/tools.py`。,"File of a script's module in the add-on, e.g. `scripts/tools.py`."
+"文件 `rel` 之上的插件文件夹：\a/b/c.py"" -> [""a""","Folders of the add-on above file `rel`: \a/b/c.py\"" -> [\""a\"""
+一个树模块的 Python 源代码。,Python source of one tree module.
+在其节点生成代码时收集一个树模块的代码。,Collects the code of one tree module while its nodes emit.
+连接到流程输出的节点的代码（它生成其余部分）。,Code of the node connected to a flow output (it emits the rest).
+值节点输出 `key` 的表达式。,Expression of output `key` of a value node.
+带有连接到 Group Output 的值的 `return ...`。,`return ...` with the values connected to a Group Output.
+文件夹模块中的 `__package__`（插件）。,`__package__` (the add-on) in a module of a folder.
+只包含 `code` 使用的名称的 `line`，若未使用任何名称则为 None。,"`line` with only the names `code` uses, None if it uses none."
+Group Input / Output 被视为 NodeContext 可读取其输入的节点。,Group Input / Output seen as a node NodeContext can read inputs of.
+为空块添加 `pass`，删除只有 pass 的 `else:` 分支。,"Add `pass` to empty blocks, drop `else:` branches that only pass."
+{节点 id：其自身的行，已去除缩进}，用于节点上的代码预览。,"{node id: its own lines, dedented} for the code preview on nodes."
+从 emit() 抛出以在节点上显示消息（它不生成代码）。,Raise from emit() to show a message on the node (it emits no code).
+编写代码时哪些内容可用。,What's available where code is being written.
+在同一函数的循环内（嵌套 def 会结束它）。,Inside a loop of the same function (a nested def ends it).
+没有流程套接字且不是根节点的节点会生成普通值。,Nodes without flow sockets that aren't roots produce plain values.
+包围 `column` 的最近 `def` 的参数名称。,Parameter names of the closest `def` enclosing `column`.
+传递给 `emit()`。参见模块文档字符串和文档站点。,Passed to `emit()`. See the module docstring and the docs site.
+实时插件为 True，导出时为 False。优先使用辅助函数。,"True for the live addon, False when exporting. Prefer helpers."
+包围函数拥有 `context` 时的 `context`，否则为 `bpy.context`。,"`context` where the enclosing function has it, else `bpy.context`."
+当前 UI 布局的表达式（在接口流程内）。,Expression of the current UI layout (inside interface flows).
+当前布局将其项目并排放置（一行）。,The current layout places its items side by side (a row).
+调用的参数，省略为 None 的参数。,"Arguments of a call, leaving out None ones."
+动态输入组 `key` 的所有套接字的表达式。,Expressions of all sockets of the dynamic input group `key`.
+引用属性所指向的节点，或 None。,"The node a reference property points to, or None."
+向模块添加导入行（去重）。,Add import lines to the module (deduplicated).
+按名称调用的共享辅助函数（core/helpers.py）的名称。,Name to call a shared helper (core/helpers.py) by.
+"尚未使用的局部变量名：\row""","A local variable name not used yet: \row\"""
+此节点在 `sn_names()` 中声明的模块级名称。,A module level name this node declared in `sn_names()`.
+一种套接字类型的值不能用作另一种类型。,A value of one socket type can't be used as another.
+将节点树（插件的一个模块）添加到所选文件夹,Add a node tree (a module of the add-on) to the selected folder
+添加节点树,Add Node Tree
+添加脚本,Add Script
+从模板添加新脚本并在节点上选取它,Add a new script from a template and pick it on the node
+新建脚本,New Script
+将文件夹（插件的一个包）添加到所选文件夹,Add a folder (a package of the add-on) to the selected folder
+添加文件夹,Add Folder
+移除,Remove
+所选文件或文件夹可移动到的文件夹。,Folders the selected file or folder can move to.
+将所选文件或文件夹移入某个文件夹,Move the selected file or folder into a folder
+移动到文件夹,Move to Folder
+文件夹,Folder
+`types` 的每个节点在每个树中各一行：跳转按钮、树、使用次数。,"One row per node of `types` in any tree: jump button, tree, use count."
+添加全局或局部变量节点,Add a Global or Local Variable node
+插件数据,Addon Data
+属性,Properties
+变量,Variables
+使用某物的节点，带有跳转按钮。,"The nodes using something, with jump buttons."
+使用者,Used by
+资产,Assets
+记录树重建,Log Tree Rebuilds
+记录重新加载时间,Log Reload Times
+显示节点代码,Show Node Code
+显示节点生成的代码,Show the generated code of the nodes
+记录叠加层,Log Overlay
+在节点编辑器中叠加显示控制台日志,Show console logs overlaid in the node editor
+叠加层字体大小,Overlay Font Size
+日志叠加层的字体大小,Font size for the log overlay
+设置,Settings
+开发,Development
+添加套接字,Add Socket
+向此组添加另一个套接字,Add another socket to this group
+移除套接字,Remove Socket
+移除此套接字,Remove this socket
+设置（或用 None 清除）插件加载错误及其归咎的节点。,Set (or clear with None) the addon load error and the nodes it blames.
+显示错误的节点，在 `tree` 中或所有树中。,"Nodes showing an error, in `tree` or in all trees."
+事件节点：从 Blender 应用处理器（bpy.app.handlers）运行其流程。,Event nodes: run their flow from a Blender app handler (bpy.app.handlers).
+为给定的 {label: handler} 选项创建事件节点类。,Create an event node class for the given {label: handler} choices.
+何时,When
+Blender 退出时运行。,Runs when Blender quits.
+Blender 关闭时,On Blender Close
+导出插件,Export Addon
+将当前文件导出为可安装的插件（.zip）,Export the current file as an installable addon (.zip)
+检查,Check
+按导出时的样子检查当前文件的插件。,Check the add-on of the current file as it would be exported.
+"属性链的 `a.b.c`，其他情况为 \""。""","`a.b.c` of an attribute chain, \\"" for anything else."""
+未使用,unused
+添加,Add
+节点树,Node Tree
+函数,Function
+脚本,Script
+文件,Files
+没有函数节点调用它,No Function node calls it
+`path` 是 `folder` 或位于其中。,`path` is `folder` or in it.
+文件夹名称：没有分隔符，前后没有空格。,"A folder name: no separators, no surrounding spaces."
+文件夹中可以有什么：节点树和插件的脚本。,What can be in a folder: node trees and the add-on's scripts.
+每个文件夹：列出的文件夹、文件的文件夹及其父文件夹。,"Every folder: listed ones, folders of files, and their parents."
+"`path`，否则为 \<path> 2""","`path`, else \<path> 2\"""
+将 `path`（及其父文件夹）添加到文件夹列表。,Add `path` (and its parents) to the folder list.
+添加未列出文件的文件夹。若有变化则为 True。,Add folders of files that aren't listed. True if something changed.
+将文件夹 `old` 及其内容移动（或重命名）到 `new`。,Move (or rename) folder `old` with its contents to `new`.
+移除文件夹 `path`，其内容移动到其父文件夹。,"Remove folder `path`, its contents move to its parent."
+数据输出项，按顺序。,"Data output items, in order."
+"数据输入的 [(item, Python 名称)]，按顺序。","[(item, Python name)] of the data inputs, in order."
+界面无法编译的原因，或 None。,"Why the interface can't be compiled, or None."
+返回值的 Group Output 节点。,The Group Output node that returns the values.
+`tree` 是否直接或通过其他函数调用 `target`。,"Whether `tree` calls `target`, directly or through other functions."
+在所有树中调用 `tree` 的组节点。,"Group nodes calling `tree`, in all trees."
+导航到节点树中的特定节点,Navigate to a specific node in a node tree
+显示下一个有错误的节点（在任意树中）,Show the next node with an error (in any tree)
+下一个错误,Next Error
+转到节点,Go To Node
+按 id 或名称获取属性（选择器中显示的标签）。,A property by id or name (the label shown in pickers).
+当前节点编辑器正在显示 SN 树时为 True。,True when the current node editor is showing an SN tree.
+将活动节点的组推入编辑器路径。,Push the active node's group onto the editor path.
+进入组,Enter Group
+向上一层，回到进入该组时的树。,"Go up one level, to the tree the group was entered from."
+退出组,Exit Group
+节点编辑器,Node Editor
+此插件的图像 `icons/<name>` 的图标 id（只加载一次）。,Icon id of the image `icons/<name>` of this add-on (loaded once).
+layout.label_multiline()：跨多行的文本，自动换行。,"layout.label_multiline(): text over several lines, wrapped."
+layout.label_markdown()：标题、列表、引用、链接、分隔线。,"layout.label_markdown(): headers, lists, quotes, links, rules."
+layout.textbox()：多行文本字段（以前是普通字段）。,layout.textbox(): a multi-line text field (a normal one before).
+layout.link()：打开 `url` 的按钮。,layout.link(): a button opening `url`.
+"重绘某类型的编辑器（\VIEW_3D""）","Redraw the editors of a type (\VIEW_3D\"")"
+"文件的内容，不存在时为 \""。""","The text of a file, \\"" if it doesn't exist."""
+将文本写入文件，并创建其文件夹。,"Write text to a file, creating its folder."
+".blend 文件中某类型数据（\materials""）的名称","Names of the data of a type (\materials\"") in a .blend file"
+加载文件会清除订阅。,Loading a file clears subscriptions.
+值作为文本：Blender 数据（物体、材质等）按名称。,"A value as text: Blender data (objects, materials, ...) by its name."
+`source` 中 `name` 的定义（直到下一个定义）。,The definition of `name` in `source` (up to the next one).
+同时在 Scripting Nodes 编辑器中显示消息的 print()。,print() that also shows the message in the Scripting Nodes editor.
+打印,print
+插件的辅助函数。,Helper functions of the add-on.
+"所有内置图标的名称，第一个是 \NONE""。""","Names of all built-in icons, \NONE\"" first."""
+无,NONE
+选取内置图标,Pick a built-in icon
+图标,Icon
+节点和树的唯一 id。用于生成的标识符中。,A unique id for nodes and trees. Used in generated identifiers.
+复制的节点/树会复制其属性的 id。,Copied nodes / trees duplicate the ids of their properties.
+depsgraph 处理器使用的廉价检查（仅树 id）。,Cheap check (tree ids only) used by the depsgraph handler.
+类型,Type
+数据的类型（空：任意）,Type of the data (empty: any)
+集合,Collection
+该类型的集合,A collection of the type
+作为界面项属性的套接字属性：更改时重建。,A socket property as interface item property: rebuilds on change.
+默认值,Default
+此位置加上属性 `name`，或加上项（`key`）。,"This location plus attribute `name`, or plus an item (`key`)."
+此位置的前 `count` 个段。,The first `count` segments of this location.
+每一步的（标签、段数），根在最前。,"(label, segment count) of every step, the root first."
+无法访问实时数据（途中为 None、没有该项等）。,"The live data can't be reached (None on the way, no such item, ...)."
+选取 `item` 的键：在按名称查找项的地方按名称。,Key picking `item`: by name where items are found by name.
+"浏览器从其存储的 Python 路径得到的位置（\"" = 起点）。""","The browser's location from its stored Python path (\\"" = the start)."""
+连接到 `node` 的 Data 输入的 Blender Data 节点，或 None。,"The Blender Data node connected to `node`'s Data input, or None."
+"连接到 `node` 的 Data 输入的数据类型（无则为 \""）。""","The type of the data connected to `node`'s Data input (\\"" if none)."""
+`location` 是否以 `base` 开头。,Whether `location` starts with `base`.
+从 `location` 设置 `node` 的路径和键（根不变）。,Set `node`'s path and keys from `location` (root unchanged).
+人类友好的时长字符串。,Human-friendly duration string.
+从 bpy.app.driver_namespace 获取共享状态字典。,Get the shared state dict from bpy.app.driver_namespace.
+向叠加层添加日志条目，去重连续相同的消息。,"Add a log entry to the overlay, deduplicating consecutive identical messages."
+清除所有日志条目。,Clear all log entries.
+请求重绘所有节点编辑器。,Request redraw of all node editors.
+用于平滑动画的计时器回调。,Timer callback for smooth animation.
+如果未运行则启动重绘计时器。,Start the redraw timer if not running.
+停止重绘计时器。,Stop the redraw timer.
+绘制带阴影的文本以提高可读性。,Draw text with a shadow for better readability.
+返回路径面包屑字符串，如果不在组内则为 None。,"Return the path breadcrumb string, or None if not inside a group."
+绘制处理器回调——面包屑（始终）+ 日志叠加层（启用时）。,Draw handler callback - breadcrumb (always) + log overlay (when enabled).
+版权行，如果没有或无效则为 None。,"The copyright line, None if there is none or it isn't valid."
+不支持的第一个 Blender 版本，如果都支持则为 None。,"The first Blender version that isn't supported, None if any is."
+元数据有什么问题（写入时已修复或省略）。,What's wrong with the metadata (fixed or left out when written).
+blender_manifest.toml；`required`：节点需要的权限。,blender_manifest.toml; `required`: permissions the nodes need.
+插件的 __init__.py 的 `bl_info = {...}`。,The `bl_info = {...}` of the add-on's __init__.py.
+"新插件的随机友好名称（\Swift Otter Addon""）。""","Random friendly names for new addons (\Swift Otter Addon\"")."""
+由用户文本生成的有效 Python 标识符。,A valid Python identifier made from user text.
+`My Value` -> `my_value`。,`My Value` -> `my_value`.
+类名，例如 `MY_ADDON_OT_say_hello`。,"A class name, e.g. `MY_ADDON_OT_say_hello`."
+操作符 bl_idname，例如 `my_addon.say_hello`。,"An operator bl_idname, e.g. `my_addon.say_hello`."
+模块级函数或变量名（有效则按原样使用）。,A module level function or variable name (used as is if valid).
+脚本的模块，`<folder>/<name>.py`，由 `owner` 共享。,"A module of a script, `<folder>/<name>.py`, shared by `owner`."
+`base`，否则 `base_2`、`base_3`、…… 将结果添加到 `used`。,"`base`, else `base_2`, `base_3`, ... Adds the result to `used`."
+按固定顺序占用插件的每个名称。,"Claim every name of the add-on, in a fixed order."
+正在编译的构建（以及上一个构建）的名称。,Names of the build that's being compiled (and of the last one).
+`owner`（节点或树）声明为 `key` 的名称。,The name `owner` (node or tree) declared as `key`.
+文件夹 `path` 的包的导入路径，例如 `ui.panels`。,"Import path of the package of folder `path`, e.g. `ui.panels`."
+树的模块的导入路径，例如 `ui.panels.main`。,"Import path of a tree's module, e.g. `ui.panels.main`."
+插件信息,Add-on Info
+位置,Position
+点击选取按钮,Click a Pick button
+添加到菜单,Add to Menu
+菜单,Menu
+要绘制到的菜单（其类名带 Python 工具提示）,The menu to draw into (its class name with Python Tooltips)
+绘制到 Blender 的某个面板中，位于其内容下方。,"Draw into one of Blender's panels, below its contents."
+添加到面板,Add to Panel
+面板,Panel
+要绘制到的面板,The panel to draw into
+绘制到编辑器的标题栏，例如 3D 视口的标题栏。,"Draw into an editor's header, e.g. the 3D Viewport's header."
+添加到标题栏,Add to Header
+标题栏,Header
+要绘制到的标题栏,The header to draw into
+转换角度,Convert Angle
+转换,Conversion
+列表资产的（标签、资产），标签唯一。,"(label, asset) of the list's assets, labels unique."
+资产,Asset
+插件的文件或文件夹,File or folder of the add-on
+`text` 可以写成 `.text`（名称，不是关键字）。,"`text` can be written as `.text` (a name, not a keyword)."
+获取属性,Get Attribute
+按名称设置任意值的属性（`setattr`）。,Set an attribute of any value by its name (`setattr`).
+设置属性,Set Attribute
+倒角,Bevel
+Blender 函数,Blender Function
+路径指向该函数所属的数据。,The path leads to the data the function belongs to.
+参数的 `name=value`，None 表示保留其默认值。,"`name=value` for a parameter, None to leave it at its default."
+Blender 数据,Blender Data
+常量 True 或 False。,A constant True or False.
+布尔,Boolean
+值,Value
+用 and/or 组合两个布尔值。,Combine two booleans with and/or.
+布尔运算,Boolean Math
+比较,Comparison
+在框中绘制连接的 UI。,Draw the connected UI in a box.
+框,Box
+运行操作符的按钮。,A button that runs an operator.
+按钮,Button
+浮雕,Emboss
+以浮雕外观绘制按钮,Draw the button with an embossed look
+按下,Depress
+将按钮绘制为按下状态,Draw the button as if it were pressed
+仅图标,Icon Only
+只绘制图标，不带文本,"Draw only the icon, without a text"
+text=,text=
+将布尔属性绘制为复选框或切换按钮。,Draw a boolean property as a checkbox or toggle button.
+复选框,Checkbox
+切换,Toggle
+绘制为切换按钮,Draw as a toggle button
+反转,Invert
+反转绘制复选框,Draw the checkbox inverted
+将值限制在某个范围内。,Limit a value to a range.
+钳制,Clamp
+向集合属性追加新项。,Append a new item to a collection property.
+集合添加,Collection Add
+移除集合属性的所有项。,Remove all items from a collection property.
+集合清空,Collection Clear
+集合属性某个索引处的项。,The item at an index of a collection property.
+集合获取项,Collection Get Item
+集合属性中的项数。,Number of items in a collection property.
+集合长度,Collection Length
+从集合属性中移除某个索引处的项。,Remove the item at an index from a collection property.
+集合移除,Collection Remove
+常量 RGB 或 RGBA 颜色。,A constant RGB or RGBA color.
+颜色,Color
+使用 Alpha,Use Alpha
+在颜色值中包含 alpha 通道,Include alpha channel in color values
+将连接的 UI 上下排列绘制。,Draw the connected UI below each other.
+列,Column
+用分隔符连接字符串。,Join strings with a separator between them.
+组合字符串,Combine Strings
+比较两个值。,Compare two values.
+比较,Compare
+比较类型,Comparison Type
+是否处于模式,Is in Mode
+模式,Mode
+物体是网格、曲线、灯光等。None 为 False。,"Whether an object is a mesh, a curve, a light, ... False for None."
+是否为物体类型,Is Object Type
+按类型获取区域,Area by Type
+编辑器,Editor
+设置上下文数据,Set Context Data
+自定义图标,Custom Icon
+图像,Image
+自定义属性的值，不存在则为默认值。,"The value of a custom property, Default if it doesn't exist."
+获取自定义属性,Get Custom Property
+设置自定义属性（不存在则创建），或移除它。,"Set a custom property (created if it doesn't exist), or remove it."
+设置自定义属性,Set Custom Property
+操作,Operation
+显示图标,Display Icon
+显示预览,Display Preview
+为每个绘制,Draw For Each
+节点的设置（非输入）作为 `name=value`。,Settings of the node (not inputs) as `name=value`.
+绘制线条,Draw Lines
+线条,Lines
+在列表的每个点处绘制一个点。,A dot at each point of a list.
+绘制点,Draw Points
+以点列表为轮廓的填充形状。,A filled shape with a list of points as its outline.
+绘制多边形,Draw Polygon
+绘制矩形,Draw Rectangle
+填充,Fill
+绘制圆形,Draw Circle
+绘制文本,Draw Text
+对齐,Align
+阴影,Shadow
+其后的深色阴影,A dark shadow behind it
+以像素为单位的图像，从其左下角开始。,"An image in pixels, from its bottom left corner."
+绘制图像,Draw Image
+绘制物体,Draw Object
+样式,Style
+枚举项,Enum Item
+名称,Name
+UI 中显示的显示名称，并用作标识符,Display name shown in UI and used as identifier
+描述,Description
+工具提示文本,Tooltip text
+描述,Desc
+枚举菜单,Enum Menu
+展开,Expand
+将每一项显示为自己的按钮,Show every item as its own button
+仅绘制项的图标,Only draw the icons of the items
+标签,Labels
+显示各项,Show the items
+缩放,Scale
+图标的大小,Size of the icon
+"文件的内容（不存在则为 \""）及其行。""","The text of a file (\\"" if it doesn't exist) and its lines."""
+读取文本文件,Read Text File
+写入文本文件,Write Text File
+添加到末尾,Add to End
+保留该文件,Keep the file
+如果文件夹不存在，则创建文件夹（及其上级文件夹）。,Create a folder (and the folders above it) if it doesn't exist.
+创建文件夹,Create Folder
+文件夹中的文件和/或文件夹，按名称排序。,"The files and/or folders in a folder, sorted by name."
+列出文件夹,List Folder
+列表,List
+完整路径,Full Paths
+使用路径而不只是名称,Paths instead of only the names
+将文件夹和文件名合并为一个路径，并使用正确的分隔符。,"Join folder and file names into one path, with the right separator."
+合并路径,Join Path
+路径信息,Path Info
+从 .blend 文件加载,Load from Blend File
+链接,Link
+链接而非追加（保留在另一个文件中）,Link instead of append (stays in the other file)
+添加到场景,Add to Scene
+将加载的物体和集合放入场景,Put loaded objects and collections in the scene
+.blend 文件内容,Blend File Contents
+文件处理器,File Handler
+操作符,Operator
+打开文件的操作符节点（调用类型为文件浏览器）,An Operator node opening files (Invoke Type File Browser)
+拖入,Drop In
+常量十进制数。,A constant decimal number.
+浮点数,Float
+此插件或 Blender 的某个属性的值。,The value of a property of this addon or of Blender.
+获取属性,Get Property
+变量的当前值。,The current value of a variable.
+获取变量,Get Variable
+变量,Variable
+全局变量,Global Variable
+数据类型,Data Type
+选择器中提供的树：不包含此树的函数。,Trees offered in the picker: functions that don't contain this one.
+当从 UI 设置 node_tree 时，Blender 会调用它。,Blender calls this when node_tree is set from the UI.
+选择器会排除这些，但粘贴的节点仍然可以这样做。,"The picker leaves these out, but a pasted node can still do it."
+Blender 的某个图标。,One of Blender's icons.
+来自数据的图标,Icon from Data
+来源,Source
+如果/否则,If/Else
+让变量成为代码赋值的输出,Make a variable the code assigns an output
+添加输出,Add Output
+移除该输出,Remove the output
+移除输出,Remove Output
+内联脚本,Inline Script
+inline.py,inline.py
+从哪里加载脚本,Where to load the script from
+文本,Text
+包含代码的文本块,Text block with the code
+文件,File
+Python 文件的路径,Path to a Python file
+输出,Outputs
+代码中作为输出的变量,Variables of the code that are outputs
+输出,Output
+常量整数。,A constant whole number.
+整数,Integer
+True 变为 False，反之亦然。,True becomes False and the other way around.
+反转布尔值,Invert Boolean
+绘制一行文本，可带一个可选图标。,"Draw a line of text, with an optional icon."
+标签,Label
+流程的最外层布局（面板/菜单自身的布局）。,The outermost layout of the flow (the panel's/menu's own layout).
+继续在面板自身的布局中绘制，位于行、框等之外。,"Continue drawing in the panel's own layout, outside of rows, boxes, ..."
+重置布局,Reset Layout
+设置布局缩放,Set Layout Scale
+固定缩放,Fixed Scale
+设置以 UI 单位表示的固定大小，而不是缩放因子,Set a fixed size in UI units instead of a scale factor
+设置布局状态,Set Layout State
+按钮运行,Buttons Run
+其后的按钮如何启动其操作符,How buttons after it start their operator
+从多个输入创建列表,Create a list from multiple inputs
+创建列表,Create List
+从列表中特定索引处获取一项,Get an item from a list at a specific index
+列表获取项,List Get Item
+获取列表的长度,Get the length of a list
+列表长度,List Length
+查找列表中某项的索引,Find the index of an item in a list
+列表索引,List Index
+检查列表是否包含某项,Check if a list contains an item
+列表包含,List Contains
+获取列表的一个切片,Get a slice of a list
+列表切片,List Slice
+向列表末尾追加一项,Append an item to the end of a list
+列表追加,List Append
+在特定索引处插入一项,Insert an item at a specific index
+列表插入,List Insert
+从列表中移除某项的第一次出现,Remove the first occurrence of an item from a list
+列表移除,List Remove
+移除并返回特定索引处的一项,Remove and return an item at a specific index
+列表弹出,List Pop
+在特定索引处设置列表中的一项,Set an item in a list at a specific index
+列表设置项,List Set Item
+清除列表中的所有项,Clear all items from a list
+列表清空,List Clear
+通过追加另一个列表的所有项来扩展列表,Extend a list by appending all items from another list
+列表扩展,List Extend
+就地反转列表,Reverse a list in place
+列表反转,List Reverse
+就地排序列表,Sort a list in place
+列表排序,List Sort
+反转,Reverse
+按降序排序,Sort in descending order
+遍历列表中的每一项,Iterate over each item in a list
+对每个（列表）,For Each (List)
+在此流程其余部分存在的变量。,A variable that exists in the rest of this flow.
+局部变量,Local Variable
+运行节点若干次。索引从 0 开始计数。,Run nodes a number of times. Index counts from 0.
+重复,Repeat
+在循环中（重复、对每个）：停止它，或跳到下一项。,"In a loop (Repeat, For Each): stop it, or skip to the next item."
+中断/继续,Break / Continue
+操作,Action
+将值从一个范围映射到另一个范围。,Map a value from one range to another.
+映射范围,Map Range
+Markdown,Markdown
+用数字计算：加、乘、舍入、比较等。,"Calculate with numbers: add, multiply, round, compare and more."
+数学,Math
+下拉菜单按钮。其内容绘制到一个 Menu 类中。,A dropdown menu button. Its contents are drawn into a Menu class.
+菜单内容,Menu Contents
+一个菜单节点,A Menu node
+Blender 菜单,Blender Menu
+Blender 的某个,One of Blender
+返回,Return
+结果,Result
+事件是按键还是鼠标按钮，例如左键按下。,"Whether an event is a key or mouse button, e.g. Left Mouse pressed."
+是否为按键,Is Key
+按键,Key
+事件,Event
+事件信息,Event Info
+文本，为空时为 None（又是 Blender 自己的文本）。,"The text, None (Blender's own text again) when it's empty."
+设置标题栏文本,Set Header Text
+设置状态栏文本,Set Status Text
+设置光标,Set Cursor
+光标,Cursor
+多行标签,Multiline Label
+对齐,Alignment
+值 None。,The value None.
+无,None
+将整数或浮点属性绘制为数字字段。,Draw an integer or float property as a number field.
+数字字段,Number Field
+滑块,Slider
+将值显示为滑块,Display the value as a slider
+在 Blender 更改时,On Blender Change
+路径终止于的（结构名称、属性名称），或 None。,"(struct name, property name) the path ends at, or None."
+当此插件的某个属性更改时运行。,Runs when a property of this add-on changes.
+在属性更新时,On Property Update
+打开菜单,Open Menu
+一个 Menu、Pie Menu 或 Panel 节点,"A Menu, Pie Menu or Panel node"
+操作符设置,Operator Settings
+配置操作符设置,Configure operator settings
+未找到节点,Node not found
+调用行为,Invoke Behavior
+选项,Options
+操作符的工具提示,Tooltip of the operator
+调用类型,Invoke Type
+从 UI 启动操作符时发生什么,What happens when the operator is started from the UI
+注册,Register
+显示在操作符搜索中并支持调整上次操作,Show in the operator search and support Adjust Last Operation
+撤销,Undo
+在操作符运行后推入一个撤销步骤,Push an undo step after the operator ran
+撤销分组,Undo Grouped
+重复运行使用一个撤销步骤,One undo step for repeated runs
+阻塞,Blocking
+运行时阻止其他操作符,Block other operators while running
+内部,Internal
+从操作符搜索中隐藏,Hide from the operator search
+预设,Preset
+为属性显示预设菜单,Show a preset menu for the properties
+取决于光标,Depends on Cursor
+等待点击时的鼠标光标,Mouse cursor while waiting for the click
+标题,Title
+消息,Message
+确认按钮,Confirm Button
+宽度,Width
+过滤器,Filter
+只显示这些文件，例如 *.png;*.jpg（空：所有文件）,"Only show these files, e.g. *.png;*.jpg (empty: all files)"
+用 Esc / 右键取消,Cancel with Esc / Right Click
+当按下 Esc 或鼠标右键时结束操作符（已取消）,End the operator (cancelled) when Esc or right mouse is pressed
+计时器,Timer
+所选操作符的枚举属性的名称。,Names of the picked operator's enum properties.
+操作符菜单,Operator Menu
+属性,Property
+该操作符,The operator
+包的安装位置（更新 Scripting Nodes 时保留）。,Where packages are installed (kept when Scripting Nodes is updated).
+由名称生成的 Python 标识符：`Text Tools-1.2.zip` -> `text_tools_1_2`。,A Python identifier from a name: `Text Tools-1.2.zip` -> `text_tools_1_2`.
+元文件的设置（全部可选）及默认值。,The meta file's settings (all optional) with defaults.
+已安装的包，按 id。,"The installed packages, by id."
+包的模块的点分名称，包在前。,"Dotted names of the package's modules, packages first."
+导入每个已安装的包（错误保留在其包中）。,Import every installed package (errors stay with their package).
+{name}：一个节点包（由 Scripting Nodes 写入的索引文件）。,{name}: a node package (index file written by Scripting Nodes).
+由 Scripting Nodes 写入的索引文件。,Index file written by Scripting Nodes.
+删除已安装的包（其节点随下次重新加载一起消失）。,Delete an installed package (its nodes go with the next reload).
+面板设置,Panel Settings
+配置面板设置,Configure panel settings
+顺序,Order
+选项卡,Tab
+任意编辑器侧边栏、属性选项卡等中的面板。,"A panel in any editor's sidebar, properties tab, ..."
+空间类型,Space Type
+面板出现的编辑器类型,Editor type where the panel appears
+区域类型,Region Type
+面板在编辑器中出现的区域,Region within the editor where the panel appears
+上下文,Context
+属性编辑器的选项卡（仅在那里使用）,Tab of the Properties editor (only used there)
+类别,Category
+侧边栏选项卡名称（空：插件的,Sidebar tab name (empty: the add-on
+面板排序索引（值越大显示越靠下）,Panel ordering index (higher values appear lower)
+默认关闭,Default Closed
+面板初始为折叠状态,Panel starts collapsed
+隐藏标题栏,Hide Header
+隐藏面板标题栏,Hide the panel header
+点击,Click 
+在任意编辑器区域中,in any editor area
+饼菜单,Pie Menu
+指针字段,Pointer Field
+弹出框,Popover
+一个面板节点,A Panel node
+插件的偏好设置（显示在 偏好设置 > 插件 中）。,The preferences of the addon (shown in Preferences > Add-ons).
+偏好设置,Preferences
+生成的插件的 AddonPreferences 类，如果没有则为 None。,"The generated add-on's AddonPreferences class, None if it has none."
+预览,Preview
+偏好设置预览,Preferences Preview
+插件已更改，再次打开预览,"The add-on changed, open the preview again"
+打印消息（开发时也显示在节点编辑器中）。,Print a message (also shown in the node editor while developing).
+打印,Print
+进度条或进度环，系数从 0 到 1。,"A progress bar or ring, Factor from 0 to 1."
+进度,Progress
+设置属性布局,Set Property Layout
+`code` 的语法树，如果不是有效的 Python 则为 None。,"The syntax tree of `code`, None if it isn't valid Python."
+`code` 有什么问题以及在哪里，如 Python 所述。,"What's wrong with `code` and where, as Python says it."
+"Python 表达式（模式 \eval""）和 Python 语句（\""exec""）的基础。""","Base of Python Expression (mode \eval\"") and Python Statement (\""exec\"")."""
+代码,Code
+一行 Python,A line of Python
+Python 表达式,Python Expression
+Python 语句,Python Statement
+随机数、布尔值、向量或颜色，每次使用时都是新的。,"A random number, boolean, vector or color, new every time it's used."
+随机值,Random Value
+重绘,Redraw
+编辑器,Editors
+报告,Report
+将数字舍入到指定的小数位数。,Round a number to a number of decimals.
+舍入浮点数,Round Float
+舍入,Round
+将连接的 UI 并排绘制。,Draw the connected UI next to each other.
+行,Row
+运行此插件或 Blender 的操作符。,Run an operator of this addon or of Blender.
+运行操作符,Run Operator
+传递给操作符调用的执行上下文,Execution context passed to the operator call
+位置到屏幕,Location to Screen
+屏幕到位置,Screen to Location
+脚本函数,Script Function
+插件的脚本（在文件列表中）,Script of the add-on (in the Files list)
+节点调用的脚本函数,Function of the script the node calls
+无流程,Without Flow
+没有流程套接字：函数在其结果所在处被调用,No flow sockets: the function is called where its results 
+列表中选中的脚本，或 None。,"The picked script of the list, or None."
+节点调用的函数的（名称、Run）。,"(name, Run) of the function the node calls."
+或在文件面板中添加一个,Or add one in the Files panel
+UI 元素之间的空格或线。,Space or a line between UI elements.
+分隔符,Separator
+显示线,Show Line
+绘制一条线,Draw a line
+更改此插件或 Blender 的某个属性。,Change a property of this addon or of Blender.
+设置属性,Set Property
+更改变量的值。,Change the value of a variable.
+设置变量,Set Variable
+可向其添加快捷键的键位映射的 {name: space_type}。,{name: space_type} of the keymaps shortcuts can be added to.
+"作为文本的快捷键，\Ctrl Shift A""。""","The shortcut as text, \Ctrl Shift A\""."""
+快捷键,Shortcut
+位置,Where
+快捷键生效的位置：Window 表示到处、某个编辑器或某个模式,"Where the shortcut works: Window everywhere, an editor or a mode"
+并排的两列：Factor 是第一列所占比例。,Two columns side by side: Factor is the share of the first.
+分割,Split
+将以下元素排列在网格中。0 列：尽可能多。,Lay out the following elements in a grid. 0 columns: as many as fit.
+网格,Grid
+常量文本。,A constant text.
+字符串,String
+拆分字符串,Split String
+将列表的项合并为一个文本，之间用分隔符。,"Join the items of a list into one text, with a separator between them."
+合并列表,Join List
+将文本的每次出现替换为另一个。,Replace every occurrence of a text with another.
+替换字符串,Replace String
+切片字符串,Slice String
+文本的字符数。,The number of characters of a text.
+字符串长度,String Length
+将文本更改为大写、小写、标题大小写等。,"Change a text to upper case, lower case, title case, ..."
+更改大小写,Change Case
+大小写,Case
+修剪字符串,Trim String
+侧,Side
+将文本填充到某个长度，例如数字带前导零。,"Fill a text up to a length, e.g. numbers with leading zeros."
+填充字符串,Pad String
+`{}` 字段的数量，None 表示编号或命名格式。,"Number of `{}` fields, None for numbered or named ones."
+格式化字符串,Format String
+在字符串中查找,Find in String
+面板内的可折叠区域（layout.panel）。,A collapsible section inside a panel (layout.panel).
+子面板,Subpanel
+文本是否包含另一个文本、以其开头或结尾。,"Whether a text contains another text, starts or ends with it."
+子字符串在字符串中,Substring In String
+区分大小写,Case Sensitive
+添加分支,Add Case
+添加一个分支,Add a case
+切换,Switch
+根据条件在两个值中选一个。,Pick one of two values depending on a condition.
+切换数据,Switch Data
+输出数据类型,Output Data Type
+以不同的上下文（窗口、区域、活动物体等）运行代码。,"Run code with a different context (window, area, active object, ...)."
+临时覆盖,Temp Override
+文本字段,Text Field
+当前时间,Current Time
+文件加载时保留,Keep on File Load
+打开另一个文件时保持计时器运行,Keep the timer running when another file is opened
+延迟运行,Run with Delay
+按间隔运行,Run in Intervals
+Scripting Node Editor,Scripting Node Editor
+"组接口（侧边栏 \组"" 选项卡）中提供的套接字类型。""","Socket types offered in the group interface (sidebar \Group\"" tab)."""
+具有组接口：编译为函数，参见 core/functions。,"Has a group interface: compiles to a function, see core/functions."
+此树的 Python 模块，例如 `main`（core/naming.py）。,"Python module of this tree, e.g. `main` (core/naming.py)."
+模块的导入路径，例如 `ui.panels.main`。,"Import path of the module, e.g. `ui.panels.main`."
+模块在插件中的文件，例如 `ui/panels/main.py`。,"File of the module in the add-on, e.g. `ui/panels/main.py`."
+具有组接口的树定义的函数，例如 `greet`。,"Function a tree with a group interface defines, e.g. `greet`."
+ScriptingDataSocket,ScriptingDataSocket
+用节点上的按钮运行流程（构建时用于测试）。,Run a flow with a button on the node (for testing while building).
+触发,Trigger
+触发（插件未加载）,Trigger (addon not loaded)
+UI 列表,UI List
+过滤函数,Filter Function
+活动索引,Active Index
+具有 2 到 4 个分量的常量向量。,A constant vector with 2 to 4 components.
+向量,Vector
+维度,Dimensions
+向量维度,Vector dimensions
+绘制向量属性。,Draw a vector property.
+向量字段,Vector Field
+并排绘制各分量,Draw the components side by side
+将值显示为滑块,Display the values as sliders
+对 2 到 4 分量向量进行数学运算。,Math with 2 to 4 component vectors.
+向量数学,Vector Math
+使用的向量大小（叉积仅存在于 3D 中）。,Vector size in use (the cross product only exists in 3D).
+由其 X、Y、Z（和 W）值构成的向量。,"A vector from its X, Y, Z (and W) values."
+组合向量,Combine Vector
+向量的 X、Y、Z（和 W）值。,"The X, Y, Z (and W) values of a vector."
+分离向量,Separate Vector
+视口绘制,Viewport Draw
+绘制,Draw
+在前面,In Front
+绘制在物体前面而不是被它们遮挡,Draw in front of objects instead of being hidden by them
+在另一个文件替换它之前卸载此文件的插件。,Unload this file's addon before another file replaces it.
+`source` 定义了一个顶层函数 `name`。,`source` defines a top-level function `name`.
+MCP 服务器,MCP Server
+让 AI 代理（Claude、Codex 等）在此 Blender 中,"Lets AI agents (Claude, Codex, ...) build"
+构建并测试你的插件。,and test your add-on in this Blender.
+已停止,Stopped
+停止,Stop
+启动,Start
+复制以下项的设置：,Copy the setup for:
+端口,Port
+代理运行 Python,Agents Run Python
+从已注册的面板中发现所有面板属性并缓存它们。,Discover all panel attributes from registered panels and cache them.
+获取缓存的空间类型枚举项。,Get cached space type enum items.
+获取缓存的区域类型枚举项。,Get cached region type enum items.
+获取缓存的上下文类型枚举项。,Get cached context type enum items.
+获取缓存的面板位置。,Get cached panel locations.
+使缓存的面板属性失效（在注册/注销面板时调用）。,Invalidate the cached panel attributes (call if panels are registered/unregistered).
+为特定位置动态创建选取器面板类。,Dynamically create a picker panel class for a specific location.
+选取此位置,Pick This Location
+选取面板位置,Pick Panel Location
+选择此位置,Select This Location
+将此位置用于面板,Use this location for the panel
+取消位置选取器,Cancel Location Picker
+取消面板位置选取器,Cancel the panel location picker
+注销所有选取器面板并重置状态。,Unregister all picker panels and reset state.
+检查面板选取器当前是否处于活动状态。,Check if the panel picker is currently active.
+获取当前活动选取器的节点 ID。,Get the node ID of the currently active picker.
+从复制的数据路径设置路径（右键单击属性 > 为 Scripting Nodes 复制数据路径，或复制完整数据路径）,"Set the path from a copied data path (right-click a property > Copy Data Path for Scripting Nodes, or Copy Full Data Path)"
+粘贴数据路径,Paste Data Path
+选取此 Blender 数据的类型,Pick the type of this Blender data
+复制此属性的路径以粘贴到 Scripting Nodes 中,Copy the path of this property to paste it into Scripting Nodes
+为 Scripting Nodes 复制数据路径,Copy Data Path for Scripting Nodes
+Scripting Nodes 插件偏好设置,Scripting Nodes addon preferences
+MCP 服务器端口,MCP Server Port
+MCP 服务器监听的 TCP 端口（仅 localhost）,TCP port the MCP server listens on (localhost only)
+随 Blender 启动,Start with Blender
+Blender 启动时启动 MCP 服务器,Start the MCP server when Blender starts
+允许运行 Python,Allow Running Python
+令牌,Token
+从节点编辑器侧边栏（N 面板）启动/停止服务器。,Start/stop the server from the node editor sidebar (N panel).
+已安装的节点包（core/node_packages.py）。,Installed node packages (core/node_packages.py).
+节点包,Node Packages
+额外节点的压缩包。它们像插件一样运行 Python：,Zips of extra nodes. They run Python like add-ons:
+只安装你信任的包。,install only packages you trust.
+安装,Install
+移除此节点包（你文件中的该包节点将显示为缺失）,Remove the node package (nodes of it in your files show as missing)
+移除节点包,Remove Node Package
+获取插件偏好设置,Get the addon preferences
+计数,Count
+每个属性列表的（种类、所有者、项）。,"(kind, owner, items) of every property list."
+{属性 id：代码中的名称}，在一个列表内唯一。,"{property id: name in code}, unique within one list."
+`scene.<this>.count`：Blender 数据上插件的组。,`scene.<this>.count`: the add-on's group on Blender data.
+`category` 的每个属性的（标签、属性），标签唯一。,"(label, property) of every property of `category`, labels unique."
+如果字段 `attr` 指向（不再）存在的属性，则为 True。,True if field `attr` points at a property that doesn't exist (anymore).
+属性字段：搜索字段，若其属性已删除则显示为红色。,"A property field: search field, red if its property was deleted."
+`refs`：{属性：选取器类别}，参见 ScriptingBaseNode。,"`refs`: {attribute: picker category}, see ScriptingBaseNode."
+属性值的套接字类型。,Socket type of the property's values.
+作为 Python 值的默认值（用于套接字默认值）。,The default as a Python value (for socket defaults).
+给定所有者表达式时，属性作为其属性的数据。,"Data the property is an attribute of, given the owner expression."
+某个属性的 On Property Update 节点。,The On Property Update nodes of a property.
+`prop` 的定义所需的模块级名称（core/naming）。,Module level names the definition of `prop` needs (core/naming).
+在 `module` 内导入 `line`（相对于插件的文件夹）。,Import `line` (relative to the add-on's folder) inside `module`.
+按组排序，使一个组在其使用的组之后。,Groups ordered so a group comes after the groups it uses.
+占用所有属性的模块级名称（core/naming.build）。,Claim the module level names of all properties (core/naming.build).
+除非单引号需要更多转义，否则使用双引号。,Double quotes unless that needs more escapes than single ones.
+{body},{body}
+一条语句：其叶子、缩进和尾随注释。,"One statement: its leaves, indentation and trailing comment."
+"逻辑行、注释行（\#...""","Logical lines, comment lines (\#...\"""
+两个位于不同行的叶子之间的空白。,Whitespace between two leaves that were on different lines.
+{开括号的索引：其闭括号的索引}及其反向。,{index of an opening bracket: index of its closing one} and back.
+括号外叶子的索引（括号本身包含在内）。,Indices of leaves outside of brackets (brackets themselves included).
+将 leaves[start:end] 包裹在括号中并分割它。,Wrap leaves[start:end] in parentheses and split it.
+`if (a):` -> `if a:`，`return (a)` -> `return a`。,"`if (a):` -> `if a:`, `return (a)` -> `return a`."
+位于 j..i 处括号紧前或紧后的 `and` / `or`。,`and` / `or` right before or after the parentheses at j..i.
+记录快捷键,Record Shortcut
+按下快捷键的按键（Esc 取消）,Press the keys of the shortcut (Esc cancels)
+此字段可能指向的节点，按树顺序。,"Nodes this field may point at, in tree order."
+每个候选的（标签、节点）。,"(label, node) of every candidate."
+字段 `attr` 的（可见属性、隐藏 id 属性）。,"(visible property, hidden id property) for field `attr`."
+节点作为引用目标的名称（参见 `reference_label`）。,Name of a node as a reference target (see `reference_label`).
+`owner` 的节点字段 `attr` 所指向的节点，或 None。,"The node field `attr` of `owner` points to, or None."
+如果该字段指向（不再）存在的节点，则为 True。,True if the field points at a node that doesn't exist (anymore).
+"引用节点 `target` 的节点：[(用户节点, attr)]。","Nodes referencing node `target`: [(user node, attr)]."
+重建插件,Rebuild Addon
+重新加载 `package` 的已加载模块（以及它本身，除非跳过）。,"Reload the loaded modules of `package` (and it, unless skipped)."
+"模块 `relative`（\a.b""）在文件夹 `root` 中的文件","File of module `relative` (\a.b\"") in folder `root`"
+对于像 `frame_end` 这样的普通 Python 属性名，则为 True。,True for a plain Python attribute name like `frame_end`.
+类型名称的 RNA 结构，或 None。,"RNA struct of a type name, or None."
+派生自 `type_name` 的类型（ID 的 Mesh、Curve 等）。,"Types derived from `type_name` (Mesh, Curve, ... for ID)."
+路径的一段所求得的值。,What one segment of a path evaluates to.
+由 `owner` 描述的值的属性 `name`。,Attribute `name` of a value described by `owner`.
+从 `root` 开始，每段一步。,"One Step per segment, starting from `root`."
+步骤的 UI 名称：属性的名称，或项类型。,"UI name of a step: the property's name, or the item type."
+"用 `type_name` 指定类型的 Blender Data 套接字（\"" = 任意）。""","A Blender Data socket typed with `type_name` (\\"" = any)."""
+`step` 的值的套接字。,The socket for values of `step`.
+`owner` 的函数 `name`（functions()），或 None。,"Function `name` of `owner` (functions()), or None."
+函数的参数，或它返回的内容。,"The function's parameters, or what it returns."
+函数的参数或结果是什么，类似属性的步骤。,"What a parameter or result of a function is, like a property's step."
+函数参数或结果的套接字，及其默认值。,"The socket of a function's parameter or result, with its default."
+普通值参数的默认值（数据为 None）。,The default of a plain value parameter (None for data).
+`entry`（从 `parts` 所指向的位置找到）作为从根开始的路径。,`entry` (found from where `parts` lead) as a path from the root.
+`word` 是否在 `entry` 的最后一部分（其名称或标签）中。,Whether `word` is in the last part of `entry` (its name or label).
+如果 `path` 由 Scripting Nodes 创建（可安全覆盖/删除），则为 True。,True if `path` was created by Scripting Nodes (safe to overwrite/delete).
+用 `files` 同步磁盘 + Blender。如果插件已重新加载则返回 True。,Sync disk + Blender with `files`. Returns True if the addon was reloaded.
+生成的插件内每个 traceback 帧的（相对路径、行）。,"(relpath, line) of every traceback frame inside the generated addon."
+写入失败行的节点的 {节点 id：简短消息}。,{node id: short message} for the nodes that wrote the failing lines.
+完全禁用 + 启用 `module`。返回（ok，错误文本）。,"Fully disable + enable `module`. Returns (ok, error text)."
+禁用 `module` 并忘记其所有 Python 模块。,Disable `module` and forget all its Python modules.
+在加载另一个文件之前调用（除非插件持久化）。,Called before loading another file (unless the addon persists).
+"启用用户标记为 \persist"" 的插件（加载文件后）。""","Enable addons the user marked as \persist\"" (after loading a file)."""
+因 `node` 更改而重建。,Rebuild because `node` changed.
+因 `tree` 的链接或节点更改而重建。,Rebuild because links or nodes of `tree` changed.
+重建并重新检查整个文件（id、版本化、套接字）。,"Rebuild and re-check the whole file (ids, versioning, sockets)."
+立即运行待处理的工作。任何时候都可安全调用；从不抛出异常。,Run pending work now. Safe to call any time; never raises.
+`tree` 的节点，每个节点都在链接到它的节点之后。,"Nodes of `tree`, every node after the nodes linked into it."
+脚本定义的内容（script_signatures.Script）。,What the script defines (script_signatures.Script).
+脚本函数的名称，如果无法读取则为 []。,"Names of the script's functions, [] if it can't be read."
+文本的名称或文件的名称。,The text's name or the file's name.
+列表脚本的（标签、脚本），标签唯一。,"(label, script) of the list's scripts, labels unique."
+脚本模块的名称，参见 naming.Script。,"Names of the script's module, see naming.Script."
+调用 `script` 的某个函数的 Script Function 节点。,Script Function nodes calling a function of `script`.
+脚本无法解析。,The script doesn't parse.
+脚本定义的内容。,What a script defines.
+`source` 定义的内容。抛出 ScriptError。,What `source` defines. Raises ScriptError.
+`function` 返回的值的 [(标签、注解)]。,"[(label, annotation)] of the values `function` returns."
+`function` 函数体的节点，不含嵌套函数的节点。,"Nodes of `function`'s body, without those of nested functions."
+带有 `annotation`（AST 节点或 None）的值的套接字规范。,Socket spec for a value with `annotation` (an AST node or None).
+返回此请求必须被拒绝的原因，如果允许则为 None。,"Return why this request must be refused, or None if it's allowed."
+在 localhost:`port` 上启动服务器。绑定失败时抛出 OSError。,Bring the server up on localhost:`port`. Raises OSError on bind failure.
+干净地关闭。幂等。,Shut down cleanly. Idempotent.
+auto_load 钩子——确保卸载时不会留下绑定的端口。,auto_load hook — make sure we don't leave a port bound at unload.
+在配置的端口上启动 Scripting Nodes MCP 服务器,Start the Scripting Nodes MCP server on the configured port
+启动 MCP 服务器,Start MCP Server
+停止 Scripting Nodes MCP 服务器,Stop the Scripting Nodes MCP server
+停止 MCP 服务器,Stop MCP Server
+将此 MCP 服务器的客户端安装片段复制到剪贴板,Copy a client-install snippet for this MCP server to the clipboard
+复制 MCP 安装片段,Copy MCP Install Snippet
+目标,Target
+数据,Data
+流程,Flow
+流程类型,Flow Kind
+流程做什么：运行代码（程序）、启动代码 Blender,"What the flow does: run code (Program), start code Blender "
+一个入口点：Blender 运行的代码（事件、操作符的 execute）。,"An entry point: code Blender runs (an event, an operator's execute)."
+内置或自定义图标。用 nodes/_icon.icon_argument 绘制它。,A built-in or custom icon. Draw it with nodes/_icon.icon_argument.
+按 bl_idname 的任意套接字类型（用于运行时选择的类型）。,Any socket type by bl_idname (for types chosen at runtime).
+复制错误,Copy Error
+将完整错误消息复制到剪贴板,Copy the full error message to the clipboard
+插件错误,Addon Error
+转到错误,Go to Error
+正在运行，没有错误,"Running, no errors"
+插件无法,The addon couldn
+再次查找缺失的 id（节点可能已被添加或恢复）。,Look up missing ids again (nodes may have been added or restored).
+文件列表的一行：文件夹、树或脚本（node_tree/file_list.py）。,"A row of the Files list: a folder, tree or script (node_tree/file_list.py)."
+来自 blender_manifest.toml 的 Scripting Nodes 版本（单一事实来源）。,Scripting Nodes version from blender_manifest.toml (single source of truth).
+路径的一个 `[]` 如何选取一项。,How one `[]` of a path picks an item.
+项,Item
+路径,Path
+输入类型,Input Type
+作为,As
+路径的段，如果不是有效路径则为 None。,"Segments of the path, or None if it isn't a valid path."
+整个路径所求得的那一步。,The step the whole path evaluates to.
+路径（或其前 `count` 段）的代码。,Code of the path (or of its first `count` segments).
+从复制的 Python 路径设置路径。抛出 ValueError。,Set the path from a copied Python path. Raises ValueError.
+" \Active Object ? Modifiers[] ? Width"" 用于浏览按钮。"""," \Active Object ? Modifiers[] ? Width\"" for the browse button."""
+" \Render ? FPS"" 用于节点标题栏。"""," \Render ? FPS\"" for the node header."""
+路径编辑器。`header(row)` 向其第一行添加按钮。,The path editor. `header(row)` adds buttons to its first row.
+无效路径,Invalid path
+调用中的错误：消息告诉代理该做什么。,A mistake in the call: the message tells the agent what to do.
+"按 id 的节点，\<tree>/<name>""","A node by id, \<tree>/<name>\"""
+工具调用如何寻址 `socket`。,How a tool call addresses `socket`.
+Blender 值的 JSON 友好版本。,JSON-friendly version of a Blender value.
+节点自身的设置（非套接字），带值。,"The node's own settings (not sockets), with values."
+将 `raw`（来自 JSON）作为 RNA 属性 `prop` 的值。,`raw` (from JSON) as a value for the RNA property `prop`.
+从 JSON 值设置 `owner` 的 RNA 属性。,Set an RNA property of `owner` from a JSON value.
+类似 `socket` 的接口套接字（组内的套接字）。,Interface socket like `socket` (the socket inside the group).
+具有 Group Input / Output（以及流经它的流程）的函数树。,A function tree with Group Input / Output (and a flow through it).
+创建具有 Group Input 和 Group Output 的函数（节点组）,Create a function (node group) with Group Input and Group Output
+新建函数,New Function
+将所选节点移入新函数并从此处调用它,Move the selected nodes into a new function and call it from here
+创建函数,Make Function
+将所选组节点的节点放回此树,Put the nodes of the selected group nodes back into this tree
+取消分组,Ungroup
+"选取器为操作符显示（并存储）的文本，未知时为 \""。""","Text the picker shows (and stores) for an operator, \\"" if unknown."""
+"选取器值的 bl_idname，除非它是现有操作符，否则为 \""。""","bl_idname of the picker value, \\"" unless it's an existing operator."""
+来自 SN Operator 节点属性的规范。,Specs from the properties of an SN Operator node.
+从 Blender 操作符的 RNA 属性派生的规范。,Specs derived from a Blender operator's RNA properties.
+如果套接字自身的值是操作符属性的默认值，则为 True。,True if the socket's own value is the operator property's default.
+一个 Operator 节点,An Operator node
+Blender 操作符,Blender Operator
+一个内置 Blender 操作符,A built-in Blender operator
+"所选操作符的点分 bl_idname，或 \""。""","Dotted bl_idname of the chosen operator, or \\""."""
+以浮雕外观绘制该字段,Draw the field with an embossed look
+每个属性一个数据输出：其在类的流程内的值。,A data output per property: its value inside the class's flows.
+用于 ctx.flow(outputs=...) 的 {输出键：表达式}。,{output key: expression} for ctx.flow(outputs=...).
+编辑属性,Edit Properties
+所选的属性（core/properties.Found）或 None。,The picked property (core/properties.Found) or None.
+所有者的输入：Data 输入，或路径的键。,"Inputs for the owner: the Data input, or the path's keys."
+目标属性值的套接字。,Socket for values of the targeted property.
+局部变量只存在于它们自己的树中。,Local variables only exist in their own tree.
+由 Inline Script 和 Script Function 节点共享。,Shared by the Inline Script and Script Function nodes.
+`node` 拥有的套接字，用于在其脚本损坏时保留其链接。,"The sockets `node` has, to keep its links while its script is broken."
+（名称、创建它的代码）：行内的行，否则为列。,"(name, code creating it): a row inside a row, a column otherwise."
+使用文本数据块的内容（用于多行）,Use the contents of a text data-block (for several lines)
+String 输入，在选取文本数据块时移除。,"The String input, removed while a text data-block is picked."
