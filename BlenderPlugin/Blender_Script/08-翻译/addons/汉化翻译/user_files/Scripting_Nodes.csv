@@ -1,3 +1,4 @@
+子,Substring
 为什么插件需要它（最多 64 个字符）,Why the add-on needs it (at most 64 characters)
 插件名称,Addon Name
 插件的名称,The name of the addon
@@ -416,7 +417,7 @@ UI 中显示的显示名称，并用作标识符,Display name shown in UI and us
 将加载的物体和集合放入场景,Put loaded objects and collections in the scene
 .blend 文件内容,Blend File Contents
 文件处理器,File Handler
-操作符,Operator
+操作项,Operator
 打开文件的操作符节点（调用类型为文件浏览器）,An Operator node opening files (Invoke Type File Browser)
 拖入,Drop In
 常量十进制数。,A constant decimal number.
@@ -434,7 +435,7 @@ UI 中显示的显示名称，并用作标识符,Display name shown in UI and us
 Blender 的某个图标。,One of Blender's icons.
 来自数据的图标,Icon from Data
 来源,Source
-如果/否则,If/Else
+if,If/Else
 让变量成为代码赋值的输出,Make a variable the code assigns an output
 添加输出,Add Output
 移除该输出,Remove the output
@@ -497,11 +498,11 @@ True 变为 False，反之亦然。,True becomes False and the other way around.
 反转,Reverse
 按降序排序,Sort in descending order
 遍历列表中的每一项,Iterate over each item in a list
-对每个（列表）,For Each (List)
+for(list),For Each (List)
 在此流程其余部分存在的变量。,A variable that exists in the rest of this flow.
 局部变量,Local Variable
 运行节点若干次。索引从 0 开始计数。,Run nodes a number of times. Index counts from 0.
-重复,Repeat
+for(次数),Repeat
 在循环中（重复、对每个）：停止它，或跳到下一项。,"In a loop (Repeat, For Each): stop it, or skip to the next item."
 中断/继续,Break / Continue
 操作,Action
@@ -690,7 +691,7 @@ UI 元素之间的空格或线。,Space or a line between UI elements.
 面板内的可折叠区域（layout.panel）。,A collapsible section inside a panel (layout.panel).
 子面板,Subpanel
 文本是否包含另一个文本、以其开头或结尾。,"Whether a text contains another text, starts or ends with it."
-子字符串在字符串中,Substring In String
+符串包含,Substring In String
 区分大小写,Case Sensitive
 添加分支,Add Case
 添加一个分支,Add a case
@@ -927,7 +928,7 @@ Blender 值的 JSON 友好版本。,JSON-friendly version of a Blender value.
 从 Blender 操作符的 RNA 属性派生的规范。,Specs derived from a Blender operator's RNA properties.
 如果套接字自身的值是操作符属性的默认值，则为 True。,True if the socket's own value is the operator property's default.
 一个 Operator 节点,An Operator node
-Blender 操作符,Blender Operator
+Blender 操作项,Blender Operator
 一个内置 Blender 操作符,A built-in Blender operator
 "所选操作符的点分 bl_idname，或 \""。""","Dotted bl_idname of the chosen operator, or \\""."""
 以浮雕外观绘制该字段,Draw the field with an embossed look

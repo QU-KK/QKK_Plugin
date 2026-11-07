@@ -30,7 +30,7 @@ def property_exists(prop_path, glob, loc):
         return False
 
 
-def sna_add_to_view3d_mt_editor_menus_C9258(self, context):
+def sna_add_to_topbar_mt_editor_menus_00EEF(self, context):
     if not (False):
         layout = self.layout
         row_75797 = layout.row(heading='', align=True)
@@ -43,7 +43,8 @@ def sna_add_to_view3d_mt_editor_menus_C9258(self, context):
         row_75797.scale_y = 1.0
         row_75797.alignment = 'Expand'.upper()
         row_75797.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
-        col_B867E = row_75797.column(heading='', align=False)
+        row_75797.separator(factor=1.0)
+        col_B867E = row_75797.column(heading='', align=True)
         col_B867E.alert = node_tree_002['sna_mat_repeat']
         col_B867E.enabled = True
         col_B867E.active = True
@@ -53,8 +54,8 @@ def sna_add_to_view3d_mt_editor_menus_C9258(self, context):
         col_B867E.scale_y = 1.0
         col_B867E.alignment = 'Expand'.upper()
         col_B867E.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
-        op = col_B867E.operator('sna.my_generic_operator_0f4a7', text='', icon_value=string_to_icon('SHADING_RENDERED'), emboss=False, depress=False)
-        col_86665 = row_75797.column(heading='', align=False)
+        op = col_B867E.operator('sna.my_generic_operator_0f4a7', text='', icon_value=string_to_icon('SHADING_RENDERED'), emboss=True, depress=False)
+        col_86665 = row_75797.column(heading='', align=True)
         col_86665.alert = node_tree_002['sna_img_repeat']
         col_86665.enabled = True
         col_86665.active = True
@@ -64,8 +65,8 @@ def sna_add_to_view3d_mt_editor_menus_C9258(self, context):
         col_86665.scale_y = 1.0
         col_86665.alignment = 'Expand'.upper()
         col_86665.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
-        op = col_86665.operator('sna.my_generic_operator_4b25b', text='', icon_value=string_to_icon('SEQ_PREVIEW'), emboss=False, depress=False)
-        col_F13CE = row_75797.column(heading='', align=False)
+        op = col_86665.operator('sna.my_generic_operator_4b25b', text='', icon_value=string_to_icon('SEQ_PREVIEW'), emboss=True, depress=False)
+        col_F13CE = row_75797.column(heading='', align=True)
         col_F13CE.alert = node_tree_002['sna_nod_repeat']
         col_F13CE.enabled = True
         col_F13CE.active = True
@@ -75,7 +76,7 @@ def sna_add_to_view3d_mt_editor_menus_C9258(self, context):
         col_F13CE.scale_y = 1.0
         col_F13CE.alignment = 'Expand'.upper()
         col_F13CE.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
-        col_F13CE.label(text='', icon_value=string_to_icon('NODE_INSERT_OFF'))
+        op = col_F13CE.operator('sn.dummy_button_operator', text='', icon_value=string_to_icon('NODE_INSERT_OFF'), emboss=True, depress=False)
 
 
 class SNA_OT_My_Generic_Operator_0F4A7(bpy.types.Operator):
@@ -194,7 +195,7 @@ class SNA_OT_My_Generic_Operator_68D09(bpy.types.Operator):
                 node_tree_002['sna_img_repeat'] = True
                 break
         for i_C05E2 in range(len(bpy.data.node_groups)):
-            if '.0' in bpy.data.node_groups[i_C05E2].name:
+            if 'ZMD_Lit_Two.0' in bpy.data.node_groups[i_C05E2].name:
                 node_tree_002['sna_nod_repeat'] = True
                 break
         return {"FINISHED"}
@@ -204,18 +205,18 @@ class SNA_OT_My_Generic_Operator_68D09(bpy.types.Operator):
 
 
 @persistent
-def save_pre_handler_0FCF4(dummy):
+def save_post_handler_0FCF4(dummy):
     bpy.ops.sna.my_generic_operator_68d09('INVOKE_DEFAULT', )
 
 
 def register():
     global _icons
     _icons = bpy.utils.previews.new()
-    bpy.types.VIEW3D_MT_editor_menus.append(sna_add_to_view3d_mt_editor_menus_C9258)
+    bpy.types.TOPBAR_MT_editor_menus.append(sna_add_to_topbar_mt_editor_menus_00EEF)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_0F4A7)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_4B25B)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_68D09)
-    bpy.app.handlers.save_pre.append(save_pre_handler_0FCF4)
+    bpy.app.handlers.save_post.append(save_post_handler_0FCF4)
 
 
 def unregister():
@@ -226,8 +227,8 @@ def unregister():
     for km, kmi in addon_keymaps.values():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
-    bpy.types.VIEW3D_MT_editor_menus.remove(sna_add_to_view3d_mt_editor_menus_C9258)
+    bpy.types.TOPBAR_MT_editor_menus.remove(sna_add_to_topbar_mt_editor_menus_00EEF)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_0F4A7)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_4B25B)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_68D09)
-    bpy.app.handlers.save_pre.remove(save_pre_handler_0FCF4)
+    bpy.app.handlers.save_post.remove(save_post_handler_0FCF4)
