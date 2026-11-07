@@ -1,0 +1,2521 @@
++低模,Add as Low
++高模,Add as High
+在上一个静默窗口内 3D 视口发生移动（环绕、平移、缩放）时为 True。,"True while a 3D view moved (orbit, pan, zoom) within the last quiet window."
+在无头 Blender 中为 True，那里没有绘制循环来完成延迟拟合。,"True in headless Blender, where there is no draw loop to finish a Deferred fit."
+在当前线程上把延迟拟合跑到完成（没有队列稍后再完成它）。,A Deferred run to completion on this thread (no queue to finish it later).
+丢弃一个已不再需要的排队拟合（其结果已从别处得到）。,Drop a queued fit that is no longer needed (its result came from elsewhere).
+若拟合的线程已完成，则存下进行中的拟合：其阶段，否则为 None。,"Store the in-flight fit if its thread is done: its stage, else None."
+几何体编辑可能让失败的拟合变为可用：让绘制重新请求。,A geometry edit may make a failed fit work: let the draw ask again.
+用户采用默认值时安装程序的放置位置。,Where the installer puts things when the user takes the defaults.
+所有可能的安装根目录，按权威性从高到低排序，已去重。,"Every plausible installation root, most authoritative first, deduplicated."
+已安装负载中 ``filename`` 的第一个存在副本，否则为 None。,"First existing copy of ``filename`` in an installed payload, or None."
+一个通道的可烘焙性，由实际编译判定。,"One channel's bakeability, as decided by an actual compile."
+一种不同的拒绝，附带它阻止的所有通道。,"One distinct refusal, with every channel it blocks."
+材质通道从中烘焙的 Principled 输入插槽。,The Principled input socket a material channel bakes from.
+节点组内为 ``output_name`` 提供输入的插槽。,The socket inside a node group that feeds ``output_name``.
+把通道判定归并为每种不同拒绝一行。,Fold channel verdicts into one row per distinct refusal.
+一组通道判定的（状态，单行摘要）。,"(status, one-line summary) for a set of channel verdicts."
+除非缓存的签名仍然有效，否则重新计算材质报告。,Recompute a material's report unless its cached signature still holds.
+当前在着色器编辑器中编辑的材质，已去重。,"Materials currently edited in a Shader Editor, deduplicated."
+把读数标记为过期；由定时器在绘制路径之外完成工作。,Mark the readout stale; the timer does the work off the draw path.
+``node_path`` 中在 ``tree`` 里存在的最深节点（从最内层开始）。,Deepest node of ``node_path`` that exists in ``tree`` (innermost first).
+选中此问题对应的节点并在编辑器中框显,Select the node behind this issue and frame it in the editor
+聚焦节点,Focus Node
+材质,Material
+节点,Node
+节点路径,Node Path
+可烘焙性,Bakeability
+正在分析……,Analyzing...
+烘焙渲染器能产出什么，以及哪些控件仍然适用。,What a bake renderer can produce and which controls still apply.
+为本次会话/此次烘焙选定的具体烘焙器。,Concrete baker chosen for this session / bake.
+Blender/Cycles 恢复与 Cycles 主模式的能力。,Capabilities for Blender/Cycles recovery and Cycles-primary mode.
+原生 FYR GPU 烘焙器（Windows 生产路径）的能力。,Capabilities for the native FYR GPU baker (production Windows path).
+当 FYR 能烘焙此贴图而 Cycles 恢复不能时为 True。,True when FYR can bake this map but Cycles recovery cannot.
+Cycles 恢复对 ``map_type`` 的保真度，未知时为 None。,"Fidelity of Cycles recovery for ``map_type``, or None if unknown."
+返回面向用户的烘焙渲染器偏好设置（AUTO/FYR/CYCLES）。,Return the user-facing Bake Renderer preference (AUTO/FYR/CYCLES).
+在主线程之外探测，完成后重绘；绝不在绘制中进行。,Probe off the main thread and redraw when done; never inside a draw.
+fyr-baker-backend-probe,fyr-baker-backend-probe
+把 AUTO/FYR/CYCLES 偏好解析为此次烘焙/界面所用的具体烘焙器。,Resolve AUTO/FYR/CYCLES preference into the concrete baker for this bake/UI.
+当前已解析烘焙器的能力（可安全用于界面绘制）。,Capabilities for the currently resolved baker (safe for UI draw).
+本次运行将写入的一个烘焙输出，作为材质图像的匹配目标。,"One bake output this run will write, as a match target for material images."
+读取同一次运行所产出输出的一个材质行。,A material row reading an output produced by this same run.
+Normal 行先行之后的阶段 1 行（若未先行则为空）。,Phase-1 rows once the Normal row has gone first (empty when it has not).
+export.prepare_bake_job 命名所保留 Normal 行所需的信息。,What export.prepare_bake_job needs to name the retained Normal row.
+阶段 1 仅作为源烘焙的行（export.prepare_bake_job source_only_map_uuids）。,Rows stage 1 bakes as a source only (export.prepare_bake_job source_only_map_uuids).
+状态行用词：是什么把这些行放入了阶段 2。,Word for the status line: what put these rows in phase 2.
+去掉末尾的 UDIM 平铺段，使 ``Asset_Curvature.1001`` 能匹配 ``Asset_Curvature``。,Drop a trailing UDIM tile segment so ``Asset_Curvature.1001`` matches ``Asset_Curvature``.
+既能在 bpy 集合上、也能在普通测试列表上使用的插槽查找。,Socket lookup that works on a bpy collection and on a plain test list alike.
+判断 *node* 是否编译为 Material IR 的二次光线操作码。,Whether *node* compiles to a Material IR secondary-ray opcode.
+*start_socket* 上游可达的图像纹理节点。,Image Texture nodes reachable upstream of *start_socket*.
+"此行所烘焙通道的 ``(socket, group_stack)`` 入口点。","``(socket, group_stack)`` entry points for the channel this row bakes."
+MATERIAL 行将要编译所针对的材质，与 ``export._collect_material_ir_source`` 保持一致。,"Materials a MATERIAL row will compile against, mirroring ``export._collect_material_ir_source``."
+ShaderNodeBevel，与其他光线节点一样按两种方式匹配。,"ShaderNodeBevel, matched the same two ways as the other ray nodes."
+当此行使用材质细节（倒角）法线着色时为 True。,True when this row shades from the material-detail (bevelled) normal.
+当 Principled 的 Normal 输入带有值得烘焙的内容时为 True。,True when a Principled Normal input carries something worth baking.
+高模材质带有法线细节的切线法线行（Material Detail = Auto）。,Tangent Normal rows (Material Detail = Auto) whose high materials carry normal detail.
+该行的绿色通道约定，按 export 为任务解析它的方式解析。,"The row's green convention, resolved the way export resolves it for the job."
+当没有插件材质烘焙队列仍在运行时为 True。,True when no addon material-bake queue is still running.
+在界面/依赖图引用稳定后移除插件拥有的临时 Blender ID。,Remove addon-owned temporary Blender IDs after UI/depsgraph references settle.
+`_queue_deferred_id_purge` 的定时器回调。,Timer callback for `_queue_deferred_id_purge`.
+当 *material* 能通过 EMIT 提供切线空间法线时为 True。,True when *material* can supply a tangent-space normal via EMIT.
+目标的一致世界缩放；当其矩阵不是 s * 正交时为 None。,"The target's uniform world scale, or None when its matrix is not s * orthogonal."
+为 ``target`` 链接一个偏移 ``offset`` 个世界单位的临时烘焙笼；返回其名称。,Link a temporary cage for ``target`` offset ``offset`` world units; return its name.
+根据每个角点的 LOCAL 位置为 ``target`` 链接烘焙笼；拓扑变化时返回 None。,Link a cage for ``target`` from per-corner LOCAL positions; None on a topology change.
+以实际原因报错，而不是 Blender 的通用烘焙错误。,Fail with the actual cause instead of Blender's generic bake error.
+为单次烘焙固定场景的烘焙目标/swizzle/烘焙笼标志，随后恢复。,"Pin the scene's bake target / swizzle / cage flags for one bake, then restore."
+:func:`resolve_material_bake_device_with_note` 的仅设备形式。,Device-only form of :func:`resolve_material_bake_device_with_note`.
+为单次材质烘焙限制 Cycles 采样数，之后恢复场景的值。,"Cap Cycles samples for one material bake, restoring the scene's value after."
+颜色,Color
+向量,Vector
+__fyr_height_bump__,__fyr_height_bump__
+__fyr_tangent_normal_encode__,__fyr_tangent_normal_encode__
+将检测到或手动的 AO 图像经 Emission 路由，用于转烘焙。,Route a detected/manual AO image through Emission for transfer baking.
+切线法线烘焙目标的起始颜色，其他贴图为 ``None``。,"The colour a tangent normal bake target starts from, ``None`` for other maps."
+用平坦切线法线替换近黑或空的纹素。,Replace near-black / empty texels with a flat tangent normal.
+Non-Color,Non-Color
+对每个非空纹素做单位长度解码（EMIT 可能留下 |n|≠1）。,Unit-length decode for every non-void texel (EMIT can leave |n|≠1).
+将近水平法线拉回平坦（消除接缝处的闪光尖刺）。,Pull near-horizontal normals back toward flat (kills seam glitter spikes).
+当贴图仍有密集的中频颗粒时，对切线法线做盒式滤波。,Box-filter tangent normals when the map still has dense mid-frequency grain.
+切线法线各遍在 numpy 缓冲区上使用的 ``bpy.types.Image`` 切片。,"The slice of ``bpy.types.Image`` the tangent-normal passes use, over a numpy buffer."
+DirectX 约定：反转已完成的 OpenGL 切线贴图的编码绿色。,DirectX convention: invert the encoded green of a finished OpenGL tangent map.
+只分配目标平铺，保持网格的着色 UV 不变。,"Allocate only the destination tile, leaving the mesh's shading UVs intact."
+以导出器请求的准确文件名保存单个烘焙平铺。,Save a single bake tile under the exact filename requested by the exporter.
+（目标，任一目标所烘焙的所有高模），已去重。,"(targets, every high any target bakes from), duplicates removed."
+单个材质通道的内存规划；无法容纳时抛出 CyclesMemoryError。,Memory plan for one material channel; raises CyclesMemoryError when it cannot fit.
+按低模名称索引的 FittedCage（cycles_projection.FittedCage）。,FittedCage per low name (cycles_projection.FittedCage).
+在此材质中添加一个指向 image 的活动（选中）图像纹理节点。,Add an active (selected) Image Texture node pointing at image in this material.
+把物体材质槽位换成临时副本；退出时恢复并清除。,Swap object material slots to temporary copies; restore and purge on exit.
+UV Set 会成为活动层，直到 _cleanup；参见 bake_uv_layer_active。,The UV Set becomes the active layer until _cleanup; see bake_uv_layer_active.
+把条带 UV 指向下一个窗口，先重新检查内存。,"Point the strip UVs at the next window, re-checking memory first."
+推进会话。完成后返回 True。,Advance the session. Return True once it is complete.
+从网格的绘制层取得的每循环（偏移值，倾斜值），不存在时为 None。,"(offset values, skew values) per loop from the mesh's paint layers, None if absent."
+把 mathutils 矩阵表示为 float32 数组（按行）。,A mathutils matrix as a float32 array (rows).
+"对 ``vectors`` 的每一行调用 ``_transformed_normal(matrix_world, Vector(v))``。","``_transformed_normal(matrix_world, Vector(v))`` for every row of ``vectors``."
+"每循环的绘制偏移乘数 max(0, 1 + value)，为 float64；无该层时为 None。","Per-loop paint offset multiplier max(0, 1 + value) as float64, or None without the layer."
+"由 (N, k) 数组得到 list[tuple[float, ...]]：Python float，一趟 C 速度遍历。","list[tuple[float, ...]] from an (N, k) array: Python floats, one C-speed pass."
+用于先前构建的负载的 :func:`write_obj_from_triangles`（同一文件、同一引用）。,":func:`write_obj_from_triangles` for a payload built earlier (same file, same ref)."
+把拟合后的烘焙笼三角形细分到烘焙光线起始的表面上。,Tessellate fitted cage triangles onto the surface the bake's rays start from.
+"每个角点的（源、位置、法线、uv、绘制），为形状 (T, 3, k) 的 numpy 数组。","(source, position, normal, uv, paint) per corner as numpy arrays shaped (T, 3, k)."
+*obj* 真实网格边的世界空间键（不含三角化对角线）。,World-space keys of *obj*'s real mesh edges (no triangulation diagonals).
+"(S, 2, C) float32 线段的一次线性 1->2 拆分：(a, m)、(m, b)。","One linear 1->2 split of (S, 2, C) float32 segments: (a, m), (m, b)."
+:func:`subdivide_offset_arrays` 的 LINES 对应版本（每段 2 行角点）。,LINES counterpart of :func:`subdivide_offset_arrays` (2 corner rows per segment).
+覆盖每个角点的 UV 行和绘制行；未覆盖者对应为 None。,"UV and paint rows that cover every corner, or None for each that does not."
+:func:`_subdivide_buffers_numpy` 的纯 Python 回退实现（位置和法线）。,Pure-Python fallback of :func:`_subdivide_buffers_numpy` (positions and normals).
+:func:`subdivide_offset_buffers`，跳过烘焙笼已平坦的三角形。,":func:`subdivide_offset_buffers`, skipping triangles whose cage is already flat."
+:func:`subdivide_line_buffers`，跳过烘焙笼已平直的线段。,":func:`subdivide_line_buffers`, skipping segments whose cage is already straight."
+:func:`subdivide_offset_buffers` 的 LINES 对应版本（每段一分为二）。,LINES counterpart of :func:`subdivide_offset_buffers` (each segment split in two).
+全局 UV 的 UDIM 平铺编号（0-1 范围内为 1001）。,UDIM tile number of a global UV (1001 for the 0-1 square).
+``cache_key`` 的记忆化拟合结果，否则为 None（从不构建）。,"The memoized fit for ``cache_key``, or None (never builds)."
+从 ``world_point`` 到最近高模表面的世界空间距离，或 ``None``。,"World-space distance from ``world_point`` to the nearest high surface, or ``None``."
+根据源三角形包围盒估算安全的向外光线距离。,Estimate a safe outward ray distance from the source triangle bounding box.
+拟合所读取的全部内容的哈希；网格无法读取时为 None。,"Hash of everything the fit reads, or None when a mesh could not be read."
+fyr-cage-fit-save,fyr-cage-fit-save
+阻塞直到所有排队的保存都已写完（测试、测试框架）。,"Block until every queued save has been written (tests, harnesses)."
+已为 ``key`` 拟合好的（偏移，诊断），来自内存或磁盘，否则为 None。,"(offsets, diagnostics) already fitted for ``key``, from memory or disk, else None."
+保留在别处（预览的工作线程）完成的拟合，存于内存和磁盘。,"Keep a fit made elsewhere (the preview's worker thread), in memory and on disk."
+工具缺失、无法启动，或返回了错误。,"The tool is missing, could not start, or answered with an error."
+一个常驻的 ``fyr_cage_gpu.exe``。调用串行执行；进程惰性重启。,One resident ``fyr_cage_gpu.exe``. Calls are serialized; the process is restarted lazily.
+若工具未运行则启动它（抛出 :class:`CageGpuError`）；返回其 HELLO 信息。,Start the tool if it is not running (raises :class:`CageGpuError`); returns its HELLO info.
+fyr-cage-gpu-idle,fyr-cage-gpu-idle
+工具自身的 VRAM/RAM 数值（当前和峰值）、缓存大小与上限，单位为 MB。,"The tool's own VRAM / RAM numbers (current and peak), cache size and limit, in MB."
+进程级工作者，工具未安装时为 None。,"The process-wide worker, or None when the tool is not installed."
+在本次会话剩余时间内停止使用 GPU 光线检查（拟合失败则回退）。,Stop using the GPU ray check for the rest of the session (a failed fit falls back).
+每条光线的（距离，朝向）；未命中时距离为 -1。,"(distance, facing) per ray; distance -1 on a miss."
+``cage.raise_offsets_to_ray_reach`` 的 GPU 对应实现（相同的约定和常量）。,GPU twin of ``cage.raise_offsets_to_ray_reach`` (same contract and constants).
+供回退步骤使用的（每个三角形的分块 id，低模三角形的 BVH）。,"(piece id per triangle, BVH of the low triangles) for the revert step."
+启用 GPU 烘焙笼后默认开启；FYR_GPU_CAGE_NATIVE=0 则保留 numpy 版本。,On by default once the GPU cage is enabled; FYR_GPU_CAGE_NATIVE=0 keeps the numpy port.
+每个拟合键在偏移字典中的键（``cage._source_position_group_key``）。,The offsets-dict key of every fit key (``cage._source_position_group_key``).
+一组低模角点位置的（对角线、窗口、边距），与 CPU 拟合相同。,"(diagonal, window, margin) of a set of low corner positions, like the CPU fit."
+随原生拟合开启；FYR_GPU_CAGE_COVERAGE=0 则保留 Python 的普通覆盖拟合。,On with the native fit; FYR_GPU_CAGE_COVERAGE=0 keeps the plain coverage fit in Python.
+针对已准备数组的 CMD_COVERBATCH 项（每个分区一项）。,The CMD_COVERBATCH items (one per partition) for prepared arrays.
+把原生拟合的偏移写回 ``offsets`` 和诊断信息；返回被抬升的角点。,Write a native fit's offsets back into ``offsets`` and the diagnostics; returns raised corners.
+原生路径上单个组的光线检查（参见 :func:`raise_offsets_to_ray_reach`）。,One group's ray check on the native path (see :func:`raise_offsets_to_ray_reach`).
+开启共享高模作用域（幂等）。,Open the shared-high scope (idempotent).
+关闭作用域并释放其持有的所有内容。,Close the scope and free everything it held.
+高模集的身份 + 内容戳键；在作用域之外或签名失败时为 None。,Identity + content-stamp key of a high set; None outside a scope or when a signature fails.
+再记录一个针对 ``highs`` 拟合的组；其第二次会使该条目变为热态。,Note one more group fitting against ``highs``; its second turns the entry warm.
+GPU 处理中存放高模已上传纹理的字典；在作用域之外为 None。,Dict the GPU pass keeps the high's uploaded texture in; None outside a scope.
+高模的世界空间顶点（拟合捕获），在作用域内每个高模集捕获一次。,"The highs' world-space vertices (fit capture), captured once per high set in a scope."
+每个低模针对 ``highs`` 的一个内容键（无法取得摘要处为 None）。,One content key per low against ``highs`` (None where a digest could not be taken).
+整个组可达性估算所用的一个内容键（参见 estimate_group_reach）。,One content key for a whole group's reach estimate (see estimate_group_reach).
+一个低模的世界空间采样点及权重（参见 :meth:`_sample_points`）。,World-space sample points + weights of one low (see :meth:`_sample_points`).
+逐顶点的最近表面间隙；按面积加权百分位聚合。,Nearest-surface per-vertex clearances; aggregate via area-weighted percentile.
+丢弃其所在组已通过烘焙笼菜单眼睛图标隐藏烘焙笼叠加的预览目标。,Drop preview targets whose group has its cage overlay hidden via the cage menu eye.
+存在某个可用相邻面使 ``threshold_test(dot)`` 为真的组。,Groups for which some usable incident face makes ``threshold_test(dot)`` true.
+按顺序合并所有 ``soups`` 得到的一个 soup（等同于拼接它们三角形的列表）。,One soup of ``soups`` in order (the same list as concatenating their triangles).
+"``(3T, 4)`` int64：取整后的源位置（x1e6）及每个角点的物体 id。","``(3T, 4)`` int64: the rounded source position (x1e6) and the object id of every corner."
+每个拟合键首个角点的 ``key_tuples``，按 ``unique_keys`` 顺序。,"``key_tuples`` of the first corner of every fit key, in ``unique_keys`` order."
+``cage_gpu_fit.prepare_arrays`` 从物体推导出的内容（相同的数组）。,What ``cage_gpu_fit.prepare_arrays`` derives from the objects (same arrays).
+``cage._source_triangles_diagonal``：源位置的包围对角线。,``cage._source_triangles_diagonal``: the bounds diagonal of the source positions.
+非空的 ``groups``：全为 soup 时合并为一个 soup，否则合并为一个三角形列表。,"The non-empty ``groups`` as one soup when all are soups, else as one list of triangles."
+从现在构建的索引开始响应查找。与 :func:`close_scope` 配对使用；可嵌套。,Start answering lookups from an index built now. Pair with :func:`close_scope`; nests.
+``obj`` 所链接的集合（即 ``obj.users_collection`` 返回的内容）。,The collections ``obj`` is linked to (what ``obj.users_collection`` returns).
+基于固定基础名称列表的工厂，用于测试和显式输入。,"A factory over a fixed list of base names, for tests and explicit input."
+在单个烘焙任务中填充每个高模网格角点颜色流的内容。,What fills the corner colour stream of every high mesh in one bake job.
+ATTRIBUTE 行所烘焙的流（按配置的名称和范围）。,"The stream an ATTRIBUTE row bakes (its name and range, as configured)."
+贴图行所读取的角点颜色流；不读取任何流时为 None。,"The corner colour stream a map row reads, or None when it reads none."
+``mesh`` 上 ATTRIBUTE 行可烘焙的属性名称（排除内部以 '.' 开头的名称）。,Attribute names on ``mesh`` an ATTRIBUTE row can bake (internal '.' names excluded).
+"属性原始值的（域，float32 数组 (n, k)）；无法烘焙时为 None。","(domain, float32 array (n, k)) of an attribute's raw values, or None if unbakeable."
+把 FACE/EDGE 行转换到流写入器可索引的域（POINT/CORNER）。,Bring FACE / EDGE rows onto a domain the stream writers index (POINT / CORNER).
+``meshes`` 中 ``attribute_name`` 各分量的最小值和最大值。,Min and max over every component of ``attribute_name`` across ``meshes``.
+此贴图类型的烘焙输出在磁盘上是否带 sRGB 编码。,Whether a baked output of this map type carries an sRGB encoding on disk.
+读取此贴图类型输出时必须使用的 Blender 色彩空间。,Blender colorspace an output of this map type must be READ with.
+存储的或生效的贴图类型所属的 MAP_TYPE_ITEMS 成员。,The MAP_TYPE_ITEMS member a stored or effective map type belongs to.
+"针对不支持的格式/位深组合的可操作单行提示（有效时为 """"）。","Actionable one-liner for an unsupported format/depth pair ("""" when valid)."
+旧版 anti_aliasing 枚举标识符对应的采样遍数。,Sample-pass count for a legacy anti_aliasing enum identifier.
+不大于给定采样数的最接近旧版枚举（旧后端回退）。,Nearest legacy enum <= the given sample count (older-backend fallback).
+把任何存储的切线基值映射到唯一受支持的基。,Map any stored tangent-basis value onto the single supported basis.
+Cycles 烘焙无法在可用内存中运行。这段文字是给美术看的。,A Cycles bake cannot run in the memory that is free. The text is for the artist.
+约束上限：可用 RAM 与可用提交内存中较小者。,The binding limit: the smaller of free RAM and free commit.
+可用物理内存、物理内存总量和可用提交内存，或 None。,"Free physical memory, total physical memory and free commit, or None."
+修改器求值后网格的三角形数（未知时为 0）。,Triangles of the modifier-evaluated mesh (0 when unknown).
+按最终文件扫描线的写入顺序排列的条带。,Strips in the order the final file's scanlines are written.
+重建规划器已选定的方案（该步骤只存储行数）。,Rebuild the plan a planner already chose (the step stores only the row count).
+当仅 ``scene_bytes`` 就超过可用量时测得的内存数值，否则为 None。,"The measured memory when ``scene_bytes`` alone is more than is free, else None."
+未传入 uv_layer 时烘焙所栅格化的 UV 层：active_render。,The UV layer a bake rasterizes when no uv_layer is passed: active_render.
+烘焙所栅格化的 UV 层：若给定则用指定的 ``uv_layer``，否则用 active_render。,"The UV layer a bake rasterizes: the named ``uv_layer`` if given, else active_render."
+烘焙路径将 ``path`` 保存为的 Blender 文件格式（默认 EXR）。,The Blender file format the bake paths save ``path`` as (EXR by default).
+保存 ``image``（一个已完成的条带窗口）并追加其保留的行。,Save ``image`` (one finished strip window) and append its kept rows.
+条带所需的重叠行数：EXTEND 边距 + 后置滤波半径 + 1 行渐变。,Rows of overlap a strip needs: EXTEND margin + post filter radius + 1 gradient row.
+如何通过 Cycles 生成一种贴图类型。,How to produce one map type through Cycles.
+"CUSTOM 烘焙笼引用背后的场景物体，或 """"（Automatic 烘焙笼是文件）。","The scene object behind a CUSTOM cage ref, or """" (Automatic cages are files)."
+网格引用的磁盘文件（共享内存引用始终保留文件回退）。,The on-disk file of a mesh ref (a shared-memory ref always keeps a file fallback).
+"soup 布局烘焙笼文件中每个三角形角点的世界位置，``(3 * T, 3)``。","World positions of every triangle corner of a soup-layout cage file, ``(3 * T, 3)``."
+该组已导出的 Automatic 烘焙笼，每个有烘焙笼的低模一个。,"The group's exported Automatic cages, one per low that has one."
+DIFFUSE 烘焙保留哪种光照：Direct/Indirect Lighting 行各烘焙自己的部分。,Which light a DIFFUSE bake keeps: Direct / Indirect Lighting rows bake their part.
+"mix(1, local AO, flag)，其中 flag 从 LOCAL_AO_ATTRIBUTE 读取：1 + flag * (AO - 1)。","mix(1, local AO, flag) with the flag read from LOCAL_AO_ATTRIBUTE: 1 + flag * (AO - 1)."
+把物体空间法线转到世界的 3x3 矩阵（世界 3x3 的逆转置）。,3x3 taking object-space normals to world (inverse-transpose of the world 3x3).
+Cycles 物体空间法线 → 世界空间，就地编码为 0..1。,"Cycles OBJECT-space normals → world-space, encoded 0..1 in place."
+Cycles POSITION 是世界空间；Fyr 存储物体空间——就地转换。,Cycles POSITION is world-space; Fyr stores object-space — convert in place.
+DirectX 绿色：Cycles 烘焙 OpenGL（+Y），GPU 路径遵循该行的格式。,"DirectX green: Cycles bakes OpenGL (+Y), the GPU path honours the row's format."
+为单遍固定场景的烘焙 swizzle/烘焙笼标志，随后还原。,Pin the scene's bake swizzle / cage flags for one pass and put them back.
+除非已知 ``emit_kind`` 的网络只读取着色后的表面，否则为 True。,True unless ``emit_kind``'s network is known to read only the shaded surface.
+实例化 ``collection`` 是否会实例化某个参与者（包括嵌套的实例化器）？,Does instancing ``collection`` instance a participant (nested instancers too)?
+把灰度高度写入 high_pos_image（复用作输出缓冲区）。,Write greyscale height into high_pos_image (reused as the output buffer).
+由三个 RGBA 遍得到的（沿低模法线的带符号高度，覆盖遮罩）。,"(signed height along the low normal, coverage mask) from the three RGBA passes."
+编码范围：烘焙笼挤出量，扩展到覆盖到的最大 |height|。,"The encode range: the cage extrusion, widened to the largest covered |height|."
+把 Fyr 光线预算限制为合理的 Cycles 采样数。,Clamp a Fyr ray budget into a sane Cycles sample count.
+由其两个探测遍把编码后的厚度写入 ``image``。,Write the encoded thickness into ``image`` from its two probe passes.
+由两个 ``thickness_probe`` 遍得到的编码灰度厚度（RGBA）。,Encoded greyscale thickness (RGBA) from the two ``thickness_probe`` passes.
+物体空间法线烘焙（0..1）→ 单位世界空间向量。,Object-space normal bake (0..1) → unit world-space vectors.
+由发射烘焙的向量（0..1）→ 单位向量，不改变空间。,"Emit-baked vector (0..1) → unit vectors, no space change."
+每个 Cycles 投影贴图在合成步骤之后都会获得的输出侧滤镜。,Output-side filters every Cycles projection map gets after its compose step.
+该贴图的每一遍都是选中到活动，因此没有任何一遍会着色低模的 UV。,"Every pass of the map is selected-to-active, so no pass shades the low's UVs."
+此贴图的任一遍能否同步/看到其自身之外的可渲染物体？,Can any pass of this map sync / see render-visible objects beyond its own?
+单个投影贴图烘焙的（围裙行数，每纹素字节数）。,"(apron rows, bytes per texel) of one projection map's bake."
+None = 整图路径；否则为任务所烘焙的 StripPlan。,None = the whole-image path; otherwise the StripPlan the job bakes.
+只运行一遍 Cycles 烘焙（第一遍还会完成贴图设置）。,Run exactly one Cycles bake pass (the first one also sets the map up).
+在最后一遍之后合成并保存贴图。返回输出路径。,Compose and save the map after its last pass. Returns the output path.
+Cycles 工作的一个（组、贴图、平铺）单元——异步 tick 的粒度。,"One (group, map, tile) unit of Cycles work — the granularity of async ticks."
+经过校验的 Cycles 工作列表，以及烘焙开始前发现的所有问题。,Validated Cycles work list plus every problem found before baking started.
+此后端完全拥有的烘焙所用的 Cycles 设备（主路径或恢复路径）。,Cycles device for a bake this backend owns outright (primary or recovery).
+该组在 ``source_objects`` 中从高模投射 AO，用于 AO 系列贴图。,"The group's Casts AO off highs among ``source_objects``, for an AO-family map."
+没有该组 UV Set 的低模名称（未设置 UV Set 时为空）。,Names of the lows without the group's UV Set (none when no UV Set is set).
+后续贴图集成员在被合成进贴图集之前烘焙的位置。,Where a later texture-set member bakes before it is composited into the set.
+烘焙一个已规划的步骤。返回错误字符串，成功时为 None。,"Bake one planned step. Returns an error string, or None on success."
+失败的已规划步骤所报告的错误行（两个驱动都用这个）。,The error line a failed planned step reports (both drivers use this).
+一个 Lit Color 输出的隐藏源文件，彼此相邻的线性 EXR。,"Hidden source files of one Lit Color output, all linear EXR next to each other."
+同一贴图集的各个组写入同一个 Wireframe 文件：把它们的低模一起绘制。,Groups of one texture set write one Wireframe file: draw their lows together.
+令牌文件的绝对路径；Blender 没有配置目录时为 None。,"Absolute path of the token file, or None when Blender has no config dir."
+"已存储的设备令牌；未存储或文件无法读取时为 """"。","The stored device token, or """" when none is stored or the file is unreadable."
+删除令牌文件。当不残留令牌时为 True，包括原本就不存在的情况。,"Remove the token file. True when no token remains, including when none existed."
+更新请求所用的 Authorization 头；未连接时为 {}。,"The Authorization header for update requests, or {} when not connected."
+"POST JSON 并返回 ``(status, body_dict)``。网络失败时为 ``(0, {...})``。","POST JSON and return ``(status, body_dict)``. Network failure is ``(0, {...})``."
+"向站点请求配对。返回服务器负载，或 ``{""error"": ...}``。","Ask the site for a pairing. Returns the server payload, or ``{""error"": ...}``."
+一次轮询。始终返回带 ``status`` 键的字典。,One poll. Always returns a dict with a ``status`` key.
+告知站点此令牌已失效。尽力而为；无论如何都会清除本地文件。,Tell the site this token is done. Best effort; the local file is cleared regardless.
+当前配对的副本；没有进行中或已完成的配对时为 None。,"A copy of the current pairing, or None when no pairing is in progress or finished."
+更新配对；传入 ``generation`` 时，仅在该配对仍为当前配对时更新。,"Update the pairing; with ``generation``, only while that pairing is still current."
+当配对为 ``generation`` 且正在等待批准时返回其副本，否则为 None。,"A copy of the pairing while it is ``generation`` and waiting for approval, else None."
+忘记已完成的配对，使偏好设置回退到空闲视图。,Forget a finished pairing so the preferences fall back to the idle view.
+开始配对；已有配对进行中时返回 False。,Start a pairing; False when one is already in progress.
+fyr-baker-device-link,fyr-baker-device-link
+（重新）在浏览器中打开批准页面。没有可打开的内容时返回 False。,(Re)open the browser at the approval page. False when there is nothing to open.
+主线程 tick：代码出现后打开浏览器，保持界面刷新。,"Main-thread tick: open the browser once the code exists, keep the UI fresh."
+在本地忘记令牌并告知站点，在主线程之外进行。,"Forget the token locally and tell the site, off the main thread."
+fyr-baker-device-unlink,fyr-baker-device-unlink
+偏好设置“更新”区域内的“Fyr 账户”区块。,"The ""Fyr account"" block inside the Updates section of the preferences."
+已连接到你的 Fyr 账户。更新可一键安装。,Connected to your Fyr account. Updates install with one click.
+此账户没有有效的 Fyr Baker 许可证，因此无法下载更新。,"This account has no active Fyr Baker license, so updates cannot be downloaded."
+断开连接,Disconnect
+你的代码：,Your code: 
+在已打开的浏览器窗口中批准它，然后回到这里。,"Approve it in the browser window that opened, then come back here."
+正在向 fyrplugins.com 请求代码……,Asking fyrplugins.com for a code...
+再次打开浏览器,Open Browser Again
+取消,Cancel
+重试,Try Again
+连接已断开。请重新连接。,The connection was lost. Connect again.
+连接你的 Fyr 账户即可一键安装更新。,Connect your Fyr account to install updates with one click.
+连接账户,Connect Account
+连接 Fyr 账户,Connect Fyr Account
+打开批准页面,Open Approval Page
+再次在浏览器中打开批准页面,Open the approval page in your browser again
+取消连接,Cancel Connection
+停止等待批准,Stop waiting for approval
+断开 Fyr 账户,Disconnect Fyr Account
+忘记此计算机上的连接，并从你的 Fyr 账户中移除,Forget the connection on this computer and remove it from your Fyr account
+当场景的灯光或世界发生变化时必须重新烘焙的已启用行类型。,Enabled row types that must rebake when the scene's lights or world change.
+"为每个低模、高模和烘焙笼物体返回 object_name -> [group_name, ...]。","Return object_name -> [group_name, ...] for every low, high, and cage object."
+单个灯光与烘焙相关的状态，对应 export._build_scene_light_record。,"One light's bake-relevant state, mirroring export._build_scene_light_record."
+为多组贴图集中的组返回 group_name -> [sibling_group_names]。,Return group_name -> [sibling_group_names] for groups in multi-group texture sets.
+上下文管理器：在期间静默 _on_depsgraph_update。,Context manager: silence _on_depsgraph_update for the duration.
+手动将某组的特定贴图类型标记为需要重新烘焙。,Manually mark specific map types for a group as needing rebake.
+将每个组和每个已知贴图类型标记为脏（强制完整增量烘焙）。,Mark every group and every known map type as dirty (forces full incremental bake).
+"在部分烘焙成功后清除特定的 (group, map_type) 条目。","Clear specific (group, map_type) entries after a successful partial bake."
+距上次脏事件的秒数。若尚无脏状态则返回 inf。,Seconds since the last dirty event. Returns inf if nothing is dirty yet.
+当上次脏事件后已过去足够长的静默时间时为真。,True when enough quiet time has passed after the last dirty event.
+在组成员变化（添加/移除物体）后调用，无需重启会话。,Call after group membership changes (add/remove objects) without restarting the session.
+停止跟踪并丢弃所有脏状态。,Stop tracking and discard all dirty state.
+将估算器的偏移量赋给 ``group``；发生变化时返回真。,Give ``group`` the estimator's offset; True when it changed.
+setup_progress 卡片：只要还有拟合未完成就显示，以免长时间的拟合看起来卡住。,"The setup_progress card: shown while fits remain, so a long fit never looks stuck."
+在烘焙读取偏移量之前完成队列中的拟合（全部或某个项目的）。,"Finish the queued fits (all, or one project's) before a bake reads the offsets."
+AppLink ``import.txt`` 的内容。写入前网格文件必须已存在。,AppLink ``import.txt`` body. The mesh file must already exist before this is written.
+将低模放入 3DCoat 的绘制室，并分配有槽位的烘焙贴图。,Drop the low poly into 3DCoat's paint room and assign the baked maps that have slots.
+Mari 的平铺令牌是 ``$UDIM``，我们的是 ``<UDIM>``。,Mari's tile token is ``$UDIM``. Ours is ``<UDIM>``.
+在低模上打开 Mari。已打开的项目会加入该网格；否则会新建项目。,Open Mari on the low poly. An open project gains the mesh; otherwise a project is created.
+单个材质通道烘焙的规格说明（后端之前，插件侧）。,"Specification for one material channel bake (pre-backend, addon-side)."
+将贴图行的 Relief 控件限制在 0–1（RNA 默认 0.5）。,Clamp a map row's Relief control to 0–1 (RNA default 0.5).
+为共享的后端任务使用最大平铺的整图半径。,Use the largest tile's full-image radius for a shared backend job.
+从用户偏好设置中返回内部执行后端字符串。,Return the internal execution backend string from user preferences.
+当槽位的物体至少拥有一个 UV 层时为真。,True when the slot's object owns at least one UV layer.
+存储输出根目录为 ``output_root`` 的每个项目（任意场景）的令牌。,Store tokens of every project (any scene) whose output root is ``output_root``.
+解析已配置的根目录但不创建它；可安全用于 UI 重绘。,Resolve the configured root without creating it; safe for UI redraws.
+返回烘焙实际写入的确切目录，而非可能是相对路径的 UI 值。,"Return the exact directory a bake will write, not the possibly-relative UI value."
+解析后的目标是否位于 Blender 或操作系统的临时目录下。,Whether the resolved destination lives under Blender's or the OS temporary directory.
+用于烘焙缓存键的材质名——会去除临时预览材质。,Material name for bake cache keys — strips transient preview materials.
+将 4×4 行主序的 matrix_world 返回为 16 个浮点数，不可用时返回单位矩阵。,"Return the 4×4 row-major matrix_world as 16 floats, or identity if unavailable."
+用 ``vertices`` 的顶点坐标填充 float32 ``out``（长度 3*N）。,Fill float32 ``out`` (len 3*N) with the vertex coordinates of ``vertices``.
+"返回一个可调用对象 (u, v) -> float，对 image 的红色通道做双线性采样；若 image 为 None 或为空则返回 None。","Return a callable (u, v) -> float that bilinearly samples the red channel of image, or None if image is None / empty."
+用于高模角点采集的共享工作线程池（主线程和预热写入器）。,Shared worker pool for high-mesh corner gathers (main thread and prewarm writer).
+用我们的 pid 声明此负载目录，以免同级 Blender 将其清理。,Claim this payload directory for our pid so no sibling Blender prunes it.
+``cache_key`` 之前写入的负载路径（若仍在磁盘上）。,"Path of a previously written payload for ``cache_key``, if it is still on disk."
+将此任务的烘焙笼警告并入 ``progress``，且不重复。,Fold this job's cage warnings into ``progress`` without duplicating them.
+"Automatic 组的 (projection_state, high_objs, fit_key)，或 None。开销低：仅签名。","(projection_state, high_objs, fit_key) for an Automatic group, or None. Cheap: signatures only."
+为位于 ``position`` 的组及其后的 ``WINDOW`` 个组启动拟合。,Start fits for the group at ``position`` and the ``WINDOW`` groups after it.
+``fit_key`` 已完成的拟合（像内联拟合那样存储），或 None。,"The finished fit for ``fit_key`` (stored like an inline fit), or None."
+烘焙笼尚未拟合的 Automatic 组（属于 ``group_names`` 的，或全部）。,"The Automatic groups (of ``group_names``, or all) whose bake cage is not fitted yet."
+立即拟合 ``group`` 的烘焙笼，以便随后的导出复用它。,"Fit ``group``'s bake cage now, so the export that follows reuses it."
+``obj`` 网格的每个 UV 层的名称和校验和。,Names and checksum of every UV layer of ``obj``'s mesh.
+该组自身的低模所涉及的 UDIM 平铺。无法判断时为空。,The UDIM tiles this group's own lows touch. Empty when that cannot be told.
+所选场景照明行中 Output 为 Lit Color 的 uuid -> row。,uuid -> row for the selected Scene Lighting rows whose Output is Lit Color.
+Lit Color 源编译成的材质行：一个普通的 Principled 通道。,The Material row a Lit Color source compiles as: a plain Principled channel.
+重复（最近邻）至 side x side 的方形单值网格；[] 仍为 []。,A square single-value grid repeated (nearest) up to side x side; [] stays [].
+一个原生 Lit Color 源的后端配置：普通的材质通道烘焙。,Backend config of one native Lit Color source: an ordinary Material channel bake.
+沿 Reroute/Mapping 追溯到图像纹理 Vector 输入的坐标来源。,Walk Reroute/Mapping to the coordinate source of an Image Texture Vector input.
+Blender XYZ 欧拉角的 3x3 旋转矩阵（先应用 X，再 Y，最后 Z）。,"3x3 rotation for a Blender XYZ euler (X applied first, then Y, then Z)."
+返回受支持的有效透明度表达式；完全不透明时返回 None。,"Return a supported effective-opacity expression, or None when fully opaque."
+此色彩空间是否需要任何解码。为只问这一点的调用方保留。,Whether this colorspace needs ANY decode. Kept for callers that only ask that.
+将 RGB 行经过 3x3 色域矩阵，使用可原地安全的 float64。,"RGB rows through a 3x3 gamut matrix, in place-safe float64."
+逆 ACEScc（S-2014-003）。在 toe 以下曲线为偏移而非钳制。,"Inverse ACEScc (S-2014-003). Below the toe the curve is offset, not clamped."
+逆 ACEScct（S-2016-001）：0.155251141552511 以下为线性段。,Inverse ACEScct (S-2016-001): a linear segment under 0.155251141552511.
+精确的 sRGB EOTF，与 Blender 着色器采样时应用的一致。,"Exact sRGB EOTF, matching what Blender's shader applies on sample."
+解析出一张通用的 AO 图像，供后端为所有组重新投影。,Resolve one common AO image that the backend can reproject for all groups.
+灯光或自发光物体的接收方与遮挡方集合（Blender 灯光链接）。,Receiver and blocker sets of a light or emissive object (Blender light linking).
+网格物体的灯光链接（自发光网格在 Cycles 中也会照亮场景）。,Light linking of mesh objects (emissive meshes light the scene in Cycles too).
+"通过普通块均值将 (h, w, c) -> (size, size, c)（h, w >= size）。","(h, w, c) -> (size, size, c) by plain block means (h, w >= size)."
+后端行、插件侧材质行或插件绘制的线框行各自构成一次烘焙。,"Backend rows, addon-side Material rows or addon-drawn Wireframe rows each make a bake."
+构建烘焙任务，若下方任何步骤失败则释放其工作区。,"Build a bake job, releasing its workspace if anything below fails."
+"每个导出组的 UV Set 覆盖值，按组名索引（"""" 表示无）。","UV Set override of every exported group, by group name ("""" = none)."
+单个烘焙任务的插件侧 Cycles 材质队列实时状态。,Live state of the addon-side Cycles material queue for one bake job.
+请求材质队列在当前进行中的 Blender 烘焙完成后停止。,Ask the material queue to stop after the in-flight Blender bake finishes.
+在程序的 GPU 光线预算内，将每个 Bevel 操作提升到烘焙下限。,"Lift every Bevel op to the bake floor, inside the program's GPU ray budget."
+在此工作区中丢弃上一次 prepare 的逐组附属文件列表。,Drop a previous prepare's per-group sidecar list in this workspace.
+记录某组从 0 开始的附属文件，以便后端绑定或拼接它。,Record one group's 0-based sidecar so the backend can bind or concatenate it.
+triangle_matslot,triangle_matslot
+仅当所有共享材质的组都指向同一集合时才返回 UV 名称。,Return a UV name only when all material-sharing groups target the same set.
+"现有 FYRMSLT1 文件的 (triangle_count, used_slots)，或 None。","(triangle_count, used_slots) of an existing FYRMSLT1 file, or None."
+为最近组的 UV 岛分配无限边距。,Assign infinite padding to the closest group's UV islands.
+内容寻址的角点附属文件所在位置，不可用时为 None。,"Where a content-addressed corner sidecar lives, or None if unavailable."
+"按 (workspace, family, layer, object) 读取一次逐角点层。","Read a per-corner layer once per (workspace, family, layer, object)."
+"某个被跟踪输出路径的 ``(不含 UDIM 平铺的主名, 扩展名)``，已做大小写折叠。","``(stem without its UDIM tile, extension)`` of one tracked output path, casefolded."
+Direct / Indirect Lighting 行按 LIGHTING 烘焙；文件名按该行的 output 命名。,Direct / Indirect Lighting rows bake as LIGHTING; name the file by the row's output.
+"已完成的 ``fyr_baker_backend pack`` 运行的 ``(written, warnings)``。","``(written, warnings)`` for a finished ``fyr_baker_backend pack`` run."
+当解析出的后端声明 ``texture_export_pack`` 时为真。,True when the resolved backend advertises ``texture_export_pack``.
+将已规范化的导出槽位转换为后端通道模式。,Convert an already-normalized export slot to the backend channel schema.
+纯函数：组装后端解析的 pack 任务字典。,Pure: assemble the pack-job dict the backend parses.
+某个源不可用的原因：关闭的行与无烘焙的读法不同。,Why one source is unavailable: a switched-off row reads differently from no bake.
+``0``、``1``、``0.5``——短到足以放进单行警告。,"``0``, ``1``, ``0.5`` -- short enough for a one-line warning."
+某一行的替换行，不含警告前缀。,"The substitution lines of one row, without the warning prefix."
+每个将被写入的行的每个被替换通道各一行。,One line per substituted channel of every row that WILL be written.
+某个贴图集解析后的 Size / Padding / 滤镜 / DDS 设置。,Resolved Size / Padding / filter / DDS settings for one texture set.
+导出将写入的一个文件，以及对话框必须显示的全部信息。,"One file the export would write, plus everything the dialog must show."
+导出列表行文本：``T_Skull_N.png - 2048x2048 PNG 16-bit``。,The Export List row text: ``T_Skull_N.png - 2048x2048 PNG 16-bit``.
+某个模板输出的编码器色彩空间。未知值回退为 data。,Encoder colorspace for one template output. Unknown values fall back to data.
+返回 ``set_key`` 的 ``set_overrides`` 行，或 ``None``。,"Return the ``set_overrides`` row for ``set_key``, or ``None``."
+返回（必要时创建）``set_key`` 的 ``set_overrides`` 行。,Return (creating if needed) the ``set_overrides`` row for ``set_key``.
+贴图集重命名时保持逐集覆盖值仍附着。,Keep per-set overrides attached when a texture set is renamed.
+将 Size 枚举值映射为具体宽度/高度。纯函数。,Map a Size enum value onto concrete width/height. Pure.
+将全局 + 逐集的 Size/Padding/滤镜解析为具体的打包选项。,Resolve Global + per-set Size/Padding/filter into concrete pack options.
+:func:`find_collisions`，并在行上额外标记两个冲突方。,":func:`find_collisions`, additionally flagging both offenders on the rows."
+通过相对路径、链接和文件系统别名比较目标。,"Compare destinations through relative paths, links and filesystem aliases."
+将替换被跟踪烘焙的导出，即使通过硬链接。,"Exports that would replace a tracked bake, even through a hard link."
+一个通道芯片：键帽图标加上它所接收的源。,One channel chip: a keycap icon plus the source it is fed from.
+某个通道定义的 ``Normal.G`` / ``AO`` / ``Curvature inv``。,``Normal.G`` / ``AO`` / ``Curvature inv`` for one channel definition.
+导出列表行右侧的 ``256x256 - PNG 16-bit``。,``256x256 - PNG 16-bit`` for the right-hand side of an Export List row.
+某行不会被写入的原因，短到可放进一行灰色文本。,"Why one row will not be written, short enough for a single grayed line."
+"按首次出现顺序的 ``[(set name, rows)]``，以便列表按集阅读。","``[(set name, rows)]`` in first-seen order, so the list reads per set."
+除非明确排除，否则集合都会包含，因此新集合默认不排除。,"Sets are included unless explicitly excluded, so new sets are opt-out."
+将项目的贴图集转换为纯 :class:`ExportSetSpec` 输入。,Turn the project's texture sets into pure :class:`ExportSetSpec` inputs.
+短 TTL 后方的 ``export_templates.list_templates()``。,``export_templates.list_templates()`` behind a short TTL.
+当美术存储的模板名确实能解析到文件时为真。,True when the artist's stored template name actually resolves to a file.
+目标文件夹：对话框自身的，或烘焙文件夹旁的 exports 子文件夹。,"Destination folder: the dialog's own, or an exports subfolder beside bakes."
+"对话框和 ``execute`` 需要的全部内容：``(template, rows, error)``。","Everything the dialog and ``execute`` need: ``(template, rows, error)``."
+sRGB,sRGB
+为回退验证与合成，每个集/平铺/变体只加载一次。,Load each set/tile/variant once for fallback validation and composition.
+为目标规划与导出解析同一批低模。,Resolve the same low meshes for destination planning and export.
+"写入一个集的低模并恢复选择；返回其路径或 """"。","Write one set's low meshes, restoring selection; return its path or """"."
+全部包含,Include All
+将本项目的每个贴图集都包含在导出中,Include every texture set of this project in the export
+切换贴图集,Toggle Texture Set
+在导出中包含或排除此贴图集,Include or exclude this texture set from the export
+贴图集,Texture Set
+重命名贴图集,Rename Texture Set
+隐式,Implicit
+名称,Name
+选择导出目标,Select Export Target
+编辑全局导出设置或此贴图集的覆盖值,Edit Global export settings or overrides for this texture set
+打开导出文件夹,Open Export Folder
+打开贴图导出到的文件夹,Open the folder the textures were exported to
+目录,Directory
+替换现有导出文件？,Replace Existing Export Files?
+用此次导出替换列出的现有文件,Replace the listed existing files with this export
+显示所有文件,Show All Files
+替换文件,Replace Files
+对这些文件的任何修改都将丢失。,Any edits to these files will be lost.
+导出贴图,Export Textures
+通过输出模板打包并导出烘焙好的贴图,Pack and export the baked maps through an output template
+显示已跳过,Show Skipped
+列出每个不会被写入的输出及原因,"List every output that will not be written, with the reason"
+导出,Export
+没有活动的烘焙项目,No bake project is active
+图标 + 标签，然后是一个占用该行剩余空间的值。,"Icon + label, then a value that uses the rest of the row."
+图标 + 标签，然后是一个仅与 Format 下拉框同宽的值。,"Icon + label, then a value only as wide as the Format dropdown."
+格式,Format
+位深度,Bit Depth
+贴图集,Texture Sets
+全局设置,Global settings
+尚无烘焙组,No bake groups yet
+常规导出参数,General Export Parameters
+生成 Mipmap,Generate Mipmaps
+先烘焙缺失的贴图,Bake Missing Maps First
+导出前生成任何缺失的贴图。,Generate any missing maps before exporting.
+网格,Mesh
+导出网格,Export Mesh
+在列表中选择此贴图集以编辑其设置,Select this texture set in the list to edit its settings
+将不会导出任何内容。请先烘焙源贴图,Nothing will be exported. Bake the source maps first
+源来自最近一次烘焙，使用其写入时的位深度。,"Sources come from the latest bake, at the bit depth it wrote."
+用于替换单个导出方案中现有文件的临时同意。,Transient consent for replacing the existing files in one export plan.
+当此源的贴图类型有文档化的中性值（而非回退值）时为真。,True when this source's map type has a documented neutral (not the fallback).
+验证某个槽位的平坦值。边界与模板存储所强制执行的一致。,Validate one slot's flat value. Same bounds the template store enforces.
+"调用方的 ``(width, height)`` -> 内部使用的 ``(rows, cols)``。","``(width, height)`` from the caller -> the ``(rows, cols)`` used internally."
+Blender 对此格式实际能写入的位深度。,Bit depths Blender can actually write for this format.
+当通道条目的 ``source`` 指向常量哨兵时为真。,True when a channel entry's ``source`` names the constant sentinel.
+模板文件不可读、无效，或会与另一个冲突。,"A template file is unreadable, invalid, or would collide with another."
+返回人类可读的错误列表；为空表示模板可用。,Return a list of human-readable errors; empty means the template is usable.
+随附模板所在位置。打包副本存在时优先使用它。,Where the shipped templates live. Packaged copy wins when it exists.
+读取并验证一个模板文件。任何问题都会引发 ``TemplateError``。,Read and validate one template file. Raises ``TemplateError`` on any problem.
+按显示名称查找模板（不区分大小写）。内置模板优先。,Look a template up by display name (case-insensitive). Built-ins win.
+项目的选择缺失时所回退的模板名称。,Name of the template a project falls back to when its choice is missing.
+``names`` 中第一个由 ``export_templates`` 导出的，否则为 ``fallback``。,"First of ``names`` that ``export_templates`` exports, else ``fallback``."
+"当此 ``source`` 表示 ""flat value"" 而非 ""baked map"" 时为真。纯函数。","True when this ``source`` means ""flat value"","" not ""baked map"". Pure."""
+常量的合法范围是 0..1；其他值会被钳制，而非拒绝。,"A constant's legal range is 0..1; anything else is clamped, not refused."
+"预设项 ``value`` 本身；为自定义值时是 ``""""``。","The preset item ``value`` *is*, or ``""""`` when it is a custom value."
+``0.25``——简短、无尾随零，用于按钮和菜单项。,"``0.25`` -- short, no trailing zeros, for the button and the menu item."
+源芯片 PNG 的文件名颜色段。纯函数；总能解析。,Filename color segment for a source's chip PNG. Pure; always resolves.
+编辑器可能请求的每个芯片：每个有效源一个，外加未分配。,"Every chip the editor can ask for: one per valid source, plus unassigned."
+源芯片的 ``icon_value=``。不可用时为 ``0``（无图标）。,``icon_value=`` for a source's chip. ``0`` (no icon) when unavailable.
+当 ``identifier`` 是材质通道输出源时为真。纯函数。,True when ``identifier`` is a material-channel output source. Pure.
+规格说明该项目持有多少次 ``map_type`` 烘焙。纯函数。,How many bakes of ``map_type`` the spec says the project holds. Pure.
+打开项目的 :func:`multi_variant_spec`——菜单的键依据。,:func:`multi_variant_spec` of the open project -- what the menu is keyed on.
+每个可选条目标识符，按菜单顺序。不含标题。,"Every selectable item identifier, in menu order. Headings excluded."
+第 0 次出现的 identifier -> item number。构建一次；从不持久化。,"identifier -> item number, for occurrence 0. Built once; never persisted."
+条目编号对应的条目标识符；未知则回退到 Unassigned。,Item identifier for an item number; unknown falls back to Unassigned.
+每个贴图类型一行；堆栈索引单独选择。,One row per map type; stack index is chosen separately.
+丢弃备忘，以便下次构建使用刚生成的芯片图标。,Drop the memo so the next build picks up freshly generated chip icons.
+暂存通道条目当前是哪个贴图类型下拉项。纯函数。,Which map-type dropdown item a staged channel entry currently *is*. Pure.
+该字段从 **1 开始**：美术从 1 开始计数烘焙，与贴图堆栈一致。,"The field is **one-based**: the artist counts bakes from 1, like the map stack."
+文件类型变更时保持位深度合法。,Keep the bit depth legal when the file type changes under it.
+某个输出的一个 RGBA 槽位。``enabled`` 关闭 == JSON ``null``。,One RGBA slot of one output. ``enabled`` off == JSON ``null``.
+槽位,Slot
+启用,Enabled
+用烘焙贴图供给此输出通道。关闭时写入 JSON null（零值）,Feed this output channel from a baked map. Off writes the JSON null (zeros)
+源贴图,Source Map
+此通道读取的烘焙贴图。为空表示未分配,Baked map this channel reads from. Empty means unassigned
+变体,Variant
+堆栈索引,Stack Index
+源通道,Source Channel
+要读取源贴图的哪个通道,Which channel of the source map to read
+反转,Invert
+反转此通道：写入 1 - value（粗糙度转光滑度，AO 转遮蔽）,"Invert this channel: write 1 - value (roughness to smoothness, AO to occlusion)"
+值,Value
+写入此通道的平坦值，0（黑）到 1（白）,"Flat value written into this channel, 0 (black) to 1 (white)"
+自定义值,Custom Value
+分配,Assignment
+此输出通道读取哪张贴图（或平坦值）,Which map (or flat value) this output channel reads
+模板的一个导出文件。,One exported file of the template.
+文件名,Filename
+文件名模板，不含扩展名。使用 $ 菜单追加令牌,"Filename template, without extension. Use the $ menu to append a token"
+文件类型,File Type
+每通道位数。仅提供此文件类型可存储的深度,Bits per channel. Only depths this file type can store are offered
+色彩空间,Color Space
+压缩,Compression
+备注,Notes
+与此输出贴图一起存储的自由格式备注,Free-form note stored with this output map
+内置,Built-in
+选择一行会将该模板加载到暂存缓冲区。,Selecting a row loads that template into the staging buffer.
+整个暂存缓冲区：正在编辑的一个模板，加上选择项。,"The whole scratch buffer: one template being edited, plus the selection."
+模板,Template
+正在编辑的输出模板,Output template being edited
+已选中,Selected
+模板名称，如导出对话框所示,"Template name, as it appears in the export dialog"
+','
+复制来源,Duplicated From
+与模板一起存储的自由格式描述,Free-form description stored with the template
+活动输出,Active Output
+活动块,Active Block
+已加载,Loaded
+加载来源,Loaded From
+错误,Error
+WindowManager 上的暂存缓冲区，注册前为 ``None``。,"The staging buffer on the WindowManager, or ``None`` before registration."
+"UIList 的 ``(name, builtin)`` 行。纯函数；无 bpy 调用。","``(name, builtin)`` rows for the UIList. Pure; no bpy calls."
+当镜像已经正好是 ``rows``（数量和名称）时为真。,True when the mirror already says exactly ``rows`` (count *and* names).
+将 ``collection`` 重写为 ``rows``。鸭子类型，因此可做单元测试。,"Rewrite ``collection`` to ``rows``. Duck-typed, so it is unit-testable."
+``name`` 的行索引（不区分大小写），或 ``-1``。,"Row index of ``name`` (case-insensitive), or ``-1``."
+磁盘上的模板，经导出对话框的短 TTL 缓存。,"The templates on disk, through the export dialog's short-TTL cache."
+将 UIList 指向 ``name``，而不重新触发加载回调。,Point the UIList at ``name`` without re-triggering the load callback.
+在下一个定时器滴答时一次性重建。可安全地从 ``draw`` 调用。,One-shot rebuild on the next timer tick. Safe to call from ``draw``.
+指定位深度，并钳制到输出的格式可存储的范围。,"Assign a bit depth, clamped to what the output's format can store."
+为输出精确提供四个通道条目，按 R/G/B/A 顺序。,"Give an output exactly four channel entries, R/G/B/A in order."
+``block`` 是否被反转（其锚点槽位的状态）。,Whether ``block`` is inverted (its anchor slot's state).
+裁剪到 ``max_chars``（含省略号）。``0`` 禁用裁剪。,Trim to ``max_chars`` including the ellipsis. ``0`` disables trimming.
+源标识符的人类可读标签，如源面板所示。,"The human label for a source identifier, as the source panel shows it."
+``GRAY`` -> ``Gray``，``IDENTITY`` -> ``RGB``，字母 -> 其本身。,"``GRAY`` -> ``Gray``, ``IDENTITY`` -> ``RGB``, a letter -> itself."
+输出的文件名（按作者所写）；令牌保持可见。,The output's filename as authored; tokens stay visible.
+从已验证的模板负载填充 ``state``。纯函数；无 bpy 调用。,Fill ``state`` from a validated template payload. Pure; no bpy calls.
+将暂存缓冲区序列化回模板负载。纯函数。,Serialise the staging buffer back to a template payload. Pure.
+暂存输出已使用的每个文件名模板，已做大小写折叠。,"Every filename template the staged outputs already use, casefolded."
+``format_id`` 是否能存储 alpha 通道。未知 == 是。,Whether ``format_id`` can store an alpha channel. Unknown == yes.
+当此源是法线贴图（任意空间）时为真。纯函数。,True when this source is a normal map (any space). Pure.
+此输出实际读取的源，按槽位顺序，不重复。,"Sources this output actually reads, in slot order, without duplicates."
+"按名称将模板加载到 ``state``。返回错误字符串，或 ``""""``。","Load a template by name into ``state``. Returns an error string, or ``""""``."
+宽容地比较两个文件系统路径（Windows 上不区分大小写）。,Compare two filesystem paths tolerantly (case-insensitive on Windows).
+此名称的用户模板写入位置，或 ``None``。,"Where a user template of this name is written, or ``None``."
+将 ``source``（内置或用户）复制为新文件并选中它。,Copy ``source`` (built-in or user) to a new file and select it.
+导出对话框会缓存模板列表；此处写入必须体现出来。,The export dialog memoises the template list; a write here must show up.
+一个不覆盖任何内容的模板名，既不是名称也不是文件。,"A template name that overwrites nothing, neither a name nor a file."
+选择输出模板,Select Output Template
+将此输出模板加载到编辑器中,Load this output template into the editor
+新建输出模板,New Output Template
+创建新的输出模板。它会立即保存并被选中,Create a new output template. It is saved and selected immediately
+复制输出模板,Duplicate Output Template
+删除输出模板,Delete Output Template
+从磁盘删除此用户模板。内置模板无法删除,Delete this user template from disk. Built-in templates cannot be deleted
+删除,Delete
+添加输出,Add Output
+向此模板追加一个预设形状的输出贴图,Append a pre-shaped output map to this template
+形状,Shape
+移除输出,Remove Output
+从模板中移除此输出贴图,Remove this output map from the template
+索引,Index
+复制输出,Duplicate Output
+移动输出,Move Output
+重新排序此输出贴图,Reorder this output map
+偏移,Offset
+选择输出,Select Output
+将此设为右侧源面板所编辑的输出,Make this the output the source panel on the right edits
+指定源贴图,Assign Source Map
+由此贴图为所选通道提供数据,Feed the selected channel from this map
+源,Source
+通道,Channel
+不在此项目中,Not in this project
+从通道选项弹出菜单中写入一个读取选项。,Write one read option from the channel-options popover.
+选择此输出通道读取源贴图的哪个通道,Choose which channel of the source map this output channel reads
+输出,Output
+通道选项,Channel Options
+选择要读取源贴图的哪个通道，以及其中的哪次烘焙,"Choose which channel of the source map to read, and which bake of it"
+透明度通道,Alpha Channel
+启用,Enable
+"每个弹出按钮对应 ``(token, label, description)``。纯函数；缓存元组。","``(token, label, description)`` per popover button. Pure; cached tuple."
+弹出菜单主体：每个已知文件名令牌对应一个全宽按钮。,The popover body: one full-width button per known filename token.
+文件名令牌,Filename Tokens
+向此输出追加文件名令牌,Append a filename token to this output
+插入令牌,Insert Token
+令牌,Token
+弹出按钮仅携带 ``$name``；其含义由提示说明。,The popover buttons carry only ``$name``; the tooltip explains it.
+导入模板,Import Template
+将输出模板 JSON 文件导入到你的用户模板中,Import an output template JSON file into your user templates
+导出模板,Export Template
+将编辑器中当前的模板写入 JSON 文件,Write the template currently in the editor to a JSON file
+编辑模板…,Edit Templates…
+在插件偏好设置中打开输出模板编辑器,Open the output-template editor in the add-on preferences
+导出对话框当前选中的模板（若有）。,"The template the export dialog currently has selected, if any."
+输出模板,Output Templates
+未找到模板,No templates found
+内置模板：复制后编辑,Built-ins: duplicate to edit
+无通道,no channels
+$,$
+未知令牌：,Unknown token(s): 
+``Current preset:`` 加上名称、说明以及内置的退出方式。,"``Current preset:`` plus the name, notes and the built-in escape hatch."
+当前预设：,Current preset:
+复制以编辑,Duplicate to Edit
+第 2 列：正在编辑的模板，每个输出贴图一张卡片。,"Column 2: the template being edited, one card per output map."
+在左侧选择一个模板，或按“新建”。,"Select a template on the left, or press New."
+内置模板为只读。复制一个后再编辑。,Built-in templates are read-only. Duplicate one to edit it.
+输出贴图,Output maps
+创建：,Create:
+还没有输出。请使用上方的“创建”行。,No outputs yet. Use the Create row above.
+暂存模板引用的合成源键（类型 + 堆栈索引）。,Composite source keys referenced by the staged template (type + stack index).
+是否有任何暂存通道引用 ``map_type``（任意堆栈索引）。纯函数。,Whether any staged channel references ``map_type`` (any stack index). Pure.
+全部正常行的 ``icon_value=``；不可用时为 ``0``。,"``icon_value=`` for the all-good row, or ``0`` when it is unavailable."
+校验读数。规则见 :func:`validate_staging`。,The validation read-out. See :func:`validate_staging` for the rules.
+校验,Validation
+一切正常！,All good!
+第 3 列：可用源，然后是校验。仅供参考，不是控件。,"Column 3: available sources, then validation. Reference, not controls."
+可用源,Available Sources
+从输出指定,Assign from an output
+``preferences.MasterBakerPreferences._draw_export_templates`` 使用的入口点。,Entry point used by ``preferences.MasterBakerPreferences._draw_export_templates``.
+模板编辑器状态不可用,Template editor state is unavailable
+在 ``start`` 处匹配的最长已知令牌名称，不区分大小写。,"Longest known token name matching at ``start``, case-insensitively."
+若 ``name`` 是已知令牌则返回其规范拼写，否则返回 ``None``。,"Canonical spelling of ``name`` if it is a known token, else ``None``."
+``template`` 使用的所有令牌，按首次使用顺序去重。,"Every token used by ``template``, in first-use order, deduplicated."
+从输出文本中删除一个末尾分隔符。找到时返回 True。,Drop one trailing separator from the emitted text. True when one was found.
+开始监视 *file_path* 的外部编辑器保存。,Begin watching *file_path* for external-editor saves.
+清除所有监视并注销 Blender 计时器。,Clear all watches and unregister the Blender timer.
+该“发送到”条目应出现时为 True。缺少偏好设置时所有条目都可见。,True when that Send To entry should appear. Missing preferences keep every entry visible.
+由 InstallLocation/DisplayIcon 风格注册表值命名的可执行文件。,Executables named by an InstallLocation/DisplayIcon style registry value.
+Steam 安装根目录以及 Steam 知道的所有附加库文件夹。,Steam install roots plus every additional library folder Steam knows about.
+``…_normal.1002.png`` -> ``…_normal.<UDIM>.png``。非平铺贴图时为空。,``…_normal.1002.png`` -> ``…_normal.<UDIM>.png``. Empty for an untiled map.
+"输出后缀的文件名形式；没有时返回 ``""""``。","The file-name form of an output suffix, or ``""""`` when there is none."
+按输出顺序的一个有效烘焙文件，已应用 Painter/Toolbag 标识规则。,"One live baked file, in output order, with Painter/Toolbag identity rules applied."
+包 Normal 行格式对应的 Painter ``NormalMapFormat`` 成员名。,Painter's ``NormalMapFormat`` member name for the package's Normal row format.
+Blender 的应用计时器注册器；在 Blender 之外为 None。,"Blender's app-timer registrar, or None outside Blender."
+不要把 Blender 的私有 OCIO 配置泄漏到下游 DCC 中。,Do not leak Blender's private OCIO configuration into downstream DCCs.
+声明贴图集材质时不使用仅 Toolbag 的 PBR 贴图指令。,Declare texture-set materials without Toolbag-only PBR map directives.
+针对材质可显示的贴图，按贴图集给出 Toolbag 子程序分配。,Per texture-set Toolbag subroutine assignments for maps the material can show.
+一个暂存贴图的较早 Update 副本：其旁边的 ``<stem>_u<N><ext>``。,Earlier Update copies of one staged map: ``<stem>_u<N><ext>`` beside it.
+请求打开的 Toolbag 发送脚本就地替换网格并刷新贴图。,Ask the open Toolbag send-script to replace the mesh and refresh maps in place.
+一个 PSD 的图层方案。无法堆叠任何有效烘焙文件时抛出异常。,Layer plan for one PSD. Raises when no live bake file can be stacked.
+最新注册优先。读取 CurVer 和 Adobe 的安装键，而非整个 HKCR。,"Newest registration first. Reads CurVer and Adobe's install keys, not all of HKCR."
+LocalServer32 为此可执行文件的 ProgID，或与版本无关的那个。,"ProgID whose LocalServer32 is this executable, or the version-independent one."
+轮询直到 Photoshop 写入结果、启动器退出或超过截止时间。,"Poll until Photoshop writes a result, the launcher exits, or the deadline passes."
+失败对美术意味着什么：是谁的问题以及下一步。,What a failure means for the artist: whose problem it is and the next step.
+一条原始失败行的指引；文本无法识别时为 None。,"Guidance for one raw failure line, or None when the text is not recognised."
+"""Setup issue: <title>. <fix> (details: <raw>)""，其中原始文本原样保留。","""Setup issue: <title>. <fix> (details: <raw>)"" with the raw text kept verbatim."
+一条失败行的引导形式；未知时原样返回该行。,"The guided form of one failure line, or the raw line unchanged when unknown."
+所有指引条目，按优先级顺序（供测试和文档使用）。,"Every guidance entry, in priority order (for tests and docs)."
+``obj`` 的网格中有多少面被标记（没有或不是网格时为 0）。,How many faces of ``obj``'s mesh are marked (0 when none or not a mesh).
+缓存签名项：没有标记面时为 ``()``，因此现有键永不改变。,"Cache-signature term: ``()`` without marked faces, so existing keys never change."
+去掉浮动体后缀的 ``name``：源所属的物体。,``name`` without the floater suffix: the object a source belongs to.
+在此块内，``obj`` 的导出只写入 ``part``（PART_BODY / PART_FLOATER）。,"Within this block, exports of ``obj`` write only ``part`` (PART_BODY / PART_FLOATER)."
+导出的缓存键项：标记签名加上正在写入的部分。,Cache-key term for exports: the mark signature plus the part being written.
+FACES,FACES
+"标记（或清除）编辑模式 bmesh 中选中的面。返回 (changed, total)。","Mark (or clear) the selected faces of an edit-mode bmesh. Returns (changed, total)."
+浮动体面的编辑模式操作符（见 floater_faces.py）：标记、清除、选择。,"Edit Mode operators for floater faces (see floater_faces.py): Mark, Clear, Select."
+标记浮动体,Mark Floater
+清除浮动体,Clear Floater
+清除所选面的浮动体标记,Clear the floater mark from the selected faces
+选择浮动体,Select Floaters
+选择标记为浮动体的面,Select the faces marked as floaters
+标记浮动体 (Fyr),Mark Floater (Fyr)
+清除浮动体 (Fyr),Clear Floater (Fyr)
+选择浮动体 (Fyr),Select Floaters (Fyr)
+为烘焙组的低模/高模提供显式且经过冲突检查的物体命名。,"Explicit, collision-checked object naming for a bake group's low/high meshes."
+应用完整方案，在任何修改前拒绝外部冲突。,"Apply a complete plan, refusing external collisions before any mutation."
+持有守卫；首个持有者会包裹受保护列表中的每个处理器。,Hold the guard; the first holder wraps every handler in the guarded lists.
+包裹自取得守卫后添加的处理器（烘焙中途启用的插件）。,Wrap handlers added since the guard was taken (an add-on enabled mid-bake).
+释放一次持有；最后一次会恢复所有原始处理器。,Drop one hold; the last one puts every original handler back.
+释放所有持有并恢复（加载文件、禁用插件）。,"Drop every hold and restore (file load, add-on disable)."
+bpy 计时器：任务结束后释放 OBJECT_BAKE 持有。,bpy timer: drop the OBJECT_BAKE holds once the job has ended.
+object_bake_pre：在主线程上、任务线程启动前立即运行。,object_bake_pre: runs on the main thread right before the job thread starts.
+堆栈的落盘位置。位于后端缓存旁边，以便支持包能找到它。,"Where the stacks land. Next to the backend cache, so support bundles find it."
+将过大的日志移到一旁，使新日志从空开始。从不抛出异常。,Move an oversized log aside so the fresh one starts empty. Never raises.
+重新设置截止时间。返回下一个间隔，符合 Blender 计时器的要求。,"Re-arm the deadline. Returns the next interval, as Blender timers want."
+在关闭日志描述符之前，将 faulthandler 与其分离。,Detach faulthandler from the log before its descriptor is closed.
+材质的 session_uid；没有时（桩对象、旧数据）为 0。,"The material's session_uid, or 0 when it has none (stubs, older data)."
+浮动体部件的缓存槽位，以其物体的跟踪状态为键。,"The floater piece's cache slots, keyed off its object's tracked state."
+仅在其异步规范写回校验通过后才发布别名。,Publish aliases only after their asynchronous canonical writes verify.
+移除因已验证的 FYRGEOM1 别名而失效的已解析通用网格。,Remove the parsed generic mesh made obsolete by a verified FYRGEOM1 alias.
+high_poly_park 已将此物体的网格换为空占位符期间为 True。,True while high_poly_park has swapped this object's mesh for an empty placeholder.
+绝不能用停放高模的占位符替代其真实几何体进行导出。,A parked high's placeholder must never be exported over its real geometry.
+即使规范 FYRGEOM1 已预热，也将 ``obj`` 导出为 FYMESH 三角形汤。,Export ``obj`` as an FYMESH triangle soup even when a canonical FYRGEOM1 is warm.
+返回当前持久的高模路径，不导出几何体。,Return a current persistent high-mesh path without exporting geometry.
+移除不再被任何已加载项目使用的高模的运行时跟踪。,Drop runtime tracking for high meshes no longer used by any loaded project.
+FyrHighPrewarmDiscard,FyrHighPrewarmDiscard
+工作线程正在写入 ``obj`` 的导出期间为 True。,True while a worker thread is writing ``obj``'s export.
+主线程：记录每一次已完成的工作线程写入。,Main thread: record every finished worker write.
+FyrHighPrewarmWrite,FyrHighPrewarmWrite
+当 ``obj`` 的工作线程写入正在运行时为 True（见 :func:`submit_high_write`）。,True when a worker write of ``obj`` is now running (see :func:`submit_high_write`).
+后台网格重新导出已排队或进行中期间为 True。,True while background mesh re-export is queued or in progress.
+忽略几何体更新（high_poly_park 的无损网格交换）。,Ignore geometry updates (high_poly_park's lossless mesh swaps).
+fyr-baker-high-mesh-prune,fyr-baker-high-mesh-prune
+按索引将 ``materials`` 放回 ``mesh``（仍存在）的槽位。,Put ``materials`` back into the (still existing) slots of ``mesh`` by index.
+根据实测模型得出的烘焙后端峰值提交量（不使用历史）。,Backend peak commit for the bake from the measured model (no history).
+高模集合的内容键：物体数量、三角形总数和网格名称。,"Content key of the high-poly set: object count, triangle total and mesh names."
+进程的峰值提交量（PeakPagefileUsage），仅限 Windows。,"Peak commit (PeakPagefileUsage) of a process, Windows only."
+共享同一网格的每个物体的编辑令牌；任一物体未被跟踪时为 None。,"Edit token of every object sharing a mesh, None when any is untracked."
+上次停放无法保留文件时的一次性磁盘空间不足消息，否则为 None。,"The one-time low-disk message when the last park could not keep its file, else None."
+当所有将要停放的网格都未经编辑地存在于其中时，返回保留的停放文件。,The retained park file when every mesh about to be parked is in it unedited.
+``obj`` 携带空占位符而非其网格期间为 True。,True while ``obj`` carries an empty placeholder instead of its mesh.
+删除已无人引用且一天内无人改动过的停放文件。,Remove park files nothing references any more and nobody has touched for a day.
+当每个网格都位于按下前写好的文件中时，返回 {mesh name: park file}。,{mesh name: park file} when EVERY mesh sits in a file written ahead of the press.
+"文件中每个已停放物体的 {(park_file, mesh_name): [objects]}。","{(park_file, mesh_name): [objects]} for every parked object in the file."
+在未停放的烘焙期间监视提交量（见 guard_tick）。,Watch the commit during an unparked bake (see guard_tick).
+后端 ``gpu_projection_hash_color`` / ``hash_color`` 的 Python 移植。,Python port of the backend's ``gpu_projection_hash_color`` / ``hash_color``.
+一个材质的 ID 贴图颜色（规则见模块文档字符串）。,The ID-map colour of one material (see the module docstring for the rule).
+当 ``image`` 是有效数据块时为 True（已释放的数据块在访问时会报错）。,True when ``image`` is a live datablock (a freed one raises on access).
+使我们即将孤立的数据块对 Blender 的清理无害。,Make a datablock we are about to orphan harmless to Blender's purge.
+不可复用的 ID；内存地址和名称可能属于替代对象。,A non-reusable ID; memory addresses and names can belong to replacements.
+仅解析原始数据块，放弃重命名/替换。,"Resolve only the original datablock, abandoning renames/replacements."
+便捷封装：返回立即被移除的数据块数量。,Convenience wrapper: returns how many datablocks were removed immediately.
+有多少图像正在等待预览任务完成。,How many images are waiting on a preview job to finish.
+对已验证 FYRGEOM1 文件的紧凑位置/索引区段进行内存映射。,Memory-map the compact position/index sections of a verified FYRGEOM1 file.
+此文件的角点颜色是否已解析（存在，或因没有而不存在）？,"Were corner colours resolved for this file (present, or absent-because-none)?"
+当除 UI 屏幕/工作区之外的任何数据块引用 ``image`` 时为 True。,True when any datablock other than UI screens/workspaces references ``image``.
+low_meshes,low_meshes
+延迟加载：dirty_tracker 会导入重度依赖 bpy 的模块；map_rebuild 加载更早。,Lazy: dirty_tracker imports bpy-heavy modules; map_rebuild loads earlier.
+物体状态中会读取其网格数据块的各项。,The terms of an object's state that read its mesh datablock.
+:func:`_mesh_state_fields` 的公开名称（high_poly_park 在交换前对其做快照）。,Public name of :func:`_mesh_state_fields` (high_poly_park snapshots it before a swap).
+恰好 `length` 长度的 float32 回读缓冲区，在一次构建内复用。,"A float32 read-back buffer of exactly `length`, reused across one build."
+关闭“投射 AO”的高模（对应 properties.group_ao_non_caster_objects）。,High meshes with Casts AO off (mirrors properties.group_ao_non_caster_objects).
+完全按后端的方式去除一个角色后缀，或原样返回名称。,"Strip one role suffix exactly the way the backend does, or return the name unchanged."
+Fyr 节点可以存在的每个着色器节点树（其 poll 接受 SHADER 树）。,Every shader node tree a Fyr node can live in (its poll accepts SHADER trees).
+在没有节点使用 *group* 后删除它。调用方先释放自己的引用。,Delete *group* once no node uses it. Callers release their own reference first.
+"自定义输出组单个输入/输出对的 (label, socket_type)。","(label, socket_type) of a Custom Output group's single in/out pair."
+就地切换自定义输出组的数据类型，同时保留节点的连接。,"Switch a Custom Output group's data type in place, keeping the node's links."
+透明着色器直通，用于将材质标记为供 Fyr 捕获。,Transparent shader passthrough that marks a material for Fyr capture.
+Fyr 材质捕获,Fyr Material Capture
+将此材质的 PBR 通道捕获到 Fyr Baker 贴图堆栈中,Capture PBR channels from this material into the Fyr Baker map stack
+标识符,Identifier
+模式,Mode
+通道如何从传入的着色器推导,How channels are derived from the incoming shader
+高级,Advanced
+显示高级 Principled 覆盖开关,Show advanced Principled override toggles
+基础色,Base Color
+金属度,Metalness
+粗糙度,Roughness
+法线,Normal
+自发光,Emission
+不透明度,Opacity
+高度,Height
+高光,Specular
+透射,Transmission
+自动推导通道,Derives channels automatically
+覆盖,Overrides
+独立于 Material Output 的命名中间捕获。,Named intermediate capture independent of Material Output.
+Fyr 自定义输出,Fyr Custom Output
+将命名的颜色、数值或向量捕获到 Fyr Baker 贴图堆栈中,"Capture a named color, value, or vector into the Fyr Baker map stack"
+此输出的贴图堆栈名称。材质间同名者共用一行,Map stack name for this output. Matching names across materials share one row
+类型,Type
+编码,Encoding
+向量输出在烘焙图像中的存储方式,How vector outputs are stored in the baked image
+自定义,Custom
+返回最接近活动材质输出 Surface 的捕获节点（若有）。,"Return the capture node closest to the active Material Output Surface, if any."
+在活动材质输出之前插入 Fyr 材质捕获。插入成功时返回 True。,Insert a Fyr Material Capture before the active Material Output. Returns True if inserted.
+项目高模源使用的材质；没有高模时使用低模。,"Materials used by the project's high sources, or lows when no highs exist."
+插入捕获节点,Insert Capture Nodes
+在此项目使用的材质上，于材质输出之前插入 Fyr 材质捕获,Insert Fyr Material Capture before Material Output on materials used by this project
+恢复检测到的输出,Restore Detected Outputs
+清除被抑制的自动检测材质输出，并重新同步贴图堆栈,Clear suppressed auto-detected material outputs and re-sync the map stack
+Fyr Baker,Fyr Baker
+材质捕获,Material Capture
+自定义输出,Custom Output
+来自 Fyr 捕获/自定义输出节点的防抖贴图堆栈同步。,Debounced map-stack synchronization from Fyr capture / custom-output nodes.
+标记需要同步；在 RNA 回调之外的计时器中修改集合。,Mark sync needed; mutate collections on a timer outside RNA callbacks.
+将捕获/自定义检测同步到项目的贴图堆栈中。,Synchronize capture/custom detections into the project's map stack.
+当用户删除自动创建的行而其源仍存在时，记录抑制状态。,Record suppression when the user deletes an auto-created row while its source remains.
+驱动活动材质输出 Surface 的节点；否则为单独的 Principled。,"Node driving the active Material Output's Surface, else a lone Principled."
+为组着色器输出提供输入的节点；否则为其中的单独 Principled。,"Node feeding the group's shader output, else a lone Principled inside it."
+当 *socket_name* 可作为 *material* 的可烘焙插槽暴露时为 True。,True when *socket_name* can be exposed as a bakeable socket for *material*.
+*group_node* 内为 *output_socket* 提供输入的 Group Output 输入（若有）。,"Group Output input inside *group_node* that feeds *output_socket*, if any."
+驱动 *output_node* 的 Surface 的 GROUP，会剥离 Capture / Reroute 直通。,"GROUP driving *output_node*'s Surface, peeling Capture / Reroute passthroughs."
+*material* 上作者绘制的切线空间法线烘焙插槽（若有）。,"Authored tangent-space normal bake socket on *material*, if any."
+当为命名表面输出提供输入的图中包含 *node_types* 中任一类型时为 True。,True when the graph feeding a named surface output contains any of *node_types*.
+当命名烘焙输出由 Facing / Fresnel / 相机光线驱动时为 True。,True when a named bake output is driven by Facing / Fresnel / camera rays.
+携带 *socket* 未连接时默认值的常量节点。,A constant node carrying *socket*'s unlinked default value.
+将高模材质细节层投影到最终的 Normal 和 AO 输出中。,Post-project high-material detail layers into final Normal and AO outputs.
+两种算法读取的全部内容，仅从 RNA 中提取一次。,"Everything the two algorithms read, pulled out of RNA exactly once."
+返回 *obj* 的 ``Mesh`` 数据块，*obj* 本身可能已是数据块。,"Return the ``Mesh`` datablock for *obj*, which may already be one."
+"``dot(float3, float3)``——将其写出以确保求和顺序固定。","``dot(float3, float3)`` -- written out so the summation order is fixed."
+"``len(float3)`` == ``sqrtf(dot(a, a))``。","``len(float3)`` == ``sqrtf(dot(a, a))``."
+"``safe_acosf`` == ``acosf(clamp(a, -1.0f, 1.0f))``。","``safe_acosf`` == ``acosf(clamp(a, -1.0f, 1.0f))``."
+"``hash_uint_to_float`` == ``uint_to_float_incl(hash_uint(kx))``，取值范围 [0, 1]。","``hash_uint_to_float`` == ``uint_to_float_incl(hash_uint(kx))``, in [0, 1]."
+形状/最小值/最大值/平均值加非有限值计数，在空输入下安全。,"Shape/min/max/mean plus a non-finite count, safe on empty input."
+一个材质解析后的通道源。,Resolved channel source for one material.
+对某个 Blender 着色器节点输出进行分类，用于材质捕获路由。,Classify one Blender shader-node output for material capture routing.
+"返回为 *socket* 提供输入的表达式的 (view_dependent, has_shader_to_rgb)。","Return (view_dependent, has_shader_to_rgb) for the expression feeding *socket*."
+提取 *material* 的有意义通道表达式和自定义输出。,Extract meaningful channel expressions and custom outputs for *material*.
+一个材质通道输出的紧凑原生程序。,Compact native program for one material channel output.
+BakeMapConfig.material_ir_program 上提供的子集。,Subset shipped on BakeMapConfig.material_ir_program.
+bpy 节点/图像的稳定标识（id() 是包装器地址且会冲突）。,Stable identity for bpy nodes/images (id() is wrapper-address and collides).
+读取节点的整数属性，容忍假节点返回的 None/垃圾值。,"Read a node's integer property, tolerating None/garbage from a fake node."
+"颜色附属标记的 (layer name, component)；否则为 None。","(layer name, component) for a colour sidecar tag, or None."
+标量浮点附属标记的属性名；否则为 None。,"Attribute name for a scalar float sidecar tag, or None."
+"切线附属标记的 (layer name, component)；否则为 None。","(layer name, component) for a tangent sidecar tag, or None."
+"UV 附属标记的 (layer name, component)；否则为 None。","(layer name, component) for a UV sidecar tag, or None."
+未连接的标量插槽的值；已连接或无法确定时为 None。,"Value of an unlinked scalar socket, or None when it is linked/undecidable."
+将 Blender 插槽图编译为 UV 域 Material IR。,Compile a Blender socket graph into UV-domain Material IR.
+将插槽编译到寄存器。want：COLOR | SCALAR。,Compile socket to a register. want: COLOR | SCALAR.
+编译向量插槽；未连接时使用插槽默认值（而非 UV）。,Compile a vector socket; unlinked uses the socket default (not UV).
+编译向量/坐标插槽（TexCoord、Mapping、UVMap、常量）。,"Compile a vector/coordinate socket (TexCoord, Mapping, UVMap, constants)."
+温度,Temperature
+波长,Wavelength
+"使用 MATH 运算现有的 clamp 标志把标量寄存器限制到 [0, 1]。","Clamp a scalar register to [0, 1] using the MATH op's existing clamp flag."
+"把颜色/向量寄存器的每个分量都限制到 [0, 1]。","Clamp every component of a colour/vector register to [0, 1]."
+在两个寄存器之间生成一个标量 MATH 运算。,Emit one scalar MATH op between registers.
+RGB <-> HSV / HSL。`direction` 是四个转换名称之一。,RGB <-> HSV / HSL. `direction` is one of the four conversion names.
+*channel* 缺失的 Mix/Add Shader 分支的贡献。,Contribution of a missing Mix/Add Shader branch for *channel*.
+通过组输入传入的闭包：编译外层组的插槽。,A closure arriving through a Group Input: compile the enclosing group's socket.
+任意闭包的 NORMAL：其 Normal 输入被驱动时用它，否则用着色法线。,"NORMAL for any closure: its Normal input when driven, else the shading normal."
+整数与小数 'regular' 区段共用的圆角弧。,The fillet arc shared by the integral and fractional 'regular' zones.
+calculate_out_variables 的尾部，加上节点的 y/x 输出交换。,The tail of calculate_out_variables plus the node's y/x output swap.
+`value >= bound`。没有 GREATER_EQUAL 操作码。,`value >= bound`. There is no GREATER_EQUAL opcode.
+*obj* 的网格是否带有此名称的几何属性。,Whether *obj*'s mesh carries a geometry attribute of this name.
+"所有参与网格共用的活动颜色层，若没有则为 """"。","The active colour layer shared by every contributing mesh, or """"."
+*obj* 的网格是否带有名为 *name* 的颜色属性。,Whether *obj*'s mesh carries *name* as a colour attribute.
+*tree* 的活动 Material Output 的置换端口上是否有内容。,Whether *tree*'s active Material Output has anything on Displacement.
+使用 Blender 的活动渲染 UV 层解析未命名的 UV 输入。,Resolve an unnamed UV input using Blender's Active Render UV layer.
+*obj* 的网格是否带有名为 *name* 的 UV 层。,Whether *obj*'s mesh carries *name* as a UV layer.
+"图像对应的 (1/width, 1/height)，尺寸不可用时为 None。","(1/width, 1/height) for an image, or None when the size is unusable."
+Cycles 的三平面盒投影：三次平面采样，按法线加权。,"Cycles' triplanar box projection: three flat taps, normal-weighted."
+七区权重选择，以掩码形式。`n` 是 L1 归一化的 |normal|。,"The seven-zone weight select, as masks. `n` is the L1-normalised |normal|."
+saturate((num/den - 0.5*(1-blend)) / blend) —— Cycles 的双向混合。,saturate((num/den - 0.5*(1-blend)) / blend) — Cycles' two-way mix.
+每个角一次 sidecar 获取，复用已注册的资源。,"One per-corner sidecar fetch, reusing an already-registered resource."
+第一个以自定义属性携带 *name* 的持有者，否则为 ``_MISSING``。,"First holder carrying *name* as a custom property, else ``_MISSING``."
+置换节点：(Height - Midlevel) * Scale，沿法线方向。,Displacement node: (Height - Midlevel) * Scale along the normal.
+向量置换：(Vector - Midlevel) * Scale，在所选空间中。,Vector Displacement: (Vector - Midlevel) * Scale in the chosen space.
+Blender 的向量旋转：center + rotate(vector - center)。,Blender's Vector Rotate: center + rotate(vector - center).
+法线节点：一个固定方向，加上它与输入的点积。,Normal node: a constant direction plus its dot with the input.
+求 3x4 仿射矩阵的逆（旋转/缩放/错切加平移）。,Invert a 3x4 affine (rotation/scale/shear plus translation).
+Blender 的 euler_to_transform：R = Rz * Ry * Rx，以三行形式返回。,"Blender's euler_to_transform: R = Rz * Ry * Rx, returned as three rows."
+应用 Euler XYZ 旋转，或其转置（向量旋转的 Invert）。,"Apply the Euler XYZ rotation, or its transpose (Vector Rotate's Invert)."
+罗德里格斯旋转；``axis`` 必须已是单位长度。,Rodrigues rotation; ``axis`` must already be unit length.
+intern/cycles/util/color.h，rgb_to_hsv。与求值器中版本对应的模块级实现。,"intern/cycles/util/color.h, rgb_to_hsv. Module-level twin of the evaluator's."
+intern/cycles/util/color.h，rgb_to_hsl。,"intern/cycles/util/color.h, rgb_to_hsl."
+用于三次渐变模式的 Blender key_curve_position_weights（BKE_key）。,Blender's key_curve_position_weights (BKE_key) for the cubic ramp modes.
+UDIM 平铺表或按材质划分的槽位表（编译期形式或连线形式）。,A UDIM tile table or a per-material slot table (compile-time or wire form).
+"`[{""tile"": n, ""path"": p}, ...]`，按平铺升序，来自导出的平铺记录。","`[{""tile"": n, ""path"": p}, ...]` ascending by tile, from export's tile records."
+Cycles 的 hash_uint2（util/hash.h），即 lookup3 的 final() 混合。,"Cycles' hash_uint2 (util/hash.h), the lookup3 final() mix."
+把 Fyr 自定义输出插槽编译为 Material IR，或返回 Cycles 回退。,"Compile a Fyr Custom Output socket into Material IR, or return a Cycles fallback."
+跨所有参与材质编译一个通道；要求共用一个原生程序。,Compile a channel across all contributing materials; require one shared native program.
+程序所触及的最高寄存器索引加一。,One past the highest register index the program touches.
+是否有程序采样 Blender 图像（槽位表唯一索引的对象）。,Whether any program samples a Blender image (the only thing a slot table indexes).
+对没有此类自定义输出的材质，读取零值的原生程序。,"A native program that reads zero, for a material with no such custom output."
+跨材质编译具名自定义输出；要求共用一个原生程序。,Compile a named Custom Output across materials; require one shared native program.
+插件侧 Material IR 能力文档（与后端 capabilities 保持一致）。,Addon-side Material IR capability document (mirrored in backend capabilities).
+Cycles ``hash_uint3``（``intern/cycles/util/hash.h``）。,Cycles ``hash_uint3`` (``intern/cycles/util/hash.h``).
+Cycles ``hash_uint`` —— 一维 Perlin 晶格哈希。,Cycles ``hash_uint`` -- the 1D Perlin lattice hash.
+Cycles ``hash_uint4`` —— 四维 Perlin 晶格哈希。,Cycles ``hash_uint4`` -- the 4D Perlin lattice hash.
+来自 ``backend_material_noise.cpp`` 的 ``wrap_period`` / ``mir_wrap_period``。,``wrap_period`` from ``backend_material_noise.cpp`` / ``mir_wrap_period``.
+若 *obj* 至少有一个材质槽位装有材质则返回 True。,True if *obj* has at least one material slot holding a material.
+某个候选通道在所有已扫描材质上的并集状态。,Union state for one candidate channel across every scanned material.
+判断是什么驱动 Principled 的 Normal 输入，以便给出友好的原因。,"Classify what drives the Principled Normal input, for a friendly reason."
+把单个 Principled BSDF 的精确读取累加进各通道累加器。,Fold one Principled BSDF's exact reads into the channel accumulators.
+把纯 Emission 着色器节点（Color * Strength）累加进累加器。,Fold a pure Emission shader node (Color * Strength) into the accumulators.
+为缺少原因的候选标量/自发光通道补充人类可读的原因。,Assign human reasons to proposed scalar/emission channels lacking one.
+把累加器实例化为有序的 ChannelProposal 对象。,Materialize accumulators into ordered ChannelProposal objects.
+"``obj`` 网格顶点坐标的摘要，没有顶点时为 """"。","Digest of ``obj``'s mesh vertex coordinates, """" when it has none."
+用每个角的顶点索引（``.corner_vert``）填充 loop_count 的 intc ``out``。,Fill the intc ``out`` of loop_count with each corner's vertex index (``.corner_vert``).
+用各角法线填充 3*loop_count 的 float32（原生格式）``out``。,Fill the float32 (native format) ``out`` of 3*loop_count with the corner normals.
+从紧凑的 V4 网格内存映射局部空间三角形角点位置。,Memory-map local-space triangle-corner positions from a compact V4 mesh.
+角绘制值是否强制使用 V3 布局（与整数组构建器相同的规则）。,Whether corner paint values force the V3 layout (same rule as the whole-array builder).
+产出已验证的连续 float32 行块；若角总数不符则抛出异常。,Yield validated contiguous float32 row blocks; raise if the corner total is off.
+Geometry Nodes 把其插槽输入存为自定义属性，而非 RNA 字段。,"Geometry Nodes stores its socket inputs as custom properties, not RNA fields."
+除去 _ignorebf 令牌后的名称，这样角色检测和配对能看到 Box_high。,"The name without its _ignorebf token, so role detection and pairing see Box_high."
+项目已启用 Attribute 行的输出后缀（即它们的属性名）。,Output suffixes of the project's enabled Attribute rows (their attribute names).
+``1001 + tile_u + 10 * tile_v`` —— 标准 UDIM 编号方式。,``1001 + tile_u + 10 * tile_v`` -- the standard UDIM numbering.
+":func:`udim_tile_from_coords` 的逆函数。返回 ``(tile_u, tile_v)``。","Inverse of :func:`udim_tile_from_coords`. Returns ``(tile_u, tile_v)``."
+丢弃已排队的推测性准备防抖计时器（若有）。,"Drop a queued speculative-prepare debounce timer, if any."
+在后台准备处理程序中忽略自身引发的 depsgraph 更新。,Ignore self-induced depsgraph updates in the background-prepare handler.
+眼睛或监视器开关处于关闭状态的集合，无论是直接关闭还是通过父级关闭。,"Collections whose eye or monitor toggle is off, directly or through a parent."
+``role`` 中当前分配给 ``group`` 的所有物体。,Every object currently assigned to ``group`` in ``role``.
+组所声明的所有物体：两个网格列表加上自定义烘焙笼。,Every object a group claims: both mesh lists plus a custom cage.
+本场景任一项目中的烘焙组仍然声明的所有物体。,Every object still claimed by a bake group in ANY project of this scene.
+捕获 ``objects`` 的角色标签，以物体名为键。,"Capture the role tags of ``objects``, keyed by object name."
+"按各自名称声明的角色对网格分组；返回 (buckets, unsuffixed)。","Bucket meshes by the role their own name declares; return (buckets, unsuffixed)."
+"该组低模上找到的第一个材质的名称（没有则为 """"）。","Name of the first material found on the group's low meshes ("""" if none)."
+"低模三角形在其活动 UV 贴图上的 [T, 3, 2] UV（没有 UV 贴图时为 None）。","[T, 3, 2] UVs of a low mesh's triangles on its active UV map (None without one)."
+每个低模的材质只是以该网格命名（ZBrush GoZ / GoB）。,Every low mesh's material is just named after that mesh (ZBrush GoZ / GoB).
+使用单个贴图集,Use One Texture Set
+ZBrush 在把网格发送到 Blender 时会添加这些。,ZBrush adds these when it sends meshes to Blender.
+它们的 UV 不,Their UVs don
+取消则保留各自独立的贴图集。,Cancel keeps the separate texture sets.
+把失败的引导形式写入项目的错误摘要（若有）。,"Put the guided form of a failure into the project's error summary, if any."
+当以 Cycles 为主的烘焙正通过其模态驱动器逐步推进时为 True。,True while a Cycles-primary bake is stepping through its modal driver.
+请求正在运行的 Cycles 会话在当前一轮后停止。空闲时返回 False。,Ask the running Cycles session to stop after the current pass. False if idle.
+模态推进需要真实窗口；无头/后台运行保持同步。,Modal stepping needs a real window; headless/background runs stay synchronous.
+Cycles 为主运行的作业 id，用于定位其材质队列。,"Job id of a Cycles-primary run, for addressing its material queue."
+把完成的贴图报告为 ProducedFile，以便 Outputs 面板点亮。,Report a finished map as a ProducedFile so the Outputs panel lights up.
+计划中每一步的传递次数，每次运行计算一次。,"Per-step pass counts for the plan, computed once per run."
+（约）, (approx)
+模态与同步两条 Cycles 路径共用的成功/失败收尾。,Shared success/failure tail for both the modal and synchronous Cycles paths.
+计时器回调：在 1 秒防抖窗口之后尝试推测性 PREPARE。,Timer callback: attempt a speculative PREPARE after the 1s debounce window.
+跳过预热导出失败的高模；内存错误后停止预热。,Skip a high mesh whose warm export failed; stop warming after a memory error.
+释放每次 tick 的高模预热链所占用的状态栏文本。,Release the status-bar text the per-tick high-mesh warm chain owns.
+当有待处理的脏改动需要重新烘焙时，由脏检查计时器调用。,Called by the dirty-check timer when pending dirty changes need rebaking.
+紧凑的已用烘焙时间（规范实现见 runtime.format_duration）。,Compact elapsed bake time (see runtime.format_duration for the canonical impl).
+从具有有效上下文的计时器中触发一次延迟导出。,"Fire the deferred export once, from a timer with a valid context."
+现有状态界面的阶段标记 —— 不新增 UI。,Stage marker for the existing status surfaces — no new UI.
+令牌化的输出文件名所带的 .NNNN 平铺编号，未平铺的文件为 0。,"The .NNNN tile a tokenized output file name carries, or 0 for an untiled file."
+此贴图集的共享输出中已有的 UV 岛。,UV islands already present in this texture set's shared output.
+备份本次逐组处理即将覆盖的共享输出文件。,Back up the shared output files this per-group pass is about to overwrite.
+把已完成的这次处理自身的纹素合成回处理前的快照之上。,Composite the finished pass's own texels back over the pre-pass snapshot.
+当物体不在活动视图层中时，hide_get() 回退到 hide_viewport。,hide_get() falls back to hide_viewport when the object isn't in the active view layer.
+当物体不在活动视图层中时，hide_set() 回退到 hide_viewport。,hide_set() falls back to hide_viewport when the object isn't in the active view layer.
+切换工作区可能会显示出预览从未配置过的 3D 视口。,A workspace switch can surface 3D viewports the preview never configured.
+刷新每视口记录；返回刚切换到 Solid 的空间。,Refresh the per-viewport record; return the spaces that just switched to Solid.
+为给定项目启动脏跟踪器和自动重烘焙计时器。,Start the dirty tracker and auto-rebake timer for the given project.
+停止脏跟踪器和自动重烘焙计时器。,Stop the dirty tracker and auto-rebake timer.
+清除无法在重载或文件加载后存活的准备计时器和 UI 状态。,Drop prepare timers and UI state that cannot survive a reload or file load.
+在 Blender 的 UI 循环被阻塞时允许用 Escape 中止索引捕获。,Allow Escape to abort an indexed capture while Blender's UI loop is blocked.
+"为选中要烘焙的组返回 (cold_objects, total_high_count)。","Return (cold_objects, total_high_count) for the groups selected to bake."
+为下一个（些）网格绘制设置卡片；``upcoming`` 是物体或名称。,Paint the setup card for the next mesh(es); ``upcoming`` is objects or names.
+完成一个所有输出都由插件绘制的作业（Wireframe 行）。,Finish a job whose every output is drawn by the addon (Wireframe rows).
+当 ``group_names`` 指定的组数少于项目所拥有的组数时为 True。,True when ``group_names`` names fewer groups than the project holds.
+添加烘焙项目,Add Bake Project
+在此 blend 文件中创建烘焙项目,Create a bake project in this blend file
+烘焙选定材质,Bake Selected Materials
+为缺少 UV 的物体生成 Smart UV,Generate Smart UVs for missing objects
+仅对缺少可用 UV 的物体，通过 Smart UV Project 创建新的 FyrMaterialBake UV 层,Create a new FyrMaterialBake UV layer via Smart UV Project only on objects that lack usable UVs
+通道,Channels
+近似 / 不支持：,Approximate / unsupported:
+重新扫描材质,Rescan Materials
+检测此项目中新增的有意义材质通道，且不更改现有行,Detect newly meaningful material channels for this project without changing existing rows
+设置输出尺寸,Set Output Size
+尺寸,Size
+清除 UV 覆盖,Clear UV Override
+使用每个低模网格,Use each low-poly mesh
+设置 UV 覆盖,Set UV Override
+为选定的烘焙组使用此 UV 层,Use this UV layer for the selected bake groups
+UV 层,UV Layer
+指定贴图集,Assign Texture Set
+把此烘焙组指定到某个贴图集，使其与同一贴图集中的其他烘焙组共享输出文件,Assign this bake group to a texture set so it shares output files with other bake groups in the same set
+烘焙组,Bake Group
+应用到选定组,Apply To Selected Groups
+设置活动烘焙组,Set Active Bake Group
+把此烘焙组设为活动烘焙组,Set this bake group as the active bake group
+按索引设置活动烘焙组,Set Active Bake Group by Index
+把此组设为活动烘焙组。Shift 单击可加入另一个组；设置更改会应用到所有已加入的组,Make this the active bake group. Shift-click to include another group; setting changes apply to every included group
+烘焙组索引,Bake Group Index
+扩展,Extend
+选择所有烘焙组,Select All Bake Groups
+选择分配给该烘焙项目的所有网格,Select every mesh assigned to the bake project
+切换烘焙笼,Toggle Cage
+显示或隐藏此烘焙项目的烘焙笼。Skew 针线仍由各自的开关控制,Show or hide the cage for this bake project. Skew needles stay on their own toggle
+切换烘焙组烘焙笼叠加,Toggle Bake Group Cage Overlay
+显示或隐藏此烘焙组的烘焙笼叠加,Show or hide the cage overlay for this bake group
+切换烘焙组烘焙笼覆盖,Toggle Bake Group Cage Coverage
+切换烘焙笼覆盖,Toggle Cage Coverage
+切换项目可见性,Toggle Project Visibility
+显示或隐藏整个烘焙项目：网格、烘焙笼和覆盖,"Show or hide the entire bake project: meshes, cage, and coverage"
+切换烘焙笼菜单展开,Toggle Cage Menu Expansion
+显示或隐藏此烘焙组,Show or hide this bake group
+按组重命名网格,Rename Meshes from Group
+选择烘焙笼物体,Select Cage Object
+物体名称,Object Name
+切换物体可见性,Toggle Object Visibility
+在视口中显示或隐藏此网格,Show or hide this mesh in the viewport
+在视口中显示或隐藏烘焙笼及其覆盖,Show or hide the cage and its coverage in the viewport
+合并所有烘焙组,Combine All Bake Groups
+把所有烘焙组指定到同一个共享贴图集，使项目只写出一套输出文件,Assign every bake group to one shared texture set so the project writes a single set of output files
+移除导出对话框中以 ``set_name`` 为键的覆盖行和排除行。,Remove the export dialog's override and exclusion rows keyed by ``set_name``.
+打开 Meshes 并保持新项目的设置处于展开状态。,Open Meshes and keep the new item's settings expanded.
+新建贴图集,New Texture Set
+新建贴图集，并可选地把活动烘焙组指定到其中,Create a new texture set and optionally assign the active bake group to it
+指定活动烘焙组,Assign Active Bake Group
+从贴图集移除,Remove from Texture Set
+把此烘焙组从其贴图集中移除，使其生成独立的输出文件,Remove this bake group from its texture set so it produces standalone output files
+迁移贴图集,Migrate Texture Sets
+把贴图集名称从烘焙组迁移到新的 texture_sets 集合,Migrate texture set names from bake groups to the new texture_sets collection
+解散贴图集,Dissolve Texture Set
+指定、重命名或清除此烘焙组,"Assign, rename, or clear this bake group"
+MASTER_BAKER_MT_texture_set_picker,MASTER_BAKER_MT_texture_set_picker
+为单个组或标题栏的选定项打开贴图集菜单。,"Open the texture-set menu for one group, or for the header's selection."
+选择这些烘焙组写入的贴图集,Choose the texture set these bake groups write into
+MASTER_BAKER_MT_assign_texture_set,MASTER_BAKER_MT_assign_texture_set
+解散此贴图集,Dissolve this texture set
+MASTER_BAKER_MT_texture_set_row,MASTER_BAKER_MT_texture_set_row
+重命名此贴图集并更新指定到它的每个烘焙组,Rename this texture set and update every bake group assigned to it
+旧名称,Old Name
+新名称,New Name
+切换贴图集展开,Toggle Texture Set Expansion
+在层级中展开或折叠此贴图集,Expand or collapse this texture set in the hierarchy
+设置活动烘焙项目,Set Active Bake Project
+把此项目设为活动烘焙项目,Make this the active bake project
+烘焙项目索引,Bake Project Index
+设置活动贴图集,Set Active Texture Set
+把此贴图集设为活动贴图集,Make this the active texture set
+切换贴图集可见性,Toggle Texture Set Visibility
+显示或隐藏此贴图集中的所有网格,Show or hide every mesh in this texture set
+切换烘焙组可见性,Toggle Bake Group Visibility
+包含高模,Include High Poly
+切换贴图集烘焙笼叠加,Toggle Texture Set Cage Overlay
+显示或隐藏此贴图集中每个烘焙组的烘焙笼叠加,Show or hide the cage overlay for every bake group in this texture set
+多选,Multi Select
+网格,Meshes
+烘焙笼,Cage
+贴图,Maps
+预览,Preview
+选择烘焙面板区段,Select Bake Panel Section
+区段,Section
+切换区段,Toggle Section
+展开或折叠此区段,Expand or collapse this section
+属性,Property
+重置为校准默认值,Reset to Calibrated Defaults
+把曲率响应滑块恢复为校准默认值,Restore the curvature response sliders to their calibrated defaults
+保存预设,Save Preset
+把活动烘焙项目保存为可复用预设,Save the active bake project as a reusable preset
+预设名称,Preset Name
+加载预设,Load Preset
+预设,Preset
+复制烘焙项目,Duplicate Bake Project
+复制活动烘焙项目及其当前设置,Duplicate the active bake project and its current settings
+移除烘焙项目,Remove Bake Project
+从此 blend 文件中移除活动烘焙项目,Remove the active bake project from this blend file
+撤销移除项目,Undo Remove Project
+恢复最近一次被移除的烘焙项目,Restore the bake project that was most recently removed
+撤销移除,Undo Remove
+恢复刚被移除的烘焙组、贴图、贴图集或网格分配,"Restore the bake group, map, texture set, or mesh assignment that was just removed"
+增加组,Add Bake Group
+向活动烘焙项目添加新烘焙组,Add a new bake group to the active bake project
+追加一个新的空烘焙组，并使其成为唯一选中的组。,"Append a new, empty bake group and make it the only selected one."
+从选择创建烘焙组,Create Bake Group From Selection
+通过匹配选定网格上常见的 Low/High、LP/HP 和 Cage 名称后缀来创建烘焙组,"Create bake groups by matching common Low/High, LP/HP, and Cage name suffixes on the selected meshes"
+移除烘焙组,Remove Bake Group
+移除此烘焙组。在下一次更改之前都提供恢复,Remove this bake group. Restore is offered until the next change
+将选定项指定到烘焙组,Assign Selected to Bake Group
+角色,Role
+新建烘焙组,New Bake Group
+把选定的网格放入新建烘焙组，而不是活动组,Put the selected meshes in a new bake group instead of the active one
+添加选定项（自动低模/高模）,Add Selected (Auto Low/High)
+移除网格,Remove Mesh
+选择网格,Select Mesh
+槽位索引,Slot Index
+切换网格可见性,Toggle Mesh Visibility
+隔离,Isolate
+同步烘焙组元数据,Sync Bake Group Metadata
+应用烘焙组元数据,Apply Bake Group Metadata
+目标,Target
+使用选定项作为自定义烘焙笼,Use Selected as Custom Cage
+把选定的网格用作活动烘焙组的自定义烘焙笼,Use the selected mesh as the custom cage for the active bake group
+诊断烘焙笼检查,Diagnose Cage Check
+把详细的烘焙笼检查和视口叠加诊断复制到剪贴板,Copy detailed Cage Check and viewport-overlay diagnostics to the clipboard
+\n,\n
+从低模创建自定义烘焙笼,Create Custom Cage from Low
+使用当前烘焙笼设置，从低模网格创建可编辑的自定义烘焙笼,Create an editable custom cage from the low-poly mesh using the current cage settings
+自动适配烘焙笼,Auto-Fit Cage
+估算烘焙笼偏移,Estimate Cage Offset
+重置烘焙笼偏移,Reset Cage Offset
+把应用范围所覆盖的基于距离的烘焙笼偏移重置为默认值,Reset the Distance Based cage offset of what Apply To covers to the default
+重置后侧距离,Reset Rear Distance
+把后侧距离重置为 0（自动）：与烘焙笼伸出的深度相同，至少为低模网格的 5%,"Reset Rear Distance to 0 (Auto): as deep as the cage reaches out, at least 5% of the low-poly mesh"
+根据低模与高模表面之间的距离估算初始的基于距离的烘焙笼偏移,Estimate a starting Distance Based cage offset from the distance between the low- and high-poly surfaces
+调整烘焙组烘焙笼偏移,Adjust Bake Group Cage Offset
+增量,Delta
+重置烘焙组烘焙笼偏移,Reset Bake Group Cage Offset
+重置活动烘焙组,Reset the active bake group
+估算所选基础偏移,Estimate Selected Base Offset
+为每个包含所选低模的烘焙组估算基于距离的烘焙笼偏移,Estimate a Distance Based cage offset for each bake group containing a selected low-poly mesh
+重置所选基础偏移,Reset Selected Base Offset
+为每个包含所选低模的烘焙组重置基于距离的烘焙笼偏移,Reset the Distance Based cage offset for each bake group containing a selected low-poly mesh
+将绘制图像的像素存储在 .blend 内，以便重新加载后仍能保留。,Store the paint image's pixels inside the .blend so they survive reload.
+实时绘制的代理物体，或 None。,"The live paint proxy object, or None."
+删除绘制代理，并取消隐藏它所代替的对象。幂等。,Delete the paint proxy and unhide whatever it stood in for. Idempotent.
+"返回当前屏幕中第一个 VIEW_3D 的 (area, region)，或 (None, None)。","Return (area, region) for the first VIEW_3D in the current screen, or (None, None)."
+如果活动物体处于纹理绘制模式，则将其返回物体模式。,"If the active object is in Texture Paint mode, return it to Object mode."
+所有烘焙组当前引用的 Paint Offset / Paint Skew 图像。,Every Paint Offset / Paint Skew image any bake group currently references.
+修复撤销或重做操作在绘制会话后残留的状态。返回该判定结果。,Repair whatever an undo or redo step left of a paint session. Returns the decision.
+一次性计时器：在有窗口的情况下运行协调，以便 mode_set 有可用的视口。,One-shot timer: run the reconcile with a window so mode_set has a viewport.
+在活动烘焙组上进入或退出 Paint Offset / Paint Skew 笔刷。,Enter or leave the Paint Offset / Paint Skew brush on the active bake group.
+Paint Offset,Paint Offset
+Paint Skew,Paint Skew
+实时绘制会话所绘制的网格（该组的每个低模）。,The meshes the live paint session paints (every low of the group).
+撤销绘制会话的隔离，前提是当前会话正是设置该隔离的会话。,"Undo a paint-session isolation, if this session is the one that set it."
+撤销绘制会话所切换的叠加层开关。幂等。,Undo the overlay toggles a paint session flipped. Idempotent.
+隔离已绘制网格,Isolate Painted Mesh
+清除绘制,Clear Paint
+估算逐网格烘焙笼偏移,Estimate Per-Mesh Cage Offset
+根据周围的高模为活动低模估算额外的烘焙笼偏移,Estimate an additional cage offset for the active low-poly mesh from the surrounding high-poly meshes
+重置逐网格烘焙笼偏移,Reset Per-Mesh Cage Offset
+重置活动低模,Reset the active low-poly mesh
+估算所选逐网格偏移,Estimate Selected Per-Mesh Offsets
+为项目中每个所选低模估算额外的烘焙笼偏移,Estimate an additional cage offset for every selected low-poly mesh in the project
+重置所选逐网格偏移,Reset Selected Per-Mesh Offsets
+重置项目中每个所选低模的额外烘焙笼偏移,Reset the additional cage offset for every selected low-poly mesh in the project
+调整自定义烘焙笼,Adjust Custom Cage
+平滑自定义烘焙笼,Smooth Custom Cage
+平滑自定义烘焙笼网格，同时保留开放边界,Smooth the custom cage mesh while preserving open boundaries
+系数,Factor
+迭代次数,Iterations
+清理自定义烘焙笼,Clean Custom Cage
+从自定义烘焙笼网格中移除离群的尖刺顶点,Remove outlier spike vertices from the custom cage mesh
+尖刺比例,Spike Ratio
+混合,Blend
+按后缀自动构建烘焙组,Auto-Build Bake Groups by Suffix
+按集合自动构建烘焙组,Auto-Build Bake Groups by Collection
+根据所选网格的集合和标签，从这些网格创建或更新烘焙组,Create or update bake groups from the selected meshes based on their collections and tags
+按名称自动构建烘焙组,Auto-Build Bake Groups by Name
+根据共享的物体名称，从所选网格创建或更新烘焙组,Create or update bake groups from the selected meshes based on shared object names
+在阻塞式全场景构建前后显示等待光标和状态行（参见 invoke）。,Wait cursor + status line around a blocking scene-wide build (see invoke).
+从名称自动构建烘焙组,Auto-Build Bake Groups from Names
+自动重命名网格为 _low/_high,Auto-Rename Meshes to _low/_high
+邻近容差,Proximity Slack
+对于不……的网格,For meshes that don
+自动设置,Auto Setup
+从集合自动命名,Auto-Name from Collections
+基础名称,Base Name
+重命名后网格的共享基础名称。留空则使用随机 ,Shared base for the renamed meshes. Leave empty for a random 
+索引位数,Index Digits
+后缀之后写入的索引宽度（_high01 与 _high001）,Width of the index written after the suffix (_high01 vs _high001)
+为每个网格数据块/UV/域组合返回一个可写的分配项。,Return one writable assignment per mesh datablock/UV/domain combination.
+捕获 UV 快照,Capture UV Snapshot
+保存活动网格,Save the active mesh
+替换快照,Replace Snapshot
+恢复 UV,Restore UVs
+拓扑匹配时精确恢复 UV；拓扑已更改时，从存储的表面转移 UV,"Restore UVs exactly when topology matches, or transfer them from the stored surface when topology has changed"
+最大转移距离,Maximum Transfer Distance
+设置 UV 转移的最大表面距离。0 会根据网格尺寸选择一个安全值,Set the maximum surface distance for UV transfer. 0 chooses a safe value from the mesh size
+重命名 UV 快照,Rename UV Snapshot
+重命名存储在活动物体上的 UV 快照,Rename the UV snapshot stored on the active object
+快照名称,Snapshot Name
+删除 UV 快照,Delete UV Snapshot
+删除活动物体,Delete the active object
+删除快照,Delete Snapshot
+清理孤立 UV 快照,Clean Orphaned UV Snapshots
+删除源物体已不存在的已存 UV 快照,Delete stored UV snapshots whose source objects no longer exist
+清理快照,Clean Snapshots
+优化 UV 接缝,Optimize UV Seams
+实验性：烘焙前对齐每条 UV 接缝的两侧，以减少可见的接缝瑕疵,Experimental: align both sides of each UV seam before baking to reduce visible seam artifacts
+最大局部调整量,Maximum Local Adjustment
+最大刚性孤岛旋转,Maximum Rigid Island Rotation
+导出烘焙工作区,Export Bake Workspace
+导出项目,Export the project
+烘焙项目,Bake Project
+烘焙活动烘焙项目中每个已启用的贴图，并将纹理写入输出文件夹,Bake every enabled map of the active bake project and write the textures to the output folder
+缺少 UV,Missing UVs
+烘焙项目的其余部分，跳过没有可用 UV 贴图的低模,"Bake the rest of the project, skipping low-poly meshes that have no usable UV map"
+跳过并烘焙,Skip Them and Bake
+烘焙没有可写入这些网格的 UV 空间：,The bake has no UV space to write these meshes into:
+这些网格将被跳过。其余一切正常烘焙。,These meshes will be skipped. Everything else bakes normally.
+为它们添加 UV 贴图并重新烘焙即可包含它们。,Add a UV map to them and bake again to include them.
+实时烘焙,Live Bake
+在首次烘焙完成后开启或关闭自动重新烘焙,Turn automatic rebaking on or off after the first bake completes
+重启后端,Restart Backend
+活动项目的状态消息，与就绪提示中显示的一致。,"The active project's status message, as shown in the readiness tooltip."
+烘焙状态,Bake State
+当前烘焙状态,Current bake state
+验证项目,Validate Project
+烘焙前检查活动烘焙项目是否存在问题，包括拓扑和文件权限,"Check the active bake project for problems before baking, including topology and file permissions"
+为预检中指定了网格的行提供点击目标：选中并框显该网格。,Click target for a preflight row that names a mesh: select it and frame it.
+选中并框显,Select and Frame
+选中此网格并在 3D 视口中框显它,Select this mesh and frame it in the 3D viewport
+物体,Object
+在窗口的每个 3D 视口中执行 view_selected；缺少视口不算错误。,view_selected in every 3D viewport of the window; a missing viewport is not an error.
+某些布尔修改器作为操作数读取的物体名称（物体或集合）。,Names of objects some Boolean modifier reads as an operand (object or collection).
+该物体、或包含它的每个集合，是否在渲染中被关闭。,"Whether the object, or every collection holding it, is switched off for render."
+重新烘焙已更改的贴图,Rebake Changed Maps
+仅重新烘焙自上次成功烘焙以来设置发生变化的已启用输出贴图,Rebake only the enabled output maps whose settings changed since the last successful bake
+全部标记为已更改,Mark All Dirty
+强制下一次自动重新烘焙重建每个已启用的烘焙组和贴图,Force the next automatic rebake to rebuild every enabled bake group and map
+清除更改标记,Clear Dirty
+清除所有待处理的自动重新烘焙更改，而不进行烘焙,Clear all pending automatic rebake changes without baking them
+步进光线,Step Rays
+移动此贴图,Move this map
+贴图 UUID,Map UUID
+方向,Direction
+适配范围,Fit Range
+将最小值和最大值设为该属性在整个项目中的最低值和最高值,Set Min and Max to the lowest and highest value of this attribute across the project
+烘焙贴图,Bake Map
+为活动烘焙项目烘焙一个输出贴图,Bake one output map for the active bake project
+贴图类型,Map Type
+通过 Cycles 烘焙,Bake via Cycles
+隐藏进度叠加层,Hide Progress Overlay
+取消烘焙,Cancel Bake
+停止当前正在运行的烘焙,Stop the bake that is currently running
+添加输出贴图,Add Output Map
+向活动烘焙项目添加新的输出贴图条目,Add a new output map entry to the active bake project
+贴图,Map
+移除输出贴图,Remove Output Map
+从堆栈中移除此贴图。在下一次更改之前可进行恢复,Remove this map from the stack. Restore is offered until the next change
+贴图索引,Map Index
+复制输出贴图,Duplicate Output Map
+在此贴图正下方添加其副本，并使用唯一的输出名称,Add a copy of this map directly below it with a unique output name
+移动贴图,Move Map
+在堆栈中上移或下移所选输出贴图,Move the selected output map up or down in the stack
+恢复贴图默认值,Restore Map Defaults
+将所选贴图条目恢复为此项目的默认设置,Restore the selected map entry to its default settings for this project
+重置贴图设置,Reset Map Setting
+将此贴图设置重置为其默认值,Reset this map setting to its default value
+属性名称,Property Name
+低采样数,Low Sample Count
+确认可能产生噪点的采样数,Confirm a sample count that may produce noisy output
+建议采样数,Proposed Samples
+先前采样数,Previous Samples
+操作,Action
+不要,Don
+应用选择,Apply Choice
+应用贴图堆栈预设,Apply Map Stack Preset
+贴图堆栈预设,Map Stack Preset
+刷新输出,Refresh Outputs
+重新加载最近一次烘焙所记录的输出,Reload the outputs recorded by the most recent bake
+打开输出文件夹,Open Output Folder
+打开活动烘焙项目的当前输出文件夹,Open the current output folder for the active bake project
+复制输出路径,Copy Output Path
+发送到 Painter,Send to Painter
+在 Substance 3D Painter 中打开低模，并将烘焙的网格贴图指定给对应的贴图集,Open the low-poly mesh in Substance 3D Painter and assign baked mesh maps to their matching texture sets
+在 Painter 中更新,Update in Painter
+在已打开的 Painter 项目中重新加载网格，保留笔触，并刷新其烘焙网格贴图,"Reload the mesh in the open Painter project, preserve strokes, and refresh its baked mesh maps"
+发送到 Marmoset,Send to Marmoset
+在 Marmoset Toolbag 中打开低模，并将烘焙的 PBR 纹理指定给贴图集材质,Open the low-poly mesh in Marmoset Toolbag with baked PBR textures assigned to texture-set materials
+在 Marmoset 中更新,Update in Marmoset
+用当前低模替换已打开的 Toolbag 网格并刷新已指定的贴图，而无需再打开一个 Toolbag,"Replace the open Toolbag mesh with the current Low and refresh assigned maps, without opening another Toolbag"
+发送到 Photoshop,Send to Photoshop
+将每张烘焙贴图作为图层在一个 Photoshop 文档中打开。再次发送将替换该文档,Open every baked map as a layer in one Photoshop document. Sending again replaces that document
+发送到 Designer,Send to Designer
+将烘焙贴图和低模添加到已打开的 Substance Designer 项目；若未打开任何项目，则创建一个项目,"Add the baked maps and the low-poly mesh to the open Substance Designer project, or create a project when none is open"
+designer_executable,designer_executable
+在 Designer 中更新,Update in Designer
+在已打开的 Substance Designer 项目中刷新已链接的低模和烘焙贴图，而不添加另一份副本,"Refresh the linked low-poly mesh and baked maps in the open Substance Designer project, without adding another copy"
+发送到 3DCoat,Send to 3DCoat
+在 3DCoat 中打开低模,Open the low-poly mesh in 3DCoat
+coat_executable,coat_executable
+发送到 Mari,Send to Mari
+在 Mari 中打开低模，并将每张烘焙贴图导入到一个通道。已打开的 Mari 项目会接收该网格,Open the low-poly mesh in Mari and import each baked map into a channel. An open Mari project receives the mesh
+mari_executable,mari_executable
+打开后端日志,Open Backend Log
+在可复制的独立窗口中打开当前后端日志,Open the current backend log in a copyable external window
+打开 GPU 诊断,Open GPU Diagnostics
+打开包含上次烘焙 GPU 诊断日志的文件夹,Open the folder containing the GPU diagnostics log from the last bake
+复制失败摘要,Copy Failure Summary
+将最近一次烘焙失败的详细信息复制到剪贴板,Copy details about the latest bake failure to the clipboard
+创建支持包,Create Support Bundle
+创建包含最新烘焙诊断信息和项目信息的 ZIP 文件,Create a ZIP file containing the latest bake diagnostics and project information
+包含 .blend 文件,Include .blend File
+当前场景的副本，保存到 zip 文件中。,"A copy of the scene as it is right now, saved into the zip."
+你打开的文件不会被修改。,Your open file is not modified.
+加载输出图像,Load Output Image
+烘焙组名称,Bake Group Name
+输出索引,Output Index
+打开贴图纹理,Open Map Texture
+打开此贴图,Open this map
+输出后缀,Output Suffix
+在低模上显示贴图,Show Map On Low
+在活动烘焙组上显示或隐藏此纹理,Show or hide this texture on the active bake group
+贴图堆栈索引,Map Stack Index
+范围,Scope
+预览贴图,Preview Map
+在低模上显示此烘焙贴图，或选择“关闭”以恢复其材质,"Show this baked map on the low-poly meshes, or Off to restore their materials"
+预览烘焙材质,Preview Baked Material
+使用可用的烘焙纹理在低模上显示或隐藏 PBR 预览,Show or hide a PBR preview on the low-poly meshes using the available baked textures
+A/B 材质对比,A/B Material Compare
+设置 PBR 预览法线来源,Set PBR Preview Normal Source
+选择由哪张烘焙法线贴图驱动组合材质预览,Choose which baked normal map drives the combined material preview
+法线来源,Normal Source
+恢复原始材质,Restore Original Materials
+停止当前预览并恢复低模,Stop the active preview and restore the low-poly meshes
+实时法线,Live Normal
+为活动烘焙组启动或停止低分辨率的实时法线预览,Start or stop a reduced-resolution live normal preview for the active bake group
+在外部编辑贴图,Edit Map Externally
+上一个输出,Previous Output
+加载上一个已跟踪的输出,Load the previous tracked output
+下一个输出,Next Output
+加载下一个已跟踪的输出,Load the next tracked output
+切换对比模式,Toggle Compare Mode
+为已跟踪的输出开启或关闭 A/B 对比,Turn A/B comparison on or off for tracked outputs
+设置图像编辑器通道,Set Image Editor Channels
+设置图像编辑器 Mip 级别,Set Image Editor Mip Level
+Mip 级别,Mip Level
+存储对比输出,Store Compare Output
+加载对比输出,Load Compare Output
+交换对比输出,Swap Compare Outputs
+交换对比输出 A 和 B,Swap compare outputs A and B
+切换烘焙组隔离,Toggle Bake Group Isolation
+隐藏活动烘焙组之外的所有物体，或恢复之前的视口可见性,"Hide all objects outside the active bake group, or restore the previous viewport visibility"
+选择烘焙组物体,Select Bake Group Objects
+选中指定给活动烘焙组的所有物体,Select all objects assigned to the active bake group
+选择网格,Select Meshes
+切换烘焙组角色可见性,Toggle Bake Group Role Visibility
+所有 *project* 的组中指定给 *role* 的每个唯一网格。,Every unique mesh assigned to *role* across all of *project*'s groups.
+当项目具有 *role* 网格且每一个都可见时返回 True。,True when the project has *role* meshes and every one is visible.
+切换参考可见性,Toggle Reference Visibility
+复制贴图输出,Duplicate Map Outputs
+多个贴图共享同一个输出文件名：,Multiple maps share the same output filename:
+点击 ,Click 
+之后你可以在“贴图”列表中手动编辑后缀。,You can edit the suffixes manually in the Maps list afterwards.
+清除缓存,Clear Cache
+删除所有可复用的烘焙缓存，以便下一次烘焙从头开始,Delete all reusable bake caches so the next bake starts from scratch
+fyr-baker-clear-cache,fyr-baker-clear-cache
+清除日志,Clear Logs
+在首次运行对话框中显示某项设置的帮助。,Show help for a setting in the first-run dialog.
+设置帮助,Setting Help
+返回新的枚举元组，使 RNA 不会持有指向已重新加载模块的指针。,Return fresh enum tuples so RNA never holds pointers into a reloaded module.
+对于 Blender 的临时顶层窗口（偏好设置、渲染等）返回 True。,"True for Blender's temporary top-level windows (Preferences, render, ...)."
+用户 Blender 会话所在的窗口，绝不会是临时窗口。,"The window the user's Blender session lives in, never a temporary one."
+"在 ``window`` 内选择一个 (area, region) 作为弹出窗口的锚点。","Pick an (area, region) inside ``window`` to anchor the popup on."
+在 ``window`` 内打开首次运行对话框，使其不会被其他窗口遮挡。,Open the first-run dialog inside ``window`` so it cannot land behind another window.
+首次运行对话框，让用户选择后端预热的积极程度。,First-run dialog that lets the user choose how aggressive backend prewarm should be.
+Fyr Baker 设置,Fyr Baker Settings
+烘焙工作进程启动,Bake Worker Startup
+提前准备网格,Prepare Meshes Early
+更新检查,Update Checks
+你稍后可在插件偏好设置中更改这些设置。,You can change these settings later in Add-on Preferences.
+更新检查会连接互联网以查找新版本。,Update checks connect to the internet to look for new versions.
+Fyr Baker 可以在你按下烘焙之前启动其后端烘焙工作进程。,Fyr Baker can spawn its backend bake worker before you press Bake.
+否则，会话中的首次烘焙会慢得多，因为后端,The first bake of a session is otherwise much slower because the backend
+需要启动、初始化 GPU、编译管线并加载网格缓存。,"must start, initialize the GPU, compile pipelines, and load mesh caches."
+无法绘制设置。请使用 编辑 → 偏好设置 → 插件 → Fyr Baker。,Could not draw settings. Use Edit → Preferences → Add-ons → Fyr Baker.
+每次安装后若尚未确认，就显示一次预热说明对话框。,Show the prewarm explainer dialog once per install if not yet acknowledged.
+在任何绘制回调之外释放被取代的预览。,Release superseded previews outside any draw callback.
+在绘制回调之外使静态烘焙笼缓存失效一次。,"Invalidate the static cage cache from outside the draw callback, once."
+该槽位的 LINES 批次，仅上传一次；没有时为 _NO_PREVIEW_LINE。,"The slot's LINES batch, uploaded once, or _NO_PREVIEW_LINE when it has none."
+*group* 的低模是否带有画笔的绘制偏移层。,Whether a low of *group* carries the brush's paint offset layer.
+该组已绘制的倾斜校正贴图（paint_sampling.skew_correction_tiles），没有时为 {}。,"The group's painted skew correction maps (paint_sampling.skew_correction_tiles), {} when none."
+高模正视图深度写入 R32F 遮罩（低模下方通道会读取它）。,The high's front view depth into an R32F mask (the beneath-the-low pass reads it).
+屏幕覆盖率的后半部分：在高模位于低模下方处绘制低模。,Second half of the screen coverage: paint the low where its high lies under it.
+同时适用于 RNA 集合和普通列表的名称查找。,Name lookup that works on both an RNA collection and a plain list.
+限制倾斜场重建频率，使其在视口可承受的范围内。,Rate-limit skew-field regeneration to something a viewport can absorb.
+让下一次 bump 立即通过（用于绘制会话结束时）。,Let the next bump through immediately (used when a paint session ends).
+释放所有池化的离屏缓冲，以便禁用/重载时立刻腾出 GPU 内存。,Drop every pooled offscreen so disable/reload frees the GPU memory now.
+对叠加层修订表忽略依赖图更新（无损网格替换）。,Ignore depsgraph updates for the overlay revision table (a lossless mesh swap).
+将 ``obj`` 的键项保持在 ``signature``（在无损替换之前取得）。,Hold ``obj``'s key term at ``signature`` (taken before a lossless swap).
+丢弃所有标记（文件加载/插件注销）。,Drop every stamp (file load / addon unregister).
+请求的逐槽位键；未带键构建的槽位回退到其位置。,Per-slot keys for a request; a slot built without one falls back to its position.
+缓存条目的按槽位键视图（键与槽位不一致时为空）。,Per-slot-key view of a cache entry (empty when keys and slots disagree).
+仅保留 ``wanted_keys`` 仍指名的槽位；若无一保留则为 None。,Keep only the slots ``wanted_keys`` still names; None when none survive.
+master_baker_auto_cage_preview,master_baker_auto_cage_preview
+master_baker_distance_average_normals_preview,master_baker_distance_average_normals_preview
+当任一贴图/PBR/实时法线预览会话占用低模材质时为 True。,True while any map/PBR/live-normal preview session owns the low materials.
+预览 ``project.latest_outputs`` 中的每个烘焙输出，无论是否启用。,"Preview every baked output in ``project.latest_outputs``, enabled or not."
+偏移画笔正在绘制的烘焙组名称（没有时为空）。,Names of the bake groups the offset brush is painting (empty when none).
+偏移画笔的实时烘焙笼，作为覆盖率深度通道；否则为 None。,"The offset brush's live cage as a coverage depth pass, or None."
+会话绘制倾斜校正贴图时的单个 UDIM 平铺。,One UDIM tile of the skew correction map while a session paints it.
+paint_sampling.skew_correction_tiles 约定中的实时贴图。,The live map in the paint_sampling.skew_correction_tiles contract.
+实时会话绘制的所有烘焙组名称（没有时为空）。,Names of every bake group the live session paints (empty when none).
+当实时会话绘制 *group*（可选为 *kind*）时为 True。,True while a live session paints *group* (optionally of *kind*).
+会话绘制的实时组，按会话顺序（缺失的跳过）。,"The live groups the session paints, in session order (missing ones skipped)."
+将 *values*（每个循环一个）写入 CORNER 层 *name*，必要时创建该层。,"Write *values* (one per loop) into the CORNER layer *name*, creating it."
+移除 *group* 已绘制的 *kind* 值（偏移层/倾斜校正贴图）。,Remove the painted *kind* values of *group* (offset layer / skew correction maps).
+每个已绘制组中按会话三角形角点对应的烘焙笼角点；否则为 None。,"Cage corner per session triangle corner across every painted group, or None."
+获取会话打开后才完成的自动烘焙笼适配。,Pick up an Automatic cage fit that finished after the session opened.
+"在 [K, 3] 的 *indices* 处对逐角点 *values* [N, C] 做重心插值。","Barycentric interpolation of per-corner *values* [N, C] at [K, 3] *indices*."
+重新读取会话的值（撤销/重做后）。False = 会话已结束。,Re-read the session's values (after undo/redo). False = the session ended.
+"3D 视口的 (window, area, region)，优先当前视口。","(window, area, region) of a 3D Viewport, preferring the current one."
+"在 *group* 上打开绘制会话。返回 (ok, message)。","Open a paint session on *group*. Returns (ok, message)."
+实时会话应结束的原因（'tool'、'mode'、'group'），或 None 表示继续。,"Why the live session should end ('tool', 'mode', 'group'), or None to keep it."
+定时器：结束艺术家以其他方式离开的会话（绝不在绘制回调中执行）。,Timer: end a session the artist left another way (never from a draw callback).
+"所有已绘制网格的最近命中：(location, normal) 世界空间坐标；否则为 None。","Nearest hit over every painted mesh: (location, normal) in world space, or None."
+保留没有被已绘制表面遮挡的点。,Keep the points no painted surface hides from the viewer.
+在屏幕 *coord* 处绘制一笔。值发生变化时返回 True。,One dab at screen *coord*. Returns True when values changed.
+没有被已绘制表面遮挡的三角形（按重心）。,The triangles (by centroid) no painted surface hides from the viewer.
+写入笔画所更改的内容（网格层或校正贴图）。返回写入的项。,Write what the strokes changed (mesh layers or correction maps). Returns items written.
+*coord* 下方表面上的绘制值（最近的焊接点或纹素）。,The painted value at the surface under *coord* (nearest welded point or texel).
+通过烘焙 UV 从倾斜校正贴图读取的表面着色。,Surface tint read from the skew correction map through the bake UVs.
+将插件偏好设置中的偏移着色颜色复制一次到该场景的画笔。,Copy the addon preferences' offset tint colours into this scene's brush once.
+用于覆盖率深度遮罩的实时烘焙笼三角形（法线为零：无偏移）。,The live cage triangles for the coverage depth mask (zero normals: no offset).
+在无会话时从工具栏选取的工具会在活动组上打开一个会话。,A tool picked from the toolbar with no session opens one on the active group.
+绘制笔画,Paint Stroke
+在烘焙组上绘制烘焙笼偏移或射线倾斜,Paint the cage offset or the ray skew on the bake group
+在表面上跟踪画笔光标（在工具中绑定到鼠标移动）。,Track the brush cursor over the surface (bound to mouse move in the tool).
+绘制画笔光标,Paint Brush Cursor
+采样绘制值,Sample Paint Value
+将光标下的绘制值用作设置目标,Use the painted value under the cursor as the Set target
+停止绘制,Stop Painting
+退出绘制偏移或绘制倾斜,Leave Paint Offset or Paint Skew
+填充,Fill
+用上方显示的设置值填充烘焙组的每个低模,Fill every low mesh of the bake group with the Set Value shown above
+工具标题栏用的紧凑画笔设置。,Compact brush settings for the tool header.
+画笔,Brush
+带图标标题及其下方分隔线的框式分区。,A boxed section with an icon header and a rule under it.
+画笔衰减,Brush Falloff
+抬高,Raised
+压低,Lowered
+偏移缩放,Offset Scale
+倾斜量,Skew Amount
+设置值,Set Value
+清除偏移,Clear Offset
+画笔选项,Brush Options
+一个工具栏槽位：绘制偏移，它的长按展开组中为绘制倾斜。,One toolbar slot: Paint Offset with Paint Skew in its hold-to-expand group.
+Ctrl：添加 <-> 减去，设置 -> 擦除；平滑与擦除没有相反操作。,"Ctrl: Add <-> Subtract, Set -> Erase; Smooth and Erase have no opposite."
+"由三角形边得到的每个点的 CSR 邻居。*triangle_points* 为 [T, 3]。","CSR neighbours of each point from triangle edges. *triangle_points* is [T, 3]."
+每个点所属连通块的标签（其中最小的点索引）。,Label of the connected piece each point belongs to (smallest point index in it).
+*points* 中每个点的邻居均值（没有邻居时用其自身值）。,Mean neighbour value of each of *points* (its own value where it has none).
+"*center* 的 *radius* 范围内各点的 (indices, distance / radius)。","(indices, distance / radius) of the points within *radius* of *center*."
+当点的法线朝向观察者时为 True。,True where the point's normal faces the viewer.
+一次绘制后 *points* 的新值（不修改 *values*）。,New values for *points* after one dab (does not modify *values*).
+每个点的角点均值。,Mean corner value per point.
+"将逐三角形的 needle 分辨率展平为 (triangle index [K], weights [K, 3])。","Flatten per-triangle needle resolutions into (triangle index [K], weights [K, 3])."
+向量化的 cage._skew_deviation_color：沿面法线为绿色，倾斜为琥珀色。,"Vectorised cage._skew_deviation_color: green along the face normal, amber tilted."
+"每个三角形的 (min, max) 角点，用于 containing_triangle 的粗筛阶段。","Per-triangle (min, max) corners, for containing_triangle's broad phase."
+每个展平纹素索引的覆盖 8 邻域（及纹素本身）的均值。,Mean of the covered 8-neighbours (and the texel itself) of each flat texel index.
+"*corner_uvs*（展平或 Nx2）中每个 (u, v) 处 *image* 的双线性红通道值；否则为 None。","Bilinear red channel of *image* at each (u, v) in *corner_uvs* (flat or Nx2), or None."
+网格的绘制属性 *name*（当其是可用的 FLOAT 层时），否则为 None。,"The mesh's paint attribute *name* when it is a usable FLOAT layer, else None."
+层偏移值 -> 后端应用的逐角点乘数（>= 0）。,Layer offset values -> the per-corner multiplier the backend applies (>= 0).
+侧边栏的轻量检测：该组是否存储任何校正贴图。,Cheap test for the sidebar: whether the group stores any correction map.
+"将一个平铺的贴图（[height, width]，第 0 行 = v 底部）写入该组。","Write one tile's map ([height, width], row 0 = v bottom) onto the group."
+从该组移除所有校正贴图。返回移除的平铺数。,Remove every correction map from the group. Returns tiles removed.
+"该组已绘制校正贴图的内容标识（没有时为 """"）。","Content identity of the group's painted correction maps ("""" when none)."
+设置文件的绝对路径；没有配置目录时为 None。,"Absolute path of the settings file, or None when there is no config dir."
+替换设置文件。无法写入时返回 False。,Replace the settings file. False when it could not be written.
+从偏好设置块中读取镜像的键。,Read the mirrored keys off a preferences block.
+指出存在但未被使用的非 CPU Cycles 设备（如果有）。,"Name a non-CPU Cycles device that exists but is not being used, if any."
+返回生效的预热模式，并遵循环境变量开关。,"Return the effective prewarm mode, honoring the env-var kill switch."
+fyr-baker-cache-usage,fyr-baker-cache-usage
+立即清理,Clean Now
+“立即清理”的工作：清理临时文件、修剪别名、执行配额。仅限文件系统。,"The Clean Now work: temp sweep, alias prune, budget enforcement. Filesystem only."
+fyr-baker-clean-caches,fyr-baker-clean-caches
+打开缓存文件夹,Open Cache Folder
+打开 Fyr Baker 存储可复用烘焙缓存的文件夹,Open the folder where Fyr Baker stores reusable bake caches
+自动检测,Auto-Detect
+应用程序,Application
+要搜索的外部应用程序,Which external application to search for
+使用此 GPU,Use This GPU
+在此 GPU 上烘焙。自动会选择支持光线追踪且内存最多的 GPU,Bake on this GPU. Automatic picks the GPU with ray tracing and the most memory
+烘焙 GPU,Bake GPU
+自动,Automatic
+设置,Settings
+选择偏好设置类别,Choose a preference category
+后端可执行文件,Backend Executable
+选择自定义的 Fyr Baker 后端可执行文件，留空则使用内置版本,"Choose a custom Fyr Baker backend executable, or leave blank to use the bundled version"
+Substance 3D Painter,Substance 3D Painter
+选择“发送到 Painter”使用的 Adobe Substance 3D Painter 应用程序,Choose the Adobe Substance 3D Painter application used by Send to Painter
+Marmoset Toolbag,Marmoset Toolbag
+选择“发送到 Marmoset”使用的 Marmoset Toolbag 应用程序,Choose the Marmoset Toolbag application used by Send to Marmoset
+Photoshop,Photoshop
+选择“发送到 Photoshop”使用的 Adobe Photoshop 应用程序,Choose the Adobe Photoshop application used by Send to Photoshop
+Substance 3D Designer,Substance 3D Designer
+选择“发送到 Designer”使用的 Substance 3D Designer 应用程序,Choose the Substance 3D Designer application used by Send to Designer
+3DCoat,3DCoat
+选择“发送到 3DCoat”使用的 3DCoat 应用程序,Choose the 3DCoat application used by Send to 3DCoat
+Mari,Mari
+选择“发送到 Mari”使用的 Foundry Mari 应用程序,Choose the Foundry Mari application used by Send to Mari
+Painter,Painter
+在“发送到”菜单中显示“发送到 Painter”,Show Send to Painter in the Send To menu
+Marmoset,Marmoset
+在“发送到”菜单中显示“发送到 Marmoset”,Show Send to Marmoset in the Send To menu
+在“发送到”菜单中显示“发送到 Photoshop”,Show Send to Photoshop in the Send To menu
+Designer,Designer
+在“发送到”菜单中显示“发送到 Substance Designer”,Show Send to Substance Designer in the Send To menu
+在“发送到”菜单中显示“发送到 3DCoat”,Show Send to 3DCoat in the Send To menu
+在“发送到”菜单中显示“发送到 Mari”,Show Send to Mari in the Send To menu
+开发者模式,Developer Mode
+优先使用仓库本地的开发后端（存在时包括 build_profiling），而非内置可执行文件,"Prefer repo-local development backends, including build_profiling when present, over the bundled executable"
+实时后端日志窗口,Live Backend Log Window
+每次烘焙工作进程启动时打开一个独立的、可复制的日志窗口,"Open a separate, copyable log window whenever the bake worker starts"
+Fyr 用于烘焙的 GPU。留空则选择支持光线追踪且内存最多的 GPU,GPU Fyr bakes on. Empty picks the GPU with ray tracing and the most memory
+烘焙渲染器,Bake Renderer
+烘焙设备,Bake Device
+Cycles 设备,Cycles Device
+执行后端,Execution Backend
+新建项目集合,New Project Collections
+选择新建烘焙项目在大纲视图中组织物体的方式,Choose how new bake projects organize their objects in the Outliner
+烘焙笼光照着色,Cage Lit Shading
+实时烘焙防抖 (s),Live Bake Debounce (s)
+CPU 线程,CPU Threads
+缓存大小限制 (GB),Cache Size Limit (GB)
+预热首次运行已确认,Prewarm First Run Acknowledged
+内部标记；在用户关闭预热说明对话框后设置,Internal flag; set after the user dismisses the prewarm explainer dialog
+后端着色器就绪签名,Backend Shaders Ready Signature
+内部：上次成功烘焙的后端可执行文件签名（其 GPU 着色器已编译）,Internal: backend executable signature of the last successful bake (its GPU shaders are compiled)
+预热 PSO 预编译签名,Prewarm PSO Priming Signature
+内部：磁盘管线缓存已预编译所对应的后端可执行文件签名,Internal: backend executable signature for which the on-disk pipeline cache has been primed
+低采样数警告,Warn About Low Sample Counts
+当光线追踪贴图的采样数降到 32 以下时显示确认,Show a confirmation when a ray-traced map is reduced below 32 samples
+在状态栏显示烘焙进度,Show Bake Progress in Status Bar
+烘焙期间静默视口,Quiet Viewport During Bake
+烘焙期间保持视口实时,Keep Viewport Live During Bake
+加速抗锯齿 (RTX),Accelerated AA (RTX)
+抬高偏移,Raised Offset
+烘焙笼被向外推时“绘制偏移”的默认着色。每个场景可在“绘制偏移”画笔选项中更改,Default tint for Paint Offset where the cage is pushed further out. Each scene can change it in the Paint Offset brush options
+压低偏移,Lowered Offset
+烘焙笼被向内收时“绘制偏移”的默认着色。每个场景可在“绘制偏移”画笔选项中更改,Default tint for Paint Offset where the cage is pulled in. Each scene can change it in the Paint Offset brush options
+预览颜色,Preview Color
+设置 3D 视口中 UV 选择高亮的颜色,Set the color of the UV selection highlight in 3D Viewports
+面透明度,Face Opacity
+设置高亮 UV 面的不透明度,Set the opacity of highlighted UV faces
+边宽度,Edge Width
+以像素为单位设置高亮 UV 边和面轮廓的宽度,Set the width of highlighted UV edges and face outlines in pixels
+顶点大小,Vertex Size
+以像素为单位设置高亮 UV 顶点的大小,Set the size of highlighted UV vertices in pixels
+X 光,X-Ray
+穿透遮挡几何体显示 UV 选择高亮,Show the UV selection highlight through occluding geometry
+面填充,Face Fill
+在选中的 UV 面上显示半透明填充,Show a translucent fill on selected UV faces
+面轮廓,Face Outline
+在选中的 UV 面周围显示明亮轮廓,Show a bright outline around selected UV faces
+叠加层隐藏时仍显示,Show When Overlays Are Hidden
+当视口叠加层被禁用时仍保持 UV 选择高亮可见,Keep the UV selection highlight visible when viewport overlays are disabled
+检查更新,Check for Updates
+叠加层控制,Overlay Controls
+左对齐的分区标题，加上其属性的分栏表单列。,Left-aligned section header plus a split-form column for its props.
+变暗的说明行，用于首次运行对话框也会显示的信息。,"Dimmed explanatory lines, for information the first-run dialog also shows."
+后端上次能力检查所报告的适配器。绘制安全：绝不进行探测。,Adapter the backend's last capabilities check reported. Draw-safe: never probes.
+0：自动，使用大部分可用核心,"0: automatic, uses most available cores"
+当前使用：未知,Currently using unknown
+正在清理缓存…,Cleaning caches…
+立即检查,Check Now
+外部应用程序,External Applications
+发送到,Send To
+返回带后端覆盖的环境字典；默认环境时为 None。,"Return an env dict with backend overrides, or None for the default environment."
+随附项目预设所在的位置。存在打包副本时优先使用它。,Where shipped project presets live. Packaged copy wins when it exists.
+创建并返回保存时写入的目录。,Create and return the directory a save writes into.
+所有可读预设，用户层级会覆盖同名的随附预设。,"Every readable preset, user tier shadowing a shipped one of the same name."
+两个预设目录的轻量变更标记（两次 stat，无通配符）。,"Cheap change stamp for the two preset directories (two stats, no glob)."
+从负载重建 project.texture_sets，或为旧版预设推导它们。,"Rebuild project.texture_sets from the payload, or derive them for legacy presets."
+写入组（规范位置），若存在嵌套状态则镜像同步到其上。,Write to the group (canonical) and mirror it onto the nested state if present.
+恢复绘制偏移与倾斜。缺失的图像会解析为 None，如同新建组时那样。,"Restore Paint Offset & Skew. Missing images resolve to None, as on a fresh group."
+普通 Python 属性的 JSON 形式；非标量时为 ``_SKIP``。,"JSON form of a plain Python attribute, or ``_SKIP`` when it is not scalar."
+序列化一个贴图集：标识、输出名称模式与 UDIM 配置。,"Serialize one texture set: identity, output-name mode, and UDIM configuration."
+按列表顺序，每个已填充槽位的物体名称 + 逐网格烘焙笼偏移（关闭时 + 投射 AO）。,"Object name + per-mesh cage offset (+ Casts AO when off) for every filled slot, in list order."
+角色槽位序列化器的公开形式（供角色槽位撤销暂存使用）。,Public form of the role-slot serializer (used by the role-slot undo stash).
+恢复旧版预设只存储了一半的字段对。,Restore the field pairs whose older presets only stored one half.
+导出设置序列化器的公开形式（供复制项目使用）。,Public form of the export-settings serializer (used by Duplicate Project).
+导出设置恢复器的公开形式（供复制项目使用）。,Public form of the export-settings restorer (used by Duplicate Project).
+会破坏现有预设的保存操作，报告给艺术家。,"A save that would destroy an existing preset, reported to the artist."
+取消隐藏活动 A/B 侧隐藏的内容，不影响其余状态。,"Unhide whatever an active A/B side hid, without touching the rest of the state."
+确保在低模上应用烘焙材质（优先反照率）预览。,Ensure a baked Material (albedo preferred) preview is applied on lows.
+"循环 关闭 → 高模 → 低模 → 关闭。返回 (status_message, side_or_empty)。","Cycle Off → High → Low → Off. Returns (status_message, side_or_empty)."
+当至少一个物体仍带有 Fyr 预览材质时为 True。,True while at least one object still wears a Fyr preview material.
+当艺术家在 Fyr 应用预览后替换了材质时为 True。,True when an artist replaced a material after Fyr applied its preview.
+若较早的预览会话改动了高模的显示/可见性，则恢复它们。,Restore high display/visibility if an older preview session mutated them.
+磁盘上的文件是否与 *resolved_path* 完全一致。,Whether the file on disk is spelled exactly like *resolved_path*.
+预览可加载的文件夹：上次烘焙目标，然后是已配置的输出目录。,"Folders preview may load from: last bake destination, then configured output dir."
+保护打开的 blend 文件中属于其他项目的烘焙目标。,Protect bake destinations owned by other projects in the open blend file.
+MaterialBake,MaterialBake
+新建项目启动时使用的集合模式（偏好设置 > 通用 > 烘焙）。,The collection mode a NEW project starts in (Preferences > General > Baking).
+若集合指针与 expected_parent 是同一物体，或不是它的有效子级，则清除该指针。,Clear a collection pointer if it is the same object as expected_parent or not a valid child of it.
+high_meshes,high_meshes
+``root`` 及其下嵌套的每个集合（各一次）。,``root`` and every collection nested under it (each once).
+查找包含给定物体的烘焙组。,Find the bake group that contains the given object.
+最后一个覆盖率开关已关闭：撤销开启覆盖率时所做的操作。,The last coverage toggle went off: undo what switching coverage on did.
+派生自实时预览会话，因此选择器绝不会读到过期数据。,"Derived from the live preview session, so the picker can never read stale."
+项目各烘焙组中所有不同的高模物体，按组顺序。,"Every distinct high object across the project's groups, in group order."
+为就地重命名贴图集所用的旧名称跟踪器提供初始值。,Seed the previous-name tracker used by in-place texture-set rename.
+上下文管理器：批量编辑期间静默逐槽位的 _group_membership_update。,Context manager: silence per-slot _group_membership_update during bulk edits.
+组归属变更后触发的响应式级联（场景范围）。,The reactive cascade that follows a group-membership change (scene-wide).
+在多个组上写入烘焙笼设置，且不将每次写入镜像到同级组。,Write cage settings on several groups without mirroring each write to siblings.
+*project* 中至少拥有一个选中低模网格的烘焙组。,Bake groups of *project* that own at least one selected low-poly mesh.
+烘焙组范围的编辑还应镜像到其他下拉选中的组。,Other dropdown-selected groups a Bake Group scoped edit should mirror to.
+组级范围覆盖的距离模式组，锚点在前。,"Distance-mode groups a group-level scope covers, anchor first."
+"偏移滑块设置的 (group, low slot) 对，锚点在前。","(group, low slot) pairs the offset slider sets, anchor first."
+"偏移滑块的 (project, anchor group, anchor slot, scope, pairs)。","(project, anchor group, anchor slot, scope, pairs) for the offset slider."
+槽位低模的最大世界空间尺寸（未知时为 0）。,Largest world-space dimension of the slot's low mesh (0 when unknown).
+包含该值的最小十进范围（留有余量）以及低模尺寸的四分之一。,Smallest decade range holding the value (with headroom) and a quarter of the low size.
+投射 AO,Casts AO
+逐网格偏移,Per-Mesh Offset
+在该低模网格上，于烘焙组之外额外添加基于距离的烘焙笼偏移,Add an extra Distance Based cage offset to this low-poly mesh on top of the bake group
+法线空间,Normal Space
+法线格式,Normal Format
+翻转绿通道,Flip Green
+反转法线输出的绿通道,Invert the green channel for normal output
+方法,Method
+AO 距离,AO Distance
+设置 AO 和弯曲法线的最大射线距离。0 = 不限，会使更宽、更深的折痕变暗。启用“相对于边界”时，非零值为模型大小的比例,"Set the maximum ray distance for AO and bent normals. 0 = unlimited, which darkens wider, deeper creases. With Relative to Bounds enabled, a non-zero value is a fraction of model size"
+最小距离,Min Distance
+忽略比此距离更近的 AO 和弯曲法线遮挡物。0 = 无最小值，因此附近的命中会计入。启用“相对于边界”时，非零值为模型大小的比例,"Ignore AO and bent-normal occluders closer than this distance. 0 = no minimum, so nearby hits count. With Relative to Bounds enabled, a non-zero value is a fraction of model size"
+双面,Two-Sided
+计算 AO 和弯曲法线时包含高模背面,Include high-poly backfaces when calculating AO and bent normals
+仅同一网格,Same Mesh Only
+仅让 AO 和弯曲法线射线击中与当前低模匹配的高模,Only let AO and bent-normal rays hit the high-poly mesh matched to the current low-poly mesh
+遮挡其他组,Occlude Other Groups
+允许此贴图,Let this map
+使用倒角法线,Use Bevel Normal
+倒角遮罩,Bevel Mask
+凹腔权重,Cavity Weight
+控制大范围表面遮蔽与细微凹腔细节之间的平衡,Control the balance between broad surface occlusion and tight cavity detail
+相对于边界,Relative to Bounds
+按模型缩放最大距离和最小距离,Scale Max Distance and Min Distance by the model
+扩散角度,Spread Angle
+设置 AO 采样锥的宽度。180° 使用完整半球；较小的值会将射线集中到表面法线附近，形成更紧凑、更具方向性的阴影,"Set the width of the AO sampling cone. 180° uses the full hemisphere; lower values concentrate rays toward the surface normal for tighter, more directional shadows"
+分布,Distribution
+忽略背面,Ignore Backface
+计算 AO 和弯曲法线时忽略击中高模背面的情况,Ignore hits on back-facing high-poly surfaces when calculating AO and bent normals
+自遮蔽,Self Occlusion
+衰减,Attenuation
+控制 AO 随距离衰减的速度。0 表示每次击中等权；值越高越强调近处接触阴影。需要有限的 AO 距离,Control how quickly AO fades with distance. 0 gives every hit equal weight; higher values emphasize nearby contact shadows. Requires a finite AO Distance
+最暗值,Darkest Value
+设置 AO 贴图可输出的最暗值,Set the darkest value the AO map can output
+最亮值,Lightest Value
+设置 AO 贴图可输出的最亮值,Set the lightest value the AO map can output
+地面遮蔽,Floor Occlusion
+使朝下的表面变暗，如同模型置于无限地面上（方向性地面遮蔽），适用于静态/落地资产,"Darken downward-facing surfaces as if the model rests on an infinite floor (directional ground occlusion), useful for static/grounded assets"
+质量,Quality
+间隙缩放,Clearance Scale
+设置漫射 AO 视为完全敞开的间隙大小，相对于 AO 距离,"Set the gap size that Diffusive AO treats as fully open, relative to AO Distance"
+间隙指数,Clearance Exponent
+控制漫射模式下狭窄间隙变暗的锐利程度,Control how sharply narrow gaps darken in Diffusive mode
+强度,Intensity
+控制环境光贴图的亮度,Control the brightness of the environment-light map
+遮蔽,Occlusion
+控制 AO 使环境光贴图变暗的强度,Control how strongly AO darkens the environment-light map
+对比度,Contrast
+控制天空与地面光照之间的对比度,Control the contrast between sky and ground lighting
+上方向轴,Up Axis
+天空,Sky
+设置来自天空的光照颜色,Set the color of light coming from the sky
+地面,Ground
+设置来自地面的光照颜色,Set the color of light coming from the ground
+曲率缩放,Curvature Scale
+控制曲率、凹腔、凹陷和凸起贴图的强度,"Control the strength of curvature, cavity, concave, and convex maps"
+黑点,Black Point
+选择哪个曲率值在输出中变为黑色,Choose which curvature value becomes black in the output
+白点,White Point
+选择哪个曲率值在输出中变为白色,Choose which curvature value becomes white in the output
+曲率距离,Curvature Distance
+设置曲率采样的作用距离。0 表示根据低模自动选择距离,Set how far curvature sampling reaches. 0 chooses a distance automatically from the low-poly mesh
+按低模缩放半径,Scale Radius by the low-poly mesh
+次级射线,Secondary Rays
+为网格射线、主曲率和方向曲率在每个击中点周围投射的探测射线数量。Painter,"Number of probe rays cast around each hit for Mesh Rays, Principal and Direction curvature. Painter"
+检测折叠,Detect Folds
+检测高模中回折并几乎自接触的几何体，使紧密的自接触褶皱呈现为锐利曲率,Detect high-poly geometry that folds back and nearly touches itself so tight self-contact creases read as sharp curvature
+自相交,Self Intersection
+选择曲率探测射线允许击中的高模网格,Choose which high-poly meshes the curvature probe rays are allowed to hit
+自动色调映射（每个 UV 平铺）,Auto Tonemapping (per UV tile)
+拉伸每个 UV 平铺,Stretch each UV tile
+值边界最小值,Value Bounds Min
+在输出中变为黑色的带符号曲率值。-1/1 保持贴图不变,Signed curvature value that becomes black in the output. -1/1 leaves the map untouched
+值边界最大值,Value Bounds Max
+在输出中变为白色的带符号曲率值。-1/1 保持贴图不变,Signed curvature value that becomes white in the output. -1/1 leaves the map untouched
+选择曲率的计算方式,Choose how curvature is calculated
+细节平滑,Detail Smoothing
+选择曲率在输出中的编码方式,Choose how curvature is encoded in the output
+距离,Distance
+设置厚度或密度采样的作用距离。0 表示根据低模自动选择距离,Set how far thickness or density sampling reaches. 0 chooses a distance automatically from the low-poly mesh
+缩放,Scale
+缩放归一化后的厚度或密度值,Scale the normalized thickness or density values
+厚度最小距离,Thickness Min Distance
+设置最小向内距离。-1 表示根据网格边界自动选择范围,Set the minimum inward distance. -1 chooses a range automatically from the mesh bounds
+伽马,Gamma
+对贴图结果应用伽马曲线,Apply a gamma curve to the map result
+仅让厚度或密度射线击中与当前低模匹配的高模,Only let thickness or density rays hit the high-poly mesh matched to the current low-poly mesh
+自动归一化,Automatic Normalization
+对数响应,Logarithmic Response
+自动色阶,Auto Levels
+将密度值拉伸到更大范围的黑白区间，同时忽略极端离群值,Stretch Density values across more of the black-to-white range while ignoring extreme outliers
+每个烘焙组,Per Bake Group
+为每个烘焙组单独计算自动色阶，而不是在整个项目中共用一个范围,Calculate Auto Levels separately for each bake group instead of sharing one range across the project
+ID 来源,ID Source
+位置归一化,Position Normalization
+轴,Axis
+相对于包围盒,Relative to Bounding Box
+在当前低模内归一化位置输出,Normalize Position output within the active low-poly mesh
+向内距离,Inner Distance
+设置高度贴图编码的向内距离。0 表示自动选择范围,Set the inward distance encoded by the Height map. 0 chooses the range automatically
+向外距离,Outer Distance
+设置高度贴图编码的向外距离。0 表示自动选择范围,Set the outward distance encoded by the Height map. 0 chooses the range automatically
+抖动,Dither
+写入 8 位高度输出时应用确定性有序抖动以减少色带,Apply deterministic ordered dithering when writing 8-bit Height output to reduce banding
+写入 8 位厚度输出时应用随机抖动以减少色带,Apply randomized dithering when writing 8-bit Thickness output to reduce banding
+UUID,UUID
+此贴图堆栈项的唯一持久标识符。请勿修改。,Unique persistent identifier for this map stack item. Do not modify.
+若缺失则分配新的 UUID。,Assign a new UUID if missing.
+在烘焙中包含此贴图,Include this map in the bake
+射线数,Rays
+为 AO、厚度和凹腔等贴图追踪的射线数量。射线越多噪点越少，但耗时更长,"Number of rays traced for maps such as AO, Thickness, and Cavity. More rays reduce noise but take longer"
+是否添加幻影,Is Add Phantom
+为此贴图及其输出文件输入自定义名称，留空则使用默认值,"Enter a custom name for this map and its output file, or leave blank to use the default"
+添加丢失的法线细节,Add Lost Normal Detail
+数量,Amount
+烘焙法线贴图所用的坐标空间,Coordinate space the normal map is baked in
+切线法线贴图绿通道的方向。OpenGL 保持 +Y；DirectX 翻转,Green-channel direction of tangent normal maps. OpenGL keeps +Y; DirectX flips it
+材质细节,Material Detail
+当材质细节设为 Manual 时选择要包含的 AO 图像,Choose the AO image to include when Material Detail is set to Manual
+浮雕,Relief
+AO 采样射线在半球上的分布方式,How AO sample rays are spread across the hemisphere
+环境光遮蔽的计算方式,How ambient occlusion is calculated
+漫射 AO 场的分辨率预设,Resolution preset for the diffusive AO field
+环境光贴图将哪个物体轴视为上方,Which object axis the environment-light map treats as up
+ID 贴图中每种颜色所代表的含义,What each color in the ID map represents
+属性,Attribute
+要高模上烘焙的网格属性。几何节点输出可用；缺少该属性的高模会烘焙成黑色,Mesh attribute on the high poly to bake. Geometry Nodes outputs count; a high without it bakes black
+最小值,Min
+烘焙为黑色的属性值,Attribute value that bakes black
+最大值,Max
+烘焙为白色的属性值,Attribute value that bakes white
+切线空间法线行写入的内容,What a tangent-space Normal row writes
+最大斜率,Max Slope
+以全红/全绿（0 或 1）写入的斜率。更陡的斜率会被裁剪。1 表示 45 度表面，2 约为 63 度,"Slope written as full red/green (0 or 1). Steeper slopes clip. 1 is a 45 degree surface, 2 about 63 degrees"
+线宽,Line Width
+绘制的 UV 边缘宽度，以烘焙纹理的像素为单位,"Width of the drawn UV edges, in pixels of the baked texture"
+三角形,Triangles
+绘制每条三角形边，包括分割四边形和多边形的对角线。关闭时仅绘制多边形边,"Draw every triangle edge, including the diagonals that split quads and n-gons. Off draws the polygon edges only"
+位置值如何映射到 0–1 颜色范围,How position values are fit into the 0–1 color range
+位置值是原始物体空间坐标，还是相对于局部原点的偏移,Whether position values are raw object-space coordinates or offsets from the local origin
+位置贴图编码哪些物体轴,Which object axes the position map encodes
+降噪,Denoise
+烘焙后减少光线追踪噪点，使较低的采样数也能得到更平滑的结果,Reduce ray-tracing noise after baking so lower sample counts can produce smoother results
+覆盖柔化,Override Soften
+使用此贴图,Use this map
+柔化,Soften
+从材质烘焙的 PBR 通道,PBR channel to bake from the material
+路由,Route
+由哪个引擎烘焙此输出。Auto 在可能时使用 Fyr，否则使用 Cycles,"Which engine bakes this output. Auto uses Fyr when possible, otherwise Cycles"
+来源,Origin
+此材质贴图行的创建方式,How this material map row was created
+绑定键,Binding Key
+用于捕获/自定义同步的稳定逻辑绑定,Stable logical binding for capture/custom synchronization
+解析,Resolve
+此材质绑定的来源覆盖/有效性,Source coverage / validity for this material binding
+数据类型,Data Type
+矢量编码,Vector Encoding
+自定义名称,Custom Name
+来源节点,Source Nodes
+状态,Status
+先前启用状态,Previous Enabled
+选择要烘焙的场景光照结果。Lighting 存储不含反照率或自发光信息的纯 HDR 辐照度；Lit Color 包含漫反射反照率和自发光,Choose the scene-lighting result to bake. Lighting stores pure HDR irradiance without albedo or emission; Lit Color includes diffuse albedo and emission
+引擎,Engine
+选择 Fyr Baker 读取材质和灯光的方式。Auto 跟随场景,Choose how Fyr Baker reads materials and lights. Auto follows the scene
+设置此光照贴图的质量。选择 Custom 可编辑下方的采样数、反弹次数和噪点阈值；其他贴图不受影响,"Set the quality for this lighting map. Choose Custom to edit samples, bounces, and the noise threshold below; other maps are not affected"
+直接,Direct
+包含来自灯光的直接光照及其阴影,Include direct light from lamps and their shadows
+间接,Indirect
+包含表面之间反弹的间接光照,Include indirect light bounced between surfaces
+世界,World
+包含来自世界或环境的光照,Include lighting from the world or environment
+包含材质表面发出的光,Include light emitted by material surfaces
+直接射线,Direct Rays
+设置用于软阴影和世界光照的每输出像素射线数。点状灯光始终使用一条射线,Set the rays per output pixel for soft shadows and world lighting. Point-like lights always use one ray
+间接路径,Indirect Paths
+设置每输出像素追踪的间接光照路径数,Set the indirect-light paths traced per output pixel
+最大反弹次数,Max Bounces
+设置间接光可反弹的最大次数,Set the maximum number of times indirect light can bounce
+包含其他组,Include Other Groups
+允许每个烘焙组,Let every bake group
+曝光,Exposure
+将烘焙的光照乘以该值,Multiply the baked light by this value
+噪点阈值,Noise Threshold
+当剩余亮度噪点低于此值时停止自适应采样。0 表示禁用自适应停止,Stop adaptive sampling when remaining brightness noise falls below this value. 0 disables adaptive stopping
+法线设置,Normal Settings
+AO 设置,AO Settings
+环境光设置,Env Light Settings
+曲率设置,Curvature Settings
+厚度设置,Thickness Settings
+ID 设置,ID Settings
+位置设置,Position Settings
+高度设置,Height Settings
+UDIM 平铺,UDIM Tile
+文件路径,File Path
+宽度,Width
+过期,Stale
+先前烘焙为某个已不再占用的平铺留下的文件。Fyr 不会自行删除它,File left over from an earlier bake for a tile that is no longer occupied. Fyr never deletes it on its own
+生效贴图类型,Effective Map Type
+显示名称,Display Name
+UDIM 路径,UDIM Path
+UDIM 平铺,UDIM Tiles
+Fyr 刚生成的平铺行，按升序排列。不包含过期的遗留项。,"Tile rows Fyr just produced, ascending. Stale leftovers are excluded."
+项目中所有过期的具体平铺文件，已去重，按稳定顺序排列。,"Every stale concrete tile file across the project, de-duplicated, in stable order."
+此烘焙组所属的贴图集。共享同一贴图集的烘焙组每个贴图烘焙为一张纹理；留空则将该烘焙组烘焙为以其名称命名的独立纹理,Texture set this bake group belongs to. Bake groups sharing a texture set bake into one texture per map; leave it empty to bake the bake group as its own standalone texture named after the bake group
+ID 集合,ID Collection
+用于设定此烘焙组的集合名称,Collection name that sets this bake group
+颜色集,Color Set
+用于设定此烘焙组的标签,Label that sets this bake group
+组集合,Group Collection
+低模集合,Low Collection
+高模集合,High Collection
+烘焙笼集合,Cage Collection
+低模网格,Low Meshes
+低模索引,Low Mesh Index
+高模网格,High Meshes
+高模索引,High Mesh Index
+将低模用作高模,Use Low as High
+使用此烘焙组,Use this bake group
+UV 集,UV Set
+选择用于烘焙的低模 UV 层，留空则使用各网格自身的 UV,"Choose the low-poly UV layer used for baking, or leave blank to use each mesh"
+烘焙笼模式,Cage Mode
+自定义烘焙笼,Custom Cage
+选择一个网格物体作为此烘焙组的自定义烘焙笼,Pick a mesh object to use as the custom cage for this bake group
+烘焙组偏移,Bake Group Offset
+设置此烘焙组中每个低模共享的基于距离的烘焙笼基础偏移,Set the base Distance Based cage offset shared by every low-poly mesh in this bake group
+后方距离,Rear Distance
+投影射线在低模表面之后多远仍能找到高模。当陷入低模的细节（如平面下方的深凹坑或内嵌结构）无论烘焙笼向外推多远都烘焙为空白时，可增大此值。0 = 自动：与烘焙笼向外延伸的深度相同，且至少为低模的 5%,"How far behind the low-poly surface a projection ray may still find the high-poly. Raise it when detail sunk into the low (a deep pocket or inset under a flat face) bakes blank however far the cage is pushed out. 0 = automatic: as deep as the cage reaches out, at least 5% of the low-poly mesh"
+平均法线,Average Normals
+在每个硬边上平均低模法线（经典平均烘焙笼）。关闭时，射线跟随网格,"Average the low-poly normals across every hard edge (classic averaged cage). Off, rays follow the mesh"
+在投影和次级追踪阶段忽略高模背面的击中,Ignore backfacing high-poly hits during projection and secondary trace passes
+按网格名称匹配,Match By Mesh Name
+控制烘焙笼偏移的绘制灰度图像：白色使用完整偏移，黑色不使用偏移,Painted grayscale image controlling cage offset: white uses the full offset; black uses none
+乘以绘制的烘焙笼偏移；未指定绘制图像时设置为统一值,"Multiply the painted cage offset, or set a uniform value when no paint image is assigned"
+控制射线方向的绘制灰度图像：黑色跟随表面法线，白色指向烘焙笼,Painted grayscale image controlling ray direction: black follows surface normals; white points toward the cage
+偏斜,Skew
+乘以从表面法线朝向烘焙笼方向绘制的混合量,Multiply the painted blend from the surface normals toward the cage direction
+此烘焙组的名称,Name of this bake group
+元数据,Metadata
+集合,Collections
+角色分配,Role Assignments
+投影设置,Projection Settings
+绘制投影设置,Paint Projection Settings
+烘焙笼菜单已展开,Cage Menu Expanded
+在烘焙笼菜单中展开此烘焙组以显示其物体,Expand this bake group in the cage menu to show its objects
+烘焙笼叠加已隐藏,Cage Overlay Hidden
+隐藏此烘焙组,Hide this bake group
+显示烘焙笼覆盖,Show Cage Coverage
+可视化此烘焙组的烘焙笼覆盖。蓝色区域已覆盖；红色区域在烘焙笼之外，可能产生漏射线。Texture Set 和 Global 作用范围会更新范围内所有组,Visualize cage coverage for this bake group. Blue areas are covered; red areas are outside the cage and may produce missed rays. Texture Set and Global scopes update every group in scope
+射线离开低模时烘焙笼的构建方式,How the cage is built for rays leaving the low-poly mesh
+隔离烘焙组,Isolate Bake Group
+隐藏此烘焙组之外的所有物体，或恢复之前的视口可见性,"Hide every object outside this bake group, or restore the previous viewport visibility"
+平铺,Tile
+UDIM 平铺编号（1001 + 列 + 10 * 行）,UDIM tile number (1001 + column + 10 * row)
+覆盖,Override
+强制烘焙或跳过此平铺，忽略检测到的占用情况,Force this tile to be baked or skipped regardless of detected occupancy
+自定义分辨率,Custom Resolution
+以此平铺自身的分辨率而非项目分辨率进行烘焙,Bake this tile at its own resolution instead of the project resolution
+此平铺的输出宽度,Output width for this tile
+此平铺的输出高度,Output height for this tile
+此贴图集的名称。分配给它的烘焙组每个贴图共享一个输出文件,Name of this texture set. Bake groups assigned to it share one output file per map
+集名称,Set Name
+Fyr Baker 如何决定为此贴图集烘焙哪些 UV 平铺,How Fyr Baker decides which UV tiles to bake for this texture set
+高亮平铺,Highlighted Tile
+仅在平铺列表中高亮的行,Row highlighted in the tile list only
+名称来源,Name Source
+选择 Fyr Baker 为此贴图集命名的方式,Choose how Fyr Baker names this texture set
+高亮的烘焙组,Highlighted Bake Group
+仅在此列表中高亮该行，不会更改活动烘焙组,Row highlighted in this list only. Does not change the active bake group
+从导出中排除的贴图集链接键（独立组则为烘焙组名称）,Link key of the texture set (or bake group name for a standalone group) left out of the export
+这些覆盖所适用的贴图集链接键,Link key of the texture set these overrides apply to
+此贴图集的导出分辨率,Export resolution for this texture set
+缩放过滤器,Resize Filter
+将此集从烘焙分辨率缩放时使用的过滤器,Filter used when this set is resized away from the bake resolution
+边距,Padding
+打包此贴图集时应用的 UV 岛边距,UV-island padding applied when packing this texture set
+边距大小,Padding Size
+此集膨胀距离边距的像素距离,Pixel distance for Dilation Distance padding on this set
+输出目录,Output Directory
+选择导出贴图的写入文件夹。留空则使用项目中的 exports 子文件夹,Choose the folder exported textures are written to. Leave empty to use the exports subfolder in the project
+输出模板,Output Template
+决定文件名、通道打包和格式的输出模板名称。留空则使用默认模板,"Name of the output template that decides file names, channel packing and formats. Empty uses the default template"
+选择决定文件名、通道打包和格式的输出模板,"Choose the output template that decides file names, channel packing and formats"
+用此文件类型写入每张导出贴图，而非各模板输出所声明的类型,Write every exported texture in this file type instead of the one each template output declares
+用此位深度写入每张导出贴图，而非各模板输出所声明的位深度,Write every exported texture at this bit depth instead of the one each template output declares
+同时写入每个导出的贴图集,Also write each exported texture set
+网格格式,Mesh Format
+选择导出低模网格使用的文件类型,Choose the file type used for the exported low-poly meshes
+全局导出分辨率。单集行可覆盖此设置,Global export resolution. Per-set rows can override this
+以不同于烘焙的分辨率导出时使用的全局过滤器,Global filter used when exporting at a different resolution than the bake
+打包器应用的全局 UV 岛边距。单集行可覆盖此设置,Global UV-island padding applied by the packer. Per-set rows can override this
+全局膨胀距离边距的像素距离,Pixel distance for Global Dilation Distance padding
+DDS 压缩,DDS Compression
+导出 DDS 文件时使用的块压缩,Block compression used when exporting DDS files
+选项卡,Tab
+要显示的导出对话框分区,Section of the export dialog to show
+活动导出目标,Active Export Target
+留空则选择全局设置；否则为所选贴图集键,Empty selects Global settings; otherwise the selected texture-set key
+排除的贴图集,Excluded Texture Sets
+贴图集覆盖,Texture Set Overrides
+用户删除的自动检测材质绑定，在恢复前不应重新创建。,User-deleted auto-detected material binding that should not be recreated until restored.
+场景遮挡物,Scene Blockers
+使用场景遮挡物,Use Scene Blockers
+允许场景遮挡物集合为此项目提供遮蔽,Let the Scene Blockers collection shade this project
+投射阴影,Cast Shadows
+场景遮挡物阻挡光线：灯光、天空和发光表面会投射其阴影,"Scene blockers block light: lamps, sky and glowing surfaces cast their shadows"
+反弹光,Bounce Light
+光线会以场景遮挡物的材质颜色从其上反弹。关闭后它们不反射光线，但仍会阻挡光线,"Light bounces off scene blockers in their material colour. Off, they reflect no light but still block it"
+工作流,Workflow
+此项目是将高模细节投射到低模目标上，还是展平所选物体,Whether this project projects high-poly detail onto low-poly targets or flattens the selected objects
+材质配置文件,Material Profile
+自动材质捕获将哪些 Principled 通道视为有效,Which Principled channels automatic material capture treats as meaningful
+抑制的材质绑定,Suppressed Material Bindings
+项目名称,Project Name
+此烘焙项目的名称,Name of this bake project
+实时重投影,Live Reproject
+在编辑兼容 UV 时保持烘焙贴图对齐；编辑确定后会替换输出,Keep baked textures aligned while editing compatible UVs; settled edits replace outputs
+项目集合,Project Collection
+Fyr 是否整理此项目,Whether Fyr organizes this project
+输出根目录,Output Root
+选择烘焙贴图和临时烘焙数据的文件夹,Choose the folder for baked textures and temporary bake data
+方形输出尺寸。同时设置宽度和高度,Square output size. Sets both width and height
+链接分辨率,Link Resolution
+方形输出尺寸时保持 Y 与 X 相同,Keep Y the same as X for square output sizes
+输出宽度（像素）,Output width in pixels
+输出高度（像素）。分辨率链接时与宽度相同,Output height in pixels. Matches the width while resolution is linked
+所写入贴图的每通道位数。默认的 16 位可保留 Height、Position、Thickness 和 Bent Normal 的渐变；8 位会产生色带但文件更小,"Bits per channel of the written maps. 16-bit, the default, keeps the gradients of Height, Position, Thickness and Bent Normal; 8-bit bands them but writes smaller files"
+图像格式,Image Format
+此项目中每张烘焙贴图写入的文件格式,File format written for every baked map in this project
+采样数,Samples
+设置每个输出像素累积的抗锯齿采样数,Set the anti-aliasing samples accumulated for each output pixel
+仅倒角相连部分,Bevel Connected Only
+膨胀,Dilation
+烘焙颜色超出 UV 岛的距离。使用 Distance 时按像素数计算；Infinite 填充每个未覆盖像素,How far baked colors extend past UV islands. Distance uses the pixel count; Infinite fills every uncovered pixel
+将烘焙颜色从 UV 岛向外扩展此像素数，以减少可见接缝,Extend baked colors outward from UV islands by this many pixels to reduce visible seams
+切线基底,Tangent Basis
+投射时忽略背面的高模命中，适用于此项目中的每个烘焙组,Ignore backfacing high-poly hits during projection for every bake group in this project
+遵循透明度,Respect Opacity
+让投射和次级烘焙光线穿过受支持高模材质中的透明纹素,Let projection and secondary bake rays pass through transparent texels in supported high-poly materials
+烘焙模式,Bake Mode
+降噪质量,Denoise Quality
+应用于每张降噪贴图的 OIDN 降噪模型质量。Balanced 和 Fast 使用更简单的模型，可保留更多高频细节且运行更快,OIDN denoising model quality applied to every denoised map. Balanced and Fast use simpler models that preserve more high-frequency detail and are faster to run
+降噪强度,Denoise Strength
+在原始烘焙结果（0）与完全降噪结果（1）之间混合，应用于每张降噪贴图。较低值可保留更多细节并减少过度平滑或降噪伪影,"Blend between the raw baked result (0) and the fully denoised result (1), applied to every denoised map. Lower values keep more detail and reduce over-smoothing or denoiser artifacts"
+贴图,Texture Maps
+贴图集索引,Texture Set Index
+层级焦点,Hierarchy Focus
+选择设置面板显示活动烘焙组还是贴图集,Choose whether the settings panel shows the active bake group or texture set
+烘焙组,Bake Groups
+最新输出,Latest Outputs
+上次任务 ID,Last Job ID
+上次工作区,Last Workspace
+上次烘焙工作区,Last Bake Workspace
+上次烘焙任务 ID,Last Bake Job Id
+上次烘焙任务路径,Last Bake Job Path
+上次输出目录,Last Output Dir
+上次进度百分比,Last Progress Percent
+上次阶段进度百分比,Last Stage Progress Percent
+上次活动烘焙组,Last Active Bake Group
+上次活动贴图,Last Active Map
+上次警告数,Last Warning Count
+上次错误数,Last Error Count
+上次警告摘要,Last Warning Summary
+上次错误摘要,Last Error Summary
+上次烘焙贴图状态,Last Baked Maps State
+活动烘焙贴图类型,Active Bake Map Types
+活动烘焙贴图 UUID,Active Bake Map UUIDs
+活动烘焙组名称,Active Bake Group Names
+上次增量烘焙组,Last Incremental Bake Groups
+上次烘焙耗时（秒）,Last Bake Duration Seconds
+上次烘焙缓存状态,Last Bake Cache State
+导出设置,Export Settings
+检查面板展开,Inspect Expanded
+任务状态展开,Job Status Expanded
+对比模式,Compare Mode
+对比输出,Compare Output
+对比 A 索引,Compare A Index
+对比 B 索引,Compare B Index
+移动层级高亮，但不将其视为对该行的单击。,Move the hierarchy highlight without treating it as a click on that row.
+搜索贴图,Search Maps
+按贴图或类别名称筛选贴图目录,Filter the map catalog by map or category name
+侧边栏主分区,Sidebar Primary Section
+侧边栏所选分区,Sidebar Selected Sections
+烘焙面板分区,Bake Panel Section
+折叠的贴图集,Collapsed Texture Sets
+存储层级中哪些贴图集处于折叠状态,Stores which texture sets are collapsed in the hierarchy
+层级行,Hierarchy Row
+选择自动分组如何将烘焙组分配给贴图集,Choose how automatic grouping assigns bake groups to texture sets
+选择自动分组是按名称前缀生成一个烘焙组，还是按部件各生成一个,Choose whether automatic grouping makes one bake group per name prefix or one per part
+应用烘焙笼设置到,Apply Cage Settings To
+显示层级上下文,Reveal Hierarchy Context
+从标题栏创建后，展开显示所聚焦的贴图集或烘焙组设置,Show the focused texture set or bake group settings expanded after creating one from the header
+烘焙组目标,Bake Group Targets
+从标题栏菜单纳入的烘焙组。按住 Shift 单击可添加或移除组；设置更改会应用于每个已纳入的组,Bake groups included from the header menu. Shift-click adds or removes a group; setting changes apply to every included group
+项目设置展开,Setup Project Expanded
+烘焙笼调试展开,Cage Debug Expanded
+偏斜调试展开,Skew Debug Expanded
+低模展开,Low Mesh Expanded
+高模展开,High Mesh Expanded
+烘焙笼叠加展开,Cage Overlay Expanded
+视口调试展开,Viewport Debug Expanded
+所选基础,Selected Base
+为包含所选低模网格的烘焙组设置基于距离烘焙笼的基础偏移,Set the base Distance Based cage offset for the bake groups containing the selected low-poly meshes
+所选偏移,Selected Offset
+为所选低模网格设置最终的基于距离烘焙笼偏移,Set the final Distance Based cage offset for the selected low-poly meshes
+低模预览激活,Preview On Low Active
+低模预览项目,Preview On Low Project
+低模预览组,Preview On Low Group
+低模预览贴图 UUID,Preview On Low Map UUID
+低模预览贴图,Preview On Low Map
+低模预览贴图索引,Preview On Low Map Index
+低模预览输出后缀,Preview On Low Output Suffix
+低模预览范围,Preview On Low Scope
+PBR 低模预览激活,Preview PBR On Low Active
+PBR 低模预览项目,Preview PBR On Low Project
+PBR 低模预览组,Preview PBR On Low Group
+AO 强度,AO Strength
+将烘焙的环境光遮蔽混合到材质预览中,Blend the baked ambient occlusion into the material preview
+旋转,Rotation
+绕垂直轴旋转材质预览工作室环境,Rotate the Material Preview studio environment around the vertical axis
+强度,Strength
+控制材质预览工作室环境强度,Control the Material Preview studio environment intensity
+显示背景,Show Background
+在所预览网格后方显示工作室环境,Show the studio environment behind the previewed meshes
+实时烘焙激活,Live Bake Active
+实时烘焙项目,Live Bake Project
+实时烘焙项目索引,Live Bake Project Index
+实时法线预览激活,Live Normal Preview Active
+实时法线预览场景,Live Normal Preview Scene
+实时法线预览项目,Live Normal Preview Project
+实时法线预览组,Live Normal Preview Group
+实时法线预览输出,Live Normal Preview Output
+低模预览恢复烘焙笼叠加,Preview On Low Restore Cage Overlay
+低模预览恢复热力图,Preview On Low Restore Heatmap
+低模预览恢复光线未命中,Preview On Low Restore Ray Misses
+低模预览恢复视口状态,Preview On Low Restore Viewport State
+低模预览恢复高模可见性,Preview On Low Restore High Visibility
+材质 A/B 对比激活,Material A/B Compare Active
+材质 A/B 对比侧,Material A/B Compare Side
+材质 A/B 对比项目,Material A/B Compare Project
+材质 A/B 对比恢复可见性,Material A/B Compare Restore Visibility
+材质 A/B 对比原有预览,Material A/B Compare Had Preview
+显示烘焙笼,Show Cage
+预览范围,Preview Scope
+选择烘焙笼模式预览活动烘焙组还是所选低模网格,Choose whether Cage Mode previews the active bake group or selected low-poly meshes
+选择时自动选择烘焙组,Auto-Select Bake Group on Selection
+自动切换到包含所选物体的烘焙组,Automatically switch to the bake group containing the selected object
+显示烘焙笼表面,Show Cage Surface
+显示烘焙笼表面叠加,Show the cage surface overlay
+烘焙笼表面颜色,Cage Surface Color
+烘焙笼表面叠加的视口颜色,Viewport color for the cage surface overlay
+显示烘焙笼线框,Show Cage Wireframe
+显示烘焙笼线框叠加,Show the cage wireframe overlay
+烘焙笼线框颜色,Cage Wireframe Color
+烘焙笼线框叠加的视口颜色,Viewport color for the cage wireframe overlay
+显示偏斜针,Show Skew Needles
+显示光线未命中,Show Ray Misses
+可视化未命中匹配高模网格的投射光线,Visualize projection rays that miss the matched high-poly mesh
+光线长度,Ray Length
+控制低模表面显示的偏斜方向线长度,Control the length of the skew-direction lines shown on the low-poly surface
+屏幕尺寸恒定,Constant Screen Size
+无论缩放如何，偏斜针在屏幕上保持相同长度，类似法线叠加,"Keep the skew needles the same length on screen regardless of zoom, like the Normals overlay"
+热力图,Heatmap
+在低模表面可视化烘焙笼覆盖情况。已覆盖区域使用内部颜色；未覆盖区域使用外部颜色,Visualize cage coverage on the low-poly surface. Covered areas use the Inside color; uncovered areas use the Outside color
+热力图内部颜色,Heatmap Inside Color
+设置被烘焙笼覆盖的低模区域颜色,Set the color for low-poly regions covered by the cage
+热力图外部颜色,Heatmap Outside Color
+设置烘焙笼外部低模区域的颜色,Set the color for low-poly regions outside the cage
+烘焙笼不透明度,Cage Opacity
+控制烘焙笼预览外壳的不透明度,Control the opacity of the cage preview shell
+烘焙笼表面不透明度,Cage Surface Opacity
+控制烘焙笼表面叠加的不透明度,Control the opacity of the cage surface overlay
+烘焙笼线框不透明度,Cage Wireframe Opacity
+控制烘焙笼线框叠加的不透明度,Control the opacity of the cage wireframe overlay
+绘制偏移/绘制偏斜工具（paint_brush.py）的笔刷。,Brush of the Paint Offset / Paint Skew tools (paint_brush.py).
+半径,Radius
+笔刷半径，以屏幕像素计（F）,Brush radius in screen pixels (F)
+每次笔触改变数值的强度（Shift+F）,How strongly each dab changes the value (Shift+F)
+压力半径,Pressure Radius
+笔压缩放半径,Pen pressure scales the radius
+压力强度,Pressure Strength
+笔压缩放强度,Pen pressure scales the strength
+衰减,Falloff
+硬度,Hardness
+在此半径比例内保持完整强度,Keep full strength out to this fraction of the radius
+间距,Spacing
+一笔中相邻笔触之间的距离，以半径百分比表示,"Distance between dabs along a stroke, in percent of the radius"
+绘制偏移的设置目标，作为烘焙笼偏移的变化量：0% 表示未绘制，-100% 使烘焙笼贴合表面,"Target of Set for Paint Offset, as a change of the cage offset: 0% is unpainted, -100% puts the cage on the surface"
+绘制偏斜的设置目标：0 保持烘焙光线不变，1 使其垂直于低模面射出,"Target of Set for Paint Skew: 0 leaves the bake ray as it is, 1 fires it straight off the low-poly face"
+仅正面,Front Faces Only
+仅绘制朝向视图的表面,Only paint surface that faces the view
+仅可见,Visible Only
+仅绘制可以看到的表面，因此前方或后方的部分不受影响,"Only paint surface you can see, so parts in front or behind are left alone"
+仅相连,Connected Only
+仅绘制笔刷下方的网格部分,Only paint the piece of mesh under the brush
+绘制偏移将烘焙笼向外推处着色。默认值来自插件偏好设置,Tint where Paint Offset pushes the cage further out. The default comes from the addon preferences
+绘制偏移将烘焙笼向内拉处着色。默认值来自插件偏好设置,Tint where Paint Offset pulls the cage in. The default comes from the addon preferences
+显示数值,Show Values
+对绘制了数值的表面着色,Tint the surface where values are painted
+烘焙项目,Bake Projects
+项目索引,Project Index
+界面状态,UI State
+叠加设置,Overlay Settings
+绘制笔刷,Paint Brush
+在低模网格上显示烘焙贴图，或选择关闭以恢复其材质,"Show a baked map on the low-poly meshes, or Off to restore their materials"
+预览会话,Preview Session
+图像编辑器,Image Editor
+会话状态,Session Status
+Fyr Baker 标题栏控件,Fyr Baker Header Controls
+在 3D 视口标题栏中显示或隐藏 Fyr Baker 控件,Show or hide the Fyr Baker controls in the 3D Viewport header
+缓存的预览贴图类型,Cached Preview Map Types
+缓存输出数,Cached Outputs Count
+UV 快照,UV Snapshots
+响应 Gamma,Response Gamma
+控制应用于曲率响应的 gamma 曲线,Control the gamma curve applied to the curvature response
+响应幅度,Response Amplitude
+控制凹腔与曲率响应的强度,Control the strength of the cavity and curvature response
+线性下限,Linear Floor
+设置响应曲线的最小线性贡献,Set the minimum linear contribution to the response curve
+微弱细节,Faint Detail
+控制微弱曲率细节的显现强度,Control how strongly faint curvature details appear
+凸面增强,Convex Boost
+增强凸面表面的响应,Increase the response on convex surfaces
+白色偏移,White Bias
+将响应向更亮的值偏移,Shift the response toward brighter values
+AA 抖动缩放,AA Jitter Scale
+控制抗锯齿采样在每个像素内的偏移距离,Control how far anti-aliasing samples are offset within each pixel
+获取当前在低模上预览的贴图，若无活动预览则返回 None。,"Get the map currently being previewed on low meshes, or None if no preview is active."
+将一条贴图行中与烘焙相关的字段复制到另一条。,Copy bake-relevant fields from one map row to another.
+为 ``target`` 添加一个在磁盘上不会冲突的显式后缀。,Give ``target`` an explicit suffix that won't collide on disk.
+在贴图堆栈中将 ``map_setting`` 的副本插入到其正下方。,Insert a copy of ``map_setting`` directly below it in the map stack.
+返回影响像素的设置完全相同的其他行。,Return other rows whose pixel-affecting settings are identical.
+查找或创建 `name`（组链接键）对应的贴图集条目。,Find or create the texture-set entry for `name` (the group link key).
+组的贴图集链接键的有效输出令牌（或 None）。,Effective output token for a group's texture-set link key (or None).
+返回显式指定的每组低模到低模来源意图。,Return the explicit per-group low-to-low source intent.
+解析投影的源槽位，而不改动已配置的角色成员关系。,Resolve projected source slots without mutating configured role membership.
+高模槽位的有效 Casts AO：由其开关决定（_ignorebf 名称不会改变它）。,Effective Casts AO of a High slot: its toggle (an _ignorebf name does not change it).
+MBBJOB44：自发光网格物体的灯光链接（字段与灯光的相同）。,MBBJOB44: light linking of an emissive mesh object (same fields as a light's).
+后端对贴图类型的名称（见 wire_types）。,The backend's name for a map type (see wire_types).
+灯光或自发光物体的 MBBJOB44 灯光链接集。,MBBJOB44 light-linking sets of a light or emissive object.
+一个候选网格：名称、求值后的三角面数，以及世界空间 AABB。,"One candidate mesh: name, evaluated tri count, and world-space AABB."
+网格自身的名称，仅移除 Blender ``.NNN`` 重复后缀。,The mesh's own name with only the Blender ``.NNN`` duplicate suffix removed.
+`box` 的体积位于 `region` 内的比例。,Share of `box`'s volume that lies inside `region`.
+两个 AABB 在各自按与缩放相关的边距扩展后是否重叠？,Do the two AABBs overlap once each is grown by a scale-relative margin?
+"索引对 ``(i, j)``（``i < j``），其扩展后的包围盒相互接触，通过 X 轴扫描求得。","Index pairs ``(i, j)``, ``i < j``, whose grown boxes touch, via a sweep on X."
+决定哪些网格一起烘焙；各阶段见 `plan_lowhigh_prep`。,Decide which meshes bake together; see `plan_lowhigh_prep` for the passes.
+"文件的 (mtime_ns, size)，无法读取时为 None。","(mtime_ns, size) of a file, or None when it cannot be read."
+原子性：写入中途崩溃会保留先前的清单，绝不会留下残缺的清单。,"Atomic: a crash mid-write leaves the previous manifest, never a torn one."
+清单的字典形式，或在缺失、不可读或版本不同时为 None。,"The manifest as a dict, or None when absent, unreadable or of another version."
+存储并布局清单中列出但已不在磁盘上的文件。,Store and layout files the manifest names that are no longer on disk.
+用于内置网格集合整数属性的未初始化 uintc 缓冲区。,Uninitialised uintc buffer for a built-in mesh collection integer property.
+用于读取通用 INT 属性 ``value`` 的未初始化 intc 缓冲区。,Uninitialised intc buffer for a generic INT attribute ``value`` read.
+通过 32 位 RNA 整数读取填充的缓冲区的 int32 视图（不复制）。,int32 view of a buffer filled through a 32-bit RNA integer read (no copy).
+清零的 uintc 缓冲区（填充读取）；格式规则同 :func:`empty_u32_for_rna`。,Zeroed uintc buffer (padded reads); same format rule as :func:`empty_u32_for_rna`.
+独立后端安装中的候选可执行文件。,Candidate executables from a standalone backend installation.
+独立安装中最新存在的可执行文件（如果有）。,"Newest existing executable from a standalone installation, if any."
+关闭由 _create_bake_progress_event 创建的 Win32 事件句柄。,Close the Win32 event handle created by _create_bake_progress_event.
+"每个适配器的 (name, VRAM MB, DXR tier)，来自功能 JSON 或已存储的判定。","(name, VRAM MB, DXR tier) per adapter, from the capabilities JSON or a stored verdict."
+将后端的功能 JSON 转换为判定。缺失的键绝不会导致拒绝。,Turn the backend's capabilities JSON into a verdict. Missing keys never refuse.
+将判定存入会话缓存，并为 TTL 重新探测给否定结果打上时间戳。,"Store a verdict in the session cache, stamping negatives for the TTL re-probe."
+本次会话最近的功能判定，用于界面文本。绝不探测。,"The most recent capabilities verdict this session, for UI text. Never probes."
+延迟读取已持久化的功能应答。可容忍任何损坏。,Lazily read the persisted capabilities answers. Tolerates any corruption.
+将判定发布到索引几何开关，若 GPU 无法烘焙则拒绝。,"Publish the verdict to the indexed-geometry switch, then refuse if the GPU cannot bake."
+是否已请求取消且工作进程尚未停止。,Whether a cancel has been requested and the worker has not stopped yet.
+轻量持久定时器，在没有烘焙运行时触发脏数据重烘焙回调。,Lightweight persistent timer that fires the dirty-rebake callback when no bake is running.
+启动持久定时器，自动触发增量重烘焙。,Start the persistent timer that auto-triggers incremental rebakes.
+在分区映射失败后创建一次性 FILE_FYMESH 作业。,Create the one-shot FILE_FYMESH job after a section mapping failure.
+将 ``call`` 排队到 Blender 主线程执行。线程安全。,Queue ``call`` for execution on Blender's main thread. Thread-safe.
+为一次预期投递的调用注册排空定时器。仅主线程。,Register the drain timer for one expected posted call. Main thread only.
+结合后端路径与 mtime 的稳定签名，用于 PSO 预热门控。,Stable signature combining backend path and mtime for PSO-prime gating.
+当前后端构建上的烘焙已完成：其着色器已编译。,A bake on the current backend build finished: its shaders are compiled.
+MasterBakerPsoPriming,MasterBakerPsoPriming
+当常驻烘焙工作进程存活且已准备好接受 RUN/PREPARE 时为 True。,True when a resident bake worker process is alive and ready for RUN/PREPARE.
+"缓存状态字符串对应的 (label, icon) 对，用于界面徽章。","(label, icon) pair for a cache-state string, for the UI badge."
+重置 OOM 恢复预热标记（烘焙成功后调用一次）。,Reset the OOM-recovery prewarm marker (call once a bake succeeds).
+PREPARE 完成后，更新任何显示加载状态的项目。,"After PREPARE completes, update any project showing the loading status."
+若磁盘上存在记住的上次成功烘焙作业，发送 PREPARE。,"If a remembered last-successful-bake job exists on disk, send PREPARE."
+尾沿防抖：活动稳定后实际发送 WARMKEEP_ARM。,Trailing-edge debounce: actually send WARMKEEP_ARM after activity settles.
+周期性空闲轮询：在 _WARMKEEP_IDLE_SECONDS 无活动后，解除一次。,"Periodic idle poll: after _WARMKEEP_IDLE_SECONDS of no activity, disarm once."
+取消一次性场景准备定时器，包括在插件重载期间。,"Cancel the one-shot scene-prepare timer, including during add-on reload."
+丢弃已准备的场景指纹，以便下次触发时重新准备。,Drop the prepared-scene fingerprint so the next trigger prepares again.
+丢弃尚未写入工作进程的防抖 WARMKEEP_ARM。,Drop a debounced WARMKEEP_ARM that has not been written to the worker yet.
+PREPARE 运行期间写入 project.last_status_message 的确切状态字符串。,The exact status string written to project.last_status_message while PREPARE is running.
+自发出 PREPARE 以来经过的可读时间（未在进行中时为空字符串）。,Human-readable elapsed time since PREPARE was issued (empty string if not in flight).
+暂存的条目，或在没有暂存内容/类型不匹配时为 None。,"The stashed entry, or None when nothing is stashed / the kind does not match."
+返回暂存的条目（并清除它），类型不匹配时返回 None。,Return the stashed entry (clearing it) or None when the kind does not match.
+暂存刚移除项目的负载，以便撤销该移除。,Hold the payload of a just-removed project so the removal can be undone.
+返回暂存的项目负载（并清除它），若无暂存内容则返回 None。,Return the stashed project payload (clearing it) or None if nothing is stashed.
+为 legacy_cleanup 的 load_post 处理器保留的旧别名。,Legacy alias kept for legacy_cleanup's load_post handler.
+当 Cycles 接管烘焙时为 False；预热和 FYR 工作进程必须保持关闭。,False when Cycles owns baking; prewarm and the FYR worker must stay down.
+当活动场景中至少有一个烘焙组分配了高模时为 True。,True when the active scene has at least one bake group with a high mesh assigned.
+后端为 RUN / 烘焙命令所选择的贴图类型的名称。,The backend's names for the map types a RUN / bake command selects.
+后端常规运行使用的批大小（每贴图集的源数量）。,Batch size (sources per texture-set batch) a normal run of the backend uses.
+重试次数 ``attempt``（0 = 第一次）对应的贴图集批大小：先减半，再减为四分之一。,"Texture-set batch size for retry number ``attempt`` (0 = first): halved, then quartered."
+后端进程未回复即终止时面向用户的标题。,User-facing headline for a backend process that died without replying.
+当错误表明存在不可恢复的协议/状态损坏时返回 True。,Return True when the error indicates unrecoverable protocol/state corruption.
+当错误可能允许工作进程继续运行时返回 True。,Return True when the error may allow the worker process to continue running.
+延迟创建进程级的关闭时终止作业对象，或 None。,"Lazily create the process-wide kill-on-close job object, or None."
+MasterBakerBakeWorkerReader,MasterBakerBakeWorkerReader
+由偏好设置驱动的工作进程环境的稳定摘要。,Stable digest of the preference-driven worker environment.
+MasterBakerDebugWorkerReader,MasterBakerDebugWorkerReader
+在一次刷新期间缓存路径规范化结果（可重入）。,Memoise path normalisation for the duration of one refresh (re-entrant).
+"在 normalized_path_cache() 作用域打开期间，对每个 (kind, text) 只调用一次 `compute()`。","`compute()` once per (kind, text) while a normalized_path_cache() scope is open."
+序列化的 ``system/gpu_info.json``；出错时返回错误记录而不是抛出异常。,Serialized ``system/gpu_info.json``; an error record instead of raising.
+告知 HUD 视口在烘焙期间是否冻结。,Tell the HUD whether the viewport is frozen for the duration of a bake.
+"进行中的 Cycles 主运行作业 ID（无法解析时为 """"）。","Job id of an in-flight Cycles-primary run ("""" when it cannot be resolved)."
+运行标识所用的字典键，包括空作业 ID。,"The dictionary key for a run identity, empty job ids included."
+运行的经过时间起点，在后端退出后仍被记住。,"Elapsed-time origin for a run, remembered across the backend's exit."
+"活动烘焙的 (title, detail, factor)（如果有）。","Return (title, detail, factor) for the active bake, if any."
+ / , / 
+sRGB 传输函数的反函数，用于单个通道。,"Inverse of the sRGB transfer function, for one channel."
+以 sRGB 中的 RGBA 读取一个主题颜色，不可用时回退。,"Read one theme colour as RGBA in sRGB, falling back when it is unavailable."
+占用启动弹窗槽位。当另一个弹窗占用时返回 False。,Claim the startup-popup slot. Returns False when another popup holds it.
+当 ``owner`` 以外的启动弹窗当前显示在屏幕上时为 True。,True when a startup popup other than ``owner`` is currently on screen.
+放弃任何占用；用于插件重载，以免过期标志卡住对话框。,Drop any claim; used on add-on reload so a stale flag cannot wedge a dialog.
+项目 Live Reproject 存储的文件夹令牌（对应 texture_reprojection）。,Folder token for a project's Live Reproject store (mirrors texture_reprojection).
+每个会话每个输出根目录执行一次，不在 UI 线程：目录树可能达数十 GB。,"Once per output root per session, off the UI thread: the tree can be tens of GB."
+fyr-baker-retired-baseline-sweep,fyr-baker-retired-baseline-sweep
+用拥有该运行时会话目录的 Blender 进程 pid 标记它。,Stamp a runtime session directory with the pid of the Blender that owns it.
+仅移除此进程的运行时会话（插件禁用时）。,Remove exactly this process's runtime session (addon disable).
+清除原子持久化写入留下的崩溃残留（超过 1 小时的 ``*.tmp``）。,Drop crash leftovers from atomic persist writes (``*.tmp`` older than 1 hour).
+由同一缓存预算管理的同一批族系所占用的字节数。,Bytes occupied by the same families governed by the one cache budget.
+fyr-baker-cache-reclaim,fyr-baker-cache-reclaim
+仅涉及文件系统的启动回收。绝不能触碰 bpy —— 它在 UI 线程之外运行。,Filesystem-only startup reclaim. Must never touch bpy — this runs off the UI thread.
+fyr-baker-startup-cleanup,fyr-baker-startup-cleanup
+"从 PNP 设备 ID（如 ``PCI\\VEN_10DE&...``）中获取 ``(vendor_id, vendor_name)``。","``(vendor_id, vendor_name)`` from a PNP device id such as ``PCI\\VEN_10DE&...``."
+从 Windows PowerShell 5.1 / 7 / CIM 为 DriverDate 输出的各种形式中获取 ISO 日期。,ISO date from the shapes Windows PowerShell 5.1 / 7 / CIM emit for DriverDate.
+ConvertTo-Json 对零行不输出内容，对一行输出对象，对多行输出列表。,"ConvertTo-Json emits nothing for no rows, an object for one, a list for many."
+替换 ``value`` 中每个字符串里的用户配置文件路径/账户名。,Replace the user profile path / account name in every string of ``value``.
+每个适配器的驱动键；64 位 VRAM 大小的唯一常规来源。,Per-adapter driver keys; the only stock source of 64-bit VRAM size.
+为每个 CIM 适配器附加 ``vram_bytes``，按 DriverDesc（+ 版本）匹配。,"Attach ``vram_bytes`` to each CIM adapter, matched by DriverDesc (+ version)."
+``system/gpu_info.json`` 所需的全部内容。绝不抛出异常。,Everything for ``system/gpu_info.json``. Never raises.
+将角色标签指向重命名后的烘焙组。指向其他任何组的标签保持不变。,Point a role tag at a renamed bake group. Tags naming any other group are left alone.
+当任何窗口运行模态操作符（变换拖拽、框选）时为 True。,"True while any window runs a modal operator (a transform drag, a box select)."
+为此项目记录的参考，由其清单重建，或为 None。,"The reference recorded for this project, rebuilt from its manifest, or None."
+已存储的参考是否仍为此场景及其文件的准确依据。,Whether a stored reference is still the truth for this scene and its files.
+低开销的轮询检查，短暂缓存：侧边栏会不断重绘。,"Cheap poll-time check, cached for a moment: the sidebar redraws constantly."
+参考像素的 GPU 副本，每个输出上传一次（2K 下 300 毫秒）。,"GPU copy of the reference pixels, uploaded once per output (300 ms at 2K)."
+将 Blender 顺序的像素（行优先 y、x、通道）上传为 RGBA32F 纹理。,"Upload Blender-order pixels (row-major y, x, channel) as an RGBA32F texture."
+参考布局的覆盖范围，以便未移动的填充区域可以保持不变。,"Coverage of the reference layout, so unmoved padding can be left alone."
+在开关旁显示一个悬停图标，而不是在其下方显示状态文本。,One hover icon next to the toggle instead of status text under it.
+Live Reproject 状态,Live Reproject Status
+恢复贴图,Restore Textures
+当材质仅以其所在网格（物体或网格数据）命名时为 True。,True when a material is just named after the mesh (object or mesh data) it is on.
+一个网格的扁平占用纹素键，每个 UDIM 平铺位于各自的键范围内。,"Flat occupied-texel keys of one mesh, each UDIM tile in its own key range."
+包装后的 ``target``，确保不会有异常从中逸出。,``target`` wrapped so that no exception leaves it.
+UV 数据无法解析为可用的平铺集。,UV data cannot be resolved to a usable tile set.
+具体路径中编码的平铺编号，若路径不含平铺则为 ``0``。,"Tile number encoded in a concrete path, or ``0`` when the path carries no tile."
+具体路径 -> ``<UDIM>`` 形式。不含平铺的路径原样返回。,Concrete path -> the ``<UDIM>`` form. A path with no tile comes back unchanged.
+"平铺编号对应的整数 UV 单元原点 ``(tile_u, tile_v)``。","Integer UV cell origin ``(tile_u, tile_v)`` for a tile number."
+Fyr 实际会烘焙的一个平铺及其有效物理尺寸。,"One tile Fyr will actually bake, with its effective physical size."
+"向下取整单元索引 -> 截断列。向下取整单元 -1 为 (-1, 0)，截断为 0。","Floor cell index -> truncation column. Floor cell -1 is (-1, 0), truncating to 0."
+无法构建或刷新平铺数据块。,A tiled datablock could not be built or refreshed.
+平铺集的稳定 ``tile:mtime`` 摘要，用于跳过空操作重载。,"Stable ``tile:mtime`` digest of a tile set, used to skip no-op reloads."
+若该平铺仍然存在，将活动平铺放回美术离开时的位置。,"Put the active tile back where the artist left it, if that tile still exists."
+磁盘上当前平铺集不再声明的具体平铺文件。,Concrete tile files on disk that the current tile set no longer claims.
+删除不再被占用的 UDIM 平铺的输出文件。Fyr 从不自行移除这些文件,Delete output files for UDIM tiles that are no longer occupied. Fyr never removes these on its own
+清理过期的 UDIM 平铺,Clean Up Stale UDIM Tiles
+丢弃所有绘制路径缓存。开销很低；可在任何位置安全调用。,Drop every draw-path memo. Cheap; safe to call from anywhere.
+返回偏好设置以及可安全用于绘制的已解析渲染器快照。,Return preferences plus a draw-safe resolved renderer snapshot.
+用于主快速设置界面的紧凑、可编辑渲染器控件。,"Compact, editable renderer controls for the main quick-settings surface."
+设备,Device
+贴图选择器的类别。,The map-picker categories.
+一旦组拥有低模且至少启用一个贴图，即为 True。,True once a group has a low mesh and at least one map is enabled.
+仅当材质贴图确实排队给 Cycles 时才警告。,Warn only when Material maps are actually queued for Cycles.
+正在完成输出…,Finalizing outputs…
+  ·  ,  ·  
+材质通道,Material Channels
+没有匹配的通道,No matching channels
+没有匹配的贴图,No matching maps
+分辨率预设,Resolution Presets
+将输出宽度和高度设置为标准贴图尺寸,Set the output width and height to a standard texture size
+项目预设,Project Presets
+将活动烘焙项目保存为预设，或加载预设,"Save the active bake project as a preset, or load one"
+准备,Prepare
+重命名网格、优化 UV 接缝，并捕获或恢复 UV 快照,"Rename meshes, optimize UV seams, and capture or restore UV snapshots"
+优化 UV 接缝（实验性）,Optimize UV Seams (Experimental)
+更新 UV 快照,Update UV Snapshot
+UV 快照,UV Snapshot
+恢复、重命名或删除活动物体上的 UV 快照,"Restore, rename, or delete the UV snapshot on the active object"
+活动物体没有快照,No snapshot for active object
+恢复到新 UV 贴图,Restore to New UV Map
+替换当前 UV 贴图,Replace Current UV Map
+重命名快照,Rename Snapshot
+贴图堆栈预设,Map Stack Presets
+用预设的输出贴图集替换贴图堆栈,Replace the map stack with a preset set of output maps
+返回将 texture_set_name 映射到组名列表的字典。,Return a dict mapping texture_set_name → list of group names.
+用一行列出与该选择共享同一贴图集的其他烘焙组。,One line naming the other bake groups that share this selection's texture set.
+每个低模上的活动 UV 层名称。空字符串表示该网格没有。,Active UV layer name on each low mesh. An empty string means that mesh has none.
+为组的贴图集绘制紧凑的下拉菜单 + 清除按钮。,Draw a compact dropdown + clear button for a group's texture set.
+将此烘焙组分配给某个贴图集，或单独烘焙它,"Assign this bake group to a texture set, or bake it on its own"
+无项目,No project
+无烘焙组,No bake group
+新建贴图集...,New Texture Set...
+无（独立）,None (Standalone)
+将一个组或标题选择中的所有组分配给某个贴图集。,"Assign one group, or every group in the header selection, to a texture set."
+独立,Standalone
+INVOKE_DEFAULT,INVOKE_DEFAULT
+溶解,Dissolve
+切换活动烘焙项目,Switch the active bake project
+无烘焙项目,No bake projects
+选择活动贴图集,Choose the active texture set
+无贴图集,No texture sets
+选择哪些烘焙组接收设置更改。按住 Shift 单击可包含多个,Choose which bake groups receive setting changes. Shift-click to include more than one
+无烘焙组,No bake groups
+配置贴图,Configure Maps
+向堆栈添加输出贴图,Add an output map to the stack
+render,render
+预设,Presets
+在低模上显示,Show on Low
+在低模网格上显示烘焙的贴图,Show a baked map on the low-poly meshes
+无活动项目,No active project
+已烘焙贴图,Baked Maps
+无预览会话,No preview session
+此范围内没有可用的烘焙输出。,No baked outputs are available for this scope.
+ · , · 
+添加 UV 平铺,Add UV Tile
+移除 UV 平铺,Remove UV Tile
+从活动贴图集中移除高亮的 UDIM 平铺行,Remove the highlighted UDIM tile row from the active texture set
+检测 UV 平铺,Detect UV Tiles
+UV 平铺,UV Tiles
+显示或隐藏此贴图集的平铺列表,Show or hide the tile list for this texture set
+一行平铺。当此贴图集有内容可管理时，平铺列表会打开。,One tile row. The tile list opens when this set has something to manage.
+平铺,Tiles
+添加平铺覆盖,Add Tile Override
+W,W
+H,H
+贴图操作,Map Actions
+打开、编辑、复制或移除此输出贴图,"Open, edit, duplicate, or remove this output map"
+未选择贴图,No map selected
+用于上次烘焙警告行的简短、始终可读的标签。,"Short, always-readable label for the last bake's warning row."
+烘焙警告,Bake Warnings
+读取上次烘焙的完整警告,Read the full warning from the last bake
+烘焙警告,Bake Warning
+打开日志,Open Log
+重复贴图警告,Duplicate Map Warning
+显示堆栈中其他具有这些完全相同烘焙设置的贴图,Show which other map in the stack has these exact bake settings
+消息,Message
+完全重复的烘焙设置,Exact duplicate bake settings
+缺失物体,Missing Object
+烘焙笼设置,Cage Settings
+活动烘焙组的烘焙笼模式、平滑和距离偏移,"Cage mode, smoothing, and distance offset for the active bake group"
+平滑烘焙笼,Smooth Cage
+烘焙笼覆盖设置,Cage Coverage Settings
+烘焙笼内外表面的颜色,Colors for surfaces inside and outside the cage
+内部,Inside
+外部,Outside
+诊断,Diagnose
+视口叠加,Viewport Overlays
+烘焙笼表面和线框的颜色与不透明度,Cage surface and wireframe color and opacity
+偏斜针,Skew Needles
+偏斜针的大小，以及该大小在屏幕上是否保持不变,"Size of the skew needles, and whether that size stays constant on screen"
+停止,Stop
+更新后的首次烘焙,First bake after an update
+Fyr 会一次性编译其 GPU 着色器。,Fyr compiles its GPU shaders once.
+大约需要一两分钟；之后的烘焙很快。,It takes a minute or two; later bakes are fast.
+属于标题栏所示贴图集的烘焙组。,Bake groups that belong to the texture set the header is showing.
+层级树上方显示贴图集、烘焙组、渲染器和设备。,"Texture set, bake group, renderer, and device above the hierarchy tree."
+烘焙运行时部分操作会被禁用。,Some actions are disabled while a bake is running.
+EXEC_DEFAULT,EXEC_DEFAULT
+支持包,Support Bundle
+另一个项目的烘焙正在运行。,Another project bake is running.
+隐藏烘焙笼,Hide Cage
+创建烘焙组,Create Bake Group
+整个烘焙组区块：先是其设置，然后是其网格。,"The whole bake group block: its settings, then its meshes."
+混合,Mixed
+烘焙组包含哪些网格：低模和高模列表（网格标签页）。,Which meshes are in the bake group: the low and high lists (Meshes tab).
+物体,Objects
+贴图集下的一个烘焙组。点击名称可激活它；菜单可移动它。,One bake group under its texture set. The name activates it; the menu moves it.
+保存 .blend 文件以按其命名输出,Save the .blend file to name outputs after it
+为低模指定材质,Assign a material to the low meshes
+每个贴图集、其下的烘焙组，然后是活动贴图集的输出和平铺。,"Every texture set, the groups under it, then the active set's output and tiles."
+创建烘焙,Create Bake Project
+推荐,recommended
+按名称或按重叠配对网格。,"Pairs meshes by name, or by overlap."
+Fyr 集合,Fyr Collections
+我的集合,My Collections
+或手动添加,or add manually
+手动,Manual
+按照选中新增组,Add Selected Meshes
+添加空烘焙组,Add Empty Bake Group
+列表高亮所在行：聚焦的贴图集或烘焙组。,Row the list highlight should sit on: the focused texture set or bake group.
+该行显示的 High 槽位的 Casts AO 开关，或 None（Low 行、Use Low as High）。,"The High slot whose Casts AO toggle this row shows, or None (Low rows, Use Low as High)."
+Blender 的 UI_UNIT_X 像素值。单位比例为 20px，再按 DPI 和界面缩放调整。,"Blender's UI_UNIT_X in pixels. 20px at unit scale, then DPI and interface scale."
+在重绘之间重建滚动列表。绘制期间对集合的修改不会保留。,Rebuild the scroll list between redraws. Collection edits during draw do not stick.
+贴图集、烘焙组和网格。树高超过视口时滚动。,"Texture sets, bake groups, and meshes. Scrolls once the tree is taller than the viewport."
+项目名称行的眼睛和烘焙笼开关所用的可见性。,Visibility used by the project-name row's eye and cage toggles.
+项目名称及其操作。位于每个标签页的 N 面板标题下方。,Project name and its actions. Sits under the N-panel header on every tab.
+项目层级：贴图集 > 烘焙组 > 网格。,Project hierarchy: texture sets > bake groups > meshes.
+高模到低模烘焙,High to Low Bake
+网格按名称配对：Body_low 从 Body_high 烘焙（_LP/_HP 同样适用）。,Meshes pair by name: Body_low bakes from Body_high (_LP/_HP too).
+还没有后缀？自动设置会按重叠配对网格。,No suffixes yet? Auto Setup pairs meshes by overlap.
+你的网格已按配对规则命名。,Your meshes are already named for pairing.
+材质烘焙,Material Bake
+展平选中物体,Flattens the selected objects
+烘焙 UV 层,Bake UV Layer
+选择此烘焙组烘焙所用的 UV 层,Choose the UV layer this bake group bakes with
+未选择低模,No low mesh selected
+未找到 UV 层,No UV layers found
+UV,UV
+低模使用了不同的活动 UV 贴图,Low meshes use different active UV maps
+烘焙前为此网格添加 UV 贴图,Add a UV map to this mesh before baking
+展开的烘焙组下的一个低模或高模子项。,One low-poly or high-poly child under an expanded bake group.
+无网格,No meshes
+一个展开的烘焙组下的网格和烘焙笼相关项，就地绘制。,"Meshes and cage aspects under one expanded bake group, drawn in place."
+文件夹,Folder
+临时输出：保存 blend 文件或设置文件夹,Temporary output: save the blend or set a folder
+X,X
+深度：,Depth:
+格式：,Format:
+抗锯齿,Anti-Aliasing
+预览输出前请先创建烘焙项目。,Create a bake project before previewing outputs.
+恢复可见性,Restore Visibility
+切线空间法线,Tangent Normal
+弯曲法线,Bent Normal
+停止材质预览,Stop Material Preview
+环境,Environment
+启用“预览烘焙材质”以调整,Enable Preview Baked Material to adjust
+检查,Check
+"验证问题指向的场景物体，若未指名则为 """"。","The scene object a validation issue points at, or """" when it names none."
+设置选项,Set Option
+选择此选项,Choose this option
+数据路径,Data Path
+UDIM 平铺状态图标的悬停目标。点击无效。,Hover target for a UDIM tile's status icon. Clicking does nothing.
+UDIM 平铺状态,UDIM Tile Status
+贴图行的材质来源图标的悬停目标。点击无效。,Hover target for a map row's material-source icon. Clicking does nothing.
+材质状态,Material Status
+将某个堆栈行设为活动贴图，使其设置显示在下方。,"Make one stack row the active map, so its settings draw underneath."
+后端状态,Backend Status
+标记为已更改,Mark Dirty
+启用实时烘焙以使用“标记为已更改”。,Enable Live Bake to use Mark Dirty.
+活动烘焙组的网格列表，在“网格”菜单中始终展开。,"Mesh lists for the active bake group, always open in the Meshes menu."
+快速开始,Quick Start
+没有活动项目。,No active project.
+烘焙失败,Bake failed
+日志,Log
+GPU 日志,GPU Log
+复制失败信息,Copy Failure
+输出,Outputs
+活动烘焙组,Active Bake Group
+请先创建烘焙组或指定选中网格。,Create a bake group or assign selected meshes first.
+贴图堆栈,Map Stack
+未配置输出贴图。,No output maps are configured.
+尚无已跟踪的输出。,No tracked outputs yet.
+烘焙或刷新输出以查看结果。,Bake or refresh outputs to inspect results.
+加载活动输出,Load Active Output
+材质预览,Material Preview
+活动输出：无,Active Output: None
+烘焙工作进程,Bake Worker
+启动时,Startup
+烘焙期间,During Bake
+视口静默,Quiet Viewport
+保持视口实时更新,Keep Viewport Live
+状态栏进度,Status Bar Progress
+视口控制,Viewport Controls
+打开文档,Open Documentation
+插件偏好设置,Addon Preferences
+从标题栏中贴图集名称打开的弹出面板。,Popover opened from the texture set name in the header.
+贴图集、每个贴图集中的烘焙组，以及该贴图集的命名方式,"Texture sets, the bake groups in each one, and how that set is named"
+无烘焙项目,No bake project
+烘焙组下拉菜单旁齿轮图标打开的弹出面板。,Popover behind the gear beside the bake group dropdown.
+烘焙组设置,Bake Group Settings
+下拉菜单中选择的烘焙组的设置,Settings of the bake group chosen in the dropdown
+快速设置,Quick Settings
+渲染器、烘焙工作进程，以及烘焙运行时视口的行为,"Renderer, bake worker, and what the viewport does while a bake runs"
+烘焙,Bake
+贴图预览,Map Preview
+烘焙中……,Baking...
+自动构建,Auto-Build Bake Groups
+将烘焙发送到外部编辑器,Send the bake to an external editor
+覆盖范围,Coverage
+低模,Low
+高模,High
+追加到 VIEW3D_MT_add，即 3D 视口“添加”菜单（Shift+A）。,"Appended to VIEW3D_MT_add, the 3D Viewport Add menu (Shift+A)."
+high_poly,high_poly
+使用低模,Use Low
+绘制偏移 / 绘制倾斜的启动按钮、其标量值和实时笔刷设置。,"Paint Offset / Paint Skew launchers, their scalars and the live brush settings."
+偏移和倾斜,Offset and Skew
+退出偏移绘制,Exit Offset Paint
+退出倾斜绘制,Exit Skew Paint
+隔离已绘制网格,Isolate Painted Meshes
+清除倾斜,Clear Skew
+膨胀,Inflate
+松弛,Relax
+平滑,Smooth
+清理,Clean
+添加烘焙组以指定低模/高模/烘焙笼网格。,Add a bake group to assign low/high/cage meshes.
+投射,Projection
+ID,ID
+集合,Collection
+转换,Convert
+自动适配,Auto-Fit
+自动匹配,Auto Match
+后缀,Suffix
+堆栈中没有贴图。,No maps in stack.
+全部烘焙,Bake All
+烘焙已更改,Bake Changed
+刷新,Refresh
+UV 工具,UV Tools
+同步已开启,Sync is on
+无 UV 层,No UV layers
+烘焙 UV,Bake UV
+更新快照,Update Snapshot
+更新,Update
+Toolbag,Toolbag
+Mip,Mip
+若堆栈中另一个已启用的贴图解析到相同输出键，则返回 True。,Return True if another enabled map in the stack resolves to the same output key.
+开启“包含其他组”以使用它们,Turn on Include Other Groups to use them
+绘制单个贴图属性，不显示重置按钮。,Draw a single map property without reset button.
+在一行内并排绘制两个浮点属性，不显示重置按钮。,Draw two float properties side-by-side in a single row without reset buttons.
+曲率系列遵循相同规则：该标志只缩放半径。,Same rule for the curvature family: the flag scales Radius only.
+曲率响应,Curvature Response
+在贴图设置最顶部绘制主算法/模式选择器。,Draw the primary algorithm/mode selector at the very top of map settings.
+方向输出：在 Fyr GPU 上为原生，在 Cycles 上为近似,"Direction output: native on Fyr GPU, approximate on Cycles"
+标签,Label
+输出名称重复。贴图将互相覆盖。,Duplicate output name. Maps will overwrite each other.
+恢复默认,Restore Defaults
+Cycles 下不可用，需要 FYR,"Not available with Cycles, requires FYR"
+需要 Fyr GPU，无法通过 Cycles 回退,"Requires Fyr GPU, not recoverable via Cycles"
+漫射 AO 需要 FYR,Diffusive AO requires FYR
+最大距离,Max Distance
+偏移滑块的左侧标题。名称随范围而定。,Left-side title for the offset slider. The subject follows the scope.
+背面距离 - 自动,Rear Distance - Auto
+cage_surface_color,cage_surface_color
+cage_wireframe_color,cage_wireframe_color
+倾斜指针大小，由“绘制倾斜”旁的箭头显示。,"Skew needle size, shown from the arrow beside Paint Skew."
+skew_debug_constant_screen_size,skew_debug_constant_screen_size
+完全重复的贴图堆栈警告图标（先项目 PNG，再 Blender 内置）。,"Exact-duplicate map-stack warning glyph (project PNG, then Blender built-ins)."
+带烘焙项目的场景的物体模式 Alt+H 选项。,Object Mode Alt+H choices for scenes with bake projects.
+为当前视图层中眼睛隐藏的高模拍摄快照。,Snapshot eye-hidden high meshes in the current view layer.
+取消隐藏物体,Unhide Objects
+取消隐藏物体，可选择保留隐藏的高模烘焙源,"Unhide objects, optionally preserving hidden high-poly bake sources"
+保持高模隐藏,Keep High Poly Hidden
+让之前隐藏的高模烘焙源保持隐藏,Leave previously hidden high-poly bake sources hidden
+全部取消隐藏,Unhide All
+选择 Alt+H 是否显示高模烘焙源,Choose whether Alt+H reveals high-poly bake sources
+物体模式,Object Mode
+将说明写入下载的压缩包旁；返回路径或 None。,Write the notes next to the downloaded archive; return the path or None.
+扩展包 ID（其在仓库内的目录名）。,The extension package id (its directory name inside the repository).
+"扩展仓库在磁盘上的目录，不可用时为 """"。","On-disk directory of the extension repository, or """" when unavailable."
+"已安装包的文件所在位置，找不到时为 """"。","Where the installed package's files live, or """" when it cannot be found."
+``url`` 是否可在无需艺术家亲自操作的情况下下载并安装。,Whether ``url`` may be downloaded and installed without the artist's hands on it.
+update_installed,update_installed
+后台下载的主线程收尾：安排安装，或暴露失败。,"Main-thread tail of a background download: schedule the install, or surface the failure."
+控制台输出加可关闭的弹窗；由定时器触发，因此需自行查找窗口。,"Console line plus a dismissable popup; runs from a timer, so find a window itself."
+fyr-baker-update-download,fyr-baker-update-download
+fyr-baker-update-check,fyr-baker-update-check
+update_blender_unsupported,update_blender_unsupported
+update_install_failed,update_install_failed
+update_notify,update_notify
+在 Fyr 插件网站检查 Fyr Baker 是否有新版本,Check the Fyr Plugins website for a newer version of Fyr Baker
+fyr-baker-update-check-now,fyr-baker-update-check-now
+一键安装不可用的原因，以简短界面文字表示；可用时为空。,"Why one-click install is unavailable, as short UI lines; empty when it is available."
+用于 update_policy 的接口：偏好设置中的 Fyr 账户区域。,Seam for update_policy: the Fyr account block in the preferences.
+绘制说明摘录以及打开全部说明的按钮。,Draw an excerpt of the notes plus the button that opens all of them.
+发布说明：,Release Notes:
+打开更新日志,Open Patch Notes
+此版本未发布说明。,No release notes were published for this version.
+……打开更新日志以阅读其余内容。,... Open Patch Notes to read the rest.
+将完整发布说明写入文本文件，并用默认文本编辑器打开,Write the full release notes to a text file and open it in your default text editor
+从网站获取,Get It From The Website
+打开 Fyr 插件网站，可在其中登录并手动下载更新,"Open the Fyr Plugins website, where you can sign in and download the update by hand"
+有可用的 Fyr Baker 更新,Fyr Baker Update Available
+跳过此版本,Skip This Version
+立即安装,Install Now
+更新后的首次烘焙会多花一两分钟，在此期间,The first bake after updating takes a minute or two longer while
+Fyr 会编译其 GPU 着色器。之后的烘焙很快。,Fyr compiles its GPU shaders. Later bakes are fast.
+Fyr Baker 更新需要其他版本的 Blender,Fyr Baker Update Needs a Different Blender
+关闭,Close
+打开网站,Open The Website
+需要重启,Restart Required
+Fyr Baker 已更新。,Fyr Baker has been updated.
+请重启 Blender 以加载新版本。,Please restart Blender to load the new version.
+显示已下载文件,Show Downloaded File
+打开包含已下载更新的文件夹,Open the folder holding the update you already downloaded
+Fyr Baker 无法自行更新,Fyr Baker Could Not Update Itself
+不再提醒此版本,Stop reminding me about this version
+你可以手动完成更新：,You can finish the update by hand:
+1.  编辑 > 偏好设置 > 获取扩展,1.  Edit > Preferences > Get Extensions
+2.  从磁盘安装（右上角的下拉菜单）,2.  Install from Disk (the dropdown at the top right)
+3.  选择下方文件，然后重启 Blender,"3.  Pick the file below, then restart Blender"
+状态文件的绝对路径，Blender 无配置目录时为 None。,"Absolute path of the state file, or None when Blender has no config dir."
+"记录的失败信息，格式为 ``{version, reason, archive}``；无失败时为空。","The recorded failure as ``{version, reason, archive}``; empty when clean."
+此构建能够检查和安装更新时为 True。,True when this build can check for and install updates.
+此构建上 ``update_check_mode`` 偏好设置的枚举项。,Enum items for the ``update_check_mode`` preference on this build.
+将保存的/原始模式转换为此构建实际支持的模式。,Coerce a saved/raw mode to a mode this build actually honours.
+重新启用（或取消）周期性检查。无更新器时为空操作。,Re-arm (or cancel) the periodic check. A no-op without an updater.
+绘制更新偏好设置中的 Fyr 账户区域。无更新器时为空操作。,Draw the Fyr account block of the Updates preferences. A no-op without an updater.
+像素空间中的三角形及其包围盒，每个岛计算一次。,"Triangles in pixel space with their bounding boxes, computed once per island."
+包围盒 p 内任意点与包围盒 q 内任意点之间距离的下界。,Lower bound on the distance between anything inside box p and anything inside box q.
+"将纹素偏移折算到 [-0.5, 0.5)：到达相同相位的最短移动。","Wrap a texel offset into [-0.5, 0.5): the shortest move to the same phase."
+位于一个纹素长度圆周上的纹素偏移的均值。,Mean of texel offsets that live on a circle of length one texel.
+当 ``edge`` 沿与 ``reference`` 相反的公共几何方向遍历时为 True。,True when ``edge`` traverses the common geometry opposite ``reference``.
+在 3D 中显示 UV 选择,Show UV Selection in 3D
+UV 选择叠加几何的逐场景缓存。,Per-scene cache for UV selection overlay geometry.
+返回插件偏好设置对象，或 None。,"Return the add-on preferences object, or None."
+从偏好设置返回外观设置，并带合理默认值。,Return appearance settings from preferences with sensible defaults.
+叠加层应处于活动状态时为 True。,True when the overlay should be active.
+生成当前处于编辑模式的网格物体。,Yield mesh objects currently in Edit Mode.
+返回当前 UV 选择模式：'VERTEX'、'EDGE'、'FACE' 或 'ISLAND'。,"Return current UV selection mode: 'VERTEX', 'EDGE', 'FACE', or 'ISLAND'."
+为每个窗口中的每个 VIEW_3D 区域标记重绘。,Tag every VIEW_3D area in every window for redraw.
+根据选择数据构建比较签名。,Build a comparison signature from selection data.
+带裁剪空间深度偏移的纯色三角形着色器。,Flat-colored triangle shader with a clip-space depth bias.
+带裁剪空间深度偏移的纯色点着色器。,Flat-colored point shader with a clip-space depth bias.
+追加屏幕空间线段四边形的 6 个顶点（2 个三角形）。,Append the 6 verts (2 triangles) of a screen-space line-quad segment.
+根据当前 UV 选择状态重建 GPU 批次。,Rebuild GPU batches from current UV selection state.
+3D 视口绘制回调（POST_VIEW）。,3D Viewport draw callback (POST_VIEW).
+SpaceImageEditor 绘制处理器——标记缓存为脏并标记 3D 视图。,SpaceImageEditor draw handler – marks cache dirty and tags 3D views.
+在拓扑/变换更改时将缓存标记为脏。,Mark cache dirty on topology/transform changes.
+加载新文件后清除过期的缓存。,Clear stale cache after loading a new file.
+持久的 Blender 原生 UV 快照归属与精确恢复规划。,Durable Blender-native UV snapshot ownership and exact restore planning.
+对完整的面角连通性做哈希，同时有意排除位置。,Hash full face-corner connectivity while deliberately excluding positions.
+文件中有多少物体携带此快照 UUID（最多计到 2）。,How many objects in the file carry this snapshot UUID (stops at 2).
+使用 Blender 原生修改器进行带质量检查的拓扑变更 UV 传递。,Quality-checked topology-changing UV transfer using Blender's native modifier.
+传递为何被阻止，指明原因及需要更改之处。,"Why a transfer is BLOCKED, naming the cause and what to change."
+HIGH_TO_LOW 组需要高模源；MATERIAL 组自行烘焙其低模。,HIGH_TO_LOW groups need a high-poly source; MATERIAL groups self-bake their lows.
+某个烘焙组的（缺少低模、缺少高模），按烘焙导出时的解析方式确定。,"(missing low, missing high) for one bake group, resolved the way a bake exports it."
+"贴图类型的可读名称（""Ambient Occlusion""），回退到原始 ID。","Human name for a map type (""Ambient Occlusion""), falling back to the raw id."
+*group* 的某个高模槽位是否关闭了 Casts AO（Use Low as High 会忽略此项）。,Whether a high mesh slot of *group* has Casts AO off (Use Low as High ignores it).
+沿用与预检相同的贴图、贴图集和平铺规则计算出的计划烘焙文件名。,"Planned bake filenames using the same map, texture-set and tile rules as preflight."
+后端为 ``map_type`` 接收的贴图类型。,The map type the backend receives for ``map_type``.

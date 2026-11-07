@@ -1,3 +1,30 @@
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTIBILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+bl_info = {
+    "name" : "Cleanup_Monitor",
+    "author" : "渠奎奎", 
+    "description" : "清理.00材质贴图",
+    "blender" : (4, 2, 0),
+    "version" : (2, 0, 0),
+    "location" : "",
+    "warning" : "",
+    "doc_url": "", 
+    "tracker_url": "", 
+    "category" : "A_工具插件" 
+}
+
+
 import bpy
 import bpy.utils.previews
 from bpy.app.handlers import persistent
@@ -30,7 +57,7 @@ def property_exists(prop_path, glob, loc):
         return False
 
 
-def sna_add_to_topbar_mt_editor_menus_00EEF(self, context):
+def sna_add_to_topbar_mt_editor_menus_57D84(self, context):
     if not (False):
         layout = self.layout
         row_75797 = layout.row(heading='', align=True)
@@ -76,7 +103,7 @@ def sna_add_to_topbar_mt_editor_menus_00EEF(self, context):
         col_F13CE.scale_y = 1.0
         col_F13CE.alignment = 'Expand'.upper()
         col_F13CE.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
-        op = col_F13CE.operator('sn.dummy_button_operator', text='', icon_value=string_to_icon('NODE_INSERT_OFF'), emboss=True, depress=False)
+        op = col_F13CE.operator('sna.my_generic_operator_4b25b', text='', icon_value=string_to_icon('NODE_INSERT_OFF'), emboss=True, depress=False)
 
 
 class SNA_OT_My_Generic_Operator_0F4A7(bpy.types.Operator):
@@ -212,7 +239,7 @@ def save_post_handler_0FCF4(dummy):
 def register():
     global _icons
     _icons = bpy.utils.previews.new()
-    bpy.types.TOPBAR_MT_editor_menus.append(sna_add_to_topbar_mt_editor_menus_00EEF)
+    bpy.types.TOPBAR_MT_editor_menus.append(sna_add_to_topbar_mt_editor_menus_57D84)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_0F4A7)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_4B25B)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_68D09)
@@ -227,7 +254,7 @@ def unregister():
     for km, kmi in addon_keymaps.values():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
-    bpy.types.TOPBAR_MT_editor_menus.remove(sna_add_to_topbar_mt_editor_menus_00EEF)
+    bpy.types.TOPBAR_MT_editor_menus.remove(sna_add_to_topbar_mt_editor_menus_57D84)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_0F4A7)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_4B25B)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_68D09)
