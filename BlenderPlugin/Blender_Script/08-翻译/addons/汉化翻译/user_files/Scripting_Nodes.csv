@@ -362,7 +362,7 @@ text=,text=
 操作,Operation
 显示图标,Display Icon
 显示预览,Display Preview
-为每个绘制,Draw For Each
+for(ui),Draw For Each
 节点的设置（非输入）作为 `name=value`。,Settings of the node (not inputs) as `name=value`.
 绘制线条,Draw Lines
 线条,Lines
