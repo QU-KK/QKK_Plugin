@@ -1,0 +1,109 @@
+{
+  "name": "Unreal Engine (Packed)",
+  "notes": "Unreal's T_ asset naming with the standard three-texture set: BaseColor+Opacity, a 16-bit Normal, and the Metallic/Specular/Roughness pack. Filename suffixes follow the existing UNREAL output preset (N for Normal).",
+  "outputs": [
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_OPACITY"
+        },
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "MATERIAL_ALBEDO"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "MATERIAL_ALBEDO"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "MATERIAL_ALBEDO"
+        }
+      },
+      "color_space": "SRGB",
+      "filename": "T_$textureSet_D",
+      "format": "PNG",
+      "notes": "Alpha carries opacity; drop the A channel for an opaque material."
+    },
+    {
+      "bit_depth": 16,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "NORMAL"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "NORMAL"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "NORMAL"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "T_$textureSet_N",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_ROUGHNESS"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_SPECULAR"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_METALNESS"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "T_$textureSet_MSR",
+      "format": "PNG",
+      "notes": "Unreal's Metallic / Specular / Roughness pack."
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "AO"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "AO"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "AO"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "T_$textureSet_AO",
+      "format": "PNG"
+    }
+  ],
+  "schema": "master_baker.output_template.v1"
+}

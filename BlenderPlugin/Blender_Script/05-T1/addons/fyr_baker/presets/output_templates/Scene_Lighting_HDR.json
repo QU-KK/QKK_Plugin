@@ -1,0 +1,106 @@
+{
+  "name": "Scene Lighting (HDR)",
+  "notes": "The lighting family at full float precision. Every one of these carries values outside 0-1 -- irradiance above 1.0, and a bent normal's signed vector -- so an 8- or 16-bit integer file would clip them. A Scene Lighting row resolves to Lighting or Lit Color depending on its Output setting; the other is skipped.",
+  "outputs": [
+    {
+      "bit_depth": 32,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "LIGHTING"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "LIGHTING"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "LIGHTING"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Lighting",
+      "format": "EXR",
+      "notes": "Pure HDR diffuse irradiance, no albedo or emission."
+    },
+    {
+      "bit_depth": 32,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "LIT_COLOR"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "LIT_COLOR"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "LIT_COLOR"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_LitColor",
+      "format": "EXR",
+      "notes": "Lighting multiplied by diffuse albedo, plus emission."
+    },
+    {
+      "bit_depth": 32,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "ENV_LIGHT"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "ENV_LIGHT"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "ENV_LIGHT"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_EnvLight",
+      "format": "EXR"
+    },
+    {
+      "bit_depth": 32,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "BENT_NORMAL"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "BENT_NORMAL"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "BENT_NORMAL"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_BentNormal",
+      "format": "EXR",
+      "notes": "Signed direction vector, kept unencoded."
+    }
+  ],
+  "schema": "master_baker.output_template.v1"
+}

@@ -1,0 +1,175 @@
+{
+  "name": "PBR Metallic Roughness",
+  "notes": "Engine-neutral metallic/roughness set using the glTF spelling of the map names (BaseColor, Metallic, Roughness, Occlusion, Emissive) rather than MasterBaker's own file labels. Nothing is packed, so any engine can consume it.",
+  "outputs": [
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "MATERIAL_ALBEDO"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "MATERIAL_ALBEDO"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "MATERIAL_ALBEDO"
+        }
+      },
+      "color_space": "SRGB",
+      "filename": "$textureSet_BaseColor",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_METALNESS"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_METALNESS"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_METALNESS"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Metallic",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_ROUGHNESS"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_ROUGHNESS"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_ROUGHNESS"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Roughness",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 16,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "NORMAL"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "NORMAL"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "NORMAL"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Normal",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "AO"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "AO"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "AO"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Occlusion",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "MATERIAL_EMISSION"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "MATERIAL_EMISSION"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "MATERIAL_EMISSION"
+        }
+      },
+      "color_space": "SRGB",
+      "filename": "$textureSet_Emissive",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 16,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "HEIGHT"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "HEIGHT"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "HEIGHT"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Height",
+      "format": "PNG"
+    }
+  ],
+  "schema": "master_baker.output_template.v1"
+}
