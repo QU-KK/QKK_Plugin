@@ -1,5 +1,5 @@
-from.Blender互导Maya_Max.Blender互导Maya_Max_py import register as Blender互导Maya_Max_register
-from.Blender互导Maya_Max.Blender互导Maya_Max_py import unregister as Blender互导Maya_Max_unregister
+from.Blender互导Maya_Max.plugin.__init__ import register as Blender互导Maya_Max_register
+from.Blender互导Maya_Max.plugin.__init__ import unregister as Blender互导Maya_Max_unregister
 
 
 

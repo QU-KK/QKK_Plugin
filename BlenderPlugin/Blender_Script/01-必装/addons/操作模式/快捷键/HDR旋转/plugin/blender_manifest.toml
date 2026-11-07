@@ -1,0 +1,25 @@
+schema_version = "1.0.0"
+
+id = "hdr"
+version = "1.0.0"
+name = "HDR_Rotation"
+tagline = "Add-on created with Scripting Nodes"
+maintainer = "QKK"
+type = "add-on"
+tags = ["3D View"]
+
+blender_version_min = "5.2.0"
+
+license = [
+  "SPDX:GPL-3.0-or-later",
+]
+
+[permissions]
+files = "Reads and writes files"
+
+[build]
+paths_exclude_pattern = [
+  "__pycache__/",
+  ".*",
+  "*.zip",
+]

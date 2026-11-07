@@ -522,7 +522,7 @@ Blender 的某个,One of Blender
 是否为按键,Is Key
 按键,Key
 事件,Event
-事件信息,Event Info
+模拟事件,Event Info
 文本，为空时为 None（又是 Blender 自己的文本）。,"The text, None (Blender's own text again) when it's empty."
 设置标题栏文本,Set Header Text
 设置状态栏文本,Set Status Text
