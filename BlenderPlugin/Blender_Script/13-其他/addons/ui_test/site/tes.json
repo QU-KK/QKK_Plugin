@@ -1,0 +1,712 @@
+{
+  "meta": {
+    "appId": "Unity_Fbx",
+    "tabName": "Unity_Fbx",
+    "panelTitle": "My panel",
+    "mode": "sidebar",
+    "accent": "#b79cf2",
+    "gradients": true,
+    "shadows": true,
+    "width": 520,
+    "palette": true
+  },
+  "root": {
+    "id": "n24",
+    "type": "Column",
+    "p": {
+      "gap": 2,
+      "padding": 0,
+      "valign": "center",
+      "tooltip": "",
+      "visible": "",
+      "enabled": "",
+      "flex": 1,
+      "width": 0,
+      "height_": 0,
+      "gradient": "theme",
+      "shadows": "theme",
+      "key": ""
+    },
+    "c": [
+      {
+        "id": "n180",
+        "type": "Tabs",
+        "p": {
+          "outlined": false,
+          "index": 0,
+          "key": "",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme"
+        },
+        "c": [
+          {
+            "id": "n178",
+            "type": "Tab",
+            "p": {
+              "label": "第一个",
+              "icon": "sparkle",
+              "tooltip": "",
+              "visible": "",
+              "enabled": "",
+              "flex": 1,
+              "width": 0,
+              "height_": 0,
+              "gradient": "theme",
+              "shadows": "theme",
+              "key": ""
+            },
+            "c": []
+          },
+          {
+            "id": "n179",
+            "type": "Tab",
+            "p": {
+              "label": "第二个",
+              "icon": "sliders",
+              "tooltip": "",
+              "visible": "",
+              "enabled": "",
+              "flex": 1,
+              "width": 0,
+              "height_": 0,
+              "gradient": "theme",
+              "shadows": "theme",
+              "key": ""
+            },
+            "c": []
+          }
+        ],
+        "ui": {
+          "tab": 0
+        }
+      },
+      {
+        "id": "n175",
+        "type": "FilePathField",
+        "p": {
+          "label": "输出文件夹",
+          "mode": "FILE",
+          "filter": "*",
+          "relative": false,
+          "bind": "",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme",
+          "key": ""
+        },
+        "c": []
+      },
+      {
+        "id": "n173",
+        "type": "Steps",
+        "p": {
+          "steps": "准备场景 | 检查对象 | done\n渲染 | Cycles，128 采样 | active\n导出 | PNG 序列 | todo",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme",
+          "key": ""
+        },
+        "c": []
+      },
+      {
+        "id": "n169",
+        "type": "Alert",
+        "p": {
+          "title": "注意",
+          "text": "已保存到当前场景。",
+          "kind": "info",
+          "icon": "",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme",
+          "key": ""
+        },
+        "c": []
+      },
+      {
+        "id": "n170",
+        "type": "DropZone",
+        "p": {
+          "label": "添加参考图片",
+          "hint": "PNG、JPG 或 EXR · 点击浏览",
+          "filter": "*.png;*.jpg;*.jpeg;*.exr;*.tif;*.webp",
+          "multiple": true,
+          "icon": "upload",
+          "height": 96,
+          "on_files": "",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme",
+          "key": ""
+        },
+        "c": []
+      },
+      {
+        "id": "n168",
+        "type": "EmptyState",
+        "p": {
+          "title": "这里还什么都没有",
+          "text": "创建内容后会显示在这里。",
+          "icon": "inbox",
+          "action": "创建",
+          "on_action": "",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme",
+          "key": ""
+        },
+        "c": []
+      },
+      {
+        "id": "n166",
+        "type": "Breadcrumbs",
+        "p": {
+          "path": "资源库\n道具\n家具\n椅子",
+          "icon": "home",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme",
+          "key": ""
+        },
+        "c": []
+      },
+      {
+        "id": "n164",
+        "type": "Column",
+        "p": {
+          "gap": 8,
+          "padding": 0,
+          "valign": "center",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme",
+          "key": ""
+        },
+        "c": [
+          {
+            "id": "n165",
+            "type": "Button",
+            "p": {
+              "text": "创建",
+              "icon": "sparkle",
+              "icon_right": "",
+              "variant": "success",
+              "size": "lg",
+              "cost": 0,
+              "loading": false,
+              "toggle": false,
+              "active": true,
+              "uppercase": false,
+              "action": "",
+              "operator": "",
+              "on_click": "",
+              "tooltip": "",
+              "visible": "",
+              "enabled": "",
+              "flex": 1,
+              "width": 0,
+              "height_": 0,
+              "gradient": "theme",
+              "shadows": "theme",
+              "key": ""
+            },
+            "c": []
+          }
+        ]
+      },
+      {
+        "id": "n153",
+        "type": "Card",
+        "p": {
+          "title": "Card",
+          "subtitle": "55555557575757",
+          "icon": "sparkle",
+          "collapsible": false,
+          "open": false,
+          "variant": "outline",
+          "padding": 12,
+          "gap": 8,
+          "key": "",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme"
+        },
+        "c": []
+      },
+      {
+        "id": "n148",
+        "type": "Row",
+        "p": {
+          "gap": 8,
+          "padding": 0,
+          "valign": "center",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme",
+          "key": ""
+        },
+        "c": [
+          {
+            "id": "n132",
+            "type": "Button",
+            "p": {
+              "text": "渲染",
+              "icon": "window",
+              "icon_right": "",
+              "variant": "secondary",
+              "size": "md",
+              "cost": 0,
+              "loading": false,
+              "toggle": false,
+              "active": false,
+              "uppercase": false,
+              "action": "",
+              "operator": "",
+              "on_click": "",
+              "tooltip": "",
+              "visible": "",
+              "enabled": "",
+              "flex": 4,
+              "width": 0,
+              "height_": 0,
+              "gradient": "theme",
+              "shadows": "theme",
+              "key": ""
+            },
+            "c": []
+          },
+          {
+            "id": "n135",
+            "type": "Button",
+            "p": {
+              "text": "",
+              "icon": "image",
+              "icon_right": "",
+              "variant": "secondary",
+              "size": "md",
+              "cost": 0,
+              "loading": false,
+              "toggle": false,
+              "active": false,
+              "uppercase": false,
+              "action": "",
+              "operator": "",
+              "on_click": "",
+              "tooltip": "",
+              "visible": "",
+              "enabled": "",
+              "flex": 1,
+              "width": 0,
+              "height_": 0,
+              "gradient": "theme",
+              "shadows": "theme",
+              "key": ""
+            },
+            "c": []
+          },
+          {
+            "id": "n140",
+            "type": "Button",
+            "p": {
+              "text": "",
+              "icon": "scene",
+              "icon_right": "",
+              "variant": "secondary",
+              "size": "md",
+              "cost": 0,
+              "loading": false,
+              "toggle": false,
+              "active": false,
+              "uppercase": false,
+              "action": "",
+              "operator": "",
+              "on_click": "",
+              "tooltip": "",
+              "visible": "",
+              "enabled": "",
+              "flex": 1,
+              "width": 0,
+              "height_": 0,
+              "gradient": "theme",
+              "shadows": "theme",
+              "key": ""
+            },
+            "c": []
+          },
+          {
+            "id": "n147",
+            "type": "Dropdown",
+            "p": {
+              "label": "",
+              "items": "槽1\n槽2\n槽3\n槽4",
+              "value": "槽1",
+              "icon": "",
+              "placeholder": "Select",
+              "searchable": "auto",
+              "bind": "",
+              "on_change": "",
+              "tooltip": "",
+              "visible": "",
+              "enabled": "",
+              "flex": 1,
+              "width": 0,
+              "height_": 0,
+              "gradient": "theme",
+              "shadows": "theme",
+              "key": ""
+            },
+            "c": []
+          }
+        ]
+      },
+      {
+        "id": "n120",
+        "type": "Separator",
+        "p": {
+          "label": "",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme",
+          "key": ""
+        },
+        "c": []
+      },
+      {
+        "id": "n94",
+        "type": "Column",
+        "p": {
+          "gap": 8,
+          "padding": 0,
+          "valign": "center",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme",
+          "key": ""
+        },
+        "c": [
+          {
+            "id": "n112",
+            "type": "Segmented",
+            "p": {
+              "items": "Grid\nList\nWall",
+              "value": "Grid",
+              "bind": "",
+              "on_change": "",
+              "tooltip": "",
+              "visible": "",
+              "enabled": "",
+              "flex": 1,
+              "width": 0,
+              "height_": 0,
+              "gradient": "theme",
+              "shadows": "theme",
+              "key": ""
+            },
+            "c": []
+          }
+        ]
+      },
+      {
+        "id": "n154",
+        "type": "Card",
+        "p": {
+          "title": "Card",
+          "subtitle": "",
+          "icon": "",
+          "collapsible": false,
+          "open": true,
+          "variant": "default",
+          "padding": 12,
+          "gap": 8,
+          "key": "",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme"
+        },
+        "c": []
+      },
+      {
+        "id": "n155",
+        "type": "Card",
+        "p": {
+          "title": "Card",
+          "subtitle": "",
+          "icon": "",
+          "collapsible": false,
+          "open": true,
+          "variant": "default",
+          "padding": 12,
+          "gap": 8,
+          "key": "",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme"
+        },
+        "c": []
+      },
+      {
+        "id": "n156",
+        "type": "Card",
+        "p": {
+          "title": "Card",
+          "subtitle": "",
+          "icon": "",
+          "collapsible": false,
+          "open": true,
+          "variant": "default",
+          "padding": 12,
+          "gap": 8,
+          "key": "",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme"
+        },
+        "c": []
+      },
+      {
+        "id": "n157",
+        "type": "Card",
+        "p": {
+          "title": "Card",
+          "subtitle": "",
+          "icon": "",
+          "collapsible": false,
+          "open": true,
+          "variant": "default",
+          "padding": 12,
+          "gap": 8,
+          "key": "",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme"
+        },
+        "c": []
+      },
+      {
+        "id": "n158",
+        "type": "Card",
+        "p": {
+          "title": "Card",
+          "subtitle": "",
+          "icon": "",
+          "collapsible": false,
+          "open": true,
+          "variant": "default",
+          "padding": 12,
+          "gap": 8,
+          "key": "",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme"
+        },
+        "c": []
+      },
+      {
+        "id": "n159",
+        "type": "Card",
+        "p": {
+          "title": "Card",
+          "subtitle": "",
+          "icon": "",
+          "collapsible": false,
+          "open": true,
+          "variant": "default",
+          "padding": 12,
+          "gap": 8,
+          "key": "",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme"
+        },
+        "c": []
+      },
+      {
+        "id": "n160",
+        "type": "Card",
+        "p": {
+          "title": "Card",
+          "subtitle": "",
+          "icon": "",
+          "collapsible": false,
+          "open": true,
+          "variant": "default",
+          "padding": 12,
+          "gap": 8,
+          "key": "",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme"
+        },
+        "c": []
+      },
+      {
+        "id": "n161",
+        "type": "Card",
+        "p": {
+          "title": "Card",
+          "subtitle": "",
+          "icon": "",
+          "collapsible": false,
+          "open": true,
+          "variant": "default",
+          "padding": 12,
+          "gap": 8,
+          "key": "",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme"
+        },
+        "c": []
+      },
+      {
+        "id": "n162",
+        "type": "Card",
+        "p": {
+          "title": "Card",
+          "subtitle": "",
+          "icon": "",
+          "collapsible": false,
+          "open": true,
+          "variant": "default",
+          "padding": 12,
+          "gap": 8,
+          "key": "",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme"
+        },
+        "c": []
+      },
+      {
+        "id": "n163",
+        "type": "Card",
+        "p": {
+          "title": "Card",
+          "subtitle": "",
+          "icon": "",
+          "collapsible": false,
+          "open": true,
+          "variant": "default",
+          "padding": 12,
+          "gap": 8,
+          "key": "",
+          "tooltip": "",
+          "visible": "",
+          "enabled": "",
+          "flex": 1,
+          "width": 0,
+          "height_": 0,
+          "gradient": "theme",
+          "shadows": "theme"
+        },
+        "c": []
+      }
+    ]
+  }
+}

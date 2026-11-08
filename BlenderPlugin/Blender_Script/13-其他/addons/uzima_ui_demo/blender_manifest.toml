@@ -1,0 +1,18 @@
+schema_version = "1.0.0"
+
+id = "uzima_ui_demo"
+version = "2.0.0"
+name = "Uzima UI Demo"
+tagline = "Custom web-style UI library with a full component demo"
+maintainer = "Raisy Clutch"
+type = "add-on"
+
+blender_version_min = "4.2.0"
+
+license = ["SPDX:GPL-3.0-or-later"]
+copyright = ["2026 Uzima UI", "2016-2026 The Inter Project Authors (Inter font, OFL-1.1)"]
+
+tags = ["User Interface", "3D View"]
+
+[build]
+paths_exclude_pattern = ["__pycache__/", "/tools/", "/.git/", "*.zip"]
