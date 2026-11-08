@@ -24,9 +24,9 @@ import gpu
 from gpu_extras.batch import batch_for_shader
 from mathutils import Vector, Matrix
 
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ....ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ....prop.zuv_preferences import get_prefs
+from ....utils.blender_zen_utils import ZenPolls
 
 from .uv_base import ZuvUVGizmoBase
 

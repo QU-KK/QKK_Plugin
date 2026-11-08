@@ -33,10 +33,10 @@ import os
 from collections import defaultdict
 import ast
 
-from ZenUV.utils.adv_generic_ui_list import zenuv_draw_ui_list, _set_context_attr, _get_context_attr
-from ZenUV.utils.blender_zen_utils import ZuvPresets, update_areas_in_all_screens, get_command_props
-from ZenUV.utils.vlog import Log
-from ZenUV.prop.common import update_addon_prop
+from ..utils.adv_generic_ui_list import zenuv_draw_ui_list, _set_context_attr, _get_context_attr
+from ..utils.blender_zen_utils import ZuvPresets, ZenPolls, update_areas_in_all_screens, get_command_props
+from ..utils.vlog import Log
+from ..prop.common import update_addon_prop
 
 
 FAV_PRESET_SUBDIR = "favourite_presets_"
@@ -180,7 +180,7 @@ class ZUV_FavItem(bpy.types.PropertyGroup):
     )
 
     def get_icon_data(self):
-        from ZenUV.ico import ZENUV_ICONS, is_blender_icon_valid
+        from ..ico import ZENUV_ICONS, is_blender_icon_valid
         s_icon = self.icon
         n_icon_value = 0
         if not s_icon:
@@ -361,7 +361,7 @@ class ZUV_FavProps(bpy.types.PropertyGroup):
     def get_display_mode(self):
         t_res = 0b000
 
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ..prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
 
         for k in FAV_CONTEXT_SUFFIX.keys():
@@ -382,7 +382,7 @@ class ZUV_FavProps(bpy.types.PropertyGroup):
         return t_res
 
     def set_display_mode(self, value):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ..prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
 
         for k in FAV_CONTEXT_SUFFIX.keys():
@@ -414,7 +414,7 @@ class ZUV_FavProps(bpy.types.PropertyGroup):
 
     @staticmethod
     def get_fav_props(s_panel_mode: str):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ..prop.zuv_preferences import get_prefs
 
         addon_prefs = get_prefs()
         p_fav_props: ZUV_FavProps = getattr(addon_prefs, f'favourite_props_{s_panel_mode}')
@@ -482,8 +482,8 @@ class ZUV_FavProps(bpy.types.PropertyGroup):
             col_main,
             context,
             class_name="ZUV_UL_FavouritesList",
-            list_path=f"preferences.addons['ZenUV'].preferences.favourite_props_{s_panel_mode}.favourites",
-            active_index_path=f"preferences.addons['ZenUV'].preferences.favourite_props_{s_panel_mode}.favourite_index",
+            list_path=f"preferences.addons['{ZenPolls.ADDON_PACKAGE}'].preferences.favourite_props_{s_panel_mode}.favourites",
+            active_index_path=f"preferences.addons['{ZenPolls.ADDON_PACKAGE}'].preferences.favourite_props_{s_panel_mode}.favourite_index",
             unique_id="name",
             new_name_attr="name",
             new_name_val="Item"
@@ -511,7 +511,7 @@ class ZUV_FavProps(bpy.types.PropertyGroup):
             r_name.prop(p_fav_item, "display_text", text="")
             if not b_is_label and p_fav_item.command:
                 op_name = r_name.operator('wm.zuv_fav_update_name', text='', icon='FILE_REFRESH')
-                op_name.data_path = f'preferences.addons["ZenUV"].preferences.favourite_props_{s_panel_mode}.favourites[{self.favourite_index}].name'
+                op_name.data_path = f'preferences.addons["{ZenPolls.ADDON_PACKAGE}"].preferences.favourite_props_{s_panel_mode}.favourites[{self.favourite_index}].name'
                 op_name.mode = p_fav_item.mode
                 op_name.cmd = p_fav_item.command
 
@@ -522,7 +522,7 @@ class ZUV_FavProps(bpy.types.PropertyGroup):
                     row.prop(p_fav_item, k)
                     op_sel = row.operator('wm.zuv_fav_select_icon')
                     op_sel.is_icon_value = p_fav_item.is_icon_value
-                    op_sel.data_path = f'preferences.addons["ZenUV"].preferences.favourite_props_{s_panel_mode}.favourites[{self.favourite_index}].icon'
+                    op_sel.data_path = f'preferences.addons["{ZenPolls.ADDON_PACKAGE}"].preferences.favourite_props_{s_panel_mode}.favourites[{self.favourite_index}].icon'
                 elif k == 'command':
                     row.alert = b_command_alert
                     row.active = not b_is_label
@@ -533,7 +533,7 @@ class ZUV_FavProps(bpy.types.PropertyGroup):
                         r_edit_op = row.row(align=True)
                         r_edit_op.enabled = not b_command_alert and p_fav_item.command != ""
                         op = r_edit_op.operator("wm.zuv_fav_edit_operator", text="", icon="PRESET")
-                        op.data_path = f'preferences.addons["ZenUV"].preferences.favourite_props_{s_panel_mode}.favourites[{self.favourite_index}].command'
+                        op.data_path = f'preferences.addons["{ZenPolls.ADDON_PACKAGE}"].preferences.favourite_props_{s_panel_mode}.favourites[{self.favourite_index}].command'
 
                     if not b_is_label and not b_is_script:
                         row.separator()
@@ -555,7 +555,7 @@ class ZUV_FavProps(bpy.types.PropertyGroup):
 
     def draw_ui(self, s_panel_mode: str, layout: bpy.types.UILayout, context: bpy.types.Context, b_show_header):
         try:
-            from ZenUV.prop.zuv_preferences import get_prefs
+            from ..prop.zuv_preferences import get_prefs
             addon_prefs = get_prefs()
             t_expanded_panels = {}
             if addon_prefs.combo_panel.expanded:
@@ -680,7 +680,7 @@ class ZUV_FavProps(bpy.types.PropertyGroup):
                                     overrided_context = context
 
                                     try:
-                                        from ZenUV.ops.context_utils import FakeContext
+                                        from ..ops.context_utils import FakeContext
 
                                         from bl_ui.properties_data_mesh import MeshButtonsPanel
                                         from bl_ui.properties_material import MaterialButtonsPanel
@@ -915,6 +915,9 @@ class ZUV_OT_FavExecutePresetBase(bpy.types.Operator):
 
     def execute(self, context):
         # Use this method because if it is inherited, can not change Blender theme !
+
+        ZuvPresets.preset_file_patch(self.filepath)
+
         res = ExecutePreset.execute(self, context)
 
         update_areas_in_all_screens(context)
@@ -1017,7 +1020,7 @@ class ZUV_OT_FavAddPreset(AddPresetBase, bpy.types.Operator):
 
     # Common variable used for all preset values
     preset_defines = [
-        'prefs = bpy.context.preferences.addons["ZenUV"].preferences.favourite_props_'
+        'prefs = bpy.context.window_manager.zen_uv.get_addon_prefs().favourite_props_'
     ]
 
     # Properties to store in the preset
@@ -1080,7 +1083,10 @@ class ZUV_OT_FavAddPreset(AddPresetBase, bpy.types.Operator):
                 print("Writing Preset: %r" % filepath)
 
                 if is_xml:
-                    import rna_xml
+                    if ZenPolls.version_since_5_0_0:
+                        import _rna_xml as rna_xml
+                    else:
+                        import rna_xml
                     rna_xml.xml_file_write(context,
                                            filepath,
                                            preset_menu_class.preset_xml_map)
@@ -1188,7 +1194,7 @@ class ZUV_OT_FavSelectIcon(bpy.types.Operator):
         p_items = []
 
         if self.is_icon_value:
-            from ZenUV.ico import ZENUV_ICONS
+            from ..ico import ZENUV_ICONS
             idx = 0
             for icon_key, icon_value in ZENUV_ICONS.items():
                 p_items.append((icon_key, icon_key, '', icon_value.icon_id, idx))
@@ -1324,7 +1330,7 @@ class ZUV_OT_FavEditOperator(bpy.types.Operator):
     def get_python_command(self):
         s_cmd = ""
         try:
-            from ZenUV.ui.keymap_manager import AddonKmiExt
+            from ..ui.keymap_manager import AddonKmiExt
             p_kmi = AddonKmiExt.get_kmi(bpy.context, "ZUV_OT_FavEditOperator")
             s_cmd = p_kmi.idname
             if s_cmd:
@@ -1332,7 +1338,7 @@ class ZUV_OT_FavEditOperator(bpy.types.Operator):
                 bl_rna_props = p_kmi.properties.bl_rna.properties
                 for k, v in p_kmi.properties.items():
                     p_prop: bpy.types.Property = bl_rna_props[k]
-                    if not p_prop.is_skip_save:
+                    if not p_prop.is_readonly and p_kmi.properties.is_property_set(k):
                         if isinstance(v, idprop.types.IDPropertyArray):
                             t_values.append(f"{k}={repr(tuple(v.to_list()))}")
                         elif isinstance(v, idprop.types.IDPropertyGroup):
@@ -1359,7 +1365,7 @@ class ZUV_OT_FavEditOperator(bpy.types.Operator):
     def draw(self, context: bpy.types.Context):
         layout = self.layout
 
-        from ZenUV.ui.keymap_manager import AddonKmiExt
+        from ..ui.keymap_manager import AddonKmiExt
 
         row = layout.row(align=True)
         row.use_property_split = True
@@ -1372,10 +1378,10 @@ class ZUV_OT_FavEditOperator(bpy.types.Operator):
     def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
         wm = context.window_manager
 
-        from ZenUV.ui.keymap_manager import AddonKmiExt
+        from ..ui.keymap_manager import AddonKmiExt
         p_kmi = AddonKmiExt.get_kmi(bpy.context, "ZUV_OT_FavEditOperator", is_new=True)
         try:
-            from ZenUV.ui.keymap_manager import AddonKmiExt
+            from ..ui.keymap_manager import AddonKmiExt
 
             cmd = _get_context_attr(context, self.data_path)
 
@@ -1812,7 +1818,7 @@ class ZUV_OT_FavPropertySelect(bpy.types.Operator):
     def get_items(self, context: bpy.types.Context):
         p_items = []
         if self.property_instance == 'ZENUV':
-            from ZenUV.prop.zuv_preferences import get_prefs
+            from ..prop.zuv_preferences import get_prefs
             p_instance = get_prefs()
         else:
             p_instance = getattr(context, self.property_instance, None)
@@ -1843,7 +1849,7 @@ class ZUV_OT_FavPropertySelect(bpy.types.Operator):
         try:
             s_prop_instance = self.property_instance
             if s_prop_instance == 'ZENUV':
-                s_prop_instance = 'preferences.addons["ZenUV"].preferences'
+                s_prop_instance = f'preferences.addons["{ZenPolls.ADDON_PACKAGE}"].preferences'
 
             s_command = f'{s_prop_instance}.{self.property_list}'
             _set_context_attr(context, self.data_path, s_command)
@@ -1877,8 +1883,8 @@ class ZUV_OT_FavDuplicateItem3D(bpy.types.Operator):
         if p_fav_props.favourite_index in range(len(p_fav_props.favourites)):
             p_was_fav_item: ZUV_FavItem = p_fav_props.favourites[p_fav_props.favourite_index]
             bpy.ops.zenuvlist.entry_add(
-                list_path=f"preferences.addons['ZenUV'].preferences.favourite_props_{self.panel_mode}.favourites",
-                active_index_path=f"preferences.addons['ZenUV'].preferences.favourite_props_{self.panel_mode}.favourite_index",
+                list_path=f"preferences.addons['{ZenPolls.ADDON_PACKAGE}'].preferences.favourite_props_{self.panel_mode}.favourites",
+                active_index_path=f"preferences.addons['{ZenPolls.ADDON_PACKAGE}'].preferences.favourite_props_{self.panel_mode}.favourite_index",
                 new_name_attr="name", new_name_val="Item")
 
             p_new_fav_item: ZUV_FavItem = p_fav_props.favourites[p_fav_props.favourite_index]
@@ -1920,7 +1926,7 @@ class ZUV_MT_FavCommandMenu3D(bpy.types.Menu):
         s_panel_mode_decorative = 'UV' if self.bl_idname == 'ZUV_MT_FavCommandMenuUV' else 'View 3D'
         s_menu_space = 'IMAGE' if self.bl_idname == 'ZUV_MT_FavCommandMenuUV' else 'VIEW3D'
 
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ..prop.zuv_preferences import get_prefs
 
         addon_prefs = get_prefs()
         p_fav_props: ZUV_FavProps = getattr(addon_prefs, f'favourite_props_{s_panel_mode}')
@@ -1930,37 +1936,37 @@ class ZUV_MT_FavCommandMenu3D(bpy.types.Menu):
             p_fav_item: ZUV_FavItem = p_fav_props.favourites[p_fav_props.favourite_index]
             if p_fav_item.mode == 'OPERATOR':
                 op = layout.operator("wm.zuv_fav_operator_select", text='Select Operator')
-                op.data_path = f'preferences.addons["ZenUV"].preferences.favourite_props_{s_panel_mode}.favourites[{p_fav_props.favourite_index}].command'
+                op.data_path = f'preferences.addons["{ZenPolls.ADDON_PACKAGE}"].preferences.favourite_props_{s_panel_mode}.favourites[{p_fav_props.favourite_index}].command'
                 op.operator_space = ''
 
                 layout.separator()
 
                 op = layout.operator("wm.zuv_fav_script_select")
-                op.data_path = f'preferences.addons["ZenUV"].preferences.favourite_props_{s_panel_mode}.favourites[{p_fav_props.favourite_index}].command'
+                op.data_path = f'preferences.addons["{ZenPolls.ADDON_PACKAGE}"].preferences.favourite_props_{s_panel_mode}.favourites[{p_fav_props.favourite_index}].command'
 
                 op = layout.operator("wm.zuv_fav_text_select")
-                op.data_path = f'preferences.addons["ZenUV"].preferences.favourite_props_{s_panel_mode}.favourites[{p_fav_props.favourite_index}].command'
+                op.data_path = f'preferences.addons["{ZenPolls.ADDON_PACKAGE}"].preferences.favourite_props_{s_panel_mode}.favourites[{p_fav_props.favourite_index}].command'
             elif p_fav_item.mode == 'PANEL':
                 op = layout.operator("wm.zuv_fav_panel_select", text=f'Select Panel - {s_panel_mode_decorative}')
-                op.data_path = f'preferences.addons["ZenUV"].preferences.favourite_props_{s_panel_mode}.favourites[{p_fav_props.favourite_index}].command'
+                op.data_path = f'preferences.addons["{ZenPolls.ADDON_PACKAGE}"].preferences.favourite_props_{s_panel_mode}.favourites[{p_fav_props.favourite_index}].command'
                 op.panel_space = s_panel_space
 
                 op = layout.operator("wm.zuv_fav_panel_select", text='Select Panel - ALL')
-                op.data_path = f'preferences.addons["ZenUV"].preferences.favourite_props_{s_panel_mode}.favourites[{p_fav_props.favourite_index}].command'
+                op.data_path = f'preferences.addons["{ZenPolls.ADDON_PACKAGE}"].preferences.favourite_props_{s_panel_mode}.favourites[{p_fav_props.favourite_index}].command'
                 op.panel_space = ''
 
                 layout.separator()
 
                 op = layout.operator("wm.zuv_fav_menu_select", text=f'Select Menu - {s_panel_mode_decorative}')
-                op.data_path = f'preferences.addons["ZenUV"].preferences.favourite_props_{s_panel_mode}.favourites[{p_fav_props.favourite_index}].command'
+                op.data_path = f'preferences.addons["{ZenPolls.ADDON_PACKAGE}"].preferences.favourite_props_{s_panel_mode}.favourites[{p_fav_props.favourite_index}].command'
                 op.menu_space = s_menu_space
 
                 op = layout.operator("wm.zuv_fav_menu_select", text='Select Menu - ALL')
-                op.data_path = f'preferences.addons["ZenUV"].preferences.favourite_props_{s_panel_mode}.favourites[{p_fav_props.favourite_index}].command'
+                op.data_path = f'preferences.addons["{ZenPolls.ADDON_PACKAGE}"].preferences.favourite_props_{s_panel_mode}.favourites[{p_fav_props.favourite_index}].command'
                 op.menu_space = ''
             elif p_fav_item.mode == 'PROPERTY':
                 op = layout.operator("wm.zuv_fav_property_select")
-                op.data_path = f'preferences.addons["ZenUV"].preferences.favourite_props_{s_panel_mode}.favourites[{p_fav_props.favourite_index}].command'
+                op.data_path = f'preferences.addons["{ZenPolls.ADDON_PACKAGE}"].preferences.favourite_props_{s_panel_mode}.favourites[{p_fav_props.favourite_index}].command'
 
 
 class ZUV_MT_FavCommandMenuUV(bpy.types.Menu):

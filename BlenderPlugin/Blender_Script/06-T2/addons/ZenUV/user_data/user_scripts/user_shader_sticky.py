@@ -23,17 +23,18 @@ import bpy
 import math
 from timeit import default_timer as timer
 
-from ZenUV.sticky_uv_editor.controls import StkUvEditorSolver
-from ZenUV.utils.blender_zen_utils import ZenPolls, show_message_box, get_ui_region_width, get_tools_region_width
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.prop.zuv_preferences import get_prefs
+from ...sticky_uv_editor.controls import StkUvEditorSolver
+from ...utils.blender_zen_utils import ZenPolls, show_message_box, get_ui_region_width, get_tools_region_width
+from ...ui.labels import ZuvLabels
+from ...prop.zuv_preferences import get_prefs
+from ...utils.vlog import Log
 
 
 _solver = None
 _was_context = None
 
 
-def zenuv_handle_sticky_solver():
+def zenuv_handle_sticky_shader_solver():
     if _solver is None:
         return
 
@@ -59,43 +60,60 @@ def zenuv_handle_sticky_solver():
     return None
 
 
-def zenuv_handle_snooper():
+def zenuv_handle_shader_snooper():
     if _solver is None:
         return
 
     if _solver.warp_it == 0:
-
-        if math.fabs(_solver.view3d_area.width - (_solver.warp_was_width + math.fabs(_solver.delta))) < 2.0:
+        AREA_DIFF = 4.0  # NOTE: this value was increased after Blender 4.5, previously was 2.0, it should be investigated in the future
+        # NOTE: we understand here that command was done and area was expanded/collapsed
+        if math.fabs(_solver.view3d_area.width - (_solver.warp_was_width + math.fabs(_solver.delta))) < AREA_DIFF:
             return None
-
-    _solver.context["window"].cursor_warp(_solver.warp_x, _solver.warp_y)
 
     _solver.warp_it += 1
 
-    # no need to wait more than 1 sec, something wrong
-    if timer() - _solver.warp_timer > 1.0:
-        return None
+    try:
+        # no need to wait more than 1 sec, something wrong
+        if timer() - _solver.warp_timer > 1.0:
+            raise RuntimeError("INTERNAL ERROR! Could not move area!")
 
-    if ZenPolls.version_since_3_2_0:
-        with bpy.context.temp_override(**_solver.context):
-            if not bpy.ops.screen.area_move.poll():
+        _solver.context["window"].cursor_warp(_solver.warp_x, _solver.warp_y)
+
+        if ZenPolls.version_since_3_2_0:
+
+            if not _solver.context['area'].regions:
+                raise RuntimeError("INTERNAL ERROR! Could not detect regions!")
+
+            with bpy.context.temp_override(**_solver.context):
+                # NOTE: this case is detected in "Shading" layout !
+                if not bpy.ops.screen.area_move.poll():
+                    return 0.001
+
+                # NOTE: everything is ready to move
+                bpy.ops.screen.area_move(x=_solver.warp_x, y=_solver.warp_y, delta=_solver.delta)
+        else:
+            if not bpy.ops.screen.area_move.poll(_solver.context, 'INVOKE_REGION_WIN'):
                 return 0.001
 
             # should poll now
             bpy.ops.screen.area_move(x=_solver.warp_x, y=_solver.warp_y, delta=_solver.delta)
-    else:
-        if not bpy.ops.screen.area_move.poll(_solver.context, 'INVOKE_REGION_WIN'):
-            return 0.001
+    except Exception as e:
+        Log.error(e)
+        pass
 
-        # should poll now
-        bpy.ops.screen.area_move(x=_solver.warp_x, y=_solver.warp_y, delta=_solver.delta)
-
+    # NOTE: revert cursor back
     w = _solver.context["window"]
     w.cursor_warp(_solver.imp_x, _solver.imp_y)
     return None
 
 
 class StkShaderEditorSolver(StkUvEditorSolver):
+
+    def _register_snooper(self):
+        if bpy.app.timers.is_registered(zenuv_handle_shader_snooper):
+            bpy.app.timers.unregister(zenuv_handle_shader_snooper)
+        bpy.app.timers.register(zenuv_handle_shader_snooper)
+
     def _find_view3d_area(self):
         if self.active.ui_type == "VIEW_3D":
             self.view3d_area = self.active
@@ -183,6 +201,8 @@ class StkShaderEditorSolver(StkUvEditorSolver):
             else:
                 bpy.ops.screen.area_split(self.context, direction='VERTICAL', factor=0.5)
 
+        uv_area = None
+
         if self.prefs_side_left:
             for area in reversed(self.input_areas):
                 if area.ui_type == 'VIEW_3D':
@@ -269,8 +289,8 @@ class ZUV_StickyShaderEditor(bpy.types.Operator):
         return {'CANCELLED'}
 
     def execute(self, context):
-        if (bpy.app.timers.is_registered(zenuv_handle_sticky_solver) or
-                bpy.app.timers.is_registered(zenuv_handle_snooper)):
+        if (bpy.app.timers.is_registered(zenuv_handle_sticky_shader_solver) or
+                bpy.app.timers.is_registered(zenuv_handle_shader_snooper)):
             self.report({'WARNING'},
                         "Sticky UV Editor: Previous operation was not finished yet!")
             return {'CANCELLED'}
@@ -298,7 +318,7 @@ class ZUV_StickyShaderEditor(bpy.types.Operator):
                 icon="ERROR")
             return {'CANCELLED'}
 
-        bpy.app.timers.register(zenuv_handle_sticky_solver)
+        bpy.app.timers.register(zenuv_handle_sticky_shader_solver)
 
         return {'FINISHED'}
 

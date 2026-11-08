@@ -18,8 +18,8 @@
 
 """ Zen UV Operatopr local properties (Popups)"""
 import bpy
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.utils.blender_zen_utils import prop_with_icon
+from ..prop.zuv_preferences import get_prefs
+from ..utils.blender_zen_utils import prop_with_icon
 
 
 class STACK_PT_Properties(bpy.types.Panel):

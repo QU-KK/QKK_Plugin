@@ -19,7 +19,8 @@
 """ Hard Ops Popup Menu """
 
 import bpy
-from ZenUV.ui.labels import ZuvLabels
+
+from ..utils.blender_zen_utils import ZenPolls
 
 
 class ZUV_MT_HOPS_Popup(bpy.types.Menu):
@@ -29,7 +30,7 @@ class ZUV_MT_HOPS_Popup(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
-        addon_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
+        addon_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
         layout.label(text="Nothing has changed.")
         layout.label(text="It looks like HOps addon")
         layout.label(text="is not installed on your system.")
@@ -45,8 +46,8 @@ class ZUV_MT_HOPS_Popup(bpy.types.Menu):
 
 def draw_zensets_popup(self, context):
     ''' @Draw Zen Sets Popup '''
-    layout = self.layout
-    addon_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
+    layout: bpy.types.UILayout = self.layout
+    addon_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
     layout.label(text="Nothing has displayed.")
     layout.label(text="It looks like Zen Sets addon")
     layout.label(text="is not installed on your system.")

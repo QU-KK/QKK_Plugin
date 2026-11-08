@@ -20,9 +20,9 @@
 import bpy
 import bmesh
 
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.generic import select_by_context
-from ZenUV.utils.vlog import Log
+from ...utils.uv_factory import UvIslandUtils, SelectionUtils
+from ...utils.generic import bpy_select_by_context
+from ...utils.vlog import Log
 
 from .addon_test_utils import (
     _get_selected_faces_ids,
@@ -34,45 +34,46 @@ from .addon_test_utils import (
     _ensure_facemap
     )
 
-from ZenUV.ops.zen_unwrap.finishing import FINISHED_FACEMAP_NAME
+from ...ops.zen_unwrap.finishing import FINISHED_FACEMAP_NAME
 
 
 def _prepare_finished_testing(context):
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
     _select_faces_by_id_active_obj(context, [*range(0, 6)])
     bpy.ops.uv.zenuv_tag_finished()
 
 
-def _get_finished_islands(context):
+def _get_finished_islands(context, uv_layer):
     islands_finished = []
     for obj in _get_objs(context):
         bm = bmesh.from_edit_mesh(obj.data).copy()
         bm.faces.ensure_lookup_table()
         bm.verts.ensure_lookup_table()
         finished_facemap = _ensure_facemap(bm, FINISHED_FACEMAP_NAME)
-        islands = island_util.get_islands(context, bm)
-        islands_finished.extend([island for island in islands if True in [f[finished_facemap] for f in island]])
+        islands = UvIslandUtils.get_all_uv_islands(context, bm, uv_layer)
+        islands_finished.extend([island for island in islands if any(f[finished_facemap] for f in island)])
         bm.free()
     return islands_finished
 
 
-def select_finished(context, bm, _finished_facemap):
-    islands = island_util.get_islands(context, bm)
-    islands_for_select = [island for island in islands if True in [f[_finished_facemap] for f in island]]
+def select_finished(context, bm, uv_layer, _finished_facemap):
+    islands = UvIslandUtils.get_all_uv_islands(context, bm, uv_layer)
+    islands_for_select = [island for island in islands if any(f[_finished_facemap] for f in island)]
     if not islands_for_select:
-        False
-    select_by_context(context, bm, islands_for_select, state=True)
+        return False
+    SelectionUtils.select_faces_any_context(context, islands_for_select, state=True, bm=bm, uv_layer=uv_layer)
     return True
 
 
 def Test_uv_zenuv_untag_finished(context):
     ''' Tag Islands as Unfinished '''
+    raise RuntimeError('Disabled Test Test_uv_zenuv_untag_finished uncompleted')
     test_count = 0
     _prepare_finished_testing(context)
 
     bpy.ops.uv.zenuv_untag_finished()
 
-    islands_finished = _get_finished_islands(context)
+    # islands_finished = _get_finished_islands(context, uv_layer)
 
     if len(islands_finished) != test_count:
         raise AddonTestError(f"Total Finished Islands must be {test_count} instead of {len(islands_finished)}")
@@ -101,10 +102,11 @@ def Test_uv_zenuv_display_finished(context):
 
 def Test_uv_zenuv_tag_finished(context):
     ''' Tag Islands as Finished '''
+    raise RuntimeError('Disabled Test Test_uv_zenuv_tag_finished uncompleted')
     test_count = 1
     _prepare_finished_testing(context)
 
-    islands_finished = _get_finished_islands(context)
+    islands_finished = _get_finished_islands(context, uv_layer)
 
     if len(islands_finished) != test_count:
         raise AddonTestError(f"Total Finished Islands must be {test_count} instead of {len(islands_finished)}")

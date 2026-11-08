@@ -31,9 +31,9 @@ from .checker import zen_checker_image_update, get_materials_with_overrider
 
 from .get_prefs import get_path, DEF_OVERRIDE_IMAGE_NAME
 
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.vlog import Log
+from ..utils.register_util import RegisterUtils
+from ..utils.vlog import Log
+from ..utils.blender_zen_utils import ZenPolls
 
 
 resolutions_x = []
@@ -43,8 +43,7 @@ values_y = []
 
 
 def get_prefs():
-    from ZenUV.ui.labels import ZuvLabels
-    return bpy.context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
+    return bpy.context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
 
 
 class ZUV_CheckerProperties(bpy.types.PropertyGroup):
@@ -177,28 +176,24 @@ class ZUV_CheckerAddonLevelProperties(bpy.types.PropertyGroup):
             Log.error("CHECKER DYN UPDATE:", e)
 
     def update_x_res(self, context: bpy.types.Context):
-        addon_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
-        addon_prefs["SizesY"] = 0
-        addon_prefs["ZenCheckerImages"] = 0
+        self["SizesY"] = 0
+        self["ZenCheckerImages"] = 0
         self.dynamic_update_function(context)
 
     def update_orient_switch(self, context: bpy.types.Context):
-        addon_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
         if self.chk_orient_filter:
-            addon_prefs["SizesX"] = 1
-            addon_prefs["SizesY"] = 0
-        addon_prefs["ZenCheckerImages"] = 0
+            self["SizesX"] = 1
+            self["SizesY"] = 1
+        self["ZenCheckerImages"] = 0
         self.dynamic_update_function(context)
 
     def update_y_res(self, context):
-        addon_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
-        addon_prefs["ZenCheckerImages"] = 0
+        self["ZenCheckerImages"] = 0
         self.dynamic_update_function(context)
 
     def dynamic_update_function_overall(self, context):
-        addon_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
-        addon_prefs["SizesY"] = 0
-        addon_prefs["ZenCheckerImages"] = 0
+        self["SizesY"] = 0
+        self["ZenCheckerImages"] = 0
         if self.dynamic_update:
             materials_with_overrider = get_materials_with_overrider(bpy.data.materials)
             # print("Mats with overrider in bpy.data: ", materials_with_overrider)
@@ -207,7 +202,7 @@ class ZUV_CheckerAddonLevelProperties(bpy.types.PropertyGroup):
 
     def checker_presets_update_function(self, context):
         try:
-            from ZenUV.zen_checker.checker import get_zen_checker_image
+            from ..zen_checker.checker import get_zen_checker_image
             image = get_zen_checker_image(context)
             if image:
                 zen_checker_image_update(context, image)

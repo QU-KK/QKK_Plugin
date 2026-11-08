@@ -25,7 +25,7 @@ import bpy
 import gpu
 from gpu_extras.batch import batch_for_shader
 
-from ZenUV.utils.blender_zen_utils import ZenCompat
+from ...utils.blender_zen_utils import ZenCompat
 
 
 class BL_UI_Button(BL_UI_Widget):

@@ -28,9 +28,9 @@ from zlib import adler32
 import numpy as np
 import random
 
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.simple_geometry import Rectangle
-from ZenUV.utils.bounding_box import t_SYMBOL_BBOX_2_DIGITS
+from ...utils.vlog import Log
+from ...utils.simple_geometry import Rectangle
+from ...utils.bounding_box import t_SYMBOL_BBOX_2_DIGITS
 
 
 _ATTR_TRIMSHEETS_REGION_CURSOR = 'zuv_trimsheet_region_cursor'
@@ -127,14 +127,14 @@ class ZuvTrimsheetUtils:
 
     @classmethod
     def getTrimsheet(cls, context: bpy.types.Context):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ...prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
         p_data = context.scene if addon_prefs.trimsheet.mode == 'SCENE' else cls.getActiveImage(context)
         return p_data.zen_uv.trimsheet if p_data is not None else []
 
     @classmethod
     def getTrimsheetOwner(cls, context: bpy.types.Context):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ...prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
         p_data = context.scene if addon_prefs.trimsheet.mode == 'SCENE' else cls.getActiveImage(context)
         if p_data is not None:
@@ -162,7 +162,7 @@ class ZuvTrimsheetUtils:
 
     @classmethod
     def getActiveTrimData(cls, context: bpy.types.Context):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ...prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
         p_data = context.scene if addon_prefs.trimsheet.mode == 'SCENE' else cls.getActiveImage(context)
         return cls.getActiveTrimDataFromData(p_data)
@@ -276,7 +276,7 @@ class ZuvTrimsheetUtils:
 
     @classmethod
     def getAllTrimsheetUuids(cls, context: bpy.types.Context):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ...prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
         p_scene = context.scene
 
@@ -579,7 +579,7 @@ class ZuvTrimsheetUtils:
 
     @classmethod
     def auto_highlight_trims(cls, context: bpy.types.Context):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ...prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
         if addon_prefs.trimsheet.auto_highlight == 'DEFAULT':
             p_scene = context.scene

@@ -25,9 +25,9 @@ from mathutils import Color
 from dataclasses import dataclass, field, fields
 from mathutils import Vector
 
-from ZenUV.utils.bounding_box import BoundingBox2d
-from ZenUV.utils.generic import resort_by_type_mesh_in_edit_mode_and_sel
-from ZenUV.utils.vlog import Log
+from ...utils.bounding_box import BoundingBox2d
+from ...utils.generic import ResortObjects
+from ...utils.vlog import Log
 
 
 class UnitsProcessor:
@@ -124,7 +124,7 @@ class TdReferencedManager:
         self.ref_colors: list = []
 
     def append_color_scheme_reference_values(self, colors: list, td_min: float, td_max: float):
-        from ZenUV.utils.generic import generate_range_values
+        from ...utils.generic import generate_range_values
 
         p_r_td_values = generate_range_values(td_min, td_max, len(colors))
 
@@ -430,7 +430,7 @@ class TdDataStorage:
 
     @classmethod
     def check_inputs(cls, context: bpy.types.Context):
-        p_objects = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        p_objects = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
 
         b_is_obj_mode = context.object.mode == 'OBJECT'
         if ((cls.td_inputs is None) or

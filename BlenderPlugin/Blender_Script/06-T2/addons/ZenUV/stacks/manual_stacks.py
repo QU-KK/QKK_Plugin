@@ -27,20 +27,20 @@ from bpy.types import (
     Operator,
     Panel
 )
-from ZenUV.utils.generic import (
+from ..utils.generic import (
     ZUV_PANEL_CATEGORY,
     ZUV_REGION_TYPE,
     ZUV_CONTEXT
 )
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.utils.generic import (
-    select_all,
-    enshure_text_block,
-    update_indexes,
-    verify_uv_layer)
-from ZenUV.stacks.stacks import detect_masters, unstack
-from ZenUV.stacks.utils import (
+from ..utils.uv_factory import UvIslandUtils, SelectionUtils
+from ..utils.iter_utils import IterUtils2, IterUtils
+from ..ui.labels import ZuvLabels
+from ..utils.generic import (
+    ensure_text_block,
+    verify_uv_layer,
+    bpy_select_by_context)
+from ..stacks.stacks import detect_masters, unstack
+from ..stacks.utils import (
     get_area,
     get_geometry,
     get_perimeter,
@@ -48,26 +48,26 @@ from ZenUV.stacks.utils import (
     StacksSystem,
 
 )
-from ZenUV.stacks.utils import (
+from ..stacks.utils import (
     get_islands_from_stack,
     set_island_sim_index,
     enshure_stack_layer,
     M_STACK_LAYER_NAME
 )
-from ZenUV.prop.zuv_preferences import get_prefs
+from ..prop.zuv_preferences import get_prefs
 
-from ZenUV.utils.progress import ProgressBar, ProgressCancelException
-from ZenUV.ui.ui_call import popup_areas
-from ZenUV.utils.blender_zen_utils import ZenPolls
-from ZenUV.utils.vlog import Log
+from ..utils.progress import ProgressBar, ProgressCancelException
+from ..ui.ui_call import popup_areas
+from ..utils.blender_zen_utils import ZenPolls
+from ..utils.vlog import Log
 
 
 def matching_indexes(sim_data, objs):
-    for it_ob in objs:
-        s_index, out_index = find_indexes_in_obj(sim_data, it_ob)
+    for obj, bm, in IterUtils2.iter_objs_with_bmesh(objs):
+        s_index, out_index = find_indexes_in_obj(sim_data, obj)
         if not s_index:
             continue
-        it_ob.zms_list_index = out_index
+        obj.zms_list_index = out_index
 
 
 def find_indexes_in_obj(sim_index, obj):
@@ -179,7 +179,7 @@ def draw_manual_stacks(self, context):
     col.operator(ZMS_OT_Unstack_Manual_Stack.bl_idname, text='Unstack All').selected = False
     col.operator(ZMS_OT_Unstack_Manual_Stack.bl_idname, text='Selected').selected = True
 
-    from ZenUV.zen_checker.check_utils import draw_checker_display_items, t_draw_stack_manual_modes
+    from ..zen_checker.check_utils import draw_checker_display_items, t_draw_stack_manual_modes
 
     draw_checker_display_items(layout, context, t_draw_stack_manual_modes)
 
@@ -228,18 +228,18 @@ class ZMS_OT_NewItem(Operator):
     def execute(self, context):
         # Detect sim index
         sim_index = None
-        for obj in context.objects_in_mode:
-            if sim_index:
-                continue
-            me = obj.data
-            bm = bmesh.from_edit_mesh(me)
-            # enshure_stack_layer(bm, stack_layer_name=M_STACK_LAYER_NAME)
-            uv_layer = verify_uv_layer(bm)
-            islands = island_util.get_island(context, bm, uv_layer)
+        objs = context.objects_in_mode
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+            if sim_index is not None:
+                break
+            if not uv_layer:
+                uv_layer = verify_uv_layer(bm)
+
+            islands = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
             for island in islands:
                 sim_index, gd = get_island_sim_index(island, uv_layer)
 
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         # If there is no sim index it means that there are no selection
         if not sim_index:
@@ -247,7 +247,8 @@ class ZMS_OT_NewItem(Operator):
             return {'CANCELLED'}
 
         # Creating Layers
-        for obj in context.objects_in_mode:
+        objs = context.objects_in_mode
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
             obj.zen_stack_list.add()
             name = "Stack"
             i = 1
@@ -260,17 +261,15 @@ class ZMS_OT_NewItem(Operator):
             obj.zen_stack_list[-1].layer_name = M_STACK_LAYER_NAME
             obj.zms_list_index = len(obj.zen_stack_list) - 1
 
-            me = obj.data
-            bm = bmesh.from_edit_mesh(me)
             enshure_stack_layer(bm, stack_layer_name=M_STACK_LAYER_NAME)
-            uv_layer = verify_uv_layer(bm)
-            islands = island_util.get_island(context, bm, uv_layer)
+
+            islands = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
             for island in islands:
                 set_island_sim_index(bm, island, M_STACK_LAYER_NAME, sim_index)
             obj.zen_stack_list[-1].sim_index = sim_index
             obj.zen_stack_list[-1].move_only = False
 
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False)
 
         return {'FINISHED'}
 
@@ -293,13 +292,13 @@ class ZMS_OT_DeleteItem(Operator):
         if obj.zms_list_index in range(len(obj.zen_stack_list)):
             sim_index = obj.zen_stack_list[obj.zms_list_index].sim_index
 
-            for obj in context.objects_in_mode:
+            objs = context.objects_in_mode
+            for obj, bm in IterUtils2.iter_objs_with_bmesh(objs):
                 if obj.zms_list_index in range(len(obj.zen_stack_list)) and obj.zen_stack_list[obj.zms_list_index].sim_index == sim_index:
-                    me = obj.data
-                    bm = bmesh.from_edit_mesh(me)
+
                     faces = get_islands_from_stack(bm, M_STACK_LAYER_NAME, sim_index)
                     set_island_sim_index(bm, faces, M_STACK_LAYER_NAME, 0.0)
-                    bmesh.update_edit_mesh(me, loop_triangles=False)
+                    bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
                     zen_stack_list = obj.zen_stack_list
                     index = obj.zms_list_index
@@ -324,11 +323,10 @@ class ZMS_OT_RemoveAllMstacks(Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH' and active_object.zen_stack_list
 
     def execute(self, context):
-        for obj in context.objects_in_mode:
-            me = obj.data
-            bm = bmesh.from_edit_mesh(me)
+        objs = context.objects_in_mode
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
             set_island_sim_index(bm, bm.faces, M_STACK_LAYER_NAME, 0.0)
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False)
             obj.zen_stack_list.clear()
 
         return {'FINISHED'}
@@ -393,7 +391,8 @@ class ZMS_OT_AssignToStack(bpy.types.Operator):
         name = active_data.name
         layer_name = active_data.layer_name
 
-        for obj in context.objects_in_mode:
+        objs = context.objects_in_mode
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
             s_index, out_index = find_indexes_in_obj(sim_data, obj)
             if not s_index:
                 obj.zen_stack_list.add()
@@ -403,30 +402,25 @@ class ZMS_OT_AssignToStack(bpy.types.Operator):
                 obj.zms_list_index = len(obj.zen_stack_list) - 1
                 obj.zen_stack_list[-1].sim_index = sim_data
 
-                me = obj.data
-                bm = bmesh.from_edit_mesh(me)
                 enshure_stack_layer(bm, stack_layer_name=layer_name)
                 uv_layer = verify_uv_layer(bm)
-                islands = island_util.get_island(context, bm, uv_layer)
+                islands = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
                 for island in islands:
                     set_island_sim_index(bm, island, layer_name, sim_data)
                     obj.zen_stack_list[-1].sim_index = sim_data
 
-                bmesh.update_edit_mesh(me, loop_triangles=False)
+                bmesh.update_edit_mesh(obj.data, loop_triangles=False)
             else:
                 obj.zms_list_index = out_index
 
-        for obj in context.objects_in_mode:
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
             if obj.zms_list_index in range(len(obj.zen_stack_list)):
                 M_STACK_LAYER_NAME = obj. \
                     zen_stack_list[obj.zms_list_index].layer_name
-                me = obj.data
-                bm = bmesh.from_edit_mesh(me)
-                uv_layer = verify_uv_layer(bm)
-                islands = island_util.get_island(context, bm, uv_layer)
+                islands = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
                 for island in islands:
                     set_island_sim_index(bm, island, M_STACK_LAYER_NAME, sim_data)
-                bmesh.update_edit_mesh(me, loop_triangles=False)
+                bmesh.update_edit_mesh(obj.data, loop_triangles=False)
             else:
                 self.report({'INFO'}, ZuvLabels.OT_ZMS_COLLECT_STACK_MSG)
         return {'FINISHED'}
@@ -452,14 +446,16 @@ class ZMS_OT_SelectStack(bpy.types.Operator):
             me = obj.data
             bm = bmesh.from_edit_mesh(me)
             sim_index = obj.zen_stack_list[obj.zms_list_index].sim_index
-            for obj in context.objects_in_mode:
-                me = obj.data
-                bm = bmesh.from_edit_mesh(me)
-                select_all(bm, action=False)
-                faces = get_islands_from_stack(bm, M_STACK_LAYER_NAME, sim_index)
-                for face in faces:
-                    face.select = True
-                bmesh.update_edit_mesh(me, loop_triangles=False)
+
+        if not sim_index:
+            return
+
+        bpy_select_by_context(context, action='DESELECT')
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(context.objects_in_mode, context, skip_obj_if_no_uv=True):
+            facelist = get_islands_from_stack(bm, M_STACK_LAYER_NAME, sim_index)
+            SelectionUtils.select_faces_any_context(context, facelist, state=True, bm=bm, uv_layer=uv_layer)
+
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
         else:
             self.report({'INFO'}, ZuvLabels.OT_ZMS_COLLECT_STACK_MSG)
         return {'FINISHED'}
@@ -486,12 +482,10 @@ class ZMS_OT_AnalyzeStack(bpy.types.Operator):
             bm = bmesh.from_edit_mesh(me)
             sim_index = obj.zen_stack_list[obj.zms_list_index].sim_index
             analyze_data = "\n\tStack name: {}, Index: {}\n".format(obj.zen_stack_list[obj.zms_list_index].name, sim_index)
-            for obj in context.objects_in_mode:
-                me = obj.data
-                bm = bmesh.from_edit_mesh(me)
-                uv_layer = verify_uv_layer(bm)
+            objs = context.objects_in_mode
+            for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
                 faces = get_islands_from_stack(bm, M_STACK_LAYER_NAME, sim_index)
-                islands = island_util.get_islands_by_face_list(context, bm, faces, uv_layer)
+                islands = UvIslandUtils.get_islands_by_facelist(bm, uv_layer, faces)
                 island_counter = 0
                 if islands:
                     analyze_data += "\n\t\tObject: {}\n".format(obj.name)
@@ -502,8 +496,8 @@ class ZMS_OT_AnalyzeStack(bpy.types.Operator):
                         perimeter = get_perimeter(island, uv_layer)
                         analyze_data += "\t\t\tIsland_{} -  Vertices: {}, Edges: {}, Faces: {}, Island Area: {}, Perimeter: {}\n".format(island_counter, verts_count, edges_count, faces_count, area, perimeter)
                         island_counter += 1
-                bmesh.update_edit_mesh(me, loop_triangles=False)
-            an_data_text = enshure_text_block("Zen UV Manual Stack Analyze")
+                bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
+            an_data_text = ensure_text_block("Zen UV Manual Stack Analyze")
             an_data_text.from_string("\nZen UV Manual Stacks analyze rezults:\n{}".format(analyze_data))
             self.raise_text(context, an_data_text)
             self.report({'INFO'}, "See 'Zen UV Analyze' in the text editor")
@@ -655,7 +649,7 @@ class ZMS_OT_Unstack_Manual_Stack(bpy.types.Operator):
         objs = context.objects_in_mode
         if not objs:
             return {'CANCELLED'}
-        update_indexes(objs)
+
         if not self.breakStack:
             self.increment = 0.0
         if self.selected:
@@ -672,7 +666,7 @@ class ZMS_OT_Unstack_Manual_Stack(bpy.types.Operator):
             matching_indexes(sim_index, objs)
             stacks = StacksSystem(context)
             sim_data = stacks.forecast(m_stack=True, sim_index=sim_index, s_layer_name=M_STACK_LAYER_NAME)
-            sim_data = detect_masters(context, sim_data, False)
+            sim_data = detect_masters(context, sim_data, self.selected)
             unstack(context, sim_data[sim_index], self.direction, self.increment, progress)
             if not progress.update():
                 break

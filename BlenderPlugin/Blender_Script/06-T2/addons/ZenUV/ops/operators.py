@@ -21,28 +21,30 @@
 import bpy
 import bmesh
 
+import itertools
 from collections import defaultdict
 
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.generic import (
-    get_mesh_data,
-    check_selection,
-    is_island_flipped,
+from ..utils.generic import (
     switch_to_edge_sel_mode,
-    select_by_context,
-    bpy_deselect_by_context,
-    resort_by_type_mesh_in_edit_mode_and_sel,
+    switch_to_face_sel_mode,
+    bpy_select_by_context,
+    ResortObjects,
     has_unapplied_rotation,
     has_overlapped_triangles_by_area,
     calc_uv_editor_image_aspect_ratio,
-    correct_self_intersecting_face
+    correct_self_intersecting_face,
+    is_face_flipped
 )
-from ZenUV.utils.messages import zen_message
-from ZenUV.utils.blender_zen_utils import ZenPolls
-from ZenUV.utils.vlog import Log
+from ..utils.uv_factory import UvIslandUtils, SelectionUtils
+from ..utils.loops_factory import LoopsFactory
+from ..utils.mesh_factory import MeshIslandUtils
+from ..utils.iter_utils import IterUtils, IterUtils2
+from ..utils.messages import zen_message
+from ..utils.blender_zen_utils import ZenPolls, is_loop_domain, is_sync_off
+from ..utils.vlog import Log
 
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.ui.pie import ZsPieFactory
+from ..ui.labels import ZuvLabels
+from ..ui.pie import ZsPieFactory
 
 
 class ZUV_OT_Select_UV_Overlap(bpy.types.Operator):
@@ -62,25 +64,26 @@ class ZUV_OT_Select_UV_Overlap(bpy.types.Operator):
 
         ZsPieFactory.mark_pie_cancelled()
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
-        bpy_deselect_by_context(context)
+        bpy_select_by_context(context, action='DESELECT')
         if not bpy.ops.uv.select_overlap.poll():
             self.report({'WARNING'}, "Can not select overlappings. Check UV Maps!")
             return {'CANCELLED'}
 
-        bpy.ops.uv.select_overlap()
+        bpy.ops.uv.select_overlap(extend=True)
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            uv_layer = bm.loops.layers.uv.active
-            if uv_layer:
-                select_by_context(context, bm, island_util.get_island(context, bm, uv_layer), state=True)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
-        if not check_selection(context):
+            for island in UvIslandUtils.yield_uv_islands(context, bm, uv_layer, b_selected_only=True, b_include_hidden=False, b_include_partially_hidden=False):
+                SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
+
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
+
+        if not ResortObjects.resort_objects_by_selection(context, objs):
             zen_message(context, message="Overlappings are not found.",)
 
         return {'FINISHED'}
@@ -107,27 +110,25 @@ class ZUV_OT_SmoothBySharp(bpy.types.Operator):
     def execute(self, context):
         from math import pi
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         def set_smooth_faces(bm):
             for f in bm.faces:
                 f.smooth = True
 
-        for obj in objs:
+        for obj, bm in IterUtils2.iter_objs_with_bmesh(objs):
 
             if ZenPolls.version_since_4_1_0:
-                bm = bmesh.from_edit_mesh(obj.data)
                 set_smooth_faces(bm)
-                bmesh.update_edit_mesh(obj.data)
+                bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
             else:
                 me = obj.data
-                bm = bmesh.from_edit_mesh(me)
                 set_smooth_faces(bm)
-                bmesh.update_edit_mesh(me)
+                bmesh.update_edit_mesh(me, loop_triangles=False, destructive=False)
                 me.use_auto_smooth = not me.use_auto_smooth
                 if me.use_auto_smooth:
                     me.auto_smooth_angle = pi
@@ -150,42 +151,24 @@ class ZUV_OT_Isolate_Island(bpy.types.Operator):
     def execute(self, context: bpy.types.Context):
         ZsPieFactory.mark_pie_cancelled()
 
-        b_is_image_editor = context.space_data.type == 'IMAGE_EDITOR'
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
+        if not objs:
+            self.report({'WARNING'}, "No objects selected.")
+            return {'CANCELLED'}
 
-        b_is_not_sync = b_is_image_editor and not context.scene.tool_settings.use_uv_select_sync
+        b_is_not_sync = is_sync_off(context)
 
         b_all_isolated = True
         t_data = {}
 
         b_something_selected = False
 
-        for p_obj in context.objects_in_mode_unique_data:
-            if p_obj.type == 'MESH':
-                me: bpy.types.Mesh = p_obj.data
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+            p_islands = set(itertools.chain.from_iterable(UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer, in_indices=True)))
 
-                bm = bmesh.from_edit_mesh(me)
-                bm.verts.ensure_lookup_table()
-                bm.edges.ensure_lookup_table()
-                bm.faces.ensure_lookup_table()
-                uv_layer = bm.loops.layers.uv.active
+            t_data[obj.data] = (bm, p_islands)
 
-                p_islands = []
-
-                if sum(me.count_selected_items()) > 0 and uv_layer:
-                    p_selection = [
-                            bm.faces[index] for index in island_util.IslandUtils.face_indexes_by_sel_elements(context, bm)]
-                    p_islands = island_util.zen_get_islands(
-                        bm, p_selection, has_selected_faces=True, is_include_hidden=True)
-
-                p_faces_for_isolate = {
-                    face.index
-                    for i in p_islands
-                    for face in i}
-
-                t_data[me] = (bm, p_faces_for_isolate)
-
-                if len(p_faces_for_isolate):
-                    b_something_selected = True
+            b_something_selected = True
 
         if b_something_selected:
             mesh_sel_mode = context.tool_settings.mesh_select_mode
@@ -193,7 +176,6 @@ class ZUV_OT_Isolate_Island(bpy.types.Operator):
             b_has_vert_and_edges_in_selection_mode = mesh_sel_mode[0] or mesh_sel_mode[1]
 
             for k, v in t_data.items():
-                me: bpy.types.Mesh = k
                 bm: bmesh.types.BMesh = v[0]
                 p_faces_for_isolate = v[1]
 
@@ -225,7 +207,8 @@ class ZUV_OT_Isolate_Island(bpy.types.Operator):
                         bm.select_flush(True)
                     else:
                         bm.select_flush_mode()
-                    bmesh.update_edit_mesh(me, loop_triangles=False, destructive=False)
+
+                    bmesh.update_edit_mesh(k, loop_triangles=False, destructive=False)
 
         if not b_something_selected or b_all_isolated:
             if b_is_not_sync:
@@ -254,9 +237,7 @@ class ZUV_OT_Isolate_Part(bpy.types.Operator):
     def execute(self, context: bpy.types.Context):
         ZsPieFactory.mark_pie_cancelled()
 
-        b_is_image_editor = context.space_data.type == 'IMAGE_EDITOR'
-
-        b_is_not_sync = b_is_image_editor and not context.scene.tool_settings.use_uv_select_sync
+        b_is_not_sync = is_sync_off(context)
 
         t_selection_data = {}
         t_hidden_data = {}
@@ -266,54 +247,35 @@ class ZUV_OT_Isolate_Part(bpy.types.Operator):
 
         b_changed = False
 
-        for p_obj in context.objects_in_mode_unique_data:
-            if p_obj.type == 'MESH':
-                me: bpy.types.Mesh = p_obj.data
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(context.objects_in_mode_unique_data, context, skip_obj_if_no_uv=True):
+            me = obj.data
 
-                bm = bmesh.from_edit_mesh(me)
-                bm.verts.ensure_lookup_table()
-                bm.edges.ensure_lookup_table()
-                bm.faces.ensure_lookup_table()
+            t_selection_data[me] = {
+                "verts": set(vert.index for vert in bm.verts if vert.select) if me.total_vert_sel else [],
+                "edges": set(edge.index for edge in bm.edges if edge.select) if me.total_edge_sel else [],
+                "faces": set(face.index for face in bm.faces if face.select) if me.total_face_sel else [],
+                "loops": []
+            }
 
-                t_selection_data[me] = {
-                    "verts": set(vert.index for vert in bm.verts if vert.select) if me.total_vert_sel else [],
-                    "edges": set(edge.index for edge in bm.edges if edge.select) if me.total_edge_sel else [],
-                    "faces": set(face.index for face in bm.faces if face.select) if me.total_face_sel else [],
-                    "loops": []
-                }
+            t_hidden_data[me] = {
+                "verts": set(vert.index for vert in bm.verts if vert.hide),
+                "edges": set(edge.index for edge in bm.edges if edge.hide),
+                "faces": set(face.index for face in bm.faces if face.hide),
+            }
 
-                t_hidden_data[me] = {
-                    "verts": set(vert.index for vert in bm.verts if vert.hide),
-                    "edges": set(edge.index for edge in bm.edges if edge.hide),
-                    "faces": set(face.index for face in bm.faces if face.hide),
-                }
+            if b_is_not_sync:
+                t_selection_data[me]["loops"] = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer)
+                uv_faces = {lp.face.index for lp in t_selection_data[me]["loops"]}
+                for face in bm.faces:
+                    face.select = face.index in uv_faces
 
-                uv_layer = None
-                if b_is_not_sync:
-                    uv_faces = set()
-                    uv_layer = bm.loops.layers.uv.active
-                    if uv_layer:
-                        t_selection_data[me]["loops"] = [
-                            (loop, loop[uv_layer].select_edge, face.index if ZenPolls.version_since_3_2_0 else None)
-                            for face in bm.faces for loop in face.loops
-                            if not face.hide and loop[uv_layer].select
-                        ]
-                        uv_faces = []
-                        p_data_loops = t_selection_data[me]["loops"]
-                        if p_data_loops:
-                            _, _, uv_faces = zip(*p_data_loops)
+            t_bm_data[me] = (bm, uv_layer)
 
-                        uv_faces = set(uv_faces)
-                    for face in bm.faces:
-                        face.select = face.index in uv_faces
-
-                t_bm_data[me] = (bm, uv_layer)
-
-                if not b_something_selected:
-                    b_something_selected = (
-                        len(t_selection_data[me]["loops"]) > 0
-                        if b_is_not_sync else
-                        sum(me.count_selected_items()) > 0)
+            if not b_something_selected:
+                b_something_selected = (
+                    len(t_selection_data[me]["loops"]) > 0
+                    if b_is_not_sync else
+                    sum(me.count_selected_items()) > 0)
 
         if b_something_selected:
             if bpy.ops.mesh.reveal.poll():
@@ -352,10 +314,7 @@ class ZUV_OT_Isolate_Part(bpy.types.Operator):
                             b_changed = True
                             face.select_set(True)
 
-                for loop, select_edge, _ in t_selection_data[me]["loops"]:
-                    loop[uv_layer].select = True
-                    if ZenPolls.version_since_3_2_0:
-                        loop[uv_layer].select_edge = select_edge
+                LoopsFactory.select_loops(context, bm, t_selection_data[me]["loops"], uv_layer=uv_layer, state=True)
 
                 bm.select_flush_mode()
                 bmesh.update_edit_mesh(me, loop_triangles=False, destructive=False)
@@ -386,38 +345,23 @@ class ZUV_OT_Select_Loop(bpy.types.Operator):
             and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        from ZenUV.utils.get_uv_islands import LoopsFactory as LF
-        for obj in context.objects_in_mode:
-            me, bm = get_mesh_data(obj)
-            uv_layer = bm.loops.layers.uv.active
-            if not uv_layer:
-                continue
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
+        if not objs:
+            self.report({'WARNING'}, "No objects selected.")
+            return {'CANCELLED'}
 
-            bm.edges.ensure_lookup_table()
-            no_sync_mode = context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync
+        switch_to_edge_sel_mode(context)
 
-            if no_sync_mode:
-                if ZenPolls.version_since_3_2_0:
-                    for lp in LF.walk_edgeloop_along(
-                                                        [lp for edge in bm.edges for lp in edge.link_loops if lp[uv_layer].select and lp[uv_layer].select_edge],
-                                                        uv_layer, no_sync_mode):
-                        lp[uv_layer].select = True
-                        lp[uv_layer].select_edge = True
-                else:
-                    for lp in LF.walk_edgeloop_along(
-                                                        [lp for edge in bm.edges for lp in edge.link_loops if lp[uv_layer].select],
-                                                        uv_layer, no_sync_mode):
-                        lp[uv_layer].select = True
-            else:
-                for lp in LF.walk_edgeloop_along(
-                                                    [lp for edge in bm.edges for lp in edge.link_loops if edge.select],
-                                                    uv_layer, no_sync_mode):
-                    lp.edge.select = True
+        b_is_loop_domain = is_loop_domain(context)
+
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+
+            p_looplist = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer, only_uv_edges=True)
+            looplist = LoopsFactory.walk_edgeloop_along(p_looplist, uv_layer, b_is_loop_domain)
+            LoopsFactory.select_loops(context, bm, looplist, uv_layer, state=True)
 
             bm.select_flush_mode()
-
-            bmesh.update_edit_mesh(me, loop_triangles=False)
-            switch_to_edge_sel_mode(context)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         return {'FINISHED'}
 
@@ -457,46 +401,35 @@ class ZUV_OT_SelectSharp(bpy.types.Operator):
             return False
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
             self.report({'WARNING'}, 'There are no selected objects')
             return {'CANCELLED'}
 
         if self.clear_selection and self.mode == 'SELECT':
-            bpy_deselect_by_context(context)
+            bpy_select_by_context(context, action='DESELECT')
 
-        if context.area.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync:
-            context.scene.tool_settings.uv_select_mode = "EDGE"
-        else:
-            bpy.ops.mesh.select_mode(type="EDGE")
+        switch_to_edge_sel_mode(context)
 
         p_state = self.mode == 'SELECT'
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            uv_layer = bm.loops.layers.uv.active
-            if not uv_layer:
+        is_loops_based = is_loop_domain(context)
+
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=False):
+
+            if context.space_data.type == 'IMAGE_EDITOR' and not uv_layer:
                 continue
 
-            p_seams = (e for e in bm.edges if not e.smooth)
-
-            if context.space_data and context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync:
-                if ZenPolls.version_since_3_2_0:
-                    for e in p_seams:
-                        for lp in e.link_loops:
-                            lp[uv_layer].select = p_state
-                            lp[uv_layer].select_edge = p_state
-                            lp.link_loop_next[uv_layer].select = p_state
-                else:
-                    for e in p_seams:
-                        for lp in e.link_loops:
-                            lp[uv_layer].select = p_state
-                            lp.link_loop_next[uv_layer].select = p_state
+            if is_loops_based:
+                looplist = (lp for e in bm.edges for lp in e.link_loops if not e.hide and not e.smooth)
+                LoopsFactory.select_loops(context, bm, looplist, uv_layer, state=p_state)
             else:
-                for e in p_seams:
+                for e in (e for e in bm.edges if not e.smooth and not e.hide):
                     e.select = p_state
+                MeshIslandUtils.update_uv_select_sync(context, bm)
+
             bm.select_flush_mode()
-            bmesh.update_edit_mesh(obj.data, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         return {'FINISHED'}
 
@@ -536,45 +469,33 @@ class ZUV_OT_SelectSeams(bpy.types.Operator):
             return False
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
             self.report({'WARNING'}, 'There are no selected objects')
             return {'CANCELLED'}
 
         if self.clear_selection and self.mode == 'SELECT':
-            bpy_deselect_by_context(context)
+            bpy_select_by_context(context, action='DESELECT')
 
-        if context.area.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync:
-            context.scene.tool_settings.uv_select_mode = "EDGE"
-        else:
-            bpy.ops.mesh.select_mode(type="EDGE")
+        switch_to_edge_sel_mode(context)
 
         p_state = self.mode == 'SELECT'
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
+        is_loops_based = is_loop_domain(context)
 
-            p_seams = (e for e in bm.edges if e.seam)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=False):
 
-            if context.space_data and context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync:
-                uv_layer = bm.loops.layers.uv.active
-                if not uv_layer:
-                    continue
+            if context.space_data.type == 'IMAGE_EDITOR' and not uv_layer:
+                continue
 
-                if ZenPolls.version_since_3_2_0:
-                    for e in p_seams:
-                        for lp in e.link_loops:
-                            lp[uv_layer].select = p_state
-                            lp[uv_layer].select_edge = p_state
-                            lp.link_loop_next[uv_layer].select = p_state
-                else:
-                    for e in p_seams:
-                        for lp in e.link_loops:
-                            lp[uv_layer].select = p_state
-                            lp.link_loop_next[uv_layer].select = p_state
+            if is_loops_based:
+                looplist = (lp for e in bm.edges for lp in e.link_loops if not e.hide and e.seam)
+                LoopsFactory.select_loops(context, bm, looplist, uv_layer, state=p_state)
             else:
-                for e in p_seams:
+                for e in (e for e in bm.edges if e.seam and not e.hide):
                     e.select = p_state
+                MeshIslandUtils.update_uv_select_sync(context, bm)
+
             bm.select_flush_mode()
             bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
@@ -588,6 +509,11 @@ class ZUV_OT_SelectFlipped(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
     bl_description = 'Select Flipped Islands'
 
+    clear_selection: bpy.props.BoolProperty(
+        name='Clear Selection',
+        description='Clears the initial selection before applying the operation',
+        default=True)
+
     @classmethod
     def poll(cls, context):
         """ Validate context """
@@ -597,34 +523,32 @@ class ZUV_OT_SelectFlipped(bpy.types.Operator):
     def execute(self, context):
 
         ZsPieFactory.mark_pie_cancelled()
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {"CANCELLED"}
 
-        bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
-        bpy_deselect_by_context(context)
+        switch_to_face_sel_mode(context)
+
+        if self.clear_selection:
+            bpy_select_by_context(context, action='DESELECT')
 
         p_flipped_count = 0
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = bm.loops.layers.uv.active
-            if not uv_layer:
-                continue
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
-            for island in island_util.get_islands(context, bm):
-                if is_island_flipped(island, uv_layer):
+            for island in UvIslandUtils.yield_uv_islands(context, bm, uv_layer, b_selected_only=False, b_include_hidden=False, b_include_partially_hidden=False):
+                if any(is_face_flipped(f, uv_layer) for f in island):
                     p_flipped_count += 1
-                    select_by_context(context, bm, [island, ], state=True)
+                    SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
 
             bm.select_flush_mode()
-            # bmesh.update_edit_mesh(me, loop_triangles=False, destructive=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         if p_flipped_count == 0:
-            self.report({'INFO'}, "No flipped islands were found.")
-            zen_message(context, message="No flipped islands were found.",)
+            self.report({'INFO'}, "No flipped islands found.")
+            zen_message(context, message="No flipped islands found.")
         else:
-            self.report({'INFO'}, f"Flipped islands found: {p_flipped_count}")
+            self.report({'INFO'}, f"{p_flipped_count} flipped islands detected.")
 
         return {'FINISHED'}
 
@@ -644,21 +568,17 @@ class ZUV_OT_SelectSelfIntersecting(bpy.types.Operator):
     def execute(self, context):
 
         ZsPieFactory.mark_pie_cancelled()
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {"CANCELLED"}
 
-        bpy_deselect_by_context(context)
+        bpy_select_by_context(context, action='DESELECT')
 
-        b_is_uv_no_sync = context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync
+        b_is_sync_off = is_sync_off(context)
 
         n_processed = 0
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = bm.loops.layers.uv.active
-            if not uv_layer:
-                continue
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
             loops = bm.calc_loop_triangles()
             bm.faces.ensure_lookup_table()
@@ -666,21 +586,17 @@ class ZUV_OT_SelectSelfIntersecting(bpy.types.Operator):
             triangles = defaultdict(list)
 
             for looptris in loops:
-                if not looptris[0].face.hide and (not b_is_uv_no_sync or looptris[0].face.select):
+                if not looptris[0].face.hide and (not b_is_sync_off or looptris[0].face.select):
                     triangles[looptris[0].face.index].append([loop[uv_layer].uv.to_tuple(5) for loop in looptris])
 
             for k, v in triangles.items():
                 p_face: bmesh.types.BMFace = bm.faces[k]
                 if has_overlapped_triangles_by_area(p_face, v, uv_layer):
                     n_processed += 1
-                    if b_is_uv_no_sync:
-                        for loop in bm.faces[k].loops:
-                            loop[uv_layer].select = True
-                            loop[uv_layer].select_edge = True
-                    else:
-                        bm.faces[k].select_set(True)
+                    SelectionUtils.select_faces_any_context(context, [bm.faces[k], ], state=True, bm=bm, uv_layer=uv_layer)
 
             bm.select_flush_mode()
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         if n_processed == 0:
             self.report({'INFO'}, "No self-intersecting faces were found.")
@@ -716,13 +632,13 @@ class ZUV_OT_CorrectSelfIntersecting(bpy.types.Operator):
 
         ZsPieFactory.mark_pie_cancelled()
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {"CANCELLED"}
 
-        sync_uv = context.scene.tool_settings.use_uv_select_sync
-        b_is_uv_no_sync = context.space_data.type == 'IMAGE_EDITOR' and not sync_uv
+        b_is_loop_domain = is_loop_domain(context)
+        b_is_sync_off = is_sync_off(context)
 
         t_processed = defaultdict(list)
         n_processed = 0
@@ -731,19 +647,14 @@ class ZUV_OT_CorrectSelfIntersecting(bpy.types.Operator):
 
         image_aspect_ratio = calc_uv_editor_image_aspect_ratio(context)
 
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = bm.loops.layers.uv.active
-            if not uv_layer:
-                continue
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
             loops = bm.calc_loop_triangles()
-            bm.faces.ensure_lookup_table()
 
             triangles = defaultdict(list)
 
             for looptris in loops:
-                if not looptris[0].face.hide and (not b_is_uv_no_sync or looptris[0].face.select):
+                if not looptris[0].face.hide and (not b_is_sync_off or looptris[0].face.select):
                     triangles[looptris[0].face.index].append([loop[uv_layer].uv.to_tuple(5) for loop in looptris])
 
             used_faces = [False] * len(bm.faces)
@@ -755,31 +666,25 @@ class ZUV_OT_CorrectSelfIntersecting(bpy.types.Operator):
                     continue
 
                 if has_overlapped_triangles_by_area(p_face, v, uv_layer):
-
                     t_processed[bm].append(p_face.index)
                     n_processed += 1
 
                     correct_self_intersecting_face(
-                        context, p_face, uv_layer, used_faces, image_aspect_ratio,
-                        b_is_island_mode, b_is_uv_no_sync)
+                        context, bm, p_face, uv_layer, used_faces, image_aspect_ratio,
+                        b_is_island_mode, b_is_loop_domain)
 
         if n_processed == 0:
             self.report({'INFO'}, "No self-intersecting faces were found.")
         else:
-            bpy_deselect_by_context(context)
+            bpy_select_by_context(context, action='DESELECT')
 
             for bm, indices in t_processed.items():
-                bm.faces.ensure_lookup_table()
                 uv_layer = bm.loops.layers.uv.active
-                if uv_layer:
-                    for idx in indices:
-                        bm.faces[idx].select_set(True)
-                        if not sync_uv:
-                            for loop in bm.faces[idx].loops:
-                                loop[uv_layer].select = True
-                                loop[uv_layer].select_edge = True
+                if not uv_layer:
+                    continue
+                SelectionUtils.select_faces_any_context(context, [bm.faces[i] for i in indices], state=True, bm=bm, uv_layer=uv_layer)
 
-            bm.select_flush_mode()
+                bm.select_flush_mode()
 
             self.report({'INFO'}, f"Self-intersecting islands corrected: {n_processed}")
 
@@ -847,22 +752,19 @@ class ZUV_OT_MirrorSeams(bpy.types.Operator):
         row.prop(self, "set_mode", expand=True)
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
 
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         if self.axis == 'TOPOLOGY':
-            from ZenUV.utils.selection_utils import SelectionProcessor
+            from ..utils.selection_utils import SelectionProcessor
 
             SelectionProcessor.reset_state()
 
-            is_not_sync = context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync
-
             Storage = SelectionProcessor.collect_selected_objects(
                 context,
-                is_not_sync,
                 b_in_indices=True,
                 b_is_skip_objs_without_selection=True,
                 b_skip_uv_layer_fail=False)
@@ -873,17 +775,15 @@ class ZUV_OT_MirrorSeams(bpy.types.Operator):
         m_x, m_y, m_z = {'X': (-1, 1, 1), 'Y': (1, -1, 1), 'Z': (1, 1, -1), 'TOPOLOGY': (-1, 1, 1)}[self.axis]
 
         if is_use_topology:
-            from ZenUV.utils.generic import bpy_deselect_by_context
-            bpy_deselect_by_context(context)
+            from ..utils.generic import bpy_select_by_context
+            bpy_select_by_context(context, action='DESELECT')
 
         p_suitable = {}
         is_has_rotation = False
-        for obj in objs:
+        for obj, bm in IterUtils2.iter_objs_with_bmesh(objs):
             if has_unapplied_rotation(obj):
                 is_has_rotation = True
                 print(f'"{obj.name}" has unapplied rotation')
-            bm = bmesh.from_edit_mesh(obj.data)
-            bm.edges.ensure_lookup_table()
 
             p_edges = self.collect_edges(p_axis, bm)
             p_suitable.update({obj: [bm, obj.data.use_mirror_topology, p_edges, []]})
@@ -931,7 +831,7 @@ class ZUV_OT_MirrorSeams(bpy.types.Operator):
                 for e in edges[3]:
                     e.seam = True
 
-            bmesh.update_edit_mesh(obj.data, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         if is_use_topology:
             bpy.ops.mesh.select_mirror(axis={self.axis if self.axis != 'TOPOLOGY' else 'X'}, extend=True)
@@ -940,14 +840,14 @@ class ZUV_OT_MirrorSeams(bpy.types.Operator):
             for obj, data in p_suitable.items():
                 obj.data.use_mirror_topology = data[1]
 
-            SelectionProcessor.restore_selection_in_objects(context, Storage, is_not_sync)
+            SelectionProcessor.restore_selection_in_objects(context, Storage)
 
         combined_message = [
             'Unapplied Rotation' if is_has_rotation else None,
             'No Symmetric Edges' if was_processed != len(objs) else None,
         ]
 
-        if combined_message:
+        if any(combined_message):
             self.report({'WARNING'}, f"{', '.join(item for item in combined_message if item is not None)}. The result may be unpredictable")
             return {'FINISHED'}
 
@@ -1019,7 +919,7 @@ class ZUV_OT_SetTextureSizePreset(bpy.types.Operator):
 
     @classmethod
     def getActiveImage(cls, context):
-        from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+        from ..ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
         p_image = ZuvTrimsheetUtils.getSpaceDataImage(context)
         if p_image is not None:
             return p_image
@@ -1045,7 +945,7 @@ class ZUV_OT_SetTextureSizePreset(bpy.types.Operator):
     def draw_image_size_preset(
             cls, s_data_path: str, context: bpy.types.Context, layout: bpy.types.UILayout,
             s_import_data_path='', b_alert_accent=True, use_property_split=False):
-        from ZenUV.utils.adv_generic_ui_list import _get_context_attr
+        from ..utils.adv_generic_ui_list import _get_context_attr
 
         s_instance, s_attr = s_data_path.rsplit('.', 1)
         p_instance = _get_context_attr(context, s_instance)
@@ -1084,7 +984,7 @@ class ZUV_OT_SetTextureSizePreset(bpy.types.Operator):
 
     @classmethod
     def has_image_size_mismatch(cls, data_path: str, context: bpy.types.Context):
-        from ZenUV.utils.adv_generic_ui_list import _get_context_attr
+        from ..utils.adv_generic_ui_list import _get_context_attr
         p_image = cls.getActiveImage(context)
         if p_image:
             s_image_preset = _get_context_attr(context, data_path)
@@ -1105,7 +1005,7 @@ class ZUV_OT_SetTextureSizePreset(bpy.types.Operator):
         try:
             i_size = self.image_size
             if i_size[0] and i_size[1]:
-                from ZenUV.utils.adv_generic_ui_list import _set_context_attr, _get_context_attr
+                from ..utils.adv_generic_ui_list import _set_context_attr, _get_context_attr
 
                 s_instance, s_attr = self.data_path.rsplit('.', 1)
                 p_instance = _get_context_attr(context, s_instance)

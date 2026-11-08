@@ -23,8 +23,8 @@ import os
 import shutil
 import json
 
-from ZenUV.utils.blender_zen_utils import ZuvPresets, ZenPolls
-from ZenUV.utils.vlog import Log
+from ...utils.blender_zen_utils import ZuvPresets, ZenPolls
+from ...utils.vlog import Log
 
 
 LITERAL_OPERATOR_DEFAULTS_CONFIG = "defaults.json"

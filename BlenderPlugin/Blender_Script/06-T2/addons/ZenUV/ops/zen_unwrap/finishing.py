@@ -21,32 +21,31 @@
 import bpy
 import bmesh
 
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.generic import (
+from ...utils.uv_factory import UvIslandUtils, SelectionUtils
+from ...utils.generic import (
     fit_uv_view,
-    get_mesh_data,
-    resort_by_type_mesh_in_edit_mode_and_sel,
-    bpy_deselect_by_context,
+    ResortObjects,
+    bpy_select_by_context,
     verify_uv_layer
 )
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.ui.pie import ZsPieFactory
-from ZenUV.utils.generic import (
+from ...ui.labels import ZuvLabels
+from ...ui.pie import ZsPieFactory
+from ...utils.generic import (
     ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE,
     ZUV_SPACE_TYPE)
 
 from mathutils import Vector
 
-from ZenUV.utils.transform import UvTransformUtils
-from ZenUV.utils.bounding_box import BoundingBox2d
+from ...utils.transform import UvTransformUtils
+from ...utils.bounding_box import BoundingBox2d
+from ...utils.iter_utils import IterUtils
 
-from ZenUV.utils.generic import (
+from ...utils.generic import (
     set_face_int_tag,
-    ensure_facemap,
-    collect_selected_objects_data,
-    select_by_context
-)
-from ZenUV.utils import vc_processor as vc
+    ensure_facemap)
+from ...utils import vc_processor as vc
+from ...utils.blender_zen_utils import ZenPolls, is_sync_off
+
 
 FINISHED_FACEMAP_NAME = "ZenUV_Finished"
 
@@ -66,17 +65,22 @@ class FinishedFactory:
         return False
 
     @classmethod
-    def select_finished(cls, context, bm, _finished_facemap, action: str = 'SELECT') -> bool:
-        p_islands = [island for island in island_util.get_islands(context, bm) if True in [f[_finished_facemap] for f in island]]
+    def select_finished(cls, context, bm, uv_layer, _finished_facemap, action: str = 'SELECT') -> bool:
+        p_islands = [
+            island for island in
+            UvIslandUtils.yield_uv_islands(context, bm, uv_layer, b_selected_only=False, b_include_hidden=False)
+            if any([f[_finished_facemap] for f in island])]
+
         if not len(p_islands):
             return False
-        select_by_context(context, bm, p_islands, state=action == 'SELECT')
+        for island in p_islands:
+            SelectionUtils.select_faces_any_context(context, island, state=action == 'SELECT', bm=bm, uv_layer=uv_layer)
         return True
 
     @classmethod
     def show_in_view_finished(cls, context, bm, _finished_facemap):
-        finished_color = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences.FinishedColor
-        unfinished_color = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences.UnFinishedColor
+        finished_color = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences.FinishedColor
+        unfinished_color = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences.UnFinishedColor
         finished_faces = [face for face in bm.faces if face[_finished_facemap]]
         unfinished_faces = [face for face in bm.faces if not face[_finished_facemap]]
         # for face in [face for face in bm.faces if face[_finished_facemap]]:
@@ -148,30 +152,18 @@ class FinishedFactory:
         """
         Tag or untag Finished depend on action='TAG' / 'UNTAG'
         """
-        # print("Zen UV: Mark Finished Starting")
-        addon_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
-        selection_mode = False
+        addon_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
 
-        bms = collect_selected_objects_data(context)
-        # work_mode = check_selection_mode()
+        objs = ResortObjects.resort_objects_by_selection(context, context.objects_in_mode)
+        if not objs:
+            return
 
-        for obj in bms:
-            # Detect if exist previously selectet elements at least in one object
-            if not selection_mode and bms[obj]['pre_selected_faces'] \
-                    or bms[obj]['pre_selected_edges']:
-                selection_mode = True
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
-        for obj in bms:
-
-            bm = bms[obj]['data']
-            me = obj.data
-            bm.faces.ensure_lookup_table()
-            bm.verts.ensure_lookup_table()
-            uv_layer = verify_uv_layer(bm)
             finished_vc_layer = cls.get_finished_map_from(obj)
-            if True in (v.select for v in bm.verts):
+            if any(v.select for v in bm.verts):
                 finished_facemap = ensure_facemap(bm, FINISHED_FACEMAP_NAME)
-                islands_for_process = island_util.get_island(context, bm, uv_layer)
+                islands_for_process = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
             else:
                 continue
 
@@ -196,7 +188,7 @@ class FinishedFactory:
             if addon_prefs.sortAutoSorting:
                 FinishedFactory.finished_sort_islands(bm, islands_for_process, finished_facemap)
 
-            bmesh.update_edit_mesh(me, loop_triangles=False, destructive=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
 
 class ZUV_OT_Sorting_Islands(bpy.types.Operator):
@@ -223,15 +215,15 @@ class ZUV_OT_Sorting_Islands(bpy.types.Operator):
         if self.is_move_finished is False and self.is_move_unfinished is False:
             self.report({'WARNING'}, "Nothing has been produced. All movement permissions are disabled.")
             return {'FINISHED'}
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+
             finished_facemap = bm.faces.layers.int.get(FINISHED_FACEMAP_NAME, None)
-            islands_for_process = island_util.get_islands(context, bm)
+            islands_for_process = UvIslandUtils.get_all_uv_islands(context, bm, uv_layer)
             FinishedFactory.finished_sort_islands(
                 bm,
                 islands_for_process,
@@ -336,27 +328,25 @@ class ZUV_OT_Select_Finished(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         if self.action == 'SELECT' and self.clear_selection:
-            bpy_deselect_by_context(context)
+            bpy_select_by_context(context, action='DESELECT')
 
         result = []
 
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            bm.faces.ensure_lookup_table()
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
             finished_facemap = bm.faces.layers.int.get(FINISHED_FACEMAP_NAME, None)
             if finished_facemap is None:
                 result.append(False)
                 continue
 
-            result.append(FinishedFactory.select_finished(context, bm, finished_facemap, action=self.action))
-            bmesh.update_edit_mesh(me, loop_triangles=False, destructive=False)
+            result.append(FinishedFactory.select_finished(context, bm, uv_layer, finished_facemap, action=self.action))
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         if True not in result:
             self.report({'WARNING'}, "No islands found with 'finished' tag")
@@ -388,7 +378,7 @@ class ZUV_OT_Hide_Finished(bpy.types.Operator):
     reveal_anyway: bpy.props.BoolProperty(
         name='Reveal Anyway',
         description='Anyway reveal finished islands if UV Sync Selection is off',
-        default=False)
+        default=True)
 
     @classmethod
     def poll(cls, context):
@@ -402,22 +392,19 @@ class ZUV_OT_Hide_Finished(bpy.types.Operator):
         row.enabled = self.action == 'UNHIDE'
         row.prop(self, 'select')
         row = layout.row()
-        row.enabled = not context.scene.tool_settings.use_uv_select_sync
+        row.enabled = is_sync_off(context)
         row.prop(self, 'reveal_anyway')
 
     def execute(self, context):
-        from ZenUV.utils.generic import HideUnhideProcessor
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        from ...utils.generic import HideUnhideProcessor
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         result = []
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            uv_layer = verify_uv_layer(bm)
-            bm.faces.ensure_lookup_table()
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
             finished_facemap = bm.faces.layers.int.get(FINISHED_FACEMAP_NAME, None)
             if finished_facemap is None:
@@ -428,6 +415,7 @@ class ZUV_OT_Hide_Finished(bpy.types.Operator):
 
             HideUnhideProcessor.hide_by_context(
                 context,
+                bm,
                 uv_layer,
                 [[face for face in bm.faces if face[finished_facemap]], ],
                 self.action,
@@ -463,7 +451,7 @@ def draw_finished_section(self, context: bpy.types.Context):
     row.operator(ZUV_OT_Hide_Finished.bl_idname, text='Hide').action = 'HIDE'
     row.operator(ZUV_OT_Hide_Finished.bl_idname, text='Unhide').action = 'UNHIDE'
 
-    from ZenUV.zen_checker.check_utils import draw_checker_display_items, DisplayItem
+    from ...zen_checker.check_utils import draw_checker_display_items, DisplayItem
     draw_checker_display_items(col, context, {'FINISHED': DisplayItem({'EDIT_MESH'}, {'UV', '3D'}, '', 'Display Finished')})
 
 

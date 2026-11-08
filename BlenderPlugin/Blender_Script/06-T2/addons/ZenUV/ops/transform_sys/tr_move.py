@@ -22,15 +22,15 @@ import bpy
 import bmesh
 from mathutils import Vector
 
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.generic import resort_by_type_mesh_in_edit_mode_and_sel
-from ZenUV.ops.transform_sys.tr_labels import TrLabels
-from ZenUV.utils.generic import get_mesh_data, verify_uv_layer
-from ZenUV.ops.transform_sys.transform_utils.transform_loops import TransformLoops
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.bounding_box import BoundingBox2d
-from ZenUV.ops.adv_uv_maps_sys.udim_utils import UdimFactory
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ...utils.register_util import RegisterUtils
+from ...ops.transform_sys.tr_labels import TrLabels
+from ...utils.generic import ResortObjects
+from ...ops.transform_sys.transform_utils.transform_loops import TransformLoops
+from ...utils.loops_factory import LoopsFactory
+from ...utils.bounding_box import BoundingBox2d
+from ...ops.adv_uv_maps_sys.udim_utils import UdimFactory
+from ...utils.iter_utils import IterUtils
+from ...utils.blender_zen_utils import ZenPolls
 
 from .transform_utils.tr_utils import TransformSysOpsProps
 from . transform_utils.tr_move_utils import TrMoveProps, MoveFactory, TrMove2dCursor
@@ -116,9 +116,9 @@ class ZUV_OT_TrMove(bpy.types.Operator):
             box.prop(self, "island_pivot")
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         move_mode = self.move_mode
@@ -148,7 +148,7 @@ class ZUV_OT_TrMove(bpy.types.Operator):
             self.op_order,
             self.island_pivot
         )
-        if not MF.move():
+        if not MF.move(context):
             self.report(MF.message[0], MF.message[1])
             return {'CANCELLED'}
 
@@ -191,16 +191,14 @@ class ZUV_OT_MoveToUvArea(bpy.types.Operator):
         row.prop(self, 'tile_number')
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
-            loops = island_util.LoopsFactory.loops_by_islands(context, bm, uv_layer)
+            loops = LoopsFactory.get_loops_by_islands(context, bm, uv_layer)
 
             for cluster in loops:
                 cp = BoundingBox2d(points=[loop[uv_layer].uv for loop in cluster]).center
@@ -226,7 +224,7 @@ class ZUV_OT_MoveToUvArea(bpy.types.Operator):
 
                 TransformLoops.move_loops(cluster, uv_layer, offset)
 
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False)
 
         return {'FINISHED'}
 
@@ -280,22 +278,20 @@ class ZUV_OT_MoveToUvAreaMouseover(bpy.types.Operator):
     def execute(self, context):
         self.cancel(context)
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
-        from ZenUV.ops.event_service import get_blender_event
+        from ...ops.event_service import get_blender_event
 
         p_event = get_blender_event(force=True)
         self.x, self.y = p_event.get('mouse_region_x', 0), p_event.get('mouse_region_y', 0)
         l_uv_co = context.region.view2d.region_to_view(self.x, self.y)
 
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
-            loops = island_util.LoopsFactory.loops_by_islands(context, bm, uv_layer)
+            loops = LoopsFactory.get_loops_by_islands(context, bm, uv_layer)
 
             for cluster in loops:
                 cp = BoundingBox2d(points=[loop[uv_layer].uv for loop in cluster]).center
@@ -303,7 +299,7 @@ class ZUV_OT_MoveToUvAreaMouseover(bpy.types.Operator):
 
                 TransformLoops.move_loops(cluster, uv_layer, offset)
 
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False)
 
         for window in context.window_manager.windows:
             for area in window.screen.areas:
@@ -375,22 +371,20 @@ class ZUV_OT_MoveToUvPositionMouseover(bpy.types.Operator):
     def execute(self, context):
         self.cancel(context)
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
-        from ZenUV.ops.event_service import get_blender_event
+        from ...ops.event_service import get_blender_event
 
         p_event = get_blender_event(force=True)
         self.x, self.y = p_event.get('mouse_region_x', 0), p_event.get('mouse_region_y', 0)
         l_uv_co = context.region.view2d.region_to_view(self.x, self.y)
 
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = bm.loops.layers.uv.verify()
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
-            loops = island_util.LoopsFactory.loops_by_islands(context, bm, uv_layer)
+            loops = LoopsFactory.get_loops_by_islands(context, bm, uv_layer)
 
             for cluster in loops:
                 cp = BoundingBox2d(points=[loop[uv_layer].uv for loop in cluster]).center
@@ -398,7 +392,7 @@ class ZUV_OT_MoveToUvPositionMouseover(bpy.types.Operator):
 
                 TransformLoops.move_loops(cluster, uv_layer, offset)
 
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False)
 
         for window in context.window_manager.windows:
             for area in window.screen.areas:
@@ -434,16 +428,14 @@ class ZUV_OT_MoveGrabIncrement(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
         props = context.scene.zen_uv
         p_selection = set()
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = verify_uv_layer(bm)
-            p_selection.update(lp[uv_layer].uv.copy().freeze() for lp in island_util.LoopsFactory.loops_by_sel_mode(context, bm, uv_layer))
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+            p_selection.update(lp[uv_layer].uv.copy().freeze() for lp in LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer))
         if not len(p_selection) == 2:
             self.report({'WARNING'}, "Zen UV: Select only two vertices or one edge.")
             return {'CANCELLED'}

@@ -18,8 +18,9 @@
 
 from mathutils import Vector
 from math import pi
-from ZenUV.utils.blender_zen_utils import ZenPolls
-from ZenUV.utils.constants import u_axis, v_axis
+from ...utils.blender_zen_utils import ZenPolls, is_loop_domain, get_selection_mode
+from ...utils.constants import u_axis, v_axis
+from ...utils.loops_factory import LoopsFactory
 
 
 class UvEdge:
@@ -37,47 +38,61 @@ class UvEdge:
         self.index_in_stripe = 0
         self.orientation = None
 
-    def select(self, context, state=True):
+    def select(self, context, bm, state=True):
         C = context
         uv_layer = self.uv_layer
-        # self.mesh_edge.select = True
-        sync_uv = C.scene.tool_settings.use_uv_select_sync
-        if C.space_data.type == 'IMAGE_EDITOR' and not sync_uv:
-            if ZenPolls.version_since_3_2_0:
-                if C.scene.tool_settings.uv_select_mode == "EDGE":
-                    for loop in self.loops:
-                        loop[uv_layer].select_edge = state
-                    for v in self.verts:
-                        v.select_state(context, state)
-                else:
-                    for v in self.verts:
-                        v.select_state(context, state)
+        v: UvVertex = None
+        if ZenPolls.version_since_5_0_0:
+            if C.space_data.type == 'IMAGE_EDITOR':
+                LoopsFactory.select_loops(context, bm, self.loops, uv_layer, state=state)
+
             else:
                 for v in self.verts:
                     v.select_state(context, state)
         else:
-            C.tool_settings.mesh_select_mode = [False, True, False]
-            self.mesh_edge.select = state
+            if C.space_data.type == 'IMAGE_EDITOR' and not C.scene.tool_settings.use_uv_select_sync:
+                if ZenPolls.version_since_3_2_0:
+                    if C.scene.tool_settings.uv_select_mode == "EDGE":
+                        for loop in self.loops:
+                            LoopsFactory.select_loop(loop, uv_layer, select_edge=True, state=state)
+                        for v in self.verts:
+                            v.select_state(context, state)
+                    else:
+                        for v in self.verts:
+                            v.select_state(context, state)
+                else:
+                    for v in self.verts:
+                        v.select_state(context, state)
+            else:
+                C.tool_settings.mesh_select_mode = [False, True, False]
+                self.mesh_edge.select = state
 
     def get_len(self):
         return (self.verts_co[1] - self.verts_co[0]).magnitude
 
     def get_select_state(self, context):
         uv_layer = self.uv_layer
-        sync_uv = context.scene.tool_settings.use_uv_select_sync
-        if context.space_data.type == 'IMAGE_EDITOR' and not sync_uv:
-            if ZenPolls.version_since_3_2_0:
-                return True in [loop[uv_layer].select_edge for loop in self.loops]
+        mode = get_selection_mode(context)
+
+        if is_loop_domain(context):
+            if ZenPolls.version_since_5_0_0:
+                return any(
+                    LoopsFactory.is_loop_selected(loop, uv_layer, select_edge=True)
+                    for loop in self.loops
+                )
+            elif ZenPolls.version_since_3_2_0:
+                return any(loop[uv_layer].select_edge for loop in self.loops)
             else:
-                return False not in [v.get_select_state(context) for v in self.verts]
-        else:
-            mode = context.tool_settings.mesh_select_mode
-            if mode[0]:
-                return self.vert.mesh_vert.select and self.other_vert.mesh_vert.select
-            elif mode[1]:
-                return self.mesh_edge.select
-            elif mode[2]:
-                return True in [f.select for f in self.mesh_edge.link_faces]
+                return all(v.get_select_state(context) for v in self.verts)
+
+        # not loop domain → geometry domain
+        if mode == 'VERT':
+            return self.vert.mesh_vert.select and self.other_vert.mesh_vert.select
+        if mode == 'EDGE':
+            return self.mesh_edge.select
+        if mode == 'FACE':
+            return any(f.select for f in self.mesh_edge.link_faces)
+
         return False
 
     def get_orientation(self):
@@ -158,26 +173,42 @@ class UvVertex:
     def select_state(self, context, state):
         C = context
         uv_layer = self.uv_layer
-        sync_uv = C.scene.tool_settings.use_uv_select_sync
-        if C.space_data.type == 'IMAGE_EDITOR' and not sync_uv:
-            for loop in self.link_loops:
-                loop[uv_layer].select = state
+
+        if ZenPolls.version_since_5_0_0:
+            if C.space_data.type == 'IMAGE_EDITOR':
+                LoopsFactory.select_loop(loop, uv_layer, select_edge=False, state=state)
+            else:
+                self.mesh_vert.select = state
         else:
-            self.mesh_vert.select = state
+            if C.space_data.type == 'IMAGE_EDITOR' and not C.scene.tool_settings.use_uv_select_sync:
+                for loop in self.link_loops:
+                    LoopsFactory.select_loop(loop, uv_layer, select_edge=False, state=state)
+            else:
+                self.mesh_vert.select = state
 
     def get_select_state(self, context):
         C = context
         uv_layer = self.uv_layer
-        sync_uv = C.scene.tool_settings.use_uv_select_sync
-        if C.space_data.type == 'IMAGE_EDITOR' and not sync_uv:
-            return False not in [loop[uv_layer].select for loop in self.link_loops]
+        if ZenPolls.version_since_5_0_0:
+            if C.space_data.type == 'IMAGE_EDITOR':
+                return all(LoopsFactory.is_loop_selected(loop, uv_layer, select_edge=False) for loop in self.link_loops)
+            else:
+                return self.mesh_vert.select
         else:
-            return self.mesh_vert.select
+            if C.space_data.type == 'IMAGE_EDITOR' and not C.scene.tool_settings.use_uv_select_sync:
+                return all(LoopsFactory.is_loop_selected(loop, uv_layer, select_edge=False) for loop in self.link_loops)
+            else:
+                return self.mesh_vert.select
 
-    def set_position(self, coords):
-        for loop in self.link_loops:
-            loop[self.uv_layer].uv = coords
-        # self.uv_co = self.link_loops[0][self.uv_layer].uv.copy().freeze()
+    def set_position(self, coords, is_set_linked: bool = False, b_is_loop_based=False):
+        if b_is_loop_based and is_set_linked:
+            vert = self.link_loops[0].vert
+            for loop in (lp for lp in vert.link_loops if LoopsFactory.is_loop_selected(lp, self.uv_layer, select_edge=False)):
+                loop[self.uv_layer].uv = coords
+        else:
+            for loop in self.link_loops:
+                loop[self.uv_layer].uv = coords
+
         self.update_uv_co()
 
     def move_by(self, coords):
@@ -197,3 +228,9 @@ class UvFace:
         self.mesh_face = Gface
         self.uv_verts = []
         self.uv_edges = []
+
+    def is_face_selected(self, context: bool, uv_layer):
+        if is_loop_domain(context):
+            return all(LoopsFactory.is_loop_selected(lp, uv_layer, select_edge=False) for lp in self.mesh_face.loops)
+        else:
+            return self.mesh_face.select

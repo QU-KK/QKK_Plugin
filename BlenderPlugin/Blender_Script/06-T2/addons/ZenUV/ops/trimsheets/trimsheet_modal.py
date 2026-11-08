@@ -23,8 +23,8 @@ import bpy
 from dataclasses import dataclass
 
 from .trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.utils.blender_zen_utils import update_areas_in_all_screens
-from ZenUV.utils.simple_geometry import Rectangle
+from ...utils.blender_zen_utils import update_areas_in_all_screens
+from ...utils.simple_geometry import Rectangle
 
 
 class ZUV_OT_TrimCreate(bpy.types.Operator):
@@ -309,7 +309,7 @@ class ZUV_OT_TrimBoxSelect(bpy.types.Operator):
     @classmethod
     def poll(cls, context: bpy.types.Context):
 
-        from ZenUV.ui.tool.uv.uv_base import ZuvUVGizmoBase
+        from ...ui.tool.uv.uv_base import ZuvUVGizmoBase
 
         p_scene = context.scene
         return (

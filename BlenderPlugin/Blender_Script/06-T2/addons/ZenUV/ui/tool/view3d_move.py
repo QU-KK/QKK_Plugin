@@ -24,8 +24,8 @@ from mathutils import Vector, Matrix
 
 from .view3d_pos_sca import ZuvGizmoPosSca
 
-from ZenUV.utils.blender_zen_utils import calc_pixel_size, ZenPolls
-from ZenUV.ops.event_service import is_skipped_by_continious_drag
+from ...utils.blender_zen_utils import calc_pixel_size, ZenPolls
+from ...ops.event_service import is_skipped_by_continious_drag
 
 
 class ZUV_GGT_3DVTransformMove(bpy.types.GizmoGroup, ZuvGizmoPosSca):
@@ -65,7 +65,7 @@ class ZUV_GGT_3DVTransformMove(bpy.types.GizmoGroup, ZuvGizmoPosSca):
 
         b_executed = False
 
-        from ZenUV.ops.transform_sys.trim_depend_transform import ZUV_OT_Tr3DVMoveInTrim
+        from ...ops.transform_sys.trim_depend_transform import ZUV_OT_Tr3DVMoveInTrim
 
         # prevent endless undo chain
         wm = context.window_manager

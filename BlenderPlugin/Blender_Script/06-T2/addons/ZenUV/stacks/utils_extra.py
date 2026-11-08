@@ -20,8 +20,9 @@
 
 
 from .utils import get_island_sim_index, distance_vec
+from ..utils.uv_factory import UvIslandUtils
 
-from ZenUV.utils.vlog import Log
+from ..utils.vlog import Log
 
 
 class StackedCluster:
@@ -40,13 +41,7 @@ class StackedCluster:
         self.faces_ids: list = [face.index for face in faces]
         self.sim_index: float = self._get_sim_index(faces, uv_layer)
         self.sim_index_no_area: int = int(self.sim_index)
-        self.selected: bool = self._is_selected(context, uv_layer, faces)
-
-    def _is_selected(self, context, uv_layer, faces):
-        if context.area.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync:
-            return True in [loop[uv_layer].select for face in faces for loop in face.loops if face.select]
-        else:
-            return True in [f.select for f in faces]
+        self.selected: bool = UvIslandUtils.is_island_selected(context, faces, uv_layer)
 
     def _get_sim_index(self, island, uv_layer):
         sim_index, _ = get_island_sim_index(island, uv_layer)

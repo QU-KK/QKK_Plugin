@@ -28,25 +28,24 @@ from dataclasses import dataclass, field
 from math import pi
 from random import choice, uniform
 
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.generic import (
-    resort_by_type_mesh_in_edit_mode_and_sel,
-    select_by_context,
-    bpy_deselect_by_context,
-    verify_uv_layer,
+from ....utils.register_util import RegisterUtils
+from ....utils.generic import (
+    ResortObjects,
+    bpy_select_by_context,
     UnitsConverter
 )
-from ZenUV.utils.generic import get_mesh_data, Scope
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.bounding_box import BoundingBox2d
-from ZenUV.ops.transform_sys.transform_utils.transform_loops import TransformLoops
-from ZenUV.ops.transform_sys.transform_utils.tr_rotate_utils import TrOrientProcessor
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.ops.world_orient import oCluster
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
-from ZenUV.ops.trimsheets.trimsheet import ZuvTrimsheetGroup
-from ZenUV.utils.blender_zen_utils import ZenPolls
-from ZenUV.utils.vlog import Log
+from ....utils.iter_utils import IterUtils
+from ....utils.generic import Scope
+from ....utils.uv_factory import UvIslandUtils, SelectionUtils
+from ....utils.bounding_box import BoundingBox2d
+from ....ops.transform_sys.transform_utils.transform_loops import TransformLoops
+from ....ops.transform_sys.transform_utils.tr_rotate_utils import TrOrientProcessor
+from ....ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ....ops.world_orient import oCluster
+from ....ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
+from ....ops.trimsheets.trimsheet import ZuvTrimsheetGroup
+from ....utils.blender_zen_utils import ZenPolls
+from ....utils.vlog import Log
 
 
 CAT = 'HOTSPOT'
@@ -172,7 +171,7 @@ class HspStorage:
         return ws_scp.data[min(ws_scp.data.keys(), key=lambda x: abs(p_island_area * scalar - x))]
 
     def get_trim_world_size(self, context, trim: ZuvTrimsheetGroup):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ....prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
 
         if trim.world_size[0] == 0.0 or trim.world_size[1] == 0.0:
@@ -205,7 +204,7 @@ class HspStorage:
 
     def collect_islands(self, context, bm, uv_layer, detect_radial) -> None:
         self.islands.clear()
-        for island in island_util.get_island(context, bm, uv_layer):
+        for island in UvIslandUtils.yield_uv_islands(context, bm, uv_layer, b_selected_only=True, b_include_hidden=False):
             i_bbox = BoundingBox2d(islands=[island, ], uv_layer=uv_layer)
             self.islands.add(
                 HspIsland(
@@ -308,9 +307,7 @@ class HotspotFactory(HspProperties):
 
         total_islands_count = 0
 
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
             HST.collect_islands(context, bm, uv_layer, self.detect_radial)
 
@@ -471,21 +468,23 @@ class HotspotFactory(HspProperties):
 
                 HST.collect_radial_idxs(obj)
 
-            bmesh.update_edit_mesh(me)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         if self.select_radials:
-            bpy_deselect_by_context(context)
+            bpy_select_by_context(context, action='DESELECT')
 
             for obj_name, p_f_idxs in HST.radial_islands_idxs_scope.items():
-                me, bm = get_mesh_data(context.scene.objects[obj_name])
+                obj = context.scene.objects[obj_name]
+                bm = bmesh.from_edit_mesh(obj.data)
+                uv_layer = bm.loops.layers.uv.active
+                if not uv_layer:
+                    continue
+                SelectionUtils.select_faces_any_context(context, [bm.faces[i] for i in p_f_idxs], state=True, bm=bm, uv_layer=uv_layer)
 
-                p_faces = [bm.faces[i] for i in p_f_idxs]
-                select_by_context(context, bm, [p_faces, ], state=True)
-
-                bmesh.update_edit_mesh(me)
+                bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         if not total_islands_count:
-            self.report('WARNING', "Zen UV: Select something.")
+            self.report('WARNING', "No islands selected.")
             return
 
         if self.priority == 'WORLD_SIZE' and total_suited_trims_count == 0:
@@ -789,9 +788,9 @@ class ZUV_OT_TrHotspot(bpy.types.Operator):
     def execute(self, context):
         self.cat = 'HOTSPOT'
         self.tag = 'Radial'
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         p_trimsheet = ZuvTrimsheetUtils.getTrimsheet(context)

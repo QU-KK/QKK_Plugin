@@ -4,19 +4,16 @@ from typing import List
 from mathutils import Vector, Matrix
 import numpy as np
 
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.generic import verify_uv_layer
+from ...utils.uv_factory import UvIslandUtils
+from ...utils.generic import verify_uv_layer, bpy_select_by_context, switch_to_face_sel_mode
 from .test_geometry import TestCube, TestCylinder
-from ZenUV.utils.bounding_box import BoundingBox2d
-from ZenUV.utils.constants import TEST_OBJ_NAME_CUBE, TEST_OBJ_NAME_CYLINDER
+from ...utils.bounding_box import BoundingBox2d
+from ...utils.iter_utils import IterUtils
+from ...utils.constants import TEST_OBJ_NAME_CUBE, TEST_OBJ_NAME_CYLINDER
 
 
 def _get_objs(context):
     return context.objects_in_mode_unique_data
-
-
-def _set_sync_uv(context, state):
-    context.scene.tool_settings.use_uv_select_sync = state
 
 
 def _select_objs_by_names(context, names, active_name):
@@ -35,9 +32,7 @@ def _move_uv(context, offset=(0, 0), all_objs=False):
     else:
         objs = [context.object, ]
     faces = []
-    for obj in objs:
-        bm = bmesh.from_edit_mesh(obj.data)
-        uv_layer = verify_uv_layer(bm)
+    for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
         loops = [loop for face in bm.faces for loop in face.loops]
         for loop in loops:
             loop[uv_layer].uv += Vector(offset)
@@ -51,10 +46,7 @@ def _move_uv_by_faces_id(context, ids, offset=(0, 0), all_objs=False):
         objs = _get_objs(context)
     else:
         objs = [context.object, ]
-    for obj in objs:
-        bm = bmesh.from_edit_mesh(obj.data)
-        bm.faces.ensure_lookup_table()
-        uv_layer = verify_uv_layer(bm)
+    for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
         for loop in [loop for i in ids for loop in bm.faces[i].loops]:
             loop[uv_layer].uv += Vector(offset)
         bmesh.update_edit_mesh(obj.data)
@@ -66,9 +58,7 @@ def _scale_uv(context, scale=(0, 0), all_objs=False):
     else:
         objs = [context.object, ]
     faces = []
-    for obj in objs:
-        bm = bmesh.from_edit_mesh(obj.data)
-        uv_layer = verify_uv_layer(bm)
+    for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
         loops = [loop for face in bm.faces for loop in face.loops]
         for loop in loops:
             loop[uv_layer].uv *= Vector(scale)
@@ -89,9 +79,7 @@ def _rotate_uv(context, angle=12, pivot=Vector((0.5, 0.5)), all_objs=True):
     else:
         objs = [context.object, ]
 
-    for obj in objs:
-        bm = bmesh.from_edit_mesh(obj.data)
-        uv_layer = verify_uv_layer(bm)
+    for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
         loops = [loop for face in bm.faces for loop in face.loops]
         uvs = np.empty([len(loops), 2])
         for i in range(len(loops)):
@@ -174,9 +162,7 @@ def _get_selected_faces_ids(context):
 
 def _set_seams(context, edge_idxs, state=True):
     objs = _get_objs(context)
-    for obj in objs:
-        bm = bmesh.from_edit_mesh(obj.data)
-        bm.edges.ensure_lookup_table()
+    for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
         for i in edge_idxs:
             bm.edges[i].seam = state
         bmesh.update_edit_mesh(obj.data)
@@ -184,9 +170,7 @@ def _set_seams(context, edge_idxs, state=True):
 
 def _set_sharp(context, edge_idxs, state=True):
     objs = _get_objs(context)
-    for obj in objs:
-        bm = bmesh.from_edit_mesh(obj.data)
-        bm.edges.ensure_lookup_table()
+    for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
         for i in edge_idxs:
             bm.edges[i].smooth = not state
         bmesh.update_edit_mesh(obj.data)
@@ -204,10 +188,9 @@ def _get_sharp_edges_ids(context):
 
 def _get_bounding_box(context):
     points = []
-    for obj in _get_objs(context):
-        bm = bmesh.from_edit_mesh(obj.data).copy()
-        uv_layer = verify_uv_layer(bm)
-        islands = island_util.get_islands(context, bm)
+    objs = _get_objs(context)
+    for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+        islands = UvIslandUtils.get_all_uv_islands(context, bm, uv_layer)
         points.extend({loop[uv_layer].uv.copy().freeze() for island in islands for face in island for loop in face.loops})
         bm.free()
     return BoundingBox2d(points=points)
@@ -223,7 +206,7 @@ def _ensure_facemap(bm, facemap_name):
 
 def get_prefs_within_tests():
     """ Return Zen UV Properties obj """
-    return bpy.context.preferences.addons["ZenUV"].preferences
+    return bpy.context.window_manager.zen_uv.get_addon_prefs()
 
 
 def _set_object_mode(context):
@@ -292,7 +275,7 @@ def _prepare_test(context, model="CUBE", count=2):
     # bpy.ops.mesh.primitive_cube_add(enter_editmode=True, location=(-4, 0, 0))
 
     _set_edit_mode(context)
-    bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
+    switch_to_face_sel_mode(context)
 
     if context.mode != 'EDIT_MESH':
         raise AddonTestError('PREPARE> Edit mode is expected!')
@@ -305,7 +288,7 @@ def _check_mgr_mode_prepared(p_cls_mgr, context, p_scene):
     p_scene.zen_sets_active_mode = p_cls_mgr.id_group
     p_cls_mgr.set_mesh_select_mode(context)
 
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
     bpy.ops.mesh.reveal(select=False)
 
 

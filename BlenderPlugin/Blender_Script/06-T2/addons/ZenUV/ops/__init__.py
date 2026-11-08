@@ -24,9 +24,9 @@ from bpy.props import IntProperty
 
 import platform
 
-from ZenUV.utils.blender_zen_utils import ZenPolls
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.vlog import Log
+from ..utils.blender_zen_utils import ZenPolls
+from ..utils.register_util import RegisterUtils
+from ..utils.vlog import Log
 
 from .operators import operators_classes
 from .zen_unwrap.finishing import finishing_classes
@@ -46,9 +46,10 @@ from .seam_groups import seam_groups_classes, ZSGListGroup
 from .pack_sys.pack import pack_classes
 from .relax import relax_classes
 from .select_sys.select import select_classes
-from .select_sys.select import poll_3_2_select_classes
-from .select_sys.select_islands import register as register_select_islands
-from .select_sys.select_islands import unregister as unregister_select_islands
+from .select_sys.select_edges import poll_3_2_select_classes
+from .select_sys.select_edges import classes as select_edges_classes
+from .select_sys.select_islands import classes as select_islands_classes
+from .select_sys.select_cylinder import classes as select_cylinder_classes
 from .reshape.ops import uv_reshape_classes
 from .context_utils import context_utils_classes
 from .pack_sys.pack_exclusion import register_pack_exclusion, unregister_pack_exclusion
@@ -75,13 +76,13 @@ from .zen_unwrap.unwrap_for_tool import unregister as unregister_unwrap_for_tool
 from .zen_unwrap.unwrap_processor import register as register_uwrp_processor
 from .zen_unwrap.unwrap_processor import unregister as unregister_uwrp_processor
 
-from ZenUV.ops.event_service import ZUV_OT_EventService, ZUV_OT_EventGet
+from ..ops.event_service import ZUV_OT_EventService, ZUV_OT_EventGet
 
-from ZenUV.ops.adv_uv_maps_sys.udims import register as register_udims
-from ZenUV.ops.adv_uv_maps_sys.udims import unregister as unregister_udims
+from ..ops.adv_uv_maps_sys.udims import register as register_udims
+from ..ops.adv_uv_maps_sys.udims import unregister as unregister_udims
 
-from ZenUV.ops.mirror_uv import register as register_mirror_uv
-from ZenUV.ops.mirror_uv import unregister as unregister_mirror_uv
+from ..ops.mirror_uv import register as register_mirror_uv
+from ..ops.mirror_uv import unregister as unregister_mirror_uv
 
 from .auto_uv_unwrap import classes as auto_unwrap_classes
 
@@ -107,11 +108,11 @@ def zenuv_image_header_draw(self, context: bpy.types.Context):
         show_uv_edit = sima.show_uvedit
 
         if show_uv_edit:
-            from ZenUV.prop.zuv_preferences import get_prefs
+            from ..prop.zuv_preferences import get_prefs
             addon_prefs = get_prefs()
 
             if addon_prefs.show_uv_zen_sync:
-                from ZenUV.ico import icon_get
+                from ..ico import icon_get
 
                 row = layout.row(align=True)
                 row.operator(
@@ -181,7 +182,9 @@ def register():
         RegisterUtils.register(poll_3_2_select_classes)
 
     RegisterUtils.register(select_classes)
-    register_select_islands()
+    RegisterUtils.register(select_edges_classes)
+    RegisterUtils.register(select_islands_classes)
+    RegisterUtils.register(select_cylinder_classes)
     # Select Registration END ------------
 
     register_pack_exclusion()
@@ -290,7 +293,10 @@ def unregister():
         RegisterUtils.unregister(poll_3_2_select_classes)
 
     RegisterUtils.unregister(select_classes)
-    unregister_select_islands()
+    RegisterUtils.unregister(select_edges_classes)
+    RegisterUtils.unregister(select_islands_classes)
+    RegisterUtils.unregister(select_cylinder_classes)
+
     # Select Unregister END --------------
 
     unregister_trimsheets()

@@ -25,9 +25,8 @@ from pathlib import Path
 
 from .trimsheet_utils import ZuvTrimsheetUtils
 
-from ZenUV.utils.blender_zen_utils import ZuvPresets, update_areas_in_all_screens
-from ZenUV.utils.adv_generic_ui_list import ZenAddPresetBase
-from ZenUV.utils.vlog import Log
+from ...utils.blender_zen_utils import ZuvPresets, update_areas_in_all_screens
+from ...utils.adv_generic_ui_list import ZenAddPresetBase
 
 
 class ZUV_OT_TrimExecutePreset(bpy.types.Operator):
@@ -72,25 +71,7 @@ class ZUV_OT_TrimExecutePreset(bpy.types.Operator):
     def execute(self, context):
         # Use this method because if it is inherited, can not change Blender theme !
 
-        try:
-            if Path(self.filepath).exists():
-                data = []
-                BUGGY_LINE = 'else bpy.context.space_data.image.zen_uv'
-                with open(self.filepath, 'rt', encoding='utf-8') as fin:
-                    text = fin.read()
-                    if BUGGY_LINE in text:
-                        fin.seek(0)
-                        data = fin.readlines()
-
-                if data:
-                    with open(self.filepath, 'wt', encoding='utf-8') as fout:
-                        for line in data:
-                            if BUGGY_LINE in line:
-                                fout.write("prefs = bpy.context.window_manager.zen_uv.get_trimsheet_data()")
-                            else:
-                                fout.write(line)
-        except Exception as e:
-            Log.error(e)
+        ZuvPresets.preset_file_patch(self.filepath)
 
         res = ExecutePreset.execute(self, context)
 

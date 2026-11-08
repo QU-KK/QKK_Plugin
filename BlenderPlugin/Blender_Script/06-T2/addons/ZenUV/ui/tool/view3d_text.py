@@ -25,14 +25,14 @@ from mathutils import Vector
 
 from .view3d_base import gizmo_trims, gizmo_cage, ZuvGizmoBase
 
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.ops.trimsheets.trimsheet import ZuvTrimsheetGroup, TrimColorSettings
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.simple_geometry import TextRect, Rectangle
-from ZenUV.utils.inject import is_modal_procedure
-from ZenUV.utils.blender_zen_utils import ZenCompat
-from ZenUV.utils.constants import UV_AREA_BBOX
+from ...prop.zuv_preferences import get_prefs
+from ...ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ...ops.trimsheets.trimsheet import ZuvTrimsheetGroup, TrimColorSettings
+from ...utils.vlog import Log
+from ...utils.simple_geometry import TextRect, Rectangle
+from ...utils.inject import is_modal_procedure
+from ...utils.blender_zen_utils import ZenCompat
+from ...utils.constants import UV_AREA_BBOX
 
 
 class ZUV_GGT_2DVToolText(bpy.types.GizmoGroup):

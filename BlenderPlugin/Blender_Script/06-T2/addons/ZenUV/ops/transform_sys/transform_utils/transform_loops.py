@@ -19,11 +19,11 @@
 # Copyright 2023, Valeriy Yatsenko
 
 import bmesh
-from math import radians
+from math import radians, atan2, pi
 from mathutils import Vector, Matrix
 from .tr_utils import TrConstants
-from ZenUV.utils.bounding_box import BoundingBox2d
-from ZenUV.utils.transform import UvTransformUtils
+from ....utils.bounding_box import BoundingBox2d
+from ....utils.transform import UvTransformUtils
 
 
 class TrLoopsAnalyzer:
@@ -351,3 +351,15 @@ class TransformLoops:
         # TrLoopsAnalyzer.check_fit_loops_results(fit_bbox, chk_cluster_bbox)
 
         return fit_bbox_pivot
+
+    @classmethod
+    def sort_loops_by_angle(cls, loops, uv_layer, start_angle: float = 0.0):
+        uv_coords = [loop[uv_layer].uv.copy() for loop in loops]
+
+        center = sum(uv_coords, Vector((0, 0))) / len(uv_coords)
+
+        def loop_angle(loop):
+            uv = loop[uv_layer].uv
+            return (atan2(uv.y - center.y, uv.x - center.x) - start_angle) % (2 * pi)
+
+        return sorted(loops, key=loop_angle)

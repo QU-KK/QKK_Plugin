@@ -20,8 +20,9 @@ import bpy
 import addon_utils
 import rna_keymap_ui
 
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.utils.vlog import Log
+from ..prop.zuv_preferences import get_prefs
+from ..utils.vlog import Log
+from ..utils.blender_zen_utils import ZenPolls
 
 
 class ZUV_OT_Keymaps(bpy.types.Operator):
@@ -76,7 +77,7 @@ class ZUV_OT_Keymaps(bpy.types.Operator):
             addon_utils.modules_refresh()
 
             try:
-                mod = addon_utils.addons_fake_modules.get("ZenUV")
+                mod = addon_utils.addons_fake_modules.get(ZenPolls.ADDON_PACKAGE)
                 info = addon_utils.module_bl_info(mod)
                 info["show_expanded"] = True  # or False to Collapse
             except Exception as e:

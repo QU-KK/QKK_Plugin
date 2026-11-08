@@ -21,10 +21,9 @@
 import bpy
 import bmesh
 from mathutils import Vector
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.generic import (
-    get_mesh_data,
-    resort_by_type_mesh_in_edit_mode_and_sel,
+from ...utils.register_util import RegisterUtils
+from ...utils.generic import (
+    ResortObjects,
     UnitsConverter
 )
 from .transform_utils.tr_scale_utils import (
@@ -32,7 +31,8 @@ from .transform_utils.tr_scale_utils import (
     ScaleFactory
 )
 from .transform_utils.tr_utils import TransformSysOpsProps
-from ZenUV.ops.transform_sys.tr_labels import TrLabels
+from ...ops.transform_sys.tr_labels import TrLabels
+from ...utils.iter_utils import IterUtils
 
 
 class ZUV_OT_TrScale(bpy.types.Operator):
@@ -117,9 +117,9 @@ class ZUV_OT_TrScale(bpy.types.Operator):
         col.prop(self, "cursor_2d_as_pivot")
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         SP = TrScaleProps(context, self.scale_mode == 'GLOBAL')
@@ -271,16 +271,15 @@ class ZUV_OT_ScaleGrabSize(bpy.types.Operator):
             layout.prop(self, "multiplier")
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
         props = context.scene.zen_uv
         sel = []
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
             sel.extend([obj.matrix_world @ v.co for v in bm.verts if v.select])
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False)
         if not len(sel) == 2:
             self.report({'WARNING'}, "Zen UV: Select only two vertices or one edge.")
             return {'CANCELLED'}
@@ -324,9 +323,9 @@ class ZUV_OT_TrFlip(bpy.types.Operator):
         s_box.prop(self, 'island_pivot')
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         SP = TrScaleProps(context, is_global=False)

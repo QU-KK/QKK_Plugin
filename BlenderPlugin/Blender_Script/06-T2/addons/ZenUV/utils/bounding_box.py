@@ -25,11 +25,13 @@ from dataclasses import dataclass, field, asdict
 from math import pi
 from mathutils import Vector, Matrix
 from mathutils.geometry import convex_hull_2d
+from itertools import chain
 
-from ZenUV.utils.vlog import Log
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.constants import UV_AREA_BBOX
-from ZenUV.utils.generic import resort_objects_by_selection, verify_uv_layer
+from ..utils.vlog import Log
+from ..utils.iter_utils import IterUtils
+from ..utils.loops_factory import LoopsFactory
+from ..utils.constants import UV_AREA_BBOX
+from ..utils.generic import ResortObjects
 
 
 # NOTE: 1 symbol is X, 2 symbol is Y
@@ -454,7 +456,7 @@ The parameters of one of the groups must be specified in full.\n\n \
             return Matrix.Diagonal((1, 1))
 
     def get_orient_angle(self, image_aspect):
-        from ZenUV.utils.transform import zen_box_fit_2d
+        from ..utils.transform import zen_box_fit_2d
         if not len(self.points):
             print('Zen UV Warning: BoundingBox2d.points is empty.')
             return 0.0
@@ -505,6 +507,15 @@ The parameters of one of the groups must be specified in full.\n\n \
             self.rect[3] >= master_bbox.rect[3] - p_safe
             ]
 
+    def point_inside_of_bbox(self, point) -> bool:
+
+        p_safe = BoundingBox2d.transform_safe_zone
+        x, y = point
+        xmin, ymax, xmax, ymin = self.rect
+
+        return (xmin - p_safe <= x <= xmax + p_safe and
+                ymin - p_safe <= y <= ymax + p_safe)
+
     def inside_of_uv_area(self) -> bool:
         p_safe = BoundingBox2d.transform_safe_zone
 
@@ -540,8 +551,8 @@ The parameters of one of the groups must be specified in full.\n\n \
             verts.append(bm.verts.new(p.resized(3)))
 
     def get_diff_scale_vec(self, other, margin: float = 0.0):
-        from ZenUV.utils.transform import UvTransformUtils
-        from ZenUV.ops.transform_sys.transform_utils.tr_fit_utils import TransformLoops
+        from ..utils.transform import UvTransformUtils
+        from ..ops.transform_sys.transform_utils.tr_fit_utils import TransformLoops
         return UvTransformUtils._get_scale_vec(
             TransformLoops.get_optimal_axis_name(self, other),
             single_axis=False,
@@ -583,18 +594,23 @@ def uv_area_bbox() -> BoundingBox2d:
 
 
 def get_overall_bbox(context: bpy.types.Context, from_islands: bool = False, as_dict: bool = True):
-    objs = resort_objects_by_selection(context, context.objects_in_mode)
+    """
+    Return global UV bounding box for all selected objects.
+
+    Calculates combined UV BBOX from selected islands or,
+    if `use_selection_only` is True, from selected faces.
+    """
+    objs = ResortObjects.resort_objects_by_selection(context, context.objects_in_mode)
     uvs = []
-    for obj in objs:
-        bm = bmesh.from_edit_mesh(obj.data)
-        uv_layer = bm.loops.layers.uv.active
-        if uv_layer is None:
-            continue
+    for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
         if from_islands:
-            uvs.extend([lp[uv_layer].uv.copy() for island in island_util.get_island(context, bm, uv_layer) for f in island for lp in f.loops])
+            p_looplist = chain.from_iterable(LoopsFactory.get_loops_by_islands(context, bm, uv_layer))
         else:
-            uvs.extend([lp[uv_layer].uv.copy() for lp in island_util.LoopsFactory.loops_by_sel_mode(context, bm, uv_layer)])
-    if not len(uvs):
+            p_looplist = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer)
+
+        if p_looplist:
+            uvs.extend([lp[uv_layer].uv.copy() for lp in p_looplist])
+    if not uvs:
         if as_dict:
             return UV_AREA_BBOX.get_as_dict()
         else:
@@ -606,14 +622,11 @@ def get_overall_bbox(context: bpy.types.Context, from_islands: bool = False, as_
 
 
 def get_bbox_loops(context):
-    objs = resort_objects_by_selection(context, context.objects_in_mode)
+    objs = ResortObjects.resort_objects_by_selection(context, context.objects_in_mode)
     bb = []
-    for obj in objs:
-        bm = bmesh.from_edit_mesh(obj.data)
-        uv_layer = verify_uv_layer(bm)
-        loops = island_util.LoopsFactory.loops_by_sel_mode(context, bm, uv_layer)
+    for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+        loops = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer)
         points = [loop[uv_layer].uv for loop in loops]
-        # islands = island_util.get_island(context, bm, uv_layer)
         if loops:
             cbbox = BoundingBox2d(points=points).get_as_dict()
             bb.extend((cbbox["bl"], cbbox["tr"]))
@@ -690,8 +703,8 @@ class BoundingBoxUtils:
 
     @classmethod
     def get_orient_angle(cls, bounding_box: BoundingBox2dSimple, image_aspect: float):
-        from ZenUV.utils.transform import zen_box_fit_2d
-        from ZenUV.utils.transform import matrix_by_image_aspect
+        from ..utils.transform import zen_box_fit_2d
+        from ..utils.transform import matrix_by_image_aspect
         if not len(bounding_box.points):
             raise RuntimeError('bounding_box.points is empty')
 
@@ -724,7 +737,7 @@ class BoundingBoxUtils:
 
     @classmethod
     def rotate_by_angle(cls, bounding_box: BoundingBox2dSimple, angle: float, image_aspect_ratio, pivot: Vector = None, ) -> BoundingBox2dSimple:
-        from ZenUV.ops.transform_sys.transform_utils.transform_loops import TransformLoops
+        from ..ops.transform_sys.transform_utils.transform_loops import TransformLoops
         R = TransformLoops._get_rotation_matrix(angle, image_aspect_ratio)
         return cls.rotate_by_matrix(bounding_box, R, pivot)
 

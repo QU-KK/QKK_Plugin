@@ -2239,7 +2239,9 @@ class SNA_PT_uv_conversion_B5EFB(bpy.types.Panel):
         op = row_FD535.operator('sna.uv__ca81b', text='', icon_value=_icons['align_top.png'].icon_id, emboss=True, depress=False)
         op.sna_func_name = 'univ_align'
         op.sna_direction = 'UPPER'
-        op = row_FD535.operator('sna.uv__b75e5', text='', icon_value=string_to_icon('SHADING_BBOX'), emboss=True, depress=False)
+        #取消
+        row_FD535.label(text='')
+        #op = row_FD535.operator('sna.uv__b75e5', text='', icon_value=string_to_icon('SHADING_BBOX'), emboss=True, depress=False)
         row_0079E = col_BAE7E.row(heading='', align=True)
         row_0079E.alert = False
         row_0079E.enabled = True

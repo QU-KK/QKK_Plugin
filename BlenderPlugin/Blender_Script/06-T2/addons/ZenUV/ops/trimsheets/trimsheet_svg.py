@@ -28,7 +28,7 @@ from .svg import import_svg
 from bpy_extras.io_utils import ImportHelper, ExportHelper
 
 from .trimsheet_utils import ZuvTrimsheetUtils, TrimImportUtils
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ...utils.blender_zen_utils import ZenPolls
 
 
 class ZUV_OT_TrimImportSVG(bpy.types.Operator, ImportHelper):
@@ -117,7 +117,7 @@ class ZUV_OT_TrimExportSVG(bpy.types.Operator, ExportHelper):
 
     def draw_trimsheet(self, p_image, trimsheet, width, height):
         ''' @Draw Trim Export '''
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ...prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
 
         p_trimsheet_prefs = addon_prefs.trimsheet
@@ -212,7 +212,7 @@ class ZUV_OT_TrimExportSVG(bpy.types.Operator, ExportHelper):
             img_w = 1024
             img_h = 1024
 
-            from ZenUV.prop.zuv_preferences import get_prefs
+            from ...prop.zuv_preferences import get_prefs
             addon_prefs = get_prefs()
             p_data = context.scene if addon_prefs.trimsheet.mode == 'SCENE' else ZuvTrimsheetUtils.getActiveImage(context)
             if p_data is None:

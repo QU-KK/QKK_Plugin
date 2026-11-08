@@ -22,24 +22,25 @@ import numpy as np
 from mathutils import Vector, Matrix, geometry
 from collections import defaultdict
 
-from ZenUV.utils.transform import (
+from ...utils.transform import (
     calculate_fit_scale,
     UvTransformUtils
 )
-from ZenUV.utils.bounding_box import BoundingBox3d
-from ZenUV.utils.bounding_box import BoundingBox2d
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.constants import Planes
-from ZenUV.utils.projection import Projection, pVector
+from ...utils.bounding_box import BoundingBox3d
+from ...utils.bounding_box import BoundingBox2d
+from ...utils.uv_factory import UvIslandUtils, SelectionUtils
+from ...utils.loops_factory import LoopsFactory
+from ...utils.constants import Planes
+from ...utils.projection import Projection, pVector
 
 # Debugging Purposes
-from ZenUV.utils.generic import Scope, verify_uv_layer
-# from ZenUV.utils.generic import MeshBuilder
-from ZenUV.utils.blender_zen_utils import ZenPolls
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
-from ZenUV.ops.transform_sys.transform_utils.transform_loops import TransformLoops
+from ...utils.generic import Scope, verify_uv_layer
+# from ...utils.generic import MeshBuilder
+from ...utils.blender_zen_utils import is_loop_domain
+from ...ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
+from ...ops.transform_sys.transform_utils.transform_loops import TransformLoops
 
-from ZenUV.utils.vlog import Log
+from ...utils.vlog import Log
 
 
 CAT = 'orient_'
@@ -65,19 +66,10 @@ class BaseCluster():
         self.bound_uv_edges = self._cluster_bound_edges()
 
     def select(self, context, state=True):
-        C = context
-        uv_layer = self.uv_layer
-        # self.mesh_edge.select = True
-        sync_uv = C.scene.tool_settings.use_uv_select_sync
-        if C.space_data.type == 'IMAGE_EDITOR' and not sync_uv:
-            for loop in self.loops.values():
-                loop[uv_layer].select = state
-            if ZenPolls.version_since_3_2_0:
-                for loop in self.loops.values():
-                    loop[uv_layer].select_edge = state
+        if is_loop_domain(context):
+            LoopsFactory.select_loops(context, self.bm, self.loops.values(), self.uv_layer, state=state)
         else:
-            for f in self.island:
-                f.select = state
+            SelectionUtils.select_faces_any_context(context, self.island, state=state, bm=self.bm, uv_layer=self.uv_layer)
 
     def reset(self):
         for loop, co in zip(self.loops.values(), self.init_co):
@@ -131,9 +123,10 @@ class BaseCluster():
             return bm
 
     def _cluster_bound_edges(self):
-        edge_indexes = island_util.get_uv_bound_edges_indexes(self.island, self.uv_layer)
-        edges = [e for f in self.island for e in f.edges if e.index in edge_indexes]
-        loops = [loop for edge in edges for loop in edge.link_loops if loop in self.loops.values()]
+        s_edge_indexes = set(UvIslandUtils.get_uv_bound_edges_indexes(self.island, self.uv_layer))
+        edges = [e for f in self.island for e in f.edges if e.index in s_edge_indexes]
+        s_loops = set(self.loops.values())
+        loops = [loop for edge in edges for loop in edge.link_loops if loop in s_loops]
         ex = []
         for loop in loops:
             ex.append(loop.link_loop_next)
@@ -663,7 +656,7 @@ class OrientCluster:
 
     @classmethod
     def get_orient_angle(cls, island, uv_layer, image_aspect: float = 1):
-        from ZenUV.utils.transform import matrix_by_image_aspect
+        from ...utils.transform import matrix_by_image_aspect
         if image_aspect != 1:
             cls.ACM = matrix_by_image_aspect(image_aspect)
         else:

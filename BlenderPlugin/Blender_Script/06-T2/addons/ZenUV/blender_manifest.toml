@@ -1,10 +1,10 @@
 schema_version = "1.0.0"
 
 id = "ZenUV"
-version = "4.5.2"
+version = "5.2.1"
 name = "Zen UV"
 tagline = "Professional toolset for creating UVs in Blender"
-maintainer = "Zenmasters Team <tyapkin.art@gmail.com>"
+maintainer = "Zenmasters Team <tyapkin.art@gmail.com>, iBlender@taobao.com"
 type = "add-on"
 
 website = "https://zenmastersteam.github.io/Zen-UV/latest/"

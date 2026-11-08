@@ -22,8 +22,8 @@
 # Original idea Oleg Stepanov (DotBow)
 # https://github.com/DotBow/Blender-Sticky-UV-Editor-Add-on
 
-from ZenUV.sticky_uv_editor.controls import STK_classes
-from ZenUV.utils.register_util import RegisterUtils
+from ..sticky_uv_editor.controls import STK_classes
+from ..utils.register_util import RegisterUtils
 
 
 def register():

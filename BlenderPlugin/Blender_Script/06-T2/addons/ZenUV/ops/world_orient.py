@@ -19,20 +19,17 @@
 import bpy
 import bmesh
 from mathutils import Vector
-from ZenUV.utils.generic import (
-    resort_by_type_mesh_in_edit_mode_and_sel,
-    resort_objects_by_selection,
-    get_mesh_data,
-    verify_uv_layer
-)
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.base_clusters.base_cluster import (
+from ..utils.generic import ResortObjects
+
+from ..utils.base_clusters.base_cluster import (
     _OrientClusterLegacy
 )
-from ZenUV.utils.base_clusters.zen_cluster import ZenCluster
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import TransformSysOpsProps
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ..utils.base_clusters.zen_cluster import ZenCluster
+from ..ui.labels import ZuvLabels
+from ..ops.transform_sys.transform_utils.tr_utils import TransformSysOpsProps
+from ..utils.blender_zen_utils import ZenPolls
+from ..utils.uv_factory import UvIslandUtils
+from ..utils.iter_utils import IterUtils
 
 
 class ZUV_OT_WorldOrient(bpy.types.Operator):
@@ -55,15 +52,15 @@ and correctly orients most of the Islands in its area"""
 
     def execute(self, context):
         import numpy as np
-        from ZenUV.utils.base_clusters.base_cluster import OrientCluster
-        from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-        from ZenUV.utils.bounding_box import BoundingBox2dSimple, BoundingBoxUtils
+        from ..utils.base_clusters.base_cluster import OrientCluster
+        from ..ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+        from ..utils.bounding_box import BoundingBox2dSimple, BoundingBoxUtils
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
-        objs = resort_objects_by_selection(context, objs)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_objects_by_selection(context, objs)
 
         if not objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         b_is_image_editor = context.space_data.type == 'IMAGE_EDITOR'
@@ -88,13 +85,13 @@ and correctly orients most of the Islands in its area"""
             aspect_ratio = None
 
         p_broken_objs_count = 0
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            uv_layer = bm.loops.layers.uv.active
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=False):
+
             if not uv_layer:
                 p_broken_objs_count += 1
                 continue
-            islands = island_util.get_island(context, bm, uv_layer)
+
+            islands = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
 
             for island in islands:
                 if not b_is_image_editor:
@@ -193,18 +190,15 @@ class ZUV_OT_WorldOrient_legacy(bpy.types.Operator):
     poll_reason = TransformSysOpsProps.poll_reason_edit_mesh_and_active_object
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
-        objs = resort_objects_by_selection(context, objs)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_objects_by_selection(context, objs)
         # print(f"\n{'-' * 50}\nObjs in WO Operator:", objs)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
-        for obj in objs:
-            # print("\nProcessed Object --->  ", obj.name)
-            me, bm = get_mesh_data(obj)
-            uv_layer = verify_uv_layer(bm)
-            islands = island_util.get_island(context, bm, uv_layer)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+            islands = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
             # clusters = []
             # print("Islands count: ", len(islands))
             for ids, island in enumerate(islands):
@@ -228,7 +222,7 @@ class ZUV_OT_WorldOrient_legacy(bpy.types.Operator):
                 cluster.type = self.method
                 cluster.do_orient_to_world()
 
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False)
 
         return {'FINISHED'}
 

@@ -20,26 +20,23 @@
 from math import radians, pi
 import bpy
 import bmesh
-from ZenUV.utils.generic import (
-    get_mesh_data,
-    collect_selected_objects_data,
-    resort_by_type_mesh_in_edit_mode_and_sel,
-    verify_uv_layer
-)
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.utils.constants import UiConstants as uc
-from ZenUV.utils.mark_utils import (
+from ..utils.generic import ResortObjects
+from ..ui.labels import ZuvLabels
+from ..utils.constants import UiConstants as uc
+from ..utils.mark_utils import (
     MarkStateManager,
     unmark_all_seams_sharp,
     sharp_by_uv_border,
-    seams_by_uv_border,
+    mark_seams_by_uv_border,
     seams_by_sharp,
     sharp_by_seam,
     seams_by_open_edges,
     MarkFactory
 )
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.ui.pie import ZsPieFactory
+from ..prop.zuv_preferences import get_prefs
+from ..ui.pie import ZsPieFactory
+from ..utils.iter_utils import IterUtils, IterUtils2
+from ..utils.blender_zen_utils import ZenPolls, is_sync_off
 
 
 class ZUV_OT_Mark_Seams(bpy.types.Operator):
@@ -91,7 +88,7 @@ Sharp edges"
             seam_label = 'Mark Seams'
             sharp_label = 'Mark Sharp Edges'
 
-        addon_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
+        addon_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
         layout.prop(self, 'clear_inside')
         mark_box = layout.box()
         s_mark_settings = 'Mark Settings'
@@ -118,18 +115,18 @@ Sharp edges"
         ZsPieFactory.mark_pie_cancelled()
 
         # Sync mode only
-        if context.space_data and context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync:
-            from ZenUV.utils.messages import zen_message
+        if is_sync_off(context):
+            from ..utils.messages import zen_message
             zen_message(context, message="Turn on UV Sync Selection mode",)
             return {'CANCELLED'}
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         MarkFactory.initialize()
-        MarkFactory.b_is_use_popup = True
+        MarkFactory.b_is_use_popup = False
 
         b_mSeam, b_mSharp = MarkStateManager(context).get_state_from_generic_operator(self.markSeamEdges, self.markSharpEdges)
         if not b_mSeam and not b_mSharp:
@@ -153,8 +150,8 @@ Sharp edges"
             bpy.ops.wm.call_menu(name=MarkFactory.popup_name)
 
         if context.scene.tool_settings.use_edge_path_live_unwrap:
-            from ZenUV.ops.pack_sys.pack import PackObjectsStorage
-            from ZenUV.utils.generic import bpy_select_by_context
+            from ..ops.pack_sys.pack import PackObjectsStorage
+            from ..utils.generic import bpy_select_by_context
 
             Storage = PackObjectsStorage()
             Storage.collect_objects(context)
@@ -221,9 +218,9 @@ class ZUV_OT_Unmark_All(bpy.types.Operator):
     def execute(self, context):
         ZsPieFactory.mark_pie_cancelled()
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         mSeam, mSharp = MarkStateManager(context).get_state_from_generic_operator(self.markSeamEdges, self.markSharpEdges)
@@ -231,11 +228,7 @@ class ZUV_OT_Unmark_All(bpy.types.Operator):
         if mSeam is False and mSharp is False:
             return {'FINISHED'}
 
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-
-            """ Clear Pinned Data """
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
             edges = [edge for edge in bm.edges if not edge.hide]
 
@@ -254,7 +247,7 @@ class ZUV_OT_Unmark_All(bpy.types.Operator):
                     edge.seam = False
                     edge.smooth = True
 
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False)
 
         return {'FINISHED'}
 
@@ -306,21 +299,35 @@ class ZUV_OT_UnifiedMark(bpy.types.Operator):
             box.label(text="No options.")
 
     def execute(self, context):
-        bms = collect_selected_objects_data(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
+        if not objs:
+            self.report({'WARNING'}, "No objects selected.")
+            return {'CANCELLED'}
+
         if self.convert == "SHARP_BY_UV_BORDER":
-            if self.unmark_seams or self.unmark_sharp:
-                unmark_all_seams_sharp(bms, self.unmark_seams, self.unmark_sharp)
-            sharp_by_uv_border(context, bms, self.influence)
-        if self.convert == "SEAM_BY_UV_BORDER":
-            if self.unmark_seams or self.unmark_sharp:
-                unmark_all_seams_sharp(bms, self.unmark_seams, self.unmark_sharp)
-            seams_by_uv_border(bms)
-        elif self.convert == "SEAM_BY_SHARP":
-            seams_by_sharp(context)
-        elif self.convert == "SHARP_BY_SEAM":
-            sharp_by_seam(context)
-        elif self.convert == "SEAM_BY_OPEN_EDGES":
-            seams_by_open_edges(bms)
+            for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+
+                if self.unmark_seams or self.unmark_sharp:
+                    unmark_all_seams_sharp(bm, self.unmark_seams, self.unmark_sharp)
+                sharp_by_uv_border(context, bm, uv_layer, self.influence)
+
+                bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
+        else:
+            for obj, bm in IterUtils2.iter_objs_with_bmesh(objs):
+
+                if self.convert == "SEAM_BY_UV_BORDER":
+                    if self.unmark_seams or self.unmark_sharp:
+                        unmark_all_seams_sharp(bm, self.unmark_seams, self.unmark_sharp)
+                    mark_seams_by_uv_border(bm)
+                elif self.convert == "SEAM_BY_SHARP":
+                    seams_by_sharp(bm)
+                elif self.convert == "SHARP_BY_SEAM":
+                    sharp_by_seam(bm)
+                elif self.convert == "SEAM_BY_OPEN_EDGES":
+                    seams_by_open_edges(bm)
+
+                bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
+
         return {'FINISHED'}
 
 
@@ -340,10 +347,22 @@ class ZUV_OT_Seams_By_UV_Borders(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        bms = collect_selected_objects_data(context)
-        if self.unmark_seams or self.unmark_sharp:
-            unmark_all_seams_sharp(bms, self.unmark_seams, self.unmark_sharp)
-        seams_by_uv_border(bms)
+        if not self.unmark_seams or not self.unmark_sharp:
+            self.report({'WARNING'}, "Enable at least one of the options: Unmark Seams or Unmark Sharp.")
+            return {'CANCELLED'}
+
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
+        if not objs:
+            self.report({'WARNING'}, "No objects selected.")
+            return {'CANCELLED'}
+
+        for obj, bm in IterUtils2.iter_objs_with_bmesh(objs):
+
+            unmark_all_seams_sharp(bm, self.unmark_seams, self.unmark_sharp)
+            mark_seams_by_uv_border(objs)
+
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False)
+
         return {'FINISHED'}
 
 
@@ -372,10 +391,19 @@ class ZUV_OT_Sharp_By_UV_Borders(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        bms = collect_selected_objects_data(context)
-        if self.unmark_seams or self.unmark_sharp:
-            unmark_all_seams_sharp(bms, self.unmark_seams, self.unmark_sharp)
-        sharp_by_uv_border(context, bms, self.influence)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
+        if not objs:
+            self.report({'WARNING'}, "No objects selected.")
+            return {'CANCELLED'}
+
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+
+            if self.unmark_seams or self.unmark_sharp:
+                unmark_all_seams_sharp(bm, self.unmark_seams, self.unmark_sharp)
+            sharp_by_uv_border(context, bm, uv_layer, self.influence)
+
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
+
         return {'FINISHED'}
 
 
@@ -392,9 +420,15 @@ class ZUV_OT_Seams_By_Open_Edges(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        bms = collect_selected_objects_data(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
+        if not objs:
+            self.report({'WARNING'}, "No objects selected.")
+            return {'CANCELLED'}
 
-        seams_by_open_edges(bms)
+        for obj, bm in IterUtils2.iter_objs_with_bmesh(objs):
+            seams_by_open_edges(bm)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
+
         return {'FINISHED'}
 
 
@@ -411,7 +445,15 @@ class ZUV_OT_Seam_By_Sharp(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        seams_by_sharp(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
+        if not objs:
+            self.report({'WARNING'}, "No objects selected.")
+            return {'CANCELLED'}
+
+        for obj, bm in IterUtils2.iter_objs_with_bmesh(objs):
+            seams_by_sharp(bm)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
+
         return {'FINISHED'}
 
 
@@ -428,7 +470,15 @@ class ZUV_OT_Sharp_By_Seam(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        sharp_by_seam(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
+        if not objs:
+            self.report({'WARNING'}, "No objects selected.")
+            return {'CANCELLED'}
+
+        for obj, bm in IterUtils2.iter_objs_with_bmesh(objs):
+            sharp_by_seam(bm)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
+
         return {'FINISHED'}
 
 
@@ -477,7 +527,7 @@ class ZUV_OT_Auto_Mark(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def draw(self, context: bpy.types.Context):
-        addon_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
+        addon_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
 
         layout = self.layout
 
@@ -502,17 +552,16 @@ class ZUV_OT_Auto_Mark(bpy.types.Operator):
     def execute(self, context):
         ZsPieFactory.mark_pie_cancelled()
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         mSeam, mSharp = MarkStateManager(context).get_state_from_generic_operator(self.markSeamEdges, self.markSharpEdges)
         if not mSeam and not mSharp:
             return {'FINISHED'}
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
+        for obj, bm in IterUtils2.iter_objs_with_bmesh(objs):
 
             if self.respect_selection:
                 edges = [edge for edge in bm.edges if not edge.hide and edge.select]

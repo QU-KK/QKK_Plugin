@@ -21,8 +21,8 @@
 
 import bpy
 
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import TransformSysOpsProps
+from ...utils.register_util import RegisterUtils
+from ...ops.transform_sys.transform_utils.tr_utils import TransformSysOpsProps
 
 from .unwrap_processor import (
     ZuvUnwrapTemplate,
@@ -39,6 +39,24 @@ class ZUV_OT_UnwrapForTool(bpy.types.Operator, ZuvUnwrapTemplate):
     bl_options = {'REGISTER', 'UNDO'}
 
     influence_mode: TransformSysOpsProps.influence_scene_mode
+
+    unwrap_allowed: ZuvUnwrapTemplate.get_unwrap_allowed(True)
+
+    restore_location: ZuvUnwrapTemplate.get_restore_location(True)
+
+    restore_orientation: ZuvUnwrapTemplate.get_restore_orientation(True)
+
+    restore_size: ZuvUnwrapTemplate.get_restore_size(True)
+
+    ignore_pins: ZuvUnwrapTemplate.get_ignore_pins(False)
+
+    urp_method: ZuvUnwrapTemplate.get_urp_method('ANGLE_BASED')
+
+    fill_holes: ZuvUnwrapTemplate.get_fill_holes(True)
+
+    correct_aspect: ZuvUnwrapTemplate.get_correct_aspect(True)
+
+    use_subsurf_data: ZuvUnwrapTemplate.get_use_subsurf_data(False)
 
     def draw(self, context):
         layout = self.layout

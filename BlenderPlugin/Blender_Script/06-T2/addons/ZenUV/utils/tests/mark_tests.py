@@ -30,7 +30,10 @@ from . addon_test_utils import (
     _get_sharp_edges_ids,
     _hide_faces_by_id_active_obj
 )
-from ZenUV.utils.vlog import Log
+from ...utils.generic import (
+    switch_to_face_sel_mode, switch_to_edge_sel_mode,
+    bpy_select_by_context)
+from ...utils.vlog import Log
 
 
 def seam_by_open_edges(context):
@@ -194,7 +197,7 @@ def Test_mesh_zenuv_select_sharp(context):
 
 def Test_uv_zenuv_unified_mark(context):
     ''' Mark and Convert Seams and Sharp '''
-    from ZenUV.utils.constants import UiConstants
+    from ...utils.constants import UiConstants
     modes = [i[0] for i in UiConstants.unified_mark_enum]
     Log.info(f"Modes for testing: {modes}")
     # ['SEAM_BY_UV_BORDER', 'SHARP_BY_UV_BORDER', 'SEAM_BY_SHARP', 'SHARP_BY_SEAM', 'SEAM_BY_OPEN_EDGES']
@@ -213,9 +216,10 @@ def Test_uv_zenuv_mark_seams(context):
     print("-------------------- Testing MARK Feature")
     Log.info("Testing in the EDGE Mode")
     test_count = 5
-    bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
 
-    bpy.ops.mesh.select_all(action='DESELECT')
+    switch_to_edge_sel_mode(context)
+
+    bpy_select_by_context(context, action='DESELECT')
     _set_seams(context, [*range(0, 12)], state=False)
 
     _select_edges_by_id_active_obj(context, [*range(0, 5)])
@@ -229,8 +233,9 @@ def Test_uv_zenuv_mark_seams(context):
 
     Log.info("Testing in the FACE Mode")
     test_count = 4
-    bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
-    bpy.ops.mesh.select_all(action='DESELECT')
+
+    switch_to_face_sel_mode(context)
+    bpy_select_by_context(context, action='DESELECT')
     _set_seams(context, [*range(0, 12)], state=False)
 
     _select_faces_by_id_active_obj(context, [1, ])
@@ -246,10 +251,11 @@ def Test_uv_zenuv_mark_seams(context):
     print("-------------------- Testing UNMARK Feature")
 
     Log.info("Testing in the EDGE Mode")
-    bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
+
+    switch_to_edge_sel_mode(context)
     unmark_edge_id = 7
     test_seams = 3
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
     seams = _get_seam_edges_ids(context)
     Log.info(f"Current Seams count {len(seams)}")
 
@@ -267,9 +273,10 @@ def Test_uv_zenuv_mark_seams(context):
     Log.info("Testing in the FACE Mode")
     _prepare_test(context)
     test_count = 11
-    bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
 
-    bpy.ops.mesh.select_all(action='DESELECT')
+    switch_to_edge_sel_mode(context)
+
+    bpy_select_by_context(context, action='DESELECT')
 
     _select_faces_by_id_active_obj(context, [1, ])
 
@@ -285,7 +292,7 @@ def Test_uv_zenuv_mark_seams(context):
 def Test_mesh_zenuv_select_seams(context):
     ''' Select Edges Marked as Seams '''
     test_seams = 14
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
 
     bpy.ops.mesh.zenuv_select_seams()
 

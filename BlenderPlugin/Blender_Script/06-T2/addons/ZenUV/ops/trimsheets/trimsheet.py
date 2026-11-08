@@ -84,11 +84,11 @@ from .trimsheet_import import (
 )
 from .color_palette import ZuvColorPaletteFactory
 
-from ZenUV.utils.blender_zen_utils import update_areas_in_all_screens, setnameex, ZenPolls
-from ZenUV.utils.group_dict_utils import group_from_dict, group_to_dict
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.vlog import Log
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import TransformSysOpsProps
+from ...utils.blender_zen_utils import update_areas_in_all_screens, setnameex, ZenPolls
+from ...utils.group_dict_utils import group_from_dict, group_to_dict
+from ...utils.register_util import RegisterUtils
+from ...utils.vlog import Log
+from ...ops.transform_sys.transform_utils.tr_utils import TransformSysOpsProps
 
 
 @dataclass
@@ -238,7 +238,7 @@ class ZuvTrimsheetGroup(bpy.types.PropertyGroup):
 
     def set_snapped_rect(self, context: bpy.types.Context, left, top, right, bottom, snap_pivots={"br", "bl", "tr", "tl"}):
         p_scene = context.scene
-        from ZenUV.prop.scene_ui_props import ZUV_UVToolProps
+        from ...prop.scene_ui_props import ZUV_UVToolProps
         tool_props: ZUV_UVToolProps = p_scene.zen_uv.ui.uv_tool
         p_image: bpy.types.Image = ZuvTrimsheetUtils.getSpaceDataImage(context)
 
@@ -973,7 +973,7 @@ class ZUV_UL_TrimsheetList(bpy.types.UIList):
         ''' @Draw Trimsheet Groups UIList '''
         custom_icon = 'OBJECT_DATAMODE'
 
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ...prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
 
         # Make sure code supports all 3 layout types
@@ -1017,7 +1017,7 @@ class ZUV_PT_TrimOverlayFilter(bpy.types.Panel):
     def draw(self, context: bpy.types.Context):
         layout = self.layout
 
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ...prop.zuv_preferences import get_prefs
 
         col = layout.column(align=False)
         col.use_property_split = True

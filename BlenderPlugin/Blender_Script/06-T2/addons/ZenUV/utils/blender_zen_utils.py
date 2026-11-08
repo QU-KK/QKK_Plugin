@@ -38,6 +38,7 @@ from dataclasses import dataclass, field
 import itertools
 from enum import IntEnum
 import subprocess
+from pathlib import Path
 
 from .vlog import Log
 
@@ -48,6 +49,8 @@ EXEC_BLENDER_OPERATOR_ARGUMENTS = 'from mathutils import Vector, Matrix, Color, 
 
 class ZenPolls:
     ADDON_PACKAGE = "ZenUV"
+    ADDON_DIR = ""
+    ADDON_VERSION = (0, 0, 0)
 
     # API:
     # - Event - mouse_prev_x, mouse_prev_y
@@ -77,6 +80,8 @@ class ZenPolls:
 
     # for Math Vis
     version_lower_4_4_0 = app_version < (4, 4, 0)
+
+    version_since_5_0_0 = app_version >= (5, 0, 0)
 
     # Will be taken from bl_info['doc_url'] !!!
     doc_url = ''
@@ -124,8 +129,20 @@ class ZenPolls:
             "trims_preselection", "orient", "priority", "area_match", "manual_scale", "allow_rotation",
             "allow_rotation_variation", "allow_location_variation", "allow_offset_variation",
             "allow_flip_variation", "loc_var_offset", "fit_axis", "inset_mode", "inset", "seed", "keep_proportion",
-            "detect_radial", "select_radials", "aspect_precision", "allow_variability"}
-        }
+            "detect_radial", "select_radials", "aspect_precision", "allow_variability"},
+        "UV_OT_zenuv_auto_uv_unwrap": {
+            "force_hard_surface", "separate_by_material", "separate_sharp_edges",
+            "triangulate_mesh", "triangulate_ngon_method", "triangulate_quad_method",
+            "auto_detect_hard_edges", "use_normal", "overlap_identical_parts",
+            "overlap_mirrored_parts", "world_scale", "use_texel_density", "texel_density",
+            "mark_seam_edges", "correct_self_intersecting",
+            "stretch", "packing", "cut", "squares", "quads", "weld", "debug_info", "extra_cmd"},
+        "UV_OT_zenuv_unwrap_inplace": {
+            "influence_mode", "unwrap_allowed", "restore_location", "restore_orientation", "restore_size",
+            "ignore_pins", "urp_method", "fill_holes", "correct_aspect", "use_subsurf_data",
+            "orient",
+            "size"}
+    }
 
     operator_defaults = dict()
 
@@ -235,7 +252,7 @@ class ZenDrawConstants:
 
     DRAW_ICON_BATCHES = {}
 
-    icon_shader = gpu.shader.from_builtin(ZenCompat.get_2d_uniform_color())
+    icon_shader = gpu.shader.from_builtin(ZenCompat.get_2d_uniform_color()) if not bpy.app.background else None
 
     @classmethod
     def get_ui_icon_batch(cls, s_identifier: str):
@@ -271,6 +288,89 @@ class ZenDrawConstants:
                 Log.error("GENERATE ICON:", s_identifier, e)
 
         return cls.DRAW_ICON_BATCHES[s_identifier]
+
+
+def is_sync_off(context: bpy.types.Context, area_type=None):
+
+    if area_type is None:
+        p_space = getattr(context, "space_data", None)
+        if p_space:
+            area_type = p_space.type
+
+    b_is_uv_editor = area_type == 'IMAGE_EDITOR'
+
+    if ZenPolls.version_since_5_0_0:
+        if b_is_uv_editor:
+            return not context.scene.tool_settings.use_uv_select_sync
+        else:
+            return False
+    else:
+        return b_is_uv_editor and not context.scene.tool_settings.use_uv_select_sync
+
+
+def is_loop_domain(context: bpy.types.Context, area_type=None):
+
+    if area_type is None:
+        p_space = getattr(context, "space_data", None)
+        if p_space:
+            area_type = p_space.type
+
+    b_is_uv_editor = area_type == 'IMAGE_EDITOR'
+
+    if ZenPolls.version_since_5_0_0:
+        return (
+            b_is_uv_editor and (
+                not context.scene.tool_settings.use_uv_select_sync or
+                context.scene.tool_settings.uv_sticky_select_mode != 'SHARED_VERTEX')
+        )
+    else:
+        return b_is_uv_editor and not context.scene.tool_settings.use_uv_select_sync
+
+
+def _internal_get_mesh_select_mode(context: bpy.types.Context):
+    modes = context.tool_settings.mesh_select_mode[:]
+    if sum(modes) > 1:
+        return 'VERT'
+
+    if modes[0]:
+        return 'VERT'
+    elif modes[1]:
+        return 'EDGE'
+    elif modes[2]:
+        return 'FACE'
+    return 'VERT'
+
+
+def _internal_get_uv_select_mode(context: bpy.types.Context):
+    mode = context.scene.tool_settings.uv_select_mode
+    if mode == 'VERTEX':
+        return 'VERT'
+    else:
+        return mode
+
+
+def get_selection_mode(context: bpy.types.Context, area_type=None):
+
+    if area_type is None:
+        p_space = getattr(context, "space_data", None)
+        if p_space:
+            area_type = p_space.type
+
+    b_is_uv_editor = area_type == 'IMAGE_EDITOR'
+
+    if ZenPolls.version_since_5_0_0:
+        if b_is_uv_editor:
+            if context.scene.tool_settings.use_uv_select_sync:
+                return _internal_get_mesh_select_mode(context)
+            else:
+                return _internal_get_uv_select_mode(context)
+        else:
+            return _internal_get_mesh_select_mode(context)
+    else:
+        if is_sync_off(context, area_type=area_type):
+            return _internal_get_uv_select_mode(context)
+        else:
+            return _internal_get_mesh_select_mode(context)
 
 
 def get_zen_platform():
@@ -412,6 +512,43 @@ class ZuvPresets:
             raise RuntimeError(f"Can not find or create: {s_preset_dir}")
 
         return target_path
+
+    @classmethod
+    def preset_file_patch(cls, s_preset_file):
+        try:
+            if Path(s_preset_file).exists():
+                data = []
+                BUGGY_LINES = {
+                    'else bpy.context.space_data.image.zen_uv': "prefs = bpy.context.window_manager.zen_uv.get_trimsheet_data()",
+                }
+
+                REPLACE_LINES = {
+                    'bpy.context.preferences.addons["ZenUV"].preferences': 'bpy.context.window_manager.zen_uv.get_addon_prefs()',
+                    "bpy.context.preferences.addons['ZenUV'].preferences": 'bpy.context.window_manager.zen_uv.get_addon_prefs()',
+                    'preferences.addons["ZenUV"].preferences': 'window_manager.zen_uv.get_addon_prefs()',
+                    "preferences.addons['ZenUV'].preferences": 'window_manager.zen_uv.get_addon_prefs()',
+                }
+
+                with open(s_preset_file, 'rt', encoding='utf-8') as fin:
+                    text = fin.read()
+                    for k in itertools.chain(BUGGY_LINES.keys(), REPLACE_LINES.keys()):
+                        if k in text:
+                            fin.seek(0)
+                            data = fin.readlines()
+
+                if data:
+                    with open(s_preset_file, 'wt', encoding='utf-8') as fout:
+                        for line in data:
+                            for k, v in BUGGY_LINES.items():
+                                if k in line:
+                                    line = v
+
+                            for k, v in REPLACE_LINES.items():
+                                line = line.replace(k, v)
+
+                            fout.write(line)
+        except Exception as e:
+            Log.error(e)
 
 
 class ZsOperatorAttrs:
@@ -816,6 +953,19 @@ def reset_properties_modified(obj_prop: bpy.types.bpy_struct):
                 obj_prop.property_unset(k)
         except Exception as e:
             Log.error('RESET PROPERTY:', e)
+
+
+def are_paths_equal_pathlib(path1, path2):
+    """
+    Checks if two directory paths are the same using the pathlib module.
+    """
+    try:
+        # Resolve the paths to get their canonical form
+        return Path(path1).resolve() == Path(path2).resolve()
+    except FileNotFoundError:
+        # Handle cases where one or both paths do not exist
+        # In this case, the paths cannot be considered "equal"
+        return False
 
 
 class ZenModeSwitcher:

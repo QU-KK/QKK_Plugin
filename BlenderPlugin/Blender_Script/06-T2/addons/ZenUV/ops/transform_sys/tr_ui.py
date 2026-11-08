@@ -20,8 +20,8 @@
 
 
 import bpy
-from ZenUV.ico import icon_get
-from ZenUV.ops.transform_sys.tr_labels import TrLabels
+from ...ico import icon_get
+from ...ops.transform_sys.tr_labels import TrLabels
 
 from . tr_move import (
     ZUV_OT_TrMove,
@@ -47,10 +47,10 @@ from . tr_rotate import (
 from . tr_align import ZUV_OT_TrAlign
 from . transform_utils.tr_utils import BlPivotPoint
 
-from ZenUV.ops.stitch import ZUV_OT_MatchAndStitch
-from ZenUV.ops.mirror_uv import ZUV_OT_MirrorUV
+from ...ops.stitch import ZUV_OT_MatchAndStitch
+from ...ops.mirror_uv import ZUV_OT_MirrorUV
 
-from ZenUV.utils.generic import ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE, ZUV_SPACE_TYPE
+from ...utils.generic import ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE, ZUV_SPACE_TYPE
 
 
 """
@@ -224,7 +224,7 @@ def draw_align_subcontrols(context, prop, s_col, s_row):
 
 def draw_rotate_subcontrols(prop, s_col, s_row):
     ''' @Draw Rotate Subcontrols '''
-    from ZenUV.ops.select_sys.select_islands import ZUV_OP_SelectIslandByDirection
+    from ...ops.select_sys.select_islands import ZUV_OP_SelectIslandByDirection
     s_col.prop(prop, "tr_rot_inc")
     row = s_col.row(align=True)
     row.operator(ZUV_OP_SelectIslandByDirection.bl_idname)
@@ -427,14 +427,15 @@ def draw_splitted_v_tuner(col2):
     res.axis = 'Y'
 
 
-def draw_trans_independent_operators(self, context, layout):
+def draw_trans_independent_operators(self, context: bpy.types.Context, layout: bpy.types.UILayout):
     ''' @Draw Trans Independent Operators '''
-    from ZenUV.ops.stitch import ZUV_OT_MergeUvVerts, ZUV_OT_Split
-    from ZenUV.ops.select_sys.select import (
-        ZUV_OT_Select_UV_Borders, ZUV_OT_SelectLinkedLoops,
-        ZUV_OT_SelectHalf)
-    from ZenUV.ops.select_sys.select_islands import ZUV_OT_Select_QuadedIslands
-    from ZenUV.ops.quadrify import ZUV_OT_Quadrify
+    from ...ops.stitch import ZUV_OT_MergeUvVerts, ZUV_OT_Split
+    from ...ops.select_sys.select_edges import ZUV_OT_Select_UV_Borders
+    from ...ops.select_sys.select import (
+        ZUV_OT_SelectLinkedLoops, ZUV_OT_SelectHalf)
+    from ...ops.select_sys.select_islands import ZUV_OT_Select_QuadedIslands
+    from ...ops.quadrify import ZUV_OT_Quadrify
+    from ...ops.transform_sys.misc_transform_ops import ZUV_OT_RoundUvCoordinates, ZUV_OT_SelectionToCircle, ZUV_OT_Rectify
 
     col = layout.column(align=True)
     row = col.row(align=True)
@@ -443,14 +444,26 @@ def draw_trans_independent_operators(self, context, layout):
     col.operator("uv.zenuv_world_orient")
     col.operator("uv.zenuv_randomize_transform")
 
+    col.separator()
+
     # Quadrify section
     row = col.row(align=True)
     row.operator(ZUV_OT_Quadrify.bl_idname, icon_value=icon_get(TrLabels.ZEN_QUADRIFY_ICO))
     row.operator(ZUV_OT_Select_QuadedIslands.bl_idname, icon="RESTRICT_SELECT_OFF", text='')
     row.popover(panel="QUADRIFY_PT_Properties", text="", icon="PREFERENCES")
 
+    row = col.row(align=True)
+    row.operator(ZUV_OT_SelectionToCircle.bl_idname)
+    op = row.operator(ZUV_OT_Select_UV_Borders.bl_idname, icon="RESTRICT_SELECT_OFF", text='')
+    op.mode = 'FACES'
+    op.clear_selection = True
+    row.operator(ZUV_OT_Rectify.bl_idname)
+    col.operator(ZUV_OT_RoundUvCoordinates.bl_idname)
+
     if context.area.type == 'IMAGE_EDITOR':
         col.operator("uv.zenuv_reshape_island")
+
+    col.separator()
 
     row = col.row(align=True)
     row.operator(ZUV_OT_MatchAndStitch.bl_idname)
@@ -460,7 +473,9 @@ def draw_trans_independent_operators(self, context, layout):
     row = col.row(align=True)
     row.operator(ZUV_OT_Split.bl_idname, text='Split')
     row.operator(ZUV_OT_MergeUvVerts.bl_idname, text='Merge')
-    row.operator(ZUV_OT_Select_UV_Borders.bl_idname, icon="RESTRICT_SELECT_OFF", text='')
+    op = row.operator(ZUV_OT_Select_UV_Borders.bl_idname, icon="RESTRICT_SELECT_OFF", text='')
+    op.mode = 'ALL_ISLANDS'
+    op.clear_selection = True
 
     row = col.row(align=True)
     row.operator(ZUV_OT_MirrorUV.bl_idname, text='Mirror UV')
@@ -682,7 +697,7 @@ class UnifiedControl:
 
 def draw_fit_region_section(context, layout):
     ''' @Draw Fit Region Section '''
-    from ZenUV.ops.transform_sys.tr_fit import (
+    from ...ops.transform_sys.tr_fit import (
         ZUV_OT_FitGrabRegion, ZUV_OT_FitShowRegion,
         ZUV_OT_FitHideRegion, ZUV_OT_FitRegion)
 
@@ -739,7 +754,9 @@ def draw_extended_transform_panel(context: bpy.types.Context, layout: bpy.types.
     ot = grid.operator(ZUV_OT_TrMove.bl_idname, text='To 2d Cursor')
     ot.move_mode = "TO_CURSOR"
 
-    ot = grid.operator(ZUV_OT_TrMove.bl_idname, text='To Mouse Cursor')
+    row = grid.row(align=True)
+    row.enabled = context.area.type == "IMAGE_EDITOR"
+    ot = row.operator(ZUV_OT_TrMove.bl_idname, text='To Mouse Cursor')
     ot.move_mode = "TO_M_CURSOR"
 
     grid.operator(ZUV_OT_MoveToUvArea.bl_idname, text='To UV Area')

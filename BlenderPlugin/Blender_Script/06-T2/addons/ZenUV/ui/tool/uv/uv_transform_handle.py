@@ -23,8 +23,8 @@ import gpu
 from mathutils import Matrix, Vector
 from gpu_extras.batch import batch_for_shader
 
-from ZenUV.utils.blender_zen_utils import ZenPolls, ZenCompat, get_gizmo_scale
-from ZenUV.utils.simple_geometry import draw_rounded_rect, Rectangle
+from ....utils.blender_zen_utils import ZenPolls, ZenCompat, get_gizmo_scale
+from ....utils.simple_geometry import draw_rounded_rect, Rectangle
 
 
 if not bpy.app.background:

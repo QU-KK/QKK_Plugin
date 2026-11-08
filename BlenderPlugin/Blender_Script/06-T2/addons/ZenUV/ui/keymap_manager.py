@@ -26,7 +26,7 @@ import rna_keymap_ui
 
 from collections import defaultdict
 
-from ZenUV.ui.keymap import _keymap
+from ..ui.keymap import _keymap
 
 addon_keymap = []
 
@@ -120,8 +120,8 @@ def get_kmi_collision(kc: bpy.types.KeyConfig, km: bpy.types.KeyMap, kmi: bpy.ty
 
 def draw_keymap_button(layout: bpy.types.UILayout):
     from .keymap_operator import ZUV_OT_Keymaps
-    from ZenUV.ico import icon_get
-    from ZenUV.ui.labels import ZuvLabels
+    from ..ico import icon_get
+    from ..ui.labels import ZuvLabels
 
     layout.operator(
             ZUV_OT_Keymaps.bl_idname,

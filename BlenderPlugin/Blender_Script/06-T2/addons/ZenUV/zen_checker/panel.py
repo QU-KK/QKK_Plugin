@@ -26,11 +26,11 @@ from bpy.types import Panel
 from .properties import get_prefs
 from .zen_checker_labels import ZCheckerLabels as label
 
-from ZenUV.ico import icon_get
-from ZenUV.zen_checker import checker
-from ZenUV.prop.common import get_combo_panel_order
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.generic import (
+from ..ico import icon_get
+from ..zen_checker import checker
+from ..prop.common import get_combo_panel_order
+from ..utils.register_util import RegisterUtils
+from ..utils.generic import (
     ZUV_REGION_TYPE, ZUV_SPACE_TYPE, ZUV_PANEL_CATEGORY)
 
 
@@ -186,7 +186,7 @@ def draw_checker_panel_3D(self, context: bpy.types.Context):
 
 
 def draw_texture_checker_setup_3D(self, context: bpy.types.Context):
-    from ZenUV.prop.zuv_preferences import get_scene_props
+    from ..prop.zuv_preferences import get_scene_props
     addon_scene_props = get_scene_props(context)
     cheker_prefs = context.scene.zen_uv_checker
     layout = self.layout

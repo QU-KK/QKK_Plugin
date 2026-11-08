@@ -25,27 +25,28 @@ import bmesh
 from mathutils import Color
 from bl_operators.presets import ExecutePreset
 
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.utils.generic import (
+from ...ui.labels import ZuvLabels
+from ...utils.generic import (
     ZUV_PANEL_CATEGORY,
     ZUV_REGION_TYPE,
     ZUV_CONTEXT,
     ZUV_SPACE_TYPE,
-    resort_objects_by_selection,
-    get_mesh_data,
+    ResortObjects,
     remap_ranges
 )
+from ...utils.iter_utils import IterUtils
+from ...utils.uv_factory import SelectionUtils
 
-from ZenUV.ops.texel_density.td_utils import (
+from ...ops.texel_density.td_utils import (
     TdContext,
     TexelDensityFactory,
     TexelDensityProcessor
 )
-from ZenUV.ui.ui_call import popup_areas
-from ZenUV.utils.blender_zen_utils import ZuvPresets
-from ZenUV.utils.adv_generic_ui_list import ZenAddPresetBase
-from ZenUV.utils.tests.system_operators import ZUV_OT_OpenPresetsFolder
-from ZenUV.utils.vlog import Log
+from ...ui.ui_call import popup_areas
+from ...utils.blender_zen_utils import ZuvPresets
+from ...utils.adv_generic_ui_list import ZenAddPresetBase
+from ...utils.tests.system_operators import ZUV_OT_OpenPresetsFolder
+from ...utils.vlog import Log
 
 from .td_props import TdProps
 
@@ -118,7 +119,7 @@ class ZUV_OT_TdExecutePreset(bpy.types.Operator):
             for s_prop, val in t_were_scene_props.items():
                 setattr(p_scene.zen_uv.td_props, s_prop, val)
 
-        from ZenUV.ops.trimsheets.trimsheet import ZuvTrimsheetUtils
+        from ...ops.trimsheets.trimsheet import ZuvTrimsheetUtils
         ZuvTrimsheetUtils.fix_undo()
 
         bpy.ops.ed.undo_push(message='Load TD Preset')
@@ -298,14 +299,11 @@ def new_list_item(context):
 def select_by_td(context, td_set, texel_density, treshold):
     for c_td, data in td_set.items():
         if texel_density - treshold < c_td < texel_density + treshold:
-            for obj_name in data["objs"]:
-                obj = context.scene.objects[obj_name]
-                me, bm = get_mesh_data(obj)
-                bm.faces.ensure_lookup_table()
-                for island in data["objs"][obj_name]:
-                    for f in island:
-                        bm.faces[f].select = True
-                bmesh.update_edit_mesh(me)
+            objs = [context.scene.objects[obj_name] for obj_name in data["objs"]]
+            for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+                for island in data["objs"][obj.name]:
+                    SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
+                bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
 
 class TDPRListGroup(bpy.types.PropertyGroup):
@@ -500,7 +498,7 @@ class TDPR_OT_NewItem(bpy.types.Operator):
     def execute(self, context):
         new_list_item(context)
 
-        from ZenUV.ops.trimsheets.trimsheet import ZuvTrimsheetUtils
+        from ...ops.trimsheets.trimsheet import ZuvTrimsheetUtils
         ZuvTrimsheetUtils.fix_undo()
 
         return {'FINISHED'}
@@ -531,7 +529,7 @@ class TDPR_OT_DeleteItem(bpy.types.Operator):
 
         TdSysUtils.update_display_presets(context)
 
-        from ZenUV.ops.trimsheets.trimsheet import ZuvTrimsheetUtils
+        from ...ops.trimsheets.trimsheet import ZuvTrimsheetUtils
         ZuvTrimsheetUtils.fix_undo()
 
         return {'FINISHED'}
@@ -570,7 +568,7 @@ class TDPR_OT_MoveItem(bpy.types.Operator):
         zen_tdpr_list.move(neighbor, index)
         self.move_index(context)
 
-        from ZenUV.ops.trimsheets.trimsheet import ZuvTrimsheetUtils
+        from ...ops.trimsheets.trimsheet import ZuvTrimsheetUtils
         ZuvTrimsheetUtils.fix_undo()
 
         return {'FINISHED'}
@@ -590,9 +588,9 @@ class TDPR_OT_Set(bpy.types.Operator):
     )
 
     def execute(self, context):
-        objs = resort_objects_by_selection(context, context.objects_in_mode)
+        objs = ResortObjects.resort_objects_by_selection(context, context.objects_in_mode)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
         scene = context.scene
         list_index = self.list_index
@@ -603,7 +601,7 @@ class TDPR_OT_Set(bpy.types.Operator):
             td_inputs.td = scene.zen_tdpr_list[list_index].value
             TexelDensityProcessor.set_td(context, objs, td_inputs)
 
-            from ZenUV.ops.trimsheets.trimsheet import ZuvTrimsheetUtils
+            from ...ops.trimsheets.trimsheet import ZuvTrimsheetUtils
             ZuvTrimsheetUtils.fix_undo()
 
         return {'FINISHED'}
@@ -619,9 +617,9 @@ class TDPR_OT_Get(bpy.types.Operator):
     def execute(self, context):
         from .td_display_utils import TdSysUtils
 
-        objs = resort_objects_by_selection(context, context.objects_in_mode)
+        objs = ResortObjects.resort_objects_by_selection(context, context.objects_in_mode)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         scene = context.scene
@@ -633,7 +631,7 @@ class TDPR_OT_Get(bpy.types.Operator):
 
         TdSysUtils.update_display_presets(context)
 
-        from ZenUV.ops.trimsheets.trimsheet import ZuvTrimsheetUtils
+        from ...ops.trimsheets.trimsheet import ZuvTrimsheetUtils
         ZuvTrimsheetUtils.fix_undo()
 
         return {'FINISHED'}

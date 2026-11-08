@@ -20,9 +20,9 @@
 
 import bpy
 
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.generic import resort_by_type_mesh_in_edit_mode_and_sel
-from ZenUV.ops.transform_sys.tr_labels import TrLabels
+from ...utils.register_util import RegisterUtils
+from ...ops.transform_sys.tr_labels import TrLabels
+from ...utils.generic import ResortObjects
 
 from .transform_utils.tr_utils import TransformSysOpsProps
 from .transform_utils.tr_rotate_utils import TrRotateProps, RotateFactory, TrOrientProcessor
@@ -94,9 +94,9 @@ class ZuvTrRotateBase:
         row.prop(self, "op_island_pivot")
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         RP = TrRotateProps(context, is_global=False)
@@ -189,17 +189,17 @@ class ZUV_OT_TrOrient(bpy.types.Operator):
         row.prop(self, 'rotate_direction')
 
     def execute(self, context):
-        from ZenUV.utils.generic import resort_objects_by_selection
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        from ...utils.generic import ResortObjects
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
 
         if not len(objs):
-            self.report({'INFO'}, "Zen UV: There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
-        objs = resort_objects_by_selection(context, objs)
+        objs = ResortObjects.resort_objects_by_selection(context, objs)
 
         if not objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {"CANCELLED"}
 
         TrOrientProcessor.orient(

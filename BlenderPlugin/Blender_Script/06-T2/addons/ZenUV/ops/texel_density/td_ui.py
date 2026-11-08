@@ -21,21 +21,21 @@
 """ Zen Texel Density UI """
 
 import bpy
-from ZenUV.utils.generic import (
+from ...utils.generic import (
     ZUV_SPACE_TYPE,
     ZUV_REGION_TYPE,
     ZUV_PANEL_CATEGORY,
     ZUV_CONTEXT
     )
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.ico import icon_get
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.prop.common import get_combo_panel_order
+from ...utils.register_util import RegisterUtils
+from ...ui.labels import ZuvLabels
+from ...ico import icon_get
+from ...prop.zuv_preferences import get_prefs
+from ...prop.common import get_combo_panel_order
 
-from ZenUV.ops.texel_density.td_utils import TdUtils
-from ZenUV.ops.texel_density.td_presets import ZUV_PT_ZenTDPresets, ZUV_PT_UVL_ZenTDPresets
-from ZenUV.ops.texel_density.td_ops import ZUV_OT_SelectByCurrentTd, ZUV_OT_SelectByTd
+from ...ops.texel_density.td_utils import TdUtils
+from ...ops.texel_density.td_presets import ZUV_PT_ZenTDPresets, ZUV_PT_UVL_ZenTDPresets
+from ...ops.texel_density.td_ops import ZUV_OT_SelectByCurrentTd, ZUV_OT_SelectByTd
 
 from .td_tools import (
     ZUV_OT_TD_Calculator,
@@ -138,7 +138,7 @@ def draw_texel_density(self, context: bpy.types.Context):
         box = col.box()
         col = box.column(align=False)
         row = col.row(align=True)
-        from ZenUV.zen_checker.check_utils import draw_checker_display_items, DisplayItem
+        from ...zen_checker.check_utils import draw_checker_display_items, DisplayItem
         draw_checker_display_items(
             row, context,
             {'TEXEL_DENSITY': DisplayItem({'EDIT_MESH'}, {'UV', '3D'}, '', 'Display TD')})
@@ -163,10 +163,11 @@ def draw_td_panel(context: bpy.types.Context, layout: bpy.types.UILayout, td_pro
 
     row.popover(panel="TD_PT_Properties", text="", icon="PREFERENCES")
 
-    col = layout.column(align=True)
     row = col.row(align=True)
     row.operator('uv.zenuv_get_texel_density')
     row.operator('uv.zenuv_set_texel_density').global_mode = True
+
+    col.separator()
     col.operator(ZUV_OT_SelectByTd.bl_idname)
 
     row = col.row(align=True)
@@ -174,15 +175,15 @@ def draw_td_panel(context: bpy.types.Context, layout: bpy.types.UILayout, td_pro
     row.prop(td_props, 'td_use_pivot', icon='EVENT_P', text='')
 
     box = col.box()
-    from ZenUV.ops.operators import ZUV_OT_SetTextureSizePreset
+    from ...ops.operators import ZUV_OT_SetTextureSizePreset
     ZUV_OT_SetTextureSizePreset.draw_image_size_preset(
         'scene.zen_uv.td_props.td_im_size_presets',
         context, box)
 
 
 def draw_enum_pivot_selector(context: bpy.types.Context, layout: bpy.types.UILayout, pivot_system: str):
-    from ZenUV.utils.bounding_box import DirMatrixStr
-    from ZenUV.ico import icon_get
+    from ...utils.bounding_box import DirMatrixStr
+    from ...ico import icon_get
     if pivot_system == 'TD':
         prop = 'td_set_pivot'
     elif pivot_system == 'SZ':
@@ -476,7 +477,7 @@ def draw_sizes_panel_mode(self, context: bpy.types.Context, layout: bpy.types.UI
         draw_enum_pivot_selector(context, layout, pivot_system='SZ')
 
     box = layout.box()
-    from ZenUV.ops.operators import ZUV_OT_SetTextureSizePreset
+    from ...ops.operators import ZUV_OT_SetTextureSizePreset
     ZUV_OT_SetTextureSizePreset.draw_image_size_preset(
         'scene.zen_uv.td_props.sz_im_size_presets',
         context, box)

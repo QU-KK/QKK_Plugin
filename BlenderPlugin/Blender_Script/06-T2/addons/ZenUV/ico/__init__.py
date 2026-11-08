@@ -94,10 +94,12 @@ def _icon_register(fileName, base_name, prefix=''):
     if p_icon_preview:
         from ..utils.vlog import Log
         try:
-            if p_icon_preview.icon_id == 0:
-                raise RuntimeError("Icon has invalid ID!")
-            if sum(p_icon_preview.icon_size) == 0:
-                raise RuntimeError("Icon was not loaded properly!")
+            # NOTE: no need to inform in the background mode, it will always give an error!
+            if not bpy.app.background:
+                if p_icon_preview.icon_id == 0:
+                    raise RuntimeError("Icon has invalid ID!")
+                if sum(p_icon_preview.icon_size) == 0:
+                    raise RuntimeError("Icon was not loaded properly!")
         except Exception as e:
             Log.error(str(e), "Name:", prefix + name, "Path:", s_icon_path)
 

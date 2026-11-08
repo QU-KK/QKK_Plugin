@@ -18,15 +18,15 @@
 
 """ Zen UV Panel In UV Layout """
 import bpy
-from ZenUV.utils.generic import ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.ico import icon_get
-from ZenUV.prop.zuv_preferences import (
+from ..utils.generic import ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE
+from ..ui.labels import ZuvLabels
+from ..ico import icon_get
+from ..prop.zuv_preferences import (
     get_prefs, draw_panels_enabler)
-from ZenUV.prop.common import get_combo_panel_order, uv_enblr
-from ZenUV.ui.panel_draws import uv_draw_unwrap
+from ..prop.common import get_combo_panel_order, uv_enblr
+from ..ui.panel_draws import uv_draw_unwrap
 
-from ZenUV.ops.transform_sys.tr_ui import draw_transform_panel
+from ..ops.transform_sys.tr_ui import draw_transform_panel
 
 
 class ZUV_PT_UVL_Preferences(bpy.types.Panel):

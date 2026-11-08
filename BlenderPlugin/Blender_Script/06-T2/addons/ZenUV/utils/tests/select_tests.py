@@ -30,8 +30,13 @@ from .addon_test_utils import (
     _get_objs,
     _move_uv
     )
-from ZenUV.ops.pack_sys.pack_exclusion import PackExcludedFactory
-from ZenUV.utils.generic import verify_uv_layer
+from ...utils.generic import (
+    switch_to_edge_sel_mode,
+    switch_to_face_sel_mode,
+    bpy_select_by_context
+)
+from ...ops.pack_sys.pack_exclusion import PackExcludedFactory
+from ...utils.iter_utils import IterUtils
 
 
 def _get_selected_edges_idxs(context):
@@ -80,9 +85,7 @@ def _scale_uv(context, scale=(1, 1), all_objs=False):
     else:
         objs = [context.object, ]
     faces = []
-    for obj in objs:
-        bm = bmesh.from_edit_mesh(obj.data)
-        uv_layer = verify_uv_layer(bm)
+    for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
         loops = [loop for face in bm.faces for loop in face.loops]
         for loop in loops:
             loop[uv_layer].uv *= Vector(scale)
@@ -93,9 +96,9 @@ def _scale_uv(context, scale=(1, 1), all_objs=False):
 
 def Test_uv_zenuv_select_edges_by_direction(context):
     ''' Select edges by direction '''
-    # bpy.ops.mesh.select_all(action='DESELECT')
+    # bpy_select_by_context(context, action='DESELECT')
     e_count = 16
-    bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
+    switch_to_edge_sel_mode(context)
     bpy.ops.uv.zenuv_select_edges_by_direction(direction='U', clear_sel=True, angle=30, desc="Select edges by direction")
     edges = _get_selected_edges_idxs(context)
     if len(edges) != e_count:
@@ -110,7 +113,7 @@ def Test_uv_zenuv_show_sim_index(context):
 
 def Test_uv_zenuv_select_similar(context):
     ''' Select Islands similar to selected '''
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
     f_count = 12
     _select_faces_by_id_active_obj(context, [0, ])
 
@@ -123,7 +126,7 @@ def Test_uv_zenuv_select_similar(context):
 
 def Test_uv_zenuv_select_island(context):
     ''' Select Islands by selected edge/face of the Islands '''
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
     f_count = 6
     _select_faces_by_id_active_obj(context, [0, ])
 
@@ -142,9 +145,10 @@ def Test_uv_zenuv_select_stretched_islands(context):
 
 def Test_uv_zenuv_select_uv_borders(context):
     ''' Select existing UV Borders '''
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
     e_count = 14
-    bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
+
+    switch_to_edge_sel_mode(context)
 
     bpy.ops.uv.zenuv_select_uv_borders(clear_selection=True)
 
@@ -159,8 +163,8 @@ def Test_uv_zenuv_select_uv_overlap(context):
 
     _prepare_test(context)
 
-    bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
-    bpy.ops.mesh.select_all(action='DESELECT')
+    switch_to_face_sel_mode(context)
+    bpy_select_by_context(context, action='DESELECT')
     _move_uv(context, offset=(0.5, 0))
     bpy.ops.uv.zenuv_select_uv_overlap()
 
@@ -173,8 +177,8 @@ def Test_uv_zenuv_select_uv_overlap(context):
 def Test_uv_zenuv_select_flipped(context):
     ''' Select Flipped Islands '''
     f_count = 6
-    bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
-    bpy.ops.mesh.select_all(action='DESELECT')
+    switch_to_face_sel_mode(context)
+    bpy_select_by_context(context, action='DESELECT')
     _scale_uv(context, scale=(-1, 1))
 
     bpy.ops.uv.zenuv_select_flipped()
@@ -187,7 +191,7 @@ def Test_uv_zenuv_select_flipped(context):
 def Test_uv_zenuv_select_pack_excluded(context):
     ''' Select Islands tagged as Excluded from Packing '''
     f_count = 6
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
     objs = _get_objs(context)
 
     _select_faces_by_id_active_obj(context, [0, ])
@@ -206,7 +210,7 @@ def Test_uv_zenuv_select_loop(context):
     test_edge_id = 219
     test_edges_sel_count = 8
     _prepare_test(context, model='CYLINDER')
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
     _select_edges_by_id_active_obj(context, [test_edge_id, ])
 
     bpy.ops.uv.zenuv_select_loop()
@@ -221,8 +225,8 @@ def Test_uv_zenuv_isolate_island(context):
     test_face_id = 4
     visible_result = 32
     _prepare_test(context, model='CYLINDER')
-    bpy.ops.mesh.select_all(action='DESELECT')
-    bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
+    bpy_select_by_context(context, action='DESELECT')
+    switch_to_face_sel_mode(context)
     _select_faces_by_id_active_obj(context, [test_face_id, ])
 
     bpy.ops.uv.zenuv_isolate_island()
@@ -237,7 +241,7 @@ def Test_mesh_zenuv_mirror_seams(context):
     seam_total_result = 64
     _prepare_test(context, model='CYLINDER', count=1)
 
-    bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
+    switch_to_edge_sel_mode(context)
     bpy.ops.uv.zenuv_select_half(clear_selection=True, axis_direction='POSITIVE', include_zero=True)
     bpy.ops.uv.zenuv_mark_seams(action='UNMARK')
 
@@ -253,11 +257,11 @@ def Test_mesh_zenuv_mirror_seams(context):
 def Test_uv_zenuv_select_by_uv_area(context):
     "Select by UV Area"
     f_count = 6
-    bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
-    bpy.ops.mesh.select_all(action='DESELECT')
+    switch_to_face_sel_mode(context)
+    bpy_select_by_context(context, action='DESELECT')
     _select_faces_by_id_active_obj(context, [*range(0, 6)])
     _scale_uv(context, (0, 0))
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
     bpy.ops.uv.zenuv_select_by_uv_area(clear_selection=True, condition='ZERO', treshold=0.5)
 
     faces = _get_selected_faces_idxs(context)

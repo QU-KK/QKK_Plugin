@@ -24,19 +24,23 @@ import numpy as np
 from dataclasses import dataclass, field
 from mathutils import Vector
 from .props import ZenUnwrapState
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.base_clusters.base_cluster import BaseCluster, ProjectCluster
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.ops.zen_unwrap.finishing import FinishedFactory, FINISHED_FACEMAP_NAME
-from ZenUV.utils.constants import PACK_EXCLUDED_FACEMAP_NAME
-from ZenUV.utils.generic import (
+from ...utils.uv_factory import UvIslandUtils, SelectionUtils
+from ...utils.loops_factory import LoopsFactory
+from ...utils.base_clusters.base_cluster import BaseCluster, ProjectCluster
+from ...ui.labels import ZuvLabels
+from ...utils.blender_zen_utils import is_loop_domain
+from ...ops.zen_unwrap.finishing import FinishedFactory, FINISHED_FACEMAP_NAME
+from ...utils.constants import PACK_EXCLUDED_FACEMAP_NAME
+from ...utils.generic import (
     Diff,
     set_face_int_tag,
-    verify_uv_layer)
-from ZenUV.utils.bounding_box import BoundingBox2d
-from ZenUV.ops.texel_density.td_utils import TexelDensityFactory, TexelDensityProcessor, TdContext
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.utils.vlog import Log
+    verify_uv_layer,
+    get_selection_mode,
+    bpy_select_by_context)
+from ...utils.bounding_box import BoundingBox2d
+from ...ops.texel_density.td_utils import TexelDensityFactory, TexelDensityProcessor, TdContext
+from ...prop.zuv_preferences import get_prefs
+from ...utils.vlog import Log
 
 
 CAT = "ZenUnwrap"
@@ -51,21 +55,30 @@ class ProjectObj(BaseCluster, ProjectCluster):
 class uObject:
 
     def __init__(self, context: bpy.types.Context, obj: bpy.types.Object) -> None:
+
+        b_is_loop_domain = is_loop_domain(context)
+
         self.obj = obj
+        self.context = context
         self.bm = bmesh.from_edit_mesh(obj.data)
         bm = self.bm
 
         self.uv_layer: bmesh.types.BMLayerItem = verify_uv_layer(bm)
-
-        self.l_selected_faces: list = [f.index for f in bm.faces if f.select and not f.hide]
+        p_sel_faces = SelectionUtils.get_faces_by_any_init_selection(context, bm, self.uv_layer)
+        self.l_selected_faces: list = [f.index for f in p_sel_faces]
         self.l_all_faces: list = [f.index for f in bm.faces if not f.hide]
         self.b_is_closed_mesh: bool = False
 
         self.l_finished_faces: list = self.get_l_finished_faces()
-
+        if b_is_loop_domain:
+            p_selection_mode = get_selection_mode(context)
+            p_loops = LoopsFactory.get_loops_by_sel_mode(context, bm, self.uv_layer, only_uv_edges=p_selection_mode == 'EDGE')
+            self.selected_loops = [lp.index for lp in p_loops]
+        else:
+            self.selected_loops: list = []
         self.l_selected_edges: list = [[e.index, e.seam] for e in bm.edges if e.select]
         self.l_selected_verts: list = [v.index for v in bm.verts if v.select]
-        self.b_is_selection_exist: bool = (len(self.l_selected_verts) != 0)  # or self.l_selected_edges or self.l_selected_verts
+        self.b_is_selection_exist: bool = len(self.selected_loops) != 0 if b_is_loop_domain else (len(self.l_selected_verts) != 0)
         self.b_is_seam_exist: bool = self._is_seam_exist()
         # self.init_seams = [e.index for e in bm.edges if e.seam]
 
@@ -84,8 +97,8 @@ class uObject:
 
     def restore_face_selection(self):
         self.bm.faces.ensure_lookup_table()
-        for i in self.l_selected_faces:
-            self.bm.faces[i].select = True
+        facelist = [self.bm.faces[i] for i in self.l_selected_faces]
+        SelectionUtils.select_faces_any_context(self.context, facelist, state=True, bm=self.bm, uv_layer=self.uv_layer)
 
     def restore_pins(self):
         if self.loops is not None:
@@ -97,8 +110,12 @@ class uObject:
 
     def pin_all_but_not_sel(self):
         self.collect_loops()
-        for loop in self.loops:
-            loop[self.uv_layer].pin_uv = not loop.vert.select
+        if is_loop_domain(self.context):
+            for loop in self.loops:
+                loop[self.uv_layer].pin_uv = not loop.uv_select_vert
+        else:
+            for loop in self.loops:
+                loop[self.uv_layer].pin_uv = not loop.vert.select
 
     def collect_init_pins(self):
         self.init_pins = set((loop for f in self.bm.faces for loop in f.loops if loop[self.uv_layer].pin_uv))
@@ -165,9 +182,9 @@ class uObject:
             return
         if self.b_is_pack_excluded:
             self.hide_pack_excluded()
-        all_islands = island_util.get_islands(context, bm)
+        all_islands = UvIslandUtils.get_all_uv_islands(context, bm, uv_layer)
         if self.b_is_selection_exist:
-            current_islands = island_util.get_island(context, bm, uv_layer)
+            current_islands = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
             FinishedFactory.finished_sort_islands(bm, Diff(all_islands, current_islands), finished_facemap)
         else:
             FinishedFactory.finished_sort_islands(bm, all_islands, finished_facemap)
@@ -178,24 +195,29 @@ class uObject:
     def select_set(self, state=True):
         self.obj.select_set(state=state)
 
-    def restore_selection(self, sm, bm=None):
-        self._restore_selection(self.bm, sm)
+    def restore_selection(self, context, selection_mode):
+        self._restore_selection(context, self.bm, self.uv_layer)
         self.bm.select_flush_mode()
 
-    def _restore_selection(self, bm, mode):
+    def _restore_selection(self, context, bm, uv_layer):
         """ Restore selected elements depending of Blender selection Mode """
-        if mode == 'VERTEX':
-            bm.verts.ensure_lookup_table()
-            for index in self.l_selected_verts:
-                bm.verts[index].select = True
-        if mode == 'FACE':
-            bm.faces.ensure_lookup_table()
-            for index in self.l_selected_faces:
-                bm.faces[index].select = True
-        if mode == 'EDGE':
-            bm.edges.ensure_lookup_table()
-            for i, _ in self.l_selected_edges:
-                bm.edges[i].select = True
+        if is_loop_domain(context):
+            s_loops = set(self.selected_loops)
+            p_loops = [lp for f in bm.faces for lp in f.loops if lp.index in s_loops]
+            LoopsFactory.select_loops(context, bm, p_loops, uv_layer, state=True)
+        else:
+            sel_mode = get_selection_mode(context)
+            if sel_mode == 'VERT':
+                bm.verts.ensure_lookup_table()
+                looplist = [lp for i in self.l_selected_verts for lp in bm.verts[i].link_loops]
+            if sel_mode == 'FACE':
+                bm.faces.ensure_lookup_table()
+                looplist = [lp for i in self.l_selected_faces for lp in bm.faces[i].loops]
+            if sel_mode == 'EDGE':
+                bm.edges.ensure_lookup_table()
+                looplist = [lp for i, _ in self.l_selected_edges for lp in bm.edges[i].link_loops]
+
+            LoopsFactory.select_loops(context, bm, looplist, uv_layer, state=True)
 
     def restore_seams(self):
         self.bm.edges.ensure_lookup_table()
@@ -248,7 +270,8 @@ class UIslandsManager:
                         return {'CANCELLED'}
 
 
-                    self.positions = self.calculate_centers()
+                    if not self.positions:
+                        self.positions = self.calculate_centers()
 
                 elif self.PROPS.ProcessingMode == 'WHOLE_MESH':
 
@@ -298,64 +321,91 @@ class UIslandsManager:
         else:
             self.set_seams_to_object(context, self.uobj)
 
-        self.islands = island_util.get_islands(context, self.bm)
+        self.islands = UvIslandUtils.get_all_uv_islands(context, self.bm, self.uv_layer)
 
         self.positions = self.calculate_centers()
 
     def ci_all_whole_seam_exist(self, context):
-        bpy.ops.mesh.select_all(action='SELECT')
+        bpy_select_by_context(context, action='SELECT')
         # self.select_all(self.bm, action=True)
-        self.islands = island_util.get_islands_by_seams(self.bm)
+        self.islands = UvIslandUtils.get_selected_uv_islands(context, self.bm, self.uv_layer, use_seams_as_separator=True)
         self.positions = self.calculate_centers()
         self.STATE.fit_view = 'all'
 
     def ci_sel_whole_vertex(self, context):
         if not self.uobj.b_is_seam_exist:
             self.set_seams_to_object(context, self.uobj)
-        self.islands = island_util.get_islands(context, self.bm)
+        self.islands = UvIslandUtils.get_all_uv_islands(context, self.bm, self.uv_layer)
         self.positions = self.calculate_centers()
 
     def ci_sel_whole_edge(self, context):
         if not self.uobj.b_is_seam_exist:
             self.set_seams_to_object(context, self.uobj)
-        self.islands = island_util.get_islands(context, self.bm)
+        self.islands = UvIslandUtils.get_all_uv_islands(context, self.bm, self.uv_layer)
         self.positions = self.calculate_centers()
 
     def ci_sel_whole_face(self, context):
 
         l_all_faces_idxs = {f.index for f in self.bm.faces if not f.hide}
         selected_idxs = set(self.uobj.l_selected_faces)
-        rest_faces = [self.bm.faces[i] for i in l_all_faces_idxs.difference(selected_idxs)]
+        unselected_idxs = l_all_faces_idxs.difference(selected_idxs)
+        unselected_faces = [self.bm.faces[i] for i in unselected_idxs]
         selected_faces = [self.bm.faces[i] for i in self.uobj.l_selected_faces]
 
         sel_position = self.calculate_centers([selected_faces, ])[0]
-        rest_position = self.calculate_centers([rest_faces, ])[0] if len(rest_faces) else None
+        rest_position = self.calculate_centers([unselected_faces, ])[0] if len(unselected_faces) else None
 
 
-        if not rest_faces:
+        if not unselected_faces:
             pass
         if self.uobj.b_is_closed_mesh:
             pass
         if selected_faces:
             self.perform_iso_projection(context, self.uobj, self.bm, selected_faces)
-        if len(rest_faces) == len(self.bm.faces):
+        if len(unselected_faces) == len(self.bm.faces):
             self.set_seams_to_object(context, self.uobj)
             # self.perform_iso_projection(context, self.uobj, self.bm, self.bm.faces)
-        self.islands = [rest_faces, selected_faces] if len(rest_faces) else [selected_faces]
+        self.islands = [unselected_faces, selected_faces] if len(unselected_faces) else [selected_faces]
 
         self.positions = [rest_position, sel_position] if rest_position is not None else [sel_position]
         self.STATE.one_by_one = True
 
     def ci_sel_sel_only_vertex(self, context):
-        self.islands = island_util.get_island(context, self.bm, self.uv_layer)
+        self.islands = UvIslandUtils.get_selected_uv_islands(context, self.bm, self.uv_layer)
 
     def ci_sel_sel_only_edge(self, context):
-        self.islands = island_util.get_island(context, self.bm, self.uv_layer)
+        self.islands = UvIslandUtils.get_selected_uv_islands(context, self.bm, self.uv_layer)
 
     def ci_sel_sel_only_face(self, context):
+        # p_faces = [self.bm.faces[i] for i in self.uobj.l_selected_faces]
+        p_faces = SelectionUtils.get_faces_by_any_init_selection(context, self.bm, self.uv_layer)
+        # print(f'{len(p_faces) = }')
+        self.positions = [BoundingBox2d(islands=[p_faces, ], uv_layer=self.uv_layer).center]
+        looplist = LoopsFactory.get_loops_by_sel_mode(context, self.bm, self.uv_layer, groupped=True)
+
+        p_init_positions = None
+
+        if len(looplist) > 1:
+            for group in looplist:
+                group.sort(key=lambda l: l.index)
+            looplist.sort(key=lambda grp: grp[0].index if grp else float('inf'))
+
+            p_init_positions = []
+            for group in looplist:
+                p_init_positions.append(BoundingBox2d(points=[lp[self.uv_layer].uv for lp in group]).center)
+
         if self.uobj.b_is_closed_mesh:
             self.perform_iso_projection(context, self.uobj, self.bm, self.bm.faces)
-        self.islands = island_util.get_islands_selected_only(self.bm, [self.bm.faces[i] for i in self.uobj.l_selected_faces])
+        else:
+            self.perform_iso_projection(context, self.uobj, self.bm, p_faces)
+
+        self.islands = list(UvIslandUtils._internal_yield_uv_islands(self.bm, self.uv_layer, p_faces))
+        if len(self.islands) > 1:
+
+            if p_init_positions is None:
+                raise RuntimeError('This must not happend! Inform developer please.')
+
+            self.positions = p_init_positions
 
     def set_seams_to_object(self, context, uobj):
         if self.STATE.PROPS.Mark and self.STATE.operator_mode == "CONTINUE":
@@ -381,15 +431,13 @@ class UIslandsManager:
     def z_unuwrap(self, context):
         if self.STATE.one_by_one:
             for island in self.islands:
-                bpy.ops.mesh.select_all(action='DESELECT')
-                for f in island:
-                    f.select = True
-                # deselect_finished(bm, self.finished_facemap)
+                bpy_select_by_context(context, action='DESELECT')
+                SelectionUtils.select_faces_any_context(context, island, state=True, bm=self.bm, uv_layer=self.uv_layer)
                 self._unwrap(context)
         else:
-            bpy.ops.mesh.select_all(action='DESELECT')
-            self.select_for_unwrap(self.STATE.sync_mode)
-            # deselect_finished(bm, self.finished_facemap)
+            bpy_select_by_context(context, action='DESELECT')
+            for island in self.islands:
+                SelectionUtils.select_faces_any_context(context, island, state=True, bm=self.bm, uv_layer=self.uv_layer)
             self._unwrap(context)
 
     def _unwrap(self, context):
@@ -414,13 +462,14 @@ class UIslandsManager:
             uCluster(
                 cluster=island,
                 position=position,
-                finished=True not in [f[self.finished_facemap] for f in island] if self.finished_facemap is not None else True
+                finished=not any(f[self.finished_facemap] for f in island) if self.finished_facemap is not None else True
             ) for island, position in zip(self.islands, self.positions) if island]
         clusters = self._remove_finished_clusters(init_clusters)
         if len(init_clusters) != len(clusters):
             self.STATE.finished_came_across = True
         self.islands = [cl.cluster for cl in clusters]
-        self.positions = [cl.position for cl in clusters]
+        if not self.positions:
+            self.positions = [cl.position for cl in clusters]
         for island in self.islands:
             p_loops = [loop[self.uv_layer] for f in island for loop in f.loops]
             for i in range(len(p_loops) - 1):
@@ -429,14 +478,6 @@ class UIslandsManager:
     def set_islands_seam_switch_mode(self):
         if self.finished_facemap is not None:
             self.islands = [[f for island in self.islands for f in island if not f[self.finished_facemap]], ]
-
-    def select_for_unwrap(self, sync):
-        if not sync:
-            for loop in [loop[self.uv_layer] for island in self.islands for f in island for loop in f.loops]:
-                loop.select = True
-        else:
-            for face in [f for i in self.islands for f in i]:
-                face.select = True
 
     def calculate_centers(self, islands=None):
         if not islands:
@@ -453,26 +494,28 @@ class UIslandsManager:
                 pass
 
             uobj.td_inputs.set_mode = 'ISLAND'
-            sel_only = self.STATE.PROPS.ProcessingMode == 'SEL_ONLY'
+            is_sel_only = self.STATE.PROPS.ProcessingMode == 'SEL_ONLY'
 
-            islands = self._get_islands_for_avg_td(context, uobj, sel_only)
+            islands = self._get_islands_for_avg_td(context, uobj, is_sel_only)
 
-            uobj.td_inputs.by_island = False if sel_only else True
+            uobj.td_inputs.by_island = False if is_sel_only else True
             for island in islands:
                 TexelDensityProcessor.set_td_to_faces(context, uobj.obj, island, uobj.td_inputs)
         else:
             pass
 
-    def _get_islands_for_avg_td(self, context, uobj, sel_only):
+    def _get_islands_for_avg_td(self, context, uobj, is_sel_only):
+
+        # return UvIslandUtils.get_selected_uv_islands(context, uobj.bm, uobj.uv_layer)
 
         if self.STATE.bl_selection_mode == "EDGE":
-            islands = island_util.get_islands_by_edge_list_indexes(uobj.bm, [i[0] for i in uobj.l_selected_edges])
+            islands = UvIslandUtils.get_islands_by_edgelist_indexes(uobj.bm, uobj.uv_layer, [i[0] for i in uobj.l_selected_edges])
         elif self.STATE.bl_selection_mode == "FACE":
-            islands = [uobj.l_selected_faces, ] if sel_only else [uobj.l_all_faces, ]
+            islands = [uobj.l_selected_faces, ] if is_sel_only else [uobj.l_all_faces, ]
         else:
-            islands = island_util.get_islands_by_vert_list_indexes(uobj.bm, uobj.l_selected_verts, _sorted=True)
+            islands = UvIslandUtils.get_islands_by_vertlist_indexes(uobj.bm, uobj.uv_layer, vertlist=uobj.l_selected_verts, b_sorted=True)
         if not islands:
-            islands = island_util.get_islands(context, uobj.bm)
+            islands = UvIslandUtils.get_all_uv_islands(context, uobj.bm, uobj.uv_layer)
         return islands
 
     def set_islands_positions(self, offset=False):
@@ -483,21 +526,20 @@ class UIslandsManager:
             else:
                 pos_set = (np.array(self.positions)).tolist()
 
-            for island, co in zip(self.islands, pos_set):
+            for island, dest_co in zip(self.islands, pos_set):
                 i_cen = BoundingBox2d(islands=[island, ], uv_layer=self.uv_layer).center
+                delta = Vector(dest_co) - i_cen
                 for loop in [loop for face in island for loop in face.loops]:
-                    loop[self.uv_layer].uv += Vector(co) - i_cen
+                    loop[self.uv_layer].uv += delta
         else:
             pass
 
     def split_selected_faces(self, context, uobj, bm, uv_layer):
         # Split selected faces and create single island
-        islands = island_util.get_islands_selected_only(bm, [bm.faces[i] for i in uobj.l_selected_faces])
-        faces = [bm.faces[i] for i in uobj.l_selected_faces]
-        PC = ProjectObj(context, uobj.obj, faces, bm=bm)
+        facelist = [bm.faces[i] for i in uobj.l_selected_faces]
+        PC = ProjectObj(context, uobj.obj, facelist, bm=bm)
         PC.project()
-        islands = island_util.get_islands(context, bm)
-        return islands
+        return UvIslandUtils.get_all_uv_islands(context, bm, uv_layer)
 
     def perform_iso_projection(self, context, uobj, bm, selection):
         ProjectObj(context, uobj.obj, selection, bm=bm).project()

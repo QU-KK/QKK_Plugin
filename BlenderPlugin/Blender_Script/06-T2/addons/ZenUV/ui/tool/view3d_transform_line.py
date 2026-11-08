@@ -23,7 +23,7 @@ import gpu
 from gpu_extras.batch import batch_for_shader
 from mathutils import Matrix, Vector
 
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ...utils.blender_zen_utils import ZenPolls
 
 
 if not bpy.app.background:

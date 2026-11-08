@@ -28,11 +28,12 @@ import numpy as np
 
 from .td_islands_storage import TdIslandsStorage, TdIsland, IslandSize
 
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils import vc_processor as vc
-from ZenUV.utils.generic import UnitsConverter, verify_uv_layer
-from ZenUV.utils.bounding_box import BoundingBox2d
-from ZenUV.utils.vlog import Log
+from ...utils.uv_factory import UvIslandUtils, SelectionUtils
+from ...utils.iter_utils import IterUtils
+from ...utils import vc_processor as vc
+from ...utils.generic import UnitsConverter, verify_uv_layer
+from ...utils.bounding_box import BoundingBox2d
+from ...utils.vlog import Log
 
 
 class TdDrawUI:
@@ -63,7 +64,7 @@ class TdDrawUI:
         min=0)
 
     def draw_gradient_setup(self, context, layout, PROPS):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ...prop.zuv_preferences import get_prefs
 
         # from .td_props import ZUV_TdDrawProperties
         # PROPS = PROPS  # type: ZUV_TdDrawProperties
@@ -266,9 +267,9 @@ class TdUtils:
             islands = [[f, ] for f in bm.faces]
         else:
             if td_inputs.selected_only:
-                islands = island_util.get_island(context, bm, uv_layer)
+                islands = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
             else:
-                islands = island_util.get_islands_ignore_context(bm, is_include_hidden=True)
+                islands = UvIslandUtils.get_all_uv_islands(context, bm, uv_layer, include_hidden=True)
 
 
         for idx, island in enumerate(islands):
@@ -296,7 +297,7 @@ class TdUtils:
         if td_influence == 'FACE':
             islands = [[f, ] for f in bm.faces]
         else:
-            islands = island_util.get_islands_ignore_context(bm, is_include_hidden=True)
+            islands = UvIslandUtils.get_all_uv_islands(context, bm, uv_layer, include_hidden=True)
 
 
         for idx, island in enumerate(islands):
@@ -320,23 +321,27 @@ class TdUtils:
                 td_range[1]
                 )
 
-        for obj_name in list({i.obj_name for i in islands}):
-            p_o_islands = [i for i in islands if i.obj_name == obj_name]
+        objs = {context.scene.objects[i.obj_name] for i in islands}
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+            p_o_islands = [i.indices for i in islands if i.obj_name == obj.name]
             TDS.i_count += len(p_o_islands)
-            p_face_idxs = sum([i.indices for i in p_o_islands], [])
-            p_obj = context.scene.objects[obj_name]
-            bm = TdBmeshManager.get_bm(td_inputs, p_obj)
+            p_faces = sum([i for i in p_o_islands], [])
+            bm = TdBmeshManager.get_bm(td_inputs, obj)
             bm.faces.ensure_lookup_table()
-            for idx in p_face_idxs:
-                bm.faces[idx].select_set(True)
+            uv_layer = bm.loops.layers.uv.active
+
+            if not uv_layer:
+                continue
+
+            facelist = (bm.faces[i] for i in p_faces)
+            SelectionUtils.select_faces_any_context(context, facelist=facelist, state=True, bm=bm, uv_layer=uv_layer)
 
             bm.select_flush_mode()
-            # TdBmeshManager.set_bm(td_inputs, p_obj, bm)
 
     @classmethod
     def select_by_size(cls, context, Scope: TdIslandsStorage, size_range: list, td_inputs: TdContext):
         from .td_islands_storage import TdDataStorage as TDS
-        from ZenUV.utils.generic import select_by_context
+
         if size_range[0] > size_range[1]:
             size_range.reverse()
         islands = Scope.get_islands_in_size_range(
@@ -352,8 +357,9 @@ class TdUtils:
             p_obj = context.scene.objects[obj_name]
             bm = TdBmeshManager.get_bm(td_inputs, p_obj)
             bm.faces.ensure_lookup_table()
+            uv_layer = verify_uv_layer(bm)
 
-            select_by_context(context, bm, [[bm.faces[i] for i in p_face_idxs], ], state=True)
+            SelectionUtils.select_faces_any_context(context, [bm.faces[i] for i in p_face_idxs], state=True, bm=bm, uv_layer=uv_layer)
 
             bm.select_flush_mode()
             # TdBmeshManager.set_bm(td_inputs, p_obj, bm)
@@ -431,11 +437,8 @@ class TexelDensityFactory():
     def get_texel_density(cls, context: bpy.types.Context, objs: list, td_inputs: TdContext):
         if objs:
             overall_td = []
-            for obj in objs:
-                bm = bmesh.from_edit_mesh(obj.data)
-                uv_layer = verify_uv_layer(bm)
-                bm.faces.ensure_lookup_table()
-                islands = island_util.get_island(context, bm, uv_layer)
+            for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+                islands = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
 
                 overall_td.append(
                     cls.calc_averaged_td(
@@ -506,7 +509,7 @@ class TexelDensityFactory():
                 bm = cls._get_bm_for_td(obj)
                 uv_layer = verify_uv_layer(bm)
                 bm.faces.ensure_lookup_table()
-                islands = island_util.get_islands(context, bm)
+                islands = UvIslandUtils.get_all_uv_islands(context, bm, uv_layer)
                 p_td_data.append(TexelDensityFactory.calc_averaged_td(obj, uv_layer, islands, td_inputs))
                 # Destroy bm
                 cls._destroy_bm_for_td(obj, bm)
@@ -568,16 +571,16 @@ class TexelDensityProcessor(TdBmeshManager):
 
 
     @classmethod
-    def _get_clusters_obj(cls, context: bpy.types.Context, bm: bmesh.types.BMesh):
-        return island_util.get_islands(context, bm)
+    def _get_clusters_obj(cls, context: bpy.types.Context, bm: bmesh.types.BMesh, uv_layer: bmesh.types.BMLayerItem):
+        return UvIslandUtils.get_all_uv_islands(context, bm, uv_layer)
 
     @classmethod
     def _get_clusters_bmesh(cls, context: bpy.types.Context, bm: bmesh.types.BMesh, uv_layer: bmesh.types.BMLayerItem):
-        return island_util.get_island(context, bm, uv_layer)
+        return UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
 
     @classmethod
     def set_td(cls, context: bpy.types.Context, objs: list, td_inputs: TdContext):
-        from ZenUV.ops.transform_sys.transform_utils.tr_scale_utils import TransformLoops
+        from ...ops.transform_sys.transform_utils.tr_scale_utils import TransformLoops
 
         if objs:
             if td_inputs.set_mode == 'OVERALL':
@@ -587,7 +590,7 @@ class TexelDensityProcessor(TdBmeshManager):
                 bm = cls.get_bm(td_inputs, obj)
                 uv_layer = verify_uv_layer(bm)
 
-                clusters = cls._get_clusters_obj(context, bm) if td_inputs.obj_mode else cls._get_clusters_bmesh(context, bm, uv_layer)
+                clusters = cls._get_clusters_obj(context, bm, uv_layer) if td_inputs.obj_mode else cls._get_clusters_bmesh(context, bm, uv_layer)
 
                 if td_inputs.set_mode == 'ISLAND':
                     for island in clusters:
@@ -623,7 +626,7 @@ class TexelDensityProcessor(TdBmeshManager):
             bm = cls.get_bm(td_inputs, obj)
             uv_layer = verify_uv_layer(bm)
 
-            clusters = cls._get_clusters_obj(context, bm) if td_inputs.obj_mode else cls._get_clusters_bmesh(context, bm, uv_layer)
+            clusters = cls._get_clusters_obj(context, bm, uv_layer) if td_inputs.obj_mode else cls._get_clusters_bmesh(context, bm, uv_layer)
 
             if not len(clusters):
                 continue
@@ -639,9 +642,11 @@ class TexelDensityProcessor(TdBmeshManager):
 
     @classmethod
     def set_td_to_faces(cls, context: bpy.types.Context, obj: bpy.types.Object, island: list, td_inputs: TdContext):
-        from ZenUV.ops.transform_sys.transform_utils.tr_scale_utils import TransformLoops
+        from ...ops.transform_sys.transform_utils.tr_scale_utils import TransformLoops
 
         def island_container(bm, island):
+            if not island:
+                return []
             if not isinstance(island, list):
                 island = list(island)
             if not isinstance(island[0], int):
@@ -654,7 +659,7 @@ class TexelDensityProcessor(TdBmeshManager):
         uv_layer = verify_uv_layer(bm)
 
         if td_inputs.by_island:
-            islands = island_util.get_islands(context, bm)
+            islands = UvIslandUtils.get_all_uv_islands(context, bm, uv_layer)
         else:
             islands = [island_container(bm, island), ]
 
@@ -676,15 +681,15 @@ class IslandSizeProcessor(TdBmeshManager):
 
     @classmethod
     def get_island_size(cls, context: bpy.types.Context) -> IslandSize:
-        from ZenUV.utils.bounding_box import get_overall_bbox
+        from ...utils.bounding_box import get_overall_bbox
         td_props = context.scene.zen_uv.td_props
 
         return IslandSize(td_props.SZ_TextureSizeX, td_props.SZ_TextureSizeY, get_overall_bbox(context, from_islands=True, as_dict=False))
 
     @classmethod
     def set_island_size(cls, context: bpy.types.Context, objs: list, sz_inputs: TdContext):
-        from ZenUV.ops.transform_sys.transform_utils.tr_scale_utils import TransformLoops
-        from ZenUV.utils.bounding_box import get_overall_bbox
+        from ...ops.transform_sys.transform_utils.tr_scale_utils import TransformLoops
+        from ...utils.bounding_box import get_overall_bbox
 
         if objs:
             if sz_inputs.set_mode == 'OVERALL':
@@ -695,7 +700,7 @@ class IslandSizeProcessor(TdBmeshManager):
                 bm = cls.get_bm(sz_inputs, obj)
                 uv_layer = verify_uv_layer(bm)
 
-                clusters = TexelDensityProcessor._get_clusters_obj(context, bm) if sz_inputs.obj_mode else TexelDensityProcessor._get_clusters_bmesh(context, bm, uv_layer)
+                clusters = TexelDensityProcessor._get_clusters_obj(context, bm, uv_layer) if sz_inputs.obj_mode else TexelDensityProcessor._get_clusters_bmesh(context, bm, uv_layer)
 
                 if sz_inputs.set_mode == 'ISLAND':
                     for island in clusters:

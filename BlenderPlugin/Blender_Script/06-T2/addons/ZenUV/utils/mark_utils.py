@@ -20,17 +20,16 @@ import bpy
 import bmesh
 from dataclasses import dataclass, field
 
-from ZenUV.utils.get_uv_islands import get_uv_bound_edges_indexes
-from ZenUV.ops.zen_unwrap.finishing import FINISHED_FACEMAP_NAME
-from ZenUV.utils.generic import get_mesh_data, verify_uv_layer
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.utils.messages import zen_message
+from ..utils.uv_factory import UvIslandUtils
+from ..ops.zen_unwrap.finishing import FINISHED_FACEMAP_NAME
+from ..utils.generic import verify_uv_layer
+from ..utils.blender_zen_utils import ZenPolls
 
 
 class MarkStateManager:
 
-    def __init__(self, context) -> None:
-        a_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
+    def __init__(self, context: bpy.types.Context) -> None:
+        a_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
         self.Gpriority = a_prefs.useGlobalMarkSettings
         self.Gseam = a_prefs.markSeamEdges
         self.Gsharp = a_prefs.markSharpEdges
@@ -73,130 +72,46 @@ def assign_seam_to_selected_edges(bm):
             edge.seam = True
 
 
-def get_bound_edges(edges_from_polygons):
-    boundary_edges = []
-    for edge in edges_from_polygons:
-        if False in [f.select for f in edge.link_faces] or edge.is_boundary:
-            boundary_edges.append(edge)
-    return boundary_edges
+def unmark_all_seams_sharp(bm, cl_seam=False, cl_sharp=False):
+    bm.edges.ensure_lookup_table()
+    if cl_seam:
+        for edge in bm.edges:
+            edge.seam = False
+    if cl_sharp:
+        for edge in bm.edges:
+            edge.smooth = True
 
 
-# TODO Must be removed?
-def zuv_mark_seams(context, bm, mSeam, mSharp, silent_mode=False, assign=True, switch=False, remove_inside=True):
-    selfaces = []
-    seledges = []
-    # Check if face selection mode
-    # Check if have currently selected faces
-    # Check Mark Seams is True
-    if bm.select_mode == {'FACE'} and True in [f.select for f in bm.faces]:
-
-        selfaces = [f for f in bm.faces if f.select]
-        region_border_edges = get_bound_edges([e for e in bm.edges if e.select])
-
-        # Emulate Live Unwrap as Blender's native
-        if switch and False not in [edge.seam for edge in region_border_edges]:
-            assign = not assign
-
-        # Clear FINISHED for selected faces
-        fin_fmap = bm.faces.layers.int.get(FINISHED_FACEMAP_NAME, None)
-        if fin_fmap is not None:
-            for face in selfaces:
-                face[fin_fmap] = 0
-
-        # Test if selected edges exist - seams to borders
-        if region_border_edges:
-            # Clear sharp and seams for selected faces
-            edges_from_faces = [e for f in selfaces for e in f.edges]
-            if mSeam:
-                if remove_inside:
-                    for edge in edges_from_faces:
-                        edge.seam = False
-                assign_seam_to_edges(region_border_edges, assign=assign)
-            if mSharp:
-                if remove_inside:
-                    for edge in edges_from_faces:
-                        edge.smooth = True
-                assign_sharp_to_edges(region_border_edges, assign=assign)
-        else:
-            if not silent_mode:
-                if assign is True:
-                    bpy.ops.wm.call_menu(name="ZUV_MT_ZenMark_Popup")
-                    return False
-                else:
-                    zen_message(context, message="Nothing is produced. Selected polygons do not have a borders.")
-                    return False
-
-    # Check if Edge selection mode
-    if bm.select_mode == {'EDGE'} and True in [x.select for x in bm.edges]:
-        seledges = [e for e in bm.edges if e.select]
-        # Emulate Live Unwrap as Blender's native
-        if switch and False not in [edge.seam for edge in seledges]:
-            assign = not assign
-        if mSeam:
-            # print("Seam is true")
-            assign_seam_to_edges(seledges, assign=assign)
-        if mSharp:
-            # print("Sharp is true")
-            assign_sharp_to_edges(seledges, assign=assign)
-
-    return True
+def mark_seams_by_uv_border(bm):
+    bm.edges.ensure_lookup_table()
+    uv_layer = verify_uv_layer(bm)
+    faces = [f for f in bm.faces if not f.hide]
+    for i in UvIslandUtils.get_uv_bound_edges_indexes(faces, uv_layer):
+        bm.edges[i].seam = True
 
 
-def unmark_all_seams_sharp(bms, cl_seam=False, cl_sharp=False):
-    for obj in bms:
-        bm = bms[obj]['data']
-        bm.edges.ensure_lookup_table()
-        if cl_seam:
-            for edge in bm.edges:
-                edge.seam = False
-        if cl_sharp:
-            for edge in bm.edges:
-                edge.smooth = True
+def sharp_by_uv_border(context: bpy.types.Context, bm, uv_layer, influence: str):
+    if influence == 'ISLAND':
+        from collections import Counter
+        for island in UvIslandUtils.yield_uv_islands(context, bm, uv_layer, b_selected_only=False, b_include_hidden=False):
+            edges = (edge for face in island for edge in face.edges if edge.link_loops)
+            i_bound_edges = Counter(
+                [edge.index for edge in edges
+                    if edge.link_loops[0][uv_layer].uv
+                    != edge.link_loops[0].link_loop_radial_next.link_loop_next[uv_layer].uv
+                    or edge.link_loops[-1][uv_layer].uv
+                    != edge.link_loops[-1].link_loop_radial_next.link_loop_next[uv_layer].uv])
 
-        bmesh.update_edit_mesh(obj.data, loop_triangles=False)
-
-
-def seams_by_uv_border(bms):
-    for obj in bms:
-        bm = bms[obj]['data']
-        bm.edges.ensure_lookup_table()
-        uv_layer = verify_uv_layer(bm)
-        faces = [f for f in bm.faces if not f.hide]
-        for i in get_uv_bound_edges_indexes(faces, uv_layer):
-            bm.edges[i].seam = True
-        bmesh.update_edit_mesh(obj.data, loop_triangles=False)
-
-
-def sharp_by_uv_border(context: bpy.types.Context, bms: dict, influence: str):
-    for obj in bms:
-        bm = bms[obj]['data']
-        bm.edges.ensure_lookup_table()
-        uv_layer = verify_uv_layer(bm)
-
-        if influence == 'ISLAND':
-            from collections import Counter
-            from ZenUV.utils import get_uv_islands as island_util
-            for island in island_util.get_islands(context, bm):
-                edges = (edge for face in island for edge in face.edges if edge.link_loops)
-                i_bound_edges = Counter(
-                    [edge.index for edge in edges
-                        if edge.link_loops[0][uv_layer].uv
-                        != edge.link_loops[0].link_loop_radial_next.link_loop_next[uv_layer].uv
-                        or edge.link_loops[-1][uv_layer].uv
-                        != edge.link_loops[-1].link_loop_radial_next.link_loop_next[uv_layer].uv])
-
-                for i, count in i_bound_edges.items():
-                    if count >= 2:
-                        continue
-                    bm.edges[i].smooth = False
-        elif influence == 'UV':
-            faces = [f for f in bm.faces if not f.hide]
-            for i in get_uv_bound_edges_indexes(faces, uv_layer):
+            for i, count in i_bound_edges.items():
+                if count >= 2:
+                    continue
                 bm.edges[i].smooth = False
-        else:
-            raise RuntimeError('influence not in ("ISLAND", "UV")')
-
-        bmesh.update_edit_mesh(obj.data, loop_triangles=False)
+    elif influence == 'UV':
+        faces = [f for f in bm.faces if not f.hide]
+        for i in UvIslandUtils.get_uv_bound_edges_indexes(faces, uv_layer):
+            bm.edges[i].smooth = False
+    else:
+        raise RuntimeError('influence not in ("ISLAND", "UV")')
 
 
 def get_splits_edges_indices(island, uv_layer) -> int:
@@ -215,18 +130,9 @@ def get_splits_edges_indices(island, uv_layer) -> int:
             yield i
 
 
-def clear_selection(bm):
-    for e in bm.edges:
-        e.select = False
-    # bm.select_flush_mode()
-
-
-def seams_by_open_edges(bms):
-    for obj in bms:
-        bm = bms[obj]['data']
-        for i in get_open_edges_indices(bm):
-            bm.edges[i].seam = True
-        bmesh.update_edit_mesh(obj.data, loop_triangles=False)
+def seams_by_open_edges(bm):
+    for i in get_open_edges_indices(bm):
+        bm.edges[i].seam = True
 
 
 def get_open_edges_indices(bm):
@@ -236,20 +142,14 @@ def get_open_edges_indices(bm):
     return sources
 
 
-def seams_by_sharp(context):
-    for obj in context.objects_in_mode:
-        me, bm = get_mesh_data(obj)
-        for edge in bm.edges:
-            edge.seam = not edge.smooth
-        bmesh.update_edit_mesh(me, loop_triangles=False)
+def seams_by_sharp(bm):
+    for edge in bm.edges:
+        edge.seam = not edge.smooth
 
 
-def sharp_by_seam(context):
-    for obj in context.objects_in_mode:
-        me, bm = get_mesh_data(obj)
-        for edge in bm.edges:
-            edge.smooth = not edge.seam
-        bmesh.update_edit_mesh(me, loop_triangles=False)
+def sharp_by_seam(bm):
+    for edge in bm.edges:
+        edge.smooth = not edge.seam
 
 
 @dataclass
@@ -281,6 +181,7 @@ class MarkFactory:
         cls.message = ''
         cls.raise_popup = False
         cls.popup_name = ''
+        cls.b_is_use_popup = False
 
     @classmethod
     def _remove_inside(cls, ST: ObjMarkState, b_inf_seam: bool = True, b_inf_sharp: bool = True):
@@ -325,7 +226,7 @@ class MarkFactory:
 
     @classmethod
     def _get_bound_edges_from_faces(cls, facelist: list) -> list:
-        return {e for f in facelist for e in f.edges if False in [f.select for f in e.link_faces] or e.is_boundary}
+        return {e for f in facelist for e in f.edges if e.is_boundary or not all(f.select for f in e.link_faces)}
 
     @classmethod
     def _create_mark_state_object(cls, bl_object, overrided_selection_mode: str = None) -> ObjMarkState:
@@ -405,13 +306,12 @@ class MarkFactory:
             if m_obj.mode == 'FACE':
                 cls._clear_finished(m_obj)
 
-                if len(m_obj.edges):
-                    if is_remove_inside:
-                        m_obj.b_is_remove_inside = True
-                        cls._remove_inside(m_obj, b_set_seam, b_set_sharp)
-                    cls._assign_to_edges(m_obj, b_set_seam, b_set_sharp, is_assign)
+                if is_remove_inside:
+                    m_obj.b_is_remove_inside = True
+                    cls._remove_inside(m_obj, b_set_seam, b_set_sharp)
+                    bmesh.update_edit_mesh(m_obj.bl_object.data, loop_triangles=False, destructive=False)
 
-                else:
+                if not m_obj.edges and not is_remove_inside:
                     if not is_silent_mode:
                         if is_assign is True:
                             if cls.b_is_use_popup:
@@ -423,6 +323,11 @@ class MarkFactory:
                         else:
                             cls.message = "Nothing is produced. Selected faces do not have a borders."
                             return None
+
+                if m_obj.edges:
+                    cls._assign_to_edges(m_obj, b_set_seam, b_set_sharp, is_assign)
+                else:
+                    cls.message = "Nothing is produced. Selected faces do not have a borders."
 
             if m_obj.mode == 'EDGE':
                 cls._assign_to_edges(m_obj, b_set_seam, b_set_sharp, is_assign)

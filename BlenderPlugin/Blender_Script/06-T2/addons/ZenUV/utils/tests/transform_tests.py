@@ -20,7 +20,10 @@
 import bpy
 import random
 from mathutils import Vector
-from ZenUV.utils.vlog import Log
+from ...utils.generic import (
+    switch_to_vert_sel_mode, switch_to_edge_sel_mode,
+    bpy_select_by_context)
+from ...utils.vlog import Log
 from .addon_test_utils import (
     AddonTestError,
     _select_edges_by_id_active_obj,
@@ -76,7 +79,7 @@ def Test_uv_zenuv_unified_transform(context):
         "br"
     )
     prop = context.scene.zen_uv
-    skip_values_combination = (("MOVE", "cen"), ("FLIP", "cen"))
+    skip_values_combination = {("MOVE", "cen"), ("FLIP", "cen")}
     # prop.tr_pivot_mode = 'CENTER'
     prop.tr_type = 'ISLAND'
     prop.tr_scale.x = 2.0
@@ -141,7 +144,7 @@ def Test_uv_zenuv_align_grab_position(context):
 
 def Test_uv_zenuv_unwrap(context):
     ''' Unwrap by Marked edges. If you have selected edges or faces they will be Marked as Seams and/or Sharp edges and Unwrapped after '''
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
     init_bbox = _get_bounding_box(context)
 
     bpy.ops.uv.zenuv_unwrap(action='DEFAULT')
@@ -177,8 +180,8 @@ def Test_uv_zenuv_unwrap_constraint(context):
 
 def Test_uv_zenuv_distribute_verts(context):
     ''' Distribute vertices along the line '''
-    bpy.ops.mesh.select_all(action='DESELECT')
-    bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
+    bpy_select_by_context(context, action='DESELECT')
+    switch_to_vert_sel_mode(context)
     _select_edges_by_id_active_obj(context, [5, 6, 7, 10])
     context.view_layer.objects.active = context.scene.objects["ZenUvTestCube"]
     _select_edges_by_id_active_obj(context, [5, 6, 7, 10])
@@ -247,8 +250,8 @@ def Test_uv_zenuv_quadrify(context):
 
 def Test_uv_zenuv_reshape_island(context):
     ''' Changes the form of the island in accordance with the input parameters '''
-    bpy.ops.mesh.select_all(action='DESELECT')
-    bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
+    bpy_select_by_context(context, action='DESELECT')
+    switch_to_edge_sel_mode(context)
     _select_edges_by_id_active_obj(context, [5, 6, 7, 10])
     context.view_layer.objects.active = context.scene.objects["ZenUvTestCube"]
     _select_edges_by_id_active_obj(context, [5, 6, 7, 10])
@@ -335,7 +338,7 @@ def Test_uv_zenuv_scale_grab_size(context):
     test_value = 2.0
     scene = context.scene
     scene.zen_uv.unts_desired_size = init_value
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
     _select_edges_by_id_active_obj(context, [0, ])
 
     bpy.ops.uv.zenuv_scale_grab_size(multiplier=1, units='m')

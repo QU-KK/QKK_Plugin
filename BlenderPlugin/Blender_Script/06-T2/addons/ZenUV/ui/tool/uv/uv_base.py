@@ -26,20 +26,20 @@ import numpy as np
 from functools import partial
 import math
 
-from ZenUV.ops.trimsheets.trimsheet import ZuvTrimsheetGroup, TrimColorSettings
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.ui.gizmo_draw import LITERAL_ZENUV_GENERAL_UPDATE
-from ZenUV.utils.constants import UV_AREA_BBOX
-from ZenUV.utils.blender_zen_utils import (
+from ....ops.trimsheets.trimsheet import ZuvTrimsheetGroup, TrimColorSettings
+from ....ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ....ui.gizmo_draw import LITERAL_ZENUV_GENERAL_UPDATE
+from ....utils.constants import UV_AREA_BBOX
+from ....utils.blender_zen_utils import (
     ZenPolls,
     update_areas_in_all_screens,
     matrix_flatten, matrix_unflatten,
     rgetattr)
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.inject import is_modal_procedure
-from ZenUV.ops.event_service import get_blender_event
-from ZenUV.prop.scene_ui_props import ZUV_UVToolProps
+from ....prop.zuv_preferences import get_prefs
+from ....utils.vlog import Log
+from ....utils.inject import is_modal_procedure
+from ....ops.event_service import get_blender_event
+from ....prop.scene_ui_props import ZUV_UVToolProps
 
 
 class ZuvUVGizmoBase():
@@ -51,6 +51,9 @@ class ZuvUVGizmoBase():
     CAGE_DEFAULT_COLOR = (1, 0, 0)
 
     CURSOR_UNDEFINED = Vector((math.nan, math.nan))
+
+    uv_selection_center = Vector((math.nan, math.nan))
+    general_update = 'UNDEFINED'
 
     def _setup_dragged(self, context: bpy.types.Context):
         pass
@@ -109,15 +112,19 @@ class ZuvUVGizmoBase():
         return (
             context.mode == 'EDIT_MESH' and
             any(
-                sum(p_obj.data.count_selected_items())
+                sum(p_obj.data.count_selected_items()) != 0
                 for p_obj in context.objects_in_mode_unique_data if p_obj.type == 'MESH'
             )
         )
 
     @classmethod
     def is_workspace_tool_active(cls, context: bpy.types.Context):
-        _id = getattr(context.workspace.tools.from_space_image_mode('UV', create=False), 'idname', None)
-        return isinstance(_id, str) and _id == 'zenuv.uv_tool'
+        try:
+            _id = getattr(context.workspace.tools.from_space_image_mode('UV', create=False), 'idname', None)
+            return isinstance(_id, str) and _id == 'zenuv.uv_tool'
+        except Exception as e:
+            Log.error("WORKSPACE TOOL:", e)
+        return False
 
     @classmethod
     def poll(cls, context: bpy.types.Context):
@@ -127,11 +134,13 @@ class ZuvUVGizmoBase():
                 return True
         return False
 
-    def is_uv_selected(self):
-        return math.isfinite(self.uv_selection_center.x) and math.isfinite(self.uv_selection_center.y)
+    @classmethod
+    def is_uv_selected(cls):
+        return math.isfinite(cls.uv_selection_center.x) and math.isfinite(cls.uv_selection_center.y)
 
-    def is_general_update_valid(self):
-        return self.general_update == bpy.app.driver_namespace.get(LITERAL_ZENUV_GENERAL_UPDATE, '')
+    @classmethod
+    def is_general_update_valid(cls):
+        return cls.general_update == bpy.app.driver_namespace.get(LITERAL_ZENUV_GENERAL_UPDATE, '')
 
     def enqueue_gizmo_check(self, context: bpy.types.Context):
         if not self.uv_center_detection_started and not self.are_gizmos_modal() and not is_modal_procedure(context):
@@ -160,9 +169,9 @@ class ZuvUVGizmoBase():
                 return 0.01
 
             v_sel_center = self.getUVSelectedCenter(ctx_override)
-            if v_sel_center != self.uv_selection_center or not self.is_general_update_valid():
-                self.uv_selection_center = v_sel_center.copy()
-                self.general_update = bpy.app.driver_namespace.get(LITERAL_ZENUV_GENERAL_UPDATE, '')
+            if v_sel_center != ZuvUVGizmoBase.uv_selection_center or not self.is_general_update_valid():
+                ZuvUVGizmoBase.uv_selection_center = v_sel_center.copy()
+                ZuvUVGizmoBase.general_update = bpy.app.driver_namespace.get(LITERAL_ZENUV_GENERAL_UPDATE, '')
 
                 ctx_override['area'].tag_redraw()
 
@@ -178,8 +187,6 @@ class ZuvUVGizmoBase():
         self.active_trim_uuid = ''
         self.active_trim_index = -1
         self.last_setup_position = 0
-        self.uv_selection_center = self.CURSOR_UNDEFINED.copy()
-        self.general_update = 'UNDEFINED'
         self.uv_center_detection_started = False
         self.handled_text_rects = set()
 
@@ -510,7 +517,11 @@ class ZuvUVGizmoBase():
                     not p_tool_props.select_trim)
 
         b_handles_enabled = p_tool_props.tr_handles != 'OFF'
-        b_is_align_available = b_handles_enabled and s_tool_mode in {'MOVE', 'ROTATE', 'SCALE'}
+        b_is_align_available = (
+            b_handles_enabled and
+            s_tool_mode in {'MOVE', 'ROTATE', 'SCALE'} and
+            ZuvUVGizmoBase.is_uv_selected()
+        )
         b_is_cage_available = p_tool_props.display_trims or s_tool_mode in {'RESIZE', 'CREATE'}
 
         b_around_gizmo = self.is_around_gizmo(p_scene)
@@ -649,7 +660,7 @@ class ZuvUVGizmoBase():
                     if not self.are_gizmos_modal() and self.is_uv_selected():
                         rgn2d = context.region.view2d
 
-                        x, y, = rgn2d.view_to_region(self.uv_selection_center.x, self.uv_selection_center.y, clip=False)
+                        x, y, = rgn2d.view_to_region(ZuvUVGizmoBase.uv_selection_center.x, ZuvUVGizmoBase.uv_selection_center.y, clip=False)
 
                         mtx = Matrix.Translation(Vector((x, y, 0)))
 

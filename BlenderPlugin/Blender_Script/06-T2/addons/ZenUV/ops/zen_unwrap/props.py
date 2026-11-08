@@ -19,10 +19,10 @@
 
 import bpy
 from bpy.props import BoolProperty
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.ops.texel_density.td_utils import TdContext
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ...ui.labels import ZuvLabels
+from ...ops.texel_density.td_utils import TdContext
+from ...utils.vlog import Log
+from ...utils.blender_zen_utils import ZenPolls, is_loop_domain
 
 
 CAT = 'Z_UWRP_STATE'
@@ -30,12 +30,12 @@ CAT = 'Z_UWRP_STATE'
 
 def get_zen_unwrap_addon_prefs():
     """ Return Zen UV Properties obj """
-    return bpy.context.preferences.addons[ZuvLabels.ADDON_NAME].preferences.op_zen_unwrap_props
+    return bpy.context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences.op_zen_unwrap_props
 
 
 def get_zen_unwrap_sc_prefs():
     """ Return Zen UV Properties obj """
-    return bpy.context.preferences.addons[ZuvLabels.ADDON_NAME].preferences.op_zen_unwrap_props
+    return bpy.context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences.op_zen_unwrap_props
 
 
 class ZenUnwrapProps:
@@ -50,8 +50,8 @@ class ZenUnwrapProps:
     ]
 
     def __init__(self, context, operator) -> None:
-        addon_level_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences.op_zen_unwrap_props
-        global_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
+        addon_level_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences.op_zen_unwrap_props
+        global_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
 
         # Operator level Properties
         self.Mark: bool = operator.MarkUnwrapped
@@ -86,14 +86,13 @@ class ZuvMessage:
 class ZenUnwrapState:
 
     def __init__(self, context, uobjs, operator) -> None:
-        # objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        # objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         # self.objs = resort_objects(context, objs)
         self.objs_count: int = len(uobjs)
         self.result = ZuvMessage()
         self.PROPS: ZenUnwrapProps = ZenUnwrapProps(context, operator)
 
-        self.sync_mode: bool = True
-        self.update_sync_mode(context)
+        self.sync_mode: bool = not is_loop_domain(context)
 
         self.mSeam, self.mSharp = True, True
 
@@ -101,7 +100,7 @@ class ZenUnwrapState:
         self.objs_init_count = len(uobjs)
         self.objs_count = len(uobjs)
 
-        self.b_is_selection_exist = True in [obj.b_is_selection_exist for obj in uobjs]
+        self.b_is_selection_exist = any(obj.b_is_selection_exist for obj in uobjs)
 
         # self.b_is_seams_exist = True in [obj.b_is_seam_exist for obj in uobjs]
         self.bl_selection_mode = self._get_bl_selection_mode(context)
@@ -118,16 +117,13 @@ class ZenUnwrapState:
 
 
         # if not uobjs:
-        #     self.result = self.report('WARNING', "Zen UV: Select something.", False)
+        #     self.result = self.report('WARNING', "No objects selected.", False)
 
     def is_sorting_allowed(self):
         return not self.PROPS.ProcessingMode == 'SEL_ONLY' and self.PROPS.SortFinished and self.PROPS.PackEngine == "BLDR"
 
     def update_sync_mode(self, context):
-        sync_uv = context.scene.tool_settings.use_uv_select_sync
-        self.sync_mode = (
-            (context.space_data and context.space_data.type == 'IMAGE_EDITOR' and sync_uv) or
-            (context.space_data and context.space_data.type == 'VIEW_3D'))
+        self.sync_mode = not is_loop_domain(context)
 
     def set_selected_only(self, context, state):
         self.PROPS.ProcessingMode = state
@@ -189,7 +185,7 @@ class ZenUnwrapState:
         return ZuvMessage(_type, message, state)
 
     def is_pack_allowed(self):
-        from ZenUV.utils.blender_zen_utils import ZenPolls
+        from ...utils.blender_zen_utils import ZenPolls
         if ZenPolls.version_equal_3_6_0:
             return False
         if self.PROPS.ProcessingMode == 'SEL_ONLY':

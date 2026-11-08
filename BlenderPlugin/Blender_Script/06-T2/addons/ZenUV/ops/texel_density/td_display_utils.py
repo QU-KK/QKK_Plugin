@@ -27,7 +27,7 @@ from mathutils import Color
 from .td_utils import TdContext
 from .td_islands_storage import TdIslandsStorage, TdPresetsStorage
 
-from ZenUV.utils.vlog import Log
+from ...utils.vlog import Log
 
 
 class TdColorManager:
@@ -362,7 +362,7 @@ class TdDisplaySpectrumFactory:
         SCOPE.sort()
 
     def set_gradient_values(self, context: bpy.types.Context, td_inputs: TdContext, SCOPE: TdIslandsStorage, values_filter: float):
-        from ZenUV.ui.gizmo_draw import GradientProperties
+        from ...ui.gizmo_draw import GradientProperties
 
         if self.is_td_uniform:
             p_td_values, p_colors = TdSysUtils.get_gradient_values_for_uniform_td(context, td_inputs, self.color_scheme_name)
@@ -415,7 +415,7 @@ class TdDisplayPresetsFactory:
 
 
     def set_gradient_values(self, td_inputs: TdContext, SCOPE: TdIslandsStorage, values_filter):
-        from ZenUV.ui.gizmo_draw import GradientProperties
+        from ...ui.gizmo_draw import GradientProperties
         from .td_islands_storage import TdIsland
 
         for td, col in zip(self.presets_td_values, self.color_scheme):
@@ -490,7 +490,7 @@ class TdDisplayBalancedFactory:
         return SCOPE
 
     def set_gradient_values(self, context: bpy.types.Context, td_inputs: TdContext, SCOPE: TdIslandsStorage, values_filter: float):
-        from ZenUV.ui.gizmo_draw import GradientProperties
+        from ...ui.gizmo_draw import GradientProperties
 
         if self.is_td_uniform:
             p_td_values, p_colors = TdSysUtils.get_gradient_values_for_uniform_td(context, td_inputs)
@@ -540,7 +540,7 @@ class TdSysUtils:
 
     @classmethod
     def is_gradient_widget_active(cls, context):
-        from ZenUV.zen_checker.check_utils import is_draw_mode_active
+        from ...zen_checker.check_utils import is_draw_mode_active
         return is_draw_mode_active(context, 'TEXEL_DENSITY')
 
     @classmethod
@@ -552,9 +552,9 @@ class TdSysUtils:
 
     @classmethod
     def is_td_display_activated(cls, context):
-        from ZenUV.utils.generic import resort_by_type_mesh_in_edit_mode_and_sel
-        from ZenUV.utils.vc_processor import Z_TD_BALANCED_V_MAP_NAME
-        for obj in resort_by_type_mesh_in_edit_mode_and_sel(context):
+        from ...utils.generic import ResortObjects
+        from ...utils.vc_processor import Z_TD_BALANCED_V_MAP_NAME
+        for obj in ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context):
             if obj.data.vertex_colors.get(Z_TD_BALANCED_V_MAP_NAME, False):
                 return True
         return False

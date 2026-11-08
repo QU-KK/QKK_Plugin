@@ -33,18 +33,18 @@ from collections import defaultdict
 from itertools import chain
 import functools
 
-from ZenUV.utils.simple_geometry import TextRect
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.utils.inject import is_modal_procedure
-from ZenUV.utils.generic import get_unique_mesh_object_map_with_active, has_overlapped_triangles_by_area
-from ZenUV.utils.blender_zen_utils import (
+from ..utils.simple_geometry import TextRect
+from ..ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ..utils.inject import is_modal_procedure
+from ..utils.generic import get_unique_mesh_object_map_with_active, has_overlapped_triangles_by_area
+from ..utils.blender_zen_utils import (
     update_areas_in_uv, update_areas_in_view3d,
     prop_with_icon,
     ZenPolls, ZenCompat, ZenDrawConstants)
-from ZenUV.utils.vlog import Log
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.stacks.utils import (
+from ..utils.vlog import Log
+from ..prop.zuv_preferences import get_prefs
+from ..utils.uv_factory import UvIslandUtils
+from ..stacks.utils import (
     M_STACK_LAYER_NAME,
     STACK_LAYER_NAME,
     StacksSystem,
@@ -489,9 +489,9 @@ class UvSelectionStorage:
             if uv_layer:
                 if b_is_not_sync:
                     selected_items = [
-                        (loop, loop[uv_layer].select_edge if ZenPolls.version_since_3_2_0 else None)
+                        (loop, loop.uv_select_edge if ZenPolls.version_since_5_0_0 else loop[uv_layer].select_edge)
                         for face in bm.faces for loop in face.loops
-                        if not face.hide and loop[uv_layer].select
+                        if not face.hide and face.select and (loop.uv_select_vert if ZenPolls.version_since_5_0_0 else loop[uv_layer].select)
                     ]
                 else:
                     selected_verts = [
@@ -520,8 +520,11 @@ class UvSelectionStorage:
                 uv_layer = v[1]
                 if uv_layer:
                     for loop, select_edge in v[2]:
-                        loop[uv_layer].select = True
-                        if ZenPolls.version_since_3_2_0:
+                        if ZenPolls.version_since_5_0_0:
+                            loop.uv_select_vert = True
+                            loop.uv_select_edge = select_edge
+                        else:
+                            loop[uv_layer].select = True
                             loop[uv_layer].select_edge = select_edge
                     bm = v[0]
                     bm.select_flush_mode()
@@ -573,7 +576,7 @@ class UV_GT_zenuv_overlay_draw(bpy.types.Gizmo):
     def draw_gradient(self, context: bpy.types.Context):
         interval = timer()
 
-        from ZenUV.utils.generic import map_range
+        from ..utils.generic import map_range
         vertices = (
             (100, 100), (300, 100),
             (100, 200), (300, 200))
@@ -924,7 +927,7 @@ class UV_GT_zenuv_overlay_draw(bpy.types.Gizmo):
 
     @classmethod
     def is_face_flipped(cls, uv_layer, p_face):
-        from ZenUV.utils.generic import is_face_flipped
+        from ..utils.generic import is_face_flipped
         return is_face_flipped(p_face, uv_layer)
 
     def check_valid_data(self, context: bpy.types.Context):
@@ -1087,7 +1090,12 @@ class UV_GT_zenuv_overlay_draw(bpy.types.Gizmo):
                             if not looptris[0].face.hide and
                             (
                                 (self.uv_sync and looptris[0].face.select) or
-                                (looptris[0].face.select and loop[uv_layer].select)
+                                (
+                                    looptris[0].face.select and (
+                                        all(
+                                            (it_loop.uv_select_vert if ZenPolls.version_since_5_0_0 else it_loop[uv_layer].select)
+                                            for it_loop in looptris))
+                                )
                             )
                         ] if me.total_face_sel else []
 
@@ -1151,7 +1159,10 @@ class UV_GT_zenuv_overlay_draw(bpy.types.Gizmo):
         t_updates = bpy.app.driver_namespace.get(LITERAL_ZENUV_UPDATE, {})
 
         def get_color():
-            p_color = bpy.context.preferences.themes[0].view_3d.edge_seam[:3]
+            if ZenPolls.version_since_5_0_0:
+                p_color = bpy.context.preferences.themes[0].view_3d.seam[:3]
+            else:
+                p_color = bpy.context.preferences.themes[0].view_3d.edge_seam[:3]
             return (*p_color, 1.0)
 
         for me, p_obj in get_unique_mesh_object_map_with_active(context).items():
@@ -1189,6 +1200,52 @@ class UV_GT_zenuv_overlay_draw(bpy.types.Gizmo):
                     self.custom_shapes.append(
                         DrawCustomShape(batch, shader, p_obj, get_color))
 
+    def build_sharps(self, context: bpy.types.Context):
+        t_updates = bpy.app.driver_namespace.get(LITERAL_ZENUV_UPDATE, {})
+
+        def get_color():
+            if ZenPolls.version_since_5_0_0:
+                p_color = bpy.context.preferences.themes[0].view_3d.sharp[:3]
+            else:
+                p_color = bpy.context.preferences.themes[0].view_3d.edge_sharp[:3]
+            return (*p_color, 1.0)
+
+        for me, p_obj in get_unique_mesh_object_map_with_active(context).items():
+            update_data = t_updates.get(me, ['', ''])
+            self.mesh_data[me] = update_data.copy()
+
+            bm = bmesh.from_edit_mesh(me)
+            bm.faces.ensure_lookup_table()
+            bm.edges.ensure_lookup_table()
+            uv_layer = bm.loops.layers.uv.active
+            if uv_layer:
+                uvs = []
+                e: bmesh.types.BMEdge
+                for e in bm.edges:
+                    if not e.hide and (self.uv_sync or e.select) and not e.smooth:
+                        for loop in e.link_loops:
+                            next_loop = loop.link_loop_next
+                            if (self.uv_sync and not loop.face.hide) or (loop.face.select and next_loop.face.select):
+                                uv = loop[uv_layer].uv
+                                next_uv = next_loop[uv_layer].uv
+                                uvs.append(uv.to_tuple(5))
+                                uvs.append(next_uv.to_tuple(5))
+
+                if len(uvs):
+                    uv_verts, uv_indices = np.unique(uvs, return_inverse=True, axis=0)
+                    uv_coords = uv_verts.tolist()
+                    uv_indices = uv_indices.astype(np.int32)
+
+                    shader = shader_2D_lines
+
+                    batch = batch_for_shader(
+                        shader, 'LINES',
+                        {"pos": uv_coords},
+                        indices=uv_indices)
+                    batch.program_set(shader)
+                    self.custom_shapes.append(
+                        DrawCustomShape(batch, shader, p_obj, get_color))
+
     def build_uv_borders(self, context: bpy.types.Context):
         addon_prefs = get_prefs()
 
@@ -1199,7 +1256,7 @@ class UV_GT_zenuv_overlay_draw(bpy.types.Gizmo):
 
         d_margin = 0
         if addon_prefs.uv_borders_draw.mode == 'PACK_MARGIN':
-            from ZenUV.utils.generic import get_padding_in_pct
+            from ..utils.generic import get_padding_in_pct
             d_margin = (
                 get_padding_in_pct(context, addon_prefs.margin_px)
                 if addon_prefs.margin_show_in_px else addon_prefs.margin)
@@ -1380,7 +1437,7 @@ class UV_GT_zenuv_overlay_draw(bpy.types.Gizmo):
                                         functools.partial(get_point_color, me)))
 
     def build_excluded(self, context: bpy.types.Context):
-        from ZenUV.ops.pack_sys.pack_exclusion import PACK_EXCLUDED_FACEMAP_NAME
+        from ..ops.pack_sys.pack_exclusion import PACK_EXCLUDED_FACEMAP_NAME
 
         addon_prefs = get_prefs()
 
@@ -1447,10 +1504,10 @@ class UV_GT_zenuv_overlay_draw(bpy.types.Gizmo):
 
             if not self.uv_sync:
                 t_face_sel = {face: face.select for face in bm.faces}
-
             bound_edges = [
                 bm.edges[index]
-                for index in island_util.get_uv_bound_edges_indexes(bm.faces, uv_layer)]
+                for index in UvIslandUtils.get_uv_bound_edges_indexes(bm.faces, uv_layer)]
+
             if bound_edges:
                 bmesh.ops.split_edges(bm, edges=bound_edges)
 
@@ -1631,8 +1688,8 @@ class UV_GT_zenuv_overlay_draw(bpy.types.Gizmo):
 
         addon_prefs = get_prefs()
 
-        from ZenUV.ops.texel_density.td_utils import TdUtils, TdContext, TdBmeshManager
-        from ZenUV.ops.texel_density.td_display_utils import TdColorProcessor
+        from ..ops.texel_density.td_utils import TdUtils, TdContext, TdBmeshManager
+        from ..ops.texel_density.td_display_utils import TdColorProcessor
         td_inputs = TdContext(context)
         interval1 = timer()
 
@@ -1903,7 +1960,7 @@ class VIEW3D_GT_zenuv_overlay_draw(bpy.types.Gizmo):
 
         # NOTE: special case for Trim Colors
         if s_draw_mode == 'TRIM_COLORS':
-            from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+            from ..ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
             addon_prefs = get_prefs()
             if addon_prefs.trimsheet.mode != self.custom_data.get("trimsheet_mode", None):
                 return False
@@ -1975,7 +2032,7 @@ class VIEW3D_GT_zenuv_overlay_draw(bpy.types.Gizmo):
                         DrawCustomShape(batch, shader, p_obj, t_colors[k], z_offset))
 
     def build_excluded(self, context: bpy.types.Context):
-        from ZenUV.ops.pack_sys.pack_exclusion import PACK_EXCLUDED_FACEMAP_NAME
+        from ..ops.pack_sys.pack_exclusion import PACK_EXCLUDED_FACEMAP_NAME
 
         addon_prefs = get_prefs()
 
@@ -2059,7 +2116,13 @@ class VIEW3D_GT_zenuv_overlay_draw(bpy.types.Gizmo):
                     return bm.loops.layers.uv.active
 
                 def is_face_enabled(layer: bmesh.types.BMLayerItem, face: bmesh.types.BMFace):
-                    return face.select if context.tool_settings.use_uv_select_sync else any(loop[layer].select for loop in face.loops)
+                    return (
+                        face.select
+                        if context.tool_settings.use_uv_select_sync else
+                        any(
+                            loop.uv_select_vert
+                            if ZenPolls.version_since_5_0_0 else loop[layer].select
+                            for loop in face.loops))
 
                 def get_color():
                     return (*addon_prefs.UvOverlappedColor[:3], addon_prefs.UvOverlappedColor[3])
@@ -2182,7 +2245,9 @@ class VIEW3D_GT_zenuv_overlay_draw(bpy.types.Gizmo):
                     [loop.vert.index for loop in looptris]
                     for looptris in p_loops
                     if not looptris[0].face.hide and looptris[0].face.select and
-                    all(loop[uv_layer].select for loop in looptris[0].face.loops)
+                    all(
+                        (loop.uv_select_vert if ZenPolls.version_since_5_0_0 else loop[uv_layer].select)
+                        for loop in looptris[0].face.loops)
                 ]
 
                 if p_indices:
@@ -2287,8 +2352,8 @@ class VIEW3D_GT_zenuv_overlay_draw(bpy.types.Gizmo):
 
         t_updates = bpy.app.driver_namespace.get(LITERAL_ZENUV_UPDATE, {})
 
-        from ZenUV.ops.trimsheets.trimsheet import ZuvTrimsheetGroup
-        from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+        from ..ops.trimsheets.trimsheet import ZuvTrimsheetGroup
+        from ..ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
 
         b_is_scene_mode = addon_prefs.trimsheet.mode == "SCENE"
         p_scene_trimsheet = context.scene.zen_uv.trimsheet
@@ -2430,7 +2495,7 @@ class VIEW3D_GT_zenuv_overlay_draw(bpy.types.Gizmo):
             bm.edges.index_update()
             bm.edges.ensure_lookup_table()
             uv_layer = bm.loops.layers.uv.active
-            bound_edges = [bm.edges[index] for index in island_util.get_uv_bound_edges_indexes(bm.faces, uv_layer)]
+            bound_edges = [bm.edges[index] for index in UvIslandUtils.get_uv_bound_edges_indexes(bm.faces, uv_layer)]
             bmesh.ops.split_edges(bm, edges=bound_edges)
             bm.verts.ensure_lookup_table()
             no_actual_verts = [v for v in bm.verts if not v.link_faces]
@@ -2598,8 +2663,8 @@ class VIEW3D_GT_zenuv_overlay_draw(bpy.types.Gizmo):
 
         addon_prefs = get_prefs()
 
-        from ZenUV.ops.texel_density.td_utils import TdUtils, TdContext, TdBmeshManager
-        from ZenUV.ops.texel_density.td_display_utils import TdColorProcessor
+        from ..ops.texel_density.td_utils import TdUtils, TdContext, TdBmeshManager
+        from ..ops.texel_density.td_display_utils import TdColorProcessor
         td_inputs = TdContext(context)
         interval1 = timer()
 

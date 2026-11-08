@@ -18,7 +18,7 @@
 
 import bpy
 
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ..utils.blender_zen_utils import ZenPolls
 
 
 def normalize(string):
@@ -55,10 +55,10 @@ zen_uv_manual_map = (
 
     # Unwrap Section
     ('bpy.ops.uv.zenuv_unwrap', 'unwrap/#zen-unwrap'),
-    ('bpy.ops.uv.zenuv_unwrap_constraint', 'unwrap/#unwrap-constraint'),
+    # ('bpy.ops.uv.zenuv_unwrap_constraint', 'unwrap/#unwrap-constraint'),
     ('bpy.ops.uv.zenuv_unwrap_inplace', 'unwrap/#unwrap-inplace'),
     ('bpy.ops.uv.zenuv_auto_uv_unwrap', 'unwrap/#auto-unwrap'),
-    
+
     # -- Mark Subsection
     ('bpy.ops.uv.zenuv_auto_mark', 'unwrap/#mark-by-angle'),
     ('bpy.ops.uv.zenuv_mark_seams', 'unwrap/#mark'),
@@ -110,7 +110,9 @@ zen_uv_manual_map = (
     ('bpy.ops.uv.zenuv_select_stretched_faces', 'select/#select-stretched-faces'),
     ('bpy.ops.mesh.zenuv_select_faces_by_normal', 'select/#select-faces-by-normal'),
     ('bpy.ops.uv.zenuv_filter_islands_by_property', 'select/#filter-islands-by-property'),
-
+    ('bpy.ops.mesh.zenuv_select_cylinder_faces', 'select/#select-cylinder-faces'),
+    ('bpy.ops.mesh.zenuv_select_cylinder_cap', 'select/#select-cylinder-cap'),
+    ('bpy.ops.mesh.zenuv_select_material_boundary_edges', 'select/#select-material-boundary-edges'),
 
     # Pack Section
     ('bpy.ops.uv.zenuv_pack', normalize('pack/#Pack Islands')),
@@ -125,7 +127,7 @@ zen_uv_manual_map = (
     ('bpy.types.ZUV_Properties.tex_checker_tiling'.lower(), 'checker/#2-checker-textures'),
     ('bpy.types.ZUV_Properties.tex_checker_offset'.lower(), 'checker/#2-checker-textures'),
     ('bpy.types.ZUV_PT_OSL_Display.stretch'.lower(), normalize('checker/#Display Stretch Map')),
-    ('bpy.ops.uv.zenuv_select_stretched_islands', normalize('checker/#Display Stretch Map')),
+    # ('bpy.ops.uv.zenuv_select_stretched_islands', normalize('checker/#Display Stretch Map')),
     # -- Checker Props Subsection
     ('bpy.ops.ops.zenuv_checker_reset_path', normalize('checker/#Checker Texture Toggle')),
     ('bpy.ops.view3d.zenuv_check_library', normalize('checker/#Checker Texture Toggle')),
@@ -150,6 +152,17 @@ zen_uv_manual_map = (
     ('bpy.ops.uv.zenuv_update_addon', normalize('installation/#Installation')),
     ('bpy.ops.view3d.zenuv_install_library', normalize('installation/#Installation')),
     ('bpy.ops.zenuv.reset_preferences', normalize('preferences/#Preferences System')),
+    ('bpy.ops.wm.zenuv_reload_icons', 'preferences/#reload-icons'),
+
+    ('bpy.types.ZuvComboSettings.*'.lower(), 'preferences/#panels'),
+    ('bpy.types.ZuvPanelEnableGroup.*'.lower(), 'preferences/#panels'),
+
+    ('bpy.types.ZUV_AddonPreferences.*'.lower(), 'addon_prefs'),
+
+    # Favourites
+    ('bpy.types.ZUV_FavProps.*'.lower(), 'favourites'),
+    ('bpy.types.ZUV_FavItem.*'.lower(), 'favourites'),
+    ('bpy.ops.wm.zuv_fav_*', 'favourites'),
 
     # # -- Unused Operators Subsection
     # ('bpy.ops.zenuv.call_pie', '/#TEMP_LINK'),

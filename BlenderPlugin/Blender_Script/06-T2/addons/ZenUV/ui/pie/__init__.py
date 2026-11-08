@@ -28,7 +28,7 @@ from timeit import default_timer as timer
 
 from .basic_pie import get_command_props
 
-from ZenUV.utils.blender_zen_utils import ZenCompat, ZenPolls
+from ...utils.blender_zen_utils import ZenDrawConstants, ZenCompat, ZenPolls
 
 # from .mesh_pie import (
 #     ZSTO_OT_PieCallerTop,
@@ -54,11 +54,9 @@ from .mesh_pie import (
 
 from ...ico import icon_get
 # from ...vlog import Log
-from ZenUV.utils.blender_zen_utils import ZenDrawConstants
 
-from ZenUV.ui.bl_ui_widgets.bl_ui_drag_panel import BL_UI_Drag_Panel
-from ZenUV.ui.bl_ui_widgets.bl_ui_label import BL_UI_Label
-from ZenUV.utils.constants import ADDON_NAME
+from ...ui.bl_ui_widgets.bl_ui_drag_panel import BL_UI_Drag_Panel
+from ...ui.bl_ui_widgets.bl_ui_label import BL_UI_Label
 
 
 # ZUV_MT_BasicPie
@@ -272,7 +270,7 @@ class ZUV_OT_PieMenu(bpy.types.Operator):
         i_WIN_WIDTH = 200
         i_WIN_HEIGHT = 30 * 5
         i_TEXT_OFFSET = 20 * ui_scale
-        i_FONT_SIZE = context.preferences.addons[ADDON_NAME].preferences.pie_assist_font_size
+        i_FONT_SIZE = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences.pie_assist_font_size
         i_ROW_SIZE = (i_FONT_SIZE * 2) * ui_scale
 
         self.panel = BL_UI_Drag_Panel(0, 0, i_WIN_WIDTH, i_WIN_HEIGHT)
@@ -429,7 +427,7 @@ class ZUV_OT_PieMenu(bpy.types.Operator):
 
     def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
 
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ...prop.zuv_preferences import get_prefs
 
         addon_prefs = get_prefs()
         if not addon_prefs.pie_assist:

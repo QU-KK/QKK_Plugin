@@ -29,10 +29,12 @@ from . tr_utils import (
     TrOrder,
     TrSpaceMode
     )
-from ZenUV.ops.transform_sys.transform_utils.transform_loops import TransformLoops
-from ZenUV.utils.generic import get_mesh_data, verify_uv_layer
-from ZenUV.utils.bounding_box import BoundingBox2d, get_overall_bbox
-from ZenUV.utils import get_uv_islands as island_util
+from ....ops.transform_sys.transform_utils.transform_loops import TransformLoops
+from ....utils.bounding_box import BoundingBox2d, get_overall_bbox
+from ....utils.loops_factory import LoopsFactory
+from ....utils.uv_factory import UvIslandUtils
+from ....utils.iter_utils import IterUtils
+
 from .tr_object_data import transform_object_data
 
 
@@ -174,7 +176,6 @@ class TrRotateProcessorEx:
         message = 'Finished' if transform_object_data.object_storage else 'No selected islands'
 
         for obj, info in transform_object_data.object_storage.items():
-            me = info.me
             uv_layer = info.uv_layer
             loops = info.loops
 
@@ -187,7 +188,7 @@ class TrRotateProcessorEx:
 
                     TransformLoops.rotate_loops(lp_cluster, uv_layer, angle, anchor, image_aspect=image_aspect, angle_in_radians=True)
 
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         return message
 
@@ -209,20 +210,17 @@ class TrRotateProcessor:
         global_anchor = get_overall_bbox(context, from_islands=is_transform_islands)[island_pivot]
         order = TrOrder.from_pivot_point(context, pivot_point)
 
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = verify_uv_layer(bm)
-
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
             if is_transform_islands:
-                loops = island_util.LoopsFactory.loops_by_islands(context, bm, uv_layer)
+                loops = LoopsFactory.get_loops_by_islands(context, bm, uv_layer)
             else:
                 from . tr_utils import BlPivotPoint
                 is_groupped = order == 'ONE_BY_ONE' or (order == 'SYSTEM_PIVOT' and BlPivotPoint.get(context) == 'INDIVIDUAL_ORIGINS')
 
                 if is_groupped:
-                    loops = island_util.LoopsFactory.loops_by_sel_mode(context, bm, uv_layer, groupped=True)
+                    loops = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer, groupped=True)
                 else:
-                    loops = [island_util.LoopsFactory.loops_by_sel_mode(context, bm, uv_layer, groupped=False), ]
+                    loops = [LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer, groupped=False), ]
 
             for lp_cluster in loops:
                 if randomize:
@@ -238,7 +236,7 @@ class TrRotateProcessor:
 
                 TransformLoops.rotate_loops(lp_cluster, uv_layer, angle, anchor, image_aspect=image_aspect, angle_in_radians=True)
 
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False)
 
 
 class TrOrientProcessor:
@@ -300,27 +298,23 @@ class TrOrientProcessor:
         :param image_aspect: float
         """
         if processing_order == 'ONE_BY_ONE':
-            for obj in objs:
-                me, bm = get_mesh_data(obj)
-                uv_layer = verify_uv_layer(bm)
-                loops = island_util.LoopsFactory.loops_by_islands(context, bm, uv_layer)
+            for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+                loops = LoopsFactory.get_loops_by_islands(context, bm, uv_layer)
 
                 for cl in loops:
                     bbox = BoundingBox2d(points=[loop[uv_layer].uv for loop in cl])
 
                     cls._orient_loops(cl, uv_layer, bbox, image_aspect, orient_direction, rotate_direction)
 
-                bmesh.update_edit_mesh(me)
+                bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         elif processing_order == 'OVERALL':
             g_bbox = get_overall_bbox(context, from_islands=True, as_dict=False)
             image_aspect = ActiveUvImage(context).aspect
             angle = cls.get_orient_angle_by_props(g_bbox, image_aspect, orient_direction, rotate_direction)
 
-            for obj in objs:
-                me, bm = get_mesh_data(obj)
-                uv_layer = verify_uv_layer(bm)
-                loops = island_util.LoopsFactory.loops_by_islands(context, bm, uv_layer)
+            for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+                loops = LoopsFactory.get_loops_by_islands(context, bm, uv_layer)
 
                 for cluster in loops:
                     TransformLoops.rotate_loops(
@@ -332,7 +326,7 @@ class TrOrientProcessor:
                         angle_in_radians=True
                     )
 
-                bmesh.update_edit_mesh(me)
+                bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
     @classmethod
     def orient_by_selection(
@@ -352,17 +346,15 @@ class TrOrientProcessor:
         :param image_aspect: float
         :param processing_order: enum in {'OVERALL', 'ONE_BY_ONE'}
         """
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = verify_uv_layer(bm)
-            islands = island_util.get_island(context, bm, uv_layer)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+            islands = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
 
             if not len(islands):
                 continue
 
             if processing_order == 'ONE_BY_ONE':
                 for island in islands:
-                    s_loops = island_util.LoopsFactory.get_selected_loops_by_island(context, island, uv_layer)
+                    s_loops = LoopsFactory.get_selected_loops_by_island(context, bm, island, uv_layer)
                     bbox = BoundingBox2d(points=[loop[uv_layer].uv for loop in s_loops])
                     cl = [lp for f in island for lp in f.loops]
 
@@ -373,7 +365,7 @@ class TrOrientProcessor:
                 for i in islands:
                     cluster.extend(i)
 
-                s_loops = island_util.LoopsFactory.get_selected_loops_by_island(context, cluster, uv_layer)
+                s_loops = LoopsFactory.get_selected_loops_by_island(context, bm, cluster, uv_layer)
                 bbox = BoundingBox2d(points=[loop[uv_layer].uv for loop in s_loops])
 
                 cls._orient_loops(
@@ -387,7 +379,7 @@ class TrOrientProcessor:
             else:
                 raise RuntimeError("processing_order not in {'OVERALL', 'ONE_BY_ONE'}")
 
-            bmesh.update_edit_mesh(me, loop_triangles=False, destructive=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
     @classmethod
     def get_orient_angle_auto(cls, bbox: BoundingBox2d, image_aspect: float = 1.0) -> radians:

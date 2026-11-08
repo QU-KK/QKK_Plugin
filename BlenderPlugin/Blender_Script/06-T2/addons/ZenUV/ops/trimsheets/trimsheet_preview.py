@@ -26,8 +26,8 @@ import math
 from timeit import default_timer as timer
 
 from .trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.blender_zen_utils import ZuvPresets
+from ...utils.vlog import Log
+from ...utils.blender_zen_utils import ZuvPresets
 
 
 preview_collections = {}

@@ -22,21 +22,22 @@
 import bpy
 import bmesh
 
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.generic import (
-    resort_objects_by_selection,
+from ...utils.register_util import RegisterUtils
+from ...utils.generic import (
+    ResortObjects,
     verify_uv_layer
 )
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.tests.addon_test_utils import (
+from ...utils.uv_factory import UvIslandUtils
+from ...utils.loops_factory import LoopsFactory
+from ...utils.tests.addon_test_utils import (
     _prepare_test,
     AddonTestError,
     _get_hided_faces_ids,
     _hide_faces_by_id_active_obj,
     _move_uv_by_faces_id
 )
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.blender_zen_utils import ZenPolls, ZuvPresets, open_document
+from ...utils.vlog import Log
+from ...utils.blender_zen_utils import ZenPolls, ZuvPresets, open_document
 
 
 class ContextSolver:
@@ -200,7 +201,11 @@ class ZUV_OT_SysCheckSelInSyncUv(bpy.types.Operator):
         islands = []
         for obj in objs:
             bm = bmesh.from_edit_mesh(obj.data).copy()
-            for island in island_util.get_islands(context, bm):
+            uv_layer = bm.loops.layers.uv.active
+            if not uv_layer:
+                bm.free()
+                continue
+            for island in UvIslandUtils.yield_uv_islands(context, bm, uv_layer, b_selected_only=False, b_include_hidden=False):
                 islands.append([f.index for f in island])
             bm.free()
         return islands
@@ -215,7 +220,7 @@ class ZUV_OT_SysCheckSelInSyncUv(bpy.types.Operator):
 
         _move_uv_by_faces_id(context, self.island_01, offset=(0.7, 0))
 
-        objs = resort_objects_by_selection(context, context.objects_in_mode)
+        objs = ResortObjects.resort_objects_by_selection(context, context.objects_in_mode)
         if not objs:
             raise AddonTestError("The test is not prepared correctly. There are no objects in the scene.")
         return objs
@@ -234,13 +239,7 @@ class ZUV_OT_SysCheckSelInSyncUv(bpy.types.Operator):
         bm = bmesh.from_edit_mesh(obj.data)
         uv_layer = verify_uv_layer(bm)
         loops = [lp for f in bm.faces for lp in f.loops]
-        if ZenPolls.version_since_3_2_0:
-            for loop in loops:
-                loop[uv_layer].select = True
-                loop[uv_layer].select_edge = True
-        else:
-            for loop in loops:
-                loop[uv_layer].select = True
+        LoopsFactory.select_loops(context, bm, loops, uv_layer, state=True)
 
 
 class ZUV_OT_OpenPresetsFolder(bpy.types.Operator):
@@ -293,7 +292,7 @@ class ZUV_OT_DEBUG(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        from ZenUV.utils.tests.transform_tests import tests_transform_sys
+        from ...utils.tests.transform_tests import tests_transform_sys
         for c in tests_transform_sys:
             if str(c.__name__) == 'Test_uv_zenuv_align_grab_position':
                 c(context)

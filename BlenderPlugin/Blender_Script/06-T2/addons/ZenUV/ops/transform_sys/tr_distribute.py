@@ -22,18 +22,16 @@ import bpy
 import bmesh
 import random
 from mathutils import Vector, Matrix
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.stacks.utils import Cluster
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.generic import (
-    resort_objects_by_selection,
-    get_mesh_data,
-    verify_uv_layer
-)
-from ZenUV.utils.transform import zen_convex_hull_2d, bound_box
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.selection_utils import SelectionProcessor, UniSelectedObject
-from ZenUV.ops.transform_sys.tr_labels import TrLabels
+from ...utils.register_util import RegisterUtils
+from ...stacks.utils import Cluster
+from ...utils.loops_factory import LoopsFactory
+from ...utils.uv_factory import UvIslandUtils
+from ...utils.iter_utils import IterUtils
+from ...utils.generic import ResortObjects
+from ...utils.transform import zen_convex_hull_2d, bound_box
+from ...utils.vlog import Log
+from ...utils.selection_utils import SelectionProcessor, UniSelectedObject
+from ...ops.transform_sys.tr_labels import TrLabels
 from .transform_utils.tr_utils import Cursor2D, TransformOrderSolver
 
 
@@ -216,18 +214,15 @@ class ZUV_OT_TrArrange(bpy.types.Operator):
         box.prop(self, "scale")
 
     def invoke(self, context, event):
-        objs = resort_objects_by_selection(context, context.objects_in_mode)
+        objs = ResortObjects.resort_objects_by_selection(context, context.objects_in_mode)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {"CANCELLED"}
         self.criterion_data = dict()
         counter = 0
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = verify_uv_layer(bm)
-            bm.faces.ensure_lookup_table()
-            islands = island_util.get_island(context, bm, uv_layer)
-            for island in islands:
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+
+            for island in UvIslandUtils.yield_uv_islands(context, bm, uv_layer, b_selected_only=True, b_include_hidden=False):
                 cluster = Cluster(context, obj, island)
                 criterion = counter
                 self.criterion_data.update(
@@ -546,7 +541,6 @@ class ZUV_OT_RandomizeTransform(bpy.types.Operator):
         SelectionProcessor.reset_state()
         self.Storage = SelectionProcessor.collect_selected_objects(
             context,
-            b_is_not_sync=False,
             b_in_indices=True,
             b_is_skip_objs_without_selection=True,
             b_skip_uv_layer_fail=True,
@@ -771,7 +765,6 @@ class ZUV_OT_RandomizeTransform(bpy.types.Operator):
             SelectionProcessor.reset_state()
             self.Storage = SelectionProcessor.collect_selected_objects(
                 context,
-                b_is_not_sync=False,
                 b_in_indices=True,
                 b_is_skip_objs_without_selection=True,
                 b_skip_uv_layer_fail=True,
@@ -788,8 +781,8 @@ class ZUV_OT_RandomizeTransform(bpy.types.Operator):
         else:
             p_scale_is_one_direction = self.scale_is_one_direction
 
-        for s_obj in SelectionProcessor.yield_selected_objects(self.Storage):
-            p_islands = island_util.get_island(context, s_obj.bm, s_obj.uv_layer, use_seams_as_separator=self.use_seams_as_separator)
+        for s_obj in SelectionProcessor.yield_selected_objects(context, self.Storage):
+            p_islands = UvIslandUtils.get_selected_uv_islands(context, s_obj.bm, s_obj.uv_layer, use_seams_as_separator=self.use_seams_as_separator)
             sorted_inner_lists = [sorted([face.index for face in face_set]) for face_set in p_islands]
             s_obj.attribute_storage['islands'] = sorted(sorted_inner_lists, key=lambda lst: lst[0])
 
@@ -800,9 +793,9 @@ class ZUV_OT_RandomizeTransform(bpy.types.Operator):
             return {'FINISHED'}
 
         from math import radians
-        from ZenUV.ops.transform_sys.transform_utils.tr_randomize_utils import TransformRandomizer as rand
-        from ZenUV.ops.transform_sys.transform_utils.transform_loops import TransformLoops
-        from ZenUV.ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
+        from ...ops.transform_sys.transform_utils.tr_randomize_utils import TransformRandomizer as rand
+        from ...ops.transform_sys.transform_utils.transform_loops import TransformLoops
+        from ...ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
 
         pivot_point = TransformOrderSolver.get(context)
         if pivot_point == '':
@@ -873,7 +866,7 @@ class ZUV_OT_RandomizeTransform(bpy.types.Operator):
             # Precalculate BoundingBox
             if self.is_rotation_enabled or self.is_scale_enabled:
                 if self.rotation_as_one or self.scale_as_one:
-                    from ZenUV.utils.bounding_box import get_overall_bbox
+                    from ...utils.bounding_box import get_overall_bbox
                     g_bbox = get_overall_bbox(context, from_islands=True, as_dict=True)
 
         # Main routine
@@ -883,7 +876,7 @@ class ZUV_OT_RandomizeTransform(bpy.types.Operator):
         R = Matrix.Rotation(0.0, 4, 'Z')
         S = Matrix.Diagonal(Vector.Fill(4, 1.0))
 
-        for s_obj in SelectionProcessor.yield_selected_objects(self.Storage):
+        for s_obj in SelectionProcessor.yield_selected_objects(context, self.Storage):
             bm = s_obj.bm
             uv_layer = s_obj.uv_layer
 
@@ -971,7 +964,7 @@ class ZUV_OT_RandomizeTransform(bpy.types.Operator):
                 if not self.is_move_enabled:
                     return {'FINISHED'}
 
-                loops = island_util.LoopsFactory.loops_by_sel_mode(context, bm, uv_layer)
+                loops = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer)
                 f_loops = {loop[uv_layer].uv.copy().freeze(): [lp for lp in loop.vert.link_loops if lp[uv_layer].uv == loop[uv_layer].uv] for loop in loops}
                 for loops in f_loops.values():
 

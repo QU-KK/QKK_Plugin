@@ -24,34 +24,35 @@ import bpy
 import numpy
 from bpy.types import Operator
 from mathutils import Vector, Color
-from ZenUV.utils.transform import (
+from ..utils.transform import (
     bound_box,
     calculate_fit_scale,
     rotate_island,
     scale2d,
     UvTransformUtils
 )
-from ZenUV.utils.transform import align_vertical, align_horizontal
-from ZenUV.ops.texel_density.td_utils import (
+from ..utils.transform import align_vertical, align_horizontal
+from ..utils.iter_utils import IterUtils
+from ..ops.texel_density.td_utils import (
     TexelDensityProcessor,
     TdContext,
     UvFaceArea,
     TexelDensityFactory,
 )
-from ZenUV.utils.generic import (
+from ..utils.generic import (
     distance_vec,
-    get_mesh_data,
-    resort_by_type_mesh,
     clear_tag_data,
     set_tag_data,
-    verify_uv_layer
+    verify_uv_layer,
+    ResortObjects
 )
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.utils.clib.lib_init import StackSolver
-from ZenUV.utils.blender_zen_utils import ZenPolls
-from ZenUV.utils.progress import ProgressBar
-from ZenUV.utils.vlog import Log
+from ..utils.uv_factory import UvIslandUtils
+from ..utils.loops_factory import LoopsFactory
+from ..prop.zuv_preferences import get_prefs
+from ..utils.clib.lib_init import StackSolver
+from ..utils.blender_zen_utils import is_loop_domain
+from ..utils.progress import ProgressBar
+from ..utils.vlog import Log
 
 
 PROGRESS_BAR = None
@@ -118,23 +119,19 @@ class ZMS_OT_ShowSimIndex(Operator):
     #     return context.object.mode == 'EDIT' and context.object.zen_stack_list
 
     def execute(self, context):
-        print("\nOperator Start_________________________")
-        for obj in context.objects_in_mode:
-            me = obj.data
-            bm = bmesh.from_edit_mesh(me)
-            # select_all(bm, action=False)
-            uv_layer = verify_uv_layer(bm)
-            # faces = [f for f in bm.faces if f.select]
-            island = island_util.get_island(context, bm, uv_layer)
-            # s_layer = enshure_stack_layer(bm, stack_layer_name=M_STACK_LAYER_NAME)
+        objs = context.objects_in_mode
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+            islands = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
+            if not islands:
+                continue
 
-            print("\n\nIn Show: Sim Index", get_island_sim_index(island[0], uv_layer, use_seams_as_separator=self.use_seams_as_separator))
-            cluster = Cluster(context, obj, island[0])
+            print("\n\nIn Show: Sim Index", get_island_sim_index(islands[0], uv_layer, use_seams_as_separator=self.use_seams_as_separator))
+            cluster = Cluster(context, obj, islands[0])
             print("Sim Index As Cluster", cluster.sim_index)
             print("TYPE: ", cluster.type)
             # for f in faces:
             #     self.report({'INFO'}, "Face: {}. Sim Index: {} ".format(f.index, round(f[s_layer], 3)))
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False)
         return {'FINISHED'}
 
 
@@ -219,29 +216,11 @@ class Cluster:
         return verts, face_colors, face_tri_indices
 
     def select(self, select=True):
-        area = self.context.area.type
-        uv_sync = self.context.scene.tool_settings.use_uv_select_sync
-        if area == 'VIEW_3D':
+        if is_loop_domain:
+            LoopsFactory.select_loops(self.context, self.bm, self.loops.values(), self.uv_layer, state=select)
+        else:
             for f in self.island:
                 f.select = select
-        elif area == 'IMAGE_EDITOR':
-            if ZenPolls.version_since_3_2_0:
-                if uv_sync:
-                    for f in self.island:
-                        f.select = select
-                else:
-                    for f in self.island:
-                        f.select = True
-                    for loop in self.loops.values():
-                        loop[self.uv_layer].select = select
-                        loop[self.uv_layer].select_edge = select
-            else:
-                if uv_sync:
-                    for f in self.island:
-                        f.select = select
-                else:
-                    for loop in self.loops.values():
-                        loop[self.uv_layer].select = select
 
         self.update_mesh()
 
@@ -249,6 +228,8 @@ class Cluster:
         bmesh.update_edit_mesh(self.obj.data, loop_triangles=False)
 
     def island_container(self, island):
+        if not island:
+            return []
         if not isinstance(island, list):
             island = list(island)
         if not isinstance(island[0], int):
@@ -345,10 +326,10 @@ class Cluster:
         self._update_bbox()
 
     def cluster_bound_edges(self):
-        edge_indexes = island_util.get_uv_bound_edges_indexes(self.island, self.uv_layer)
-        if not edge_indexes and len(self.island) == 1:
-            edge_indexes = [e.index for f in self.island for e in f.edges]
-        return {e.index: e for f in self.island for e in f.edges if e.index in edge_indexes}
+        s_edge_indexes = set(UvIslandUtils.get_uv_bound_edges_indexes(self.island, self.uv_layer))
+        if not s_edge_indexes and len(self.island) == 1:
+            s_edge_indexes = {e.index for f in self.island for e in f.edges}
+        return {e.index: e for f in self.island for e in f.edges if e.index in s_edge_indexes}
 
     def get_perimeter(self):
         return round(sum([e.calc_length() for e in self.uv_bound_edges.values()]), 3)
@@ -360,11 +341,12 @@ class Cluster:
         return geometry_factor + sim_index_p2
 
     def store_cluster(self):
+        s_loops = set(self.loops.keys())
         for vertex in self.verts.values():
             self.cluster.update(
                 {
                     vertex.index: {
-                        "v_loops": {loop.index for loop in vertex.link_loops if loop.index in self.loops.keys()},
+                        "v_loops": {loop.index for loop in vertex.link_loops if loop.index in s_loops},
                         "neighbours": self.neighbours(vertex),
                         }
                 }
@@ -509,7 +491,7 @@ class Cluster:
         return iso, message
 
     # def compare_synthetic(self, v_adj_master, v_adj_pair):
-    #     # from ZenUV.utils.clib.lib_init import ZenUv
+    #     # from ..utils.clib.lib_init import ZenUv
     #     stack_solver = self.StackSolver()
     #     iso, outMapping, ec = stack_solver.calcMapping(v_adj_master, v_adj_pair)
     #     print("MAPPING: ", outMapping)
@@ -595,7 +577,8 @@ class Cluster:
         return iso, message
 
     def neighbours(self, vertex):
-        return {e.other_vert(vertex).index for e in vertex.link_edges for loop in e.link_loops if loop.index in self.loops}
+        s_loops = set(self.loops.keys())
+        return {e.other_vert(vertex).index for e in vertex.link_edges for loop in e.link_loops if loop.index in s_loops}
 
     def create_adj_data(self):
         for index, data in sorted(self.cluster.items()):
@@ -618,11 +601,12 @@ class StacksSystem:
 
     def __init__(self, context):
         self.context = context
-        self.sync_uv = context.scene.tool_settings.use_uv_select_sync
+        self.sync_uv = is_loop_domain(context)
         self.uv_area_only = context.scene.zen_uv.st_uv_area_only
         # self.bm = None  # Current bmesh representation
         self.StackedColor = get_prefs().StackedColor
-        self.objs = resort_by_type_mesh(context)
+        self.objs = ResortObjects.resort_by_type_mesh(context)
+        # self.objs = ResortObjects.resort_by_type_mesh_for_stacks(context)
         self.ASD = dict()  # Already Stacked Data (ASD). Dict with already stacked clusters
         self.SimData = dict()  # Dict with similarity data
 
@@ -655,7 +639,8 @@ class StacksSystem:
             master_island_name = stack['select']
             if master_island_name:
                 for obj_name, islands in stack["objs"].items():
-                    if master_island_name in islands.keys():
+                    s_names = set(islands.keys())
+                    if master_island_name in s_names:
                         master_cluster = Cluster(self.context, obj_name, islands[master_island_name])
 
         for obj_name, islands in stack["objs"].items():
@@ -762,7 +747,7 @@ class StacksSystem:
         found bbox data and solve which cluster stacked
         """
         uv_layer = verify_uv_layer(self.bm)
-        islands_ind = island_util.get_islands_in_indices(self.bm, use_seams_as_separator=use_seams_as_separator)
+        islands_ind = UvIslandUtils.get_all_uv_islands(self.context, self.bm, uv_layer, in_indices=True, use_seams_as_separator=use_seams_as_separator)
         iterator = 0
         axis_x = Vector((1.0, 0.0))
         axis_y = Vector((0.0, 1.0))
@@ -777,7 +762,7 @@ class StacksSystem:
             angle_y = position.angle_signed(axis_y, 0.1)
             bbox_data = pos_magnitude + bbox["len_x"] + bbox["len_y"]
             island_name = "island" + str(iterator)
-            # print("DATA: position: {}, sum_pos: {}, angle_y: {}, angle_x: {}".format(position, position.x + position.y, angle_y, angle_x))
+            # print(f"DATA: position: {position}, sum_pos: {position.x + position.y}, angle_y: {angle_y}, angle_x: {angle_x}")
             if self.uv_area_only:
                 if angle_y < 0 and angle_x > 0 and position.x < 1 and position.y < 1:
                     self.append_to_asd(island, bbox_data, island_name, sim_index)
@@ -799,7 +784,7 @@ class StacksSystem:
         """
         print out current data stored in SimData
         """
-        data_types = ["forecast", "singleton", "stacks"]
+        data_types = {"forecast", "singleton", "stacks"}
         if data_type in data_types:
             print("\nOutput Data: {}".format(data_type))
             if not self.SimData:
@@ -813,7 +798,7 @@ class StacksSystem:
             for index, data in out_data:
                 print(index, data)
         else:
-            print("Set Data Type. Must be: {}".format(data_types))
+            print(f"Set Data Type. Must be in: {data_types}")
 
     def expose_counts_ASD(self):
         """
@@ -976,19 +961,18 @@ class StacksSystem:
     def _create_similarity_data(self, m_stack=False, sim_index=None, s_layer_name=None, only_selected_islands=False, area_match=True, use_seams_as_separator: bool = False):
         """ Create similarity dict """
         self.SimData.clear()
-        for obj in self.objs:
-            bm, obj = self.get_bmesh(obj.name)
-            uv_layer = verify_uv_layer(bm)
+
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(self.objs, self.context, skip_obj_if_no_uv=True):
 
             if m_stack:  # gathering Manual Stack Data
                 if obj.zen_stack_list.items():
                     sim_index = obj.zen_stack_list[obj.zms_list_index].sim_index
                     faces = get_islands_from_stack(bm, s_layer_name, sim_index)
-                    islands = island_util.get_islands_by_face_list(self.context, bm, faces, uv_layer, use_seams_as_separator=use_seams_as_separator)
+                    islands = UvIslandUtils.get_islands_by_facelist(bm, uv_layer, faces, use_seams_as_separator=use_seams_as_separator)
                 else:
                     islands = []
             else:
-                islands = island_util.get_islands(self.context, bm, use_seams_as_separator=use_seams_as_separator)
+                islands = UvIslandUtils.get_all_uv_islands(self.context, bm, uv_layer, use_seams_as_separator=use_seams_as_separator)
 
             index = 0
             for island in islands:
@@ -1036,11 +1020,11 @@ class StacksSystem:
     #             if obj.zen_stack_list.items():
     #                 sim_index = obj.zen_stack_list[obj.zms_list_index].sim_index
     #                 faces = get_islands_from_stack(bm, s_layer_name, sim_index)
-    #                 islands = island_util.get_islands_by_face_list(self.context, bm, faces, uv_layer)
+    #                 islands = UvIslandUtils.get_islands_by_facelist(bm, uv_layer, faces)
     #             else:
     #                 islands = []
     #         else:
-    #             islands = island_util.get_islands(self.context, bm)
+    #             islands = UvIslandUtils.UvIslandUtils.get_all_uv_islands(context, bm, uv_layer)
     #         index = 0
     #         for island in islands:
     #             if m_stack and len(obj.zen_stack_list) > 0:
@@ -1092,6 +1076,7 @@ class StacksSystem:
 
     def get_filled_stack_storage(
             self,
+            context: bpy.types.Context,
             m_stack: bool = False,
             sim_index: float = None,
             s_layer_name: str = None,
@@ -1103,20 +1088,17 @@ class StacksSystem:
         from .utils_extra import StacksStorage, StackedCluster
 
         StacksStorage.clear()
-        for obj in self.objs:
-            # bm, obj = self.get_bmesh(obj.name)
-            bm = bmesh.from_edit_mesh(obj.data)
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(self.objs, context, skip_obj_if_no_uv=True):
 
             if m_stack:  # gathering Manual Stack Data
                 if obj.zen_stack_list.items():
                     sim_index = obj.zen_stack_list[obj.zms_list_index].sim_index
                     faces = get_islands_from_stack(bm, s_layer_name, sim_index)
-                    islands = island_util.get_islands_by_face_list(self.context, bm, faces, uv_layer)
+                    islands = UvIslandUtils.get_islands_by_facelist(bm, uv_layer, faces)
                 else:
                     islands = []
             else:
-                islands = island_util.get_islands(self.context, bm)
+                islands = UvIslandUtils.get_all_uv_islands(self.context, bm, uv_layer)
 
             for island in islands:
                 StacksStorage.append(
@@ -1135,23 +1117,10 @@ class StacksSystem:
 
     def _get_island_name(self, sim_index, uv_layer, island, index):
         island_name = "island" + str(index)
-        if self.context.area.type == 'VIEW_3D':
-            if True in [f.select for f in island]:
-                island_name = "s_" + island_name
-                self.SimData[sim_index]["select"] = island_name
-        elif self.context.area.type == 'IMAGE_EDITOR':
-            if self.sync_uv:
-                # In the UV Editor Works correct only in FACE selection mode. This is due to the peculiarity Selections of the blender.
-                if True in [f.select for f in island]:  # or True in [e.select for f in island for e in f.edges]:
-                    island_name = "s_" + island_name
-                    self.SimData[sim_index]["select"] = island_name
-            else:
-                if True in [loop[uv_layer].select for face in island for loop in face.loops if face.select]:
-                    island_name = "s_" + island_name
-                    self.SimData[sim_index]["select"] = island_name
+        if UvIslandUtils.is_island_selected(self.context, island, uv_layer):
+            island_name = "s_" + island_name
+            self.SimData[sim_index]["select"] = island_name
         return island_name
-
-        # return stacks
 
     def color_by_sim_index(self, sim_index):
         # solver returns order alpha, color.value, color.saturation
@@ -1215,11 +1184,11 @@ def get_area(island):
 
 def get_perimeter(island, uv_layer, use_seams_as_separator: bool = False):
     if use_seams_as_separator:
-        edge_indexes = {e.index for f in island for e in f.edges if e.seam}
+        s_edge_indexes = {e.index for f in island for e in f.edges if e.seam}
     else:
-        edge_indexes = island_util.get_uv_bound_edges_indexes(island, uv_layer)
+        s_edge_indexes = set(UvIslandUtils.get_uv_bound_edges_indexes(island, uv_layer))
     # print("ISLAND EDGES INDEXES: ", len(edge_indexes))
-    edges = {e for f in island for e in f.edges if e.index in edge_indexes}
+    edges = {e for f in island for e in f.edges if e.index in s_edge_indexes}
     # print("PERIMETER EDGES: ", [e.index for e in edges], len(edges))
     return round(sum([e.calc_length() for e in edges]), 3)
 
@@ -1255,7 +1224,7 @@ def get_master_parameters(context, obj_name, indices):
     master_loop_indices = dict()
     master_face_indices = dict()
     obj = context.scene.objects[obj_name]
-    me, bm_master = get_mesh_data(obj)
+    bm_master = bmesh.from_edit_mesh(obj.data)
     uv_layer = verify_uv_layer(bm_master)
     bm_island = [bm_master.faces[index] for index in indices]
     master_loop_indices[obj_name] = [loop.index for f in bm_island for loop in f.loops]
@@ -1268,12 +1237,7 @@ def get_master_parameters(context, obj_name, indices):
 
 
 def get_master_island_position(bm_master, indices):
-    # master = dict()
-    # obj = context.scene.objects[obj_name]
-    # me, bm_master = get_mesh_data(obj)
     uv_layer = verify_uv_layer(bm_master)
-    # bm_island = [bm_master.faces[index] for index in indices]
-    # master[obj_name] = [loop.index for f in bm_island for loop in f.loops]
     bm_master.faces.ensure_lookup_table()
     points = [loop[uv_layer].uv for index in indices for loop in bm_master.faces[index].loops]
     position = bound_box(points=points, uv_layer=uv_layer)["cen"]

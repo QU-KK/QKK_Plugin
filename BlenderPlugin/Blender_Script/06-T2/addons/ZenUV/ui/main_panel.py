@@ -19,19 +19,19 @@
 """ Zen UV Main Panel controls """
 import bpy
 
-from ZenUV.ico import icon_get
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.utils.generic import (
+from ..ico import icon_get
+from ..ui.labels import ZuvLabels
+from ..utils.generic import (
     ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE,
     ZUV_SPACE_TYPE, ZenKeyEventSolver)
-from ZenUV.prop.zuv_preferences import (
+from ..prop.zuv_preferences import (
     draw_panels_enabler, get_prefs, get_addon_version)
-from ZenUV.prop.common import uv_enblr, get_combo_panel_order
-from ZenUV.ui.panel_draws import draw_unwrap
+from ..prop.common import uv_enblr, get_combo_panel_order
+from ..ui.panel_draws import draw_unwrap
 
-from ZenUV.ops.transform_sys.tr_ui import draw_transform_panel
-from ZenUV.utils.clib.lib_init import StackSolver, get_zenlib_version, is_zenlib_present
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ..ops.transform_sys.tr_ui import draw_transform_panel
+from ..utils.clib.lib_init import StackSolver, get_zenlib_version, is_zenlib_present
+from ..utils.blender_zen_utils import ZenPolls
 
 
 class ZUV_PT_3DV_Transform(bpy.types.Panel):
@@ -216,22 +216,22 @@ class ZUV_PT_Help(bpy.types.Panel):
 
         col = layout.column(align=True)
 
-        try:
-            row = col.row(align=True)
-            # TODO: decide what is better
-            if True:
-                row.label(text='Version: ' + get_addon_version())
-            else:
-                row.alignment = 'LEFT'
-                row.label(text='Version:')
-                r2 = row.row(align=False)
-                r2.ui_units_x = 3
-                s_version = get_addon_version()
-                op = r2.operator('wm.zenuv_show_addon_version_info', text=s_version)
-                op.is_silent = True
-                op.version = s_version
-        except Exception:
-            print('Zen UV: No version found. There may be several versions installed. Try uninstalling everything and installing the latest version.')
+        # try:
+        #     row = col.row(align=True)
+        #     # TODO: decide what is better
+        #     if True:
+        #         row.label(text='Version: ' + get_addon_version())
+        #     else:
+        #         row.alignment = 'LEFT'
+        #         row.label(text='Version:')
+        #         r2 = row.row(align=False)
+        #         r2.ui_units_x = 3
+        #         s_version = get_addon_version()
+        #         op = r2.operator('wm.zenuv_show_addon_version_info', text=s_version)
+        #         op.is_silent = True
+        #         op.version = s_version
+        # except Exception:
+        #     print('Zen UV: No version found. There may be several versions installed. Try uninstalling everything and installing the latest version.')
 
         row = col.row(align=True)
 
@@ -475,9 +475,9 @@ class ZUV_OT_resetPreferences(bpy.types.Operator):
             print(" Zen UV: The 'System' panel is registered.")
 
         # if hasattr(bpy.types, bpy.ops.uvpackeroperator.packbtn.idname()):
-        from ZenUV.utils.tests.td_tests import ZUV_OT_UnitTestTexelDensity
-        from ZenUV.utils.tests.td_tests import register as register_td_tests
-        from ZenUV.utils.tests.td_tests import unregister as unregister_td_tests
+        from ..utils.tests.td_tests import ZUV_OT_UnitTestTexelDensity
+        from ..utils.tests.td_tests import register as register_td_tests
+        from ..utils.tests.td_tests import unregister as unregister_td_tests
         if hasattr(bpy.types, ZUV_OT_UnitTestTexelDensity.bl_idname):
             unregister_td_tests()
             print('Operators TD Tests UnRegistered')
@@ -566,7 +566,7 @@ class ZUV_OT_ShowAddonVersionInfo(bpy.types.Operator):
             layout.label(text=f'New Version: {self.version} is available!', icon='ERROR')
             layout.label(text='Visit Blendermarket or Gumroad to update!')
 
-        layout.prop(addon_prefs, 'check_for_updates')
+        # layout.prop(addon_prefs, 'check_for_updates')
 
     def execute(self, context):
         try:
@@ -590,24 +590,25 @@ class ZUV_PT_System(bpy.types.Panel):
         return True
 
     def draw(self, context):
-        from ZenUV.utils.tests.td_tests import (
+        from ..utils.tests.td_tests import (
             ZUV_OT_DevTestTexelDensity,
             ZUV_OT_UnitTestTexelDensity,
             ZUV_OT_TestPropertiesTexelDensity
         )
-        from ZenUV.utils.tests.addon_test import ZUV_OP_GrabCurveToFont
-        from ZenUV.zen_checker.check_utils import ZUV_OT_ShowIslandArea
+        from ..utils.tests.addon_test import ZUV_OP_GrabCurveToFont
+        from ..zen_checker.check_utils import ZUV_OT_ShowIslandArea
+        from ..utils.tests.system_operators import ZUV_OT_SysCheckSelInSyncUv
 
         lt = self.layout
         lt.operator('zenuv_test.test_checking')
         lt.operator("zenuv_test.addon_test")
-        lt.operator("zenuv.check_sel_in_sync_states")
+        lt.operator(ZUV_OT_SysCheckSelInSyncUv.bl_idname)
         lt.operator("uv.zenuv_debug")
         lt.operator("view3d.zenuv_check_library")
         lt.operator(ZUV_OP_GrabCurveToFont.bl_idname)
         lt.operator(ZUV_OT_ShowIslandArea.bl_idname)
 
-        from ZenUV.zen_checker.check_utils import draw_checker_display_items, t_draw_system_modes
+        from ..zen_checker.check_utils import draw_checker_display_items, t_draw_system_modes
         draw_checker_display_items(lt, context, t_draw_system_modes)
 
         lt.operator("uv.zenuv_show_sim_index")
@@ -641,7 +642,7 @@ class ZUV_PT_System_UVL(bpy.types.Panel):
         layout.operator("uv.zenuv_debug")
         layout.operator("view3d.zenuv_check_library")
 
-        from ZenUV.zen_checker.check_utils import draw_checker_display_items, t_draw_system_modes
+        from ..zen_checker.check_utils import draw_checker_display_items, t_draw_system_modes
         draw_checker_display_items(layout, context, t_draw_system_modes)
 
         layout.operator("uv.zenuv_show_sim_index")

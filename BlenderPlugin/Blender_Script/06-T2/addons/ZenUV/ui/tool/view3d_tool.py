@@ -20,8 +20,8 @@
 
 import bpy
 
-from ZenUV.ico import zenuv_tool_icon
-from ZenUV.prop.zuv_preferences import get_prefs
+from ...ico import zenuv_tool_icon
+from ...prop.zuv_preferences import get_prefs
 
 from .tool_generic_keymap import get_tool_generic_keymap
 
@@ -192,7 +192,7 @@ class Zuv3DVWorkSpaceTool(bpy.types.WorkSpaceTool):
                 draw_lock_in_trim(F'view3d.zenuv_{s_tool_mode.lower()}_in_trim')
 
         if b_is_in_property_area:
-            from ZenUV.ui.combo_panel import ZuvComboBase, ZUV_PT_3DV_ComboPanel
+            from ...ui.combo_panel import ZuvComboBase, ZUV_PT_3DV_ComboPanel
             pnl = ZuvComboBase()
             pnl.column_align = 'RIGHT'
             pnl.bl_space_type = ZUV_PT_3DV_ComboPanel.bl_space_type

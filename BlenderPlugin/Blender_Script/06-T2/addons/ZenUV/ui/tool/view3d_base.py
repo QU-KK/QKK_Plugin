@@ -28,15 +28,15 @@ from timeit import default_timer as timer
 import numpy as np
 from functools import partial
 
-from ZenUV.utils.transform import centroid
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.utils.constants import UV_AREA_BBOX
-from ZenUV.utils.inject import is_modal_procedure
-from ZenUV.utils.vlog import Log
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.ops.trimsheets.trimsheet import ZuvTrimsheetGroup, TrimColorSettings
-from ZenUV.utils.blender_zen_utils import rgetattr
-from ZenUV.utils.transform import ZenLocRotScale
+from ...utils.transform import centroid
+from ...ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ...utils.constants import UV_AREA_BBOX
+from ...utils.inject import is_modal_procedure
+from ...utils.vlog import Log
+from ...prop.zuv_preferences import get_prefs
+from ...ops.trimsheets.trimsheet import ZuvTrimsheetGroup, TrimColorSettings
+from ...utils.blender_zen_utils import rgetattr
+from ...utils.transform import ZenLocRotScale
 
 from bpy_extras import view3d_utils
 
@@ -203,7 +203,7 @@ class AdvancedBaseVectors:
             self._calc_base_edges(uv_layer)
 
     def _is_face_flipped(self, uv_layer):
-        from ZenUV.utils.generic import is_face_flipped
+        from ...utils.generic import is_face_flipped
         return is_face_flipped(self.p_face, uv_layer)
 
     def _calc_base_edges(self, uv_layer):
@@ -523,6 +523,8 @@ class ZuvGizmoBase():
 
     CAGE_DEFAULT_COLOR = (1, 0, 0)
 
+    has_selected_mesh_elements = False
+
     # ABSTRACT METHODS
 
     def _reset_dragged(self, context: bpy.types.Context):
@@ -558,7 +560,9 @@ class ZuvGizmoBase():
                 if isinstance(_id, str) and _id == 'zenuv.view3d_tool':
                     mesh = p_obj.data  # type: bpy.types.Mesh
                     bm = bmesh.from_edit_mesh(mesh)
-                    return bm.faces.active is not None
+                    p_face = bm.faces.active
+                    if p_face is not None:
+                        return True
         return False
 
     @classmethod
@@ -671,7 +675,9 @@ class ZuvGizmoBase():
             op_props.direction = k
             op_props.pivot_prop = self.pivot_prop
 
+        p_were_gizmos = set(self.gizmos)
         self._setup_dragged(context)
+        self.dragged_gizmos = set(self.gizmos) - p_were_gizmos
 
         self.mpr_trim = self.gizmos.new("VIEW3D_GT_zenuv_trim_cage")
         self.mpr_trim.color = 1.0, 0.0, 0.0
@@ -861,14 +867,23 @@ class ZuvGizmoBase():
             self.mpr_trim.color = p_cage_color
             self.mpr_trim.color_highlight = self.mpr_trim.color
 
+        b_handles_enabled = (
+            not b_modal_disable and
+            tool_props.tr_handles != 'OFF' and
+            ZuvGizmoBase.has_selected_mesh_elements
+        )
+
         for k, v in self.mpr_trim_align.items():
-            v.hide = b_modal_disable or tool_props.tr_handles == 'OFF'
+            v.hide = not b_handles_enabled
             self.mpr_trim_fitflip[k].hide = v.hide or v.is_highlight
             if not v.hide:
                 v.color = p_active_color
                 v.color_highlight = v.color
 
                 self.mpr_trim_fitflip[k].color = p_active_color
+
+        for gizmo in self.dragged_gizmos:
+            gizmo.hide = not ZuvGizmoBase.has_selected_mesh_elements
 
     def setup_colors(self, context: bpy.types.Context):
         p_trimsheet = None
@@ -1044,6 +1059,8 @@ class ZuvGizmoBase():
         # NOTE: Do not do check for modal procedure here!
 
 
+        ZuvGizmoBase.has_selected_mesh_elements = any(sum(obj.data.count_selected_items()) != 0 for obj in context.objects_in_mode if obj.type == 'MESH')
+
         # -- Are we in drag mode
         b_drag_completed = self._check_and_set_drag_completed()
 
@@ -1060,7 +1077,7 @@ class ZuvGizmoBase():
                     self.setup_position(context, update_drag=False)
 
     def refresh(self, context: bpy.types.Context):
-        from ZenUV.utils.inject import is_modal_procedure
+        from ...utils.inject import is_modal_procedure
 
         if is_modal_procedure(context):
             return

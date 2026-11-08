@@ -13,7 +13,7 @@ import json
 import bpy
 from mathutils import Vector, Matrix
 from bpy.app.translations import pgettext_tip as tip_
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ....utils.blender_zen_utils import ZenPolls
 
 from . import svg_colors
 from .svg_util import (
@@ -632,7 +632,7 @@ class SVGGeometryImage(SVGGeometryContainer):
                 if context.space_data.image != p_image:
                     context.space_data.image = p_image
 
-                from ZenUV.prop.zuv_preferences import get_prefs
+                from ....prop.zuv_preferences import get_prefs
                 addon_prefs = get_prefs()
                 if addon_prefs.trimsheet.mode != 'IMAGE':
                     addon_prefs.trimsheet.mode = 'IMAGE'
@@ -802,7 +802,9 @@ class SVGGeometryRECT(SVGGeometry):
             p_trim.name_ex = p_trim_name
 
             if 'color' not in t_trim_dict:
-                p_trim.color = ZuvTrimsheetUtils.getTrimsheetGeneratedColor(self._data.get("trim_data"))
+                p_trim_data = self._data.get("trim_data", None)
+                if p_trim_data:
+                    p_trim.color = ZuvTrimsheetUtils.getTrimsheetGeneratedColor(p_trim_data.trimsheet)
 
         p_trim.from_dict(t_trim_dict)
 

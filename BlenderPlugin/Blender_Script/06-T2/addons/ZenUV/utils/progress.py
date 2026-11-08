@@ -22,8 +22,8 @@ from __future__ import annotations
 import bpy
 
 from timeit import default_timer as timer
-from ZenUV.utils.clib.lib_init import init_progress, finish_progress
-from ZenUV.prop.zuv_preferences import get_prefs
+from ..utils.clib.lib_init import init_progress, finish_progress
+from ..prop.zuv_preferences import get_prefs
 
 _ATTR_PROGRESS_LOCK = 'zen_sets_progress_lock'
 

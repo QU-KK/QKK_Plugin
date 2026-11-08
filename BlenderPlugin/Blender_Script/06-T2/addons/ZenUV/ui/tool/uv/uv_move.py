@@ -21,11 +21,11 @@
 import bpy
 
 from mathutils import Vector
-from ZenUV.utils.vlog import Log
+from ....utils.vlog import Log
 
 from .uv_pos_sca import ZuvUVGizmoPosSca
-from ZenUV.ops.event_service import is_skipped_by_continious_drag
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ....ops.event_service import is_skipped_by_continious_drag
+from ....utils.blender_zen_utils import ZenPolls
 
 
 class ZUV_GGT_UVTransformMove(bpy.types.GizmoGroup, ZuvUVGizmoPosSca):
@@ -54,7 +54,7 @@ class ZUV_GGT_UVTransformMove(bpy.types.GizmoGroup, ZuvUVGizmoPosSca):
 
         b_executed = False
 
-        from ZenUV.ops.transform_sys.trim_depend_transform import ZUV_OT_TrUVMoveInTrim
+        from ....ops.transform_sys.trim_depend_transform import ZUV_OT_TrUVMoveInTrim
 
         # prevent endless undo chain
         wm = bpy.context.window_manager

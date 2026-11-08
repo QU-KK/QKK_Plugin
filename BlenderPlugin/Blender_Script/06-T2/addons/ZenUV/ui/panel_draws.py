@@ -24,10 +24,10 @@ import bpy
 
 import platform
 
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.ico import icon_get
+from ..ui.labels import ZuvLabels
+from ..ico import icon_get
 
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ..utils.blender_zen_utils import ZenPolls
 
 
 def draw_progress_bar(self, context):
@@ -44,7 +44,7 @@ def draw_progress_bar(self, context):
 
 
 def draw_smooth_by_sharp_op(layout):
-    from ZenUV.ops.operators import ZUV_OT_SmoothBySharp
+    from ..ops.operators import ZUV_OT_SmoothBySharp
     if not ZenPolls.version_since_4_1_0:
         p_op_name = ZUV_OT_SmoothBySharp.bl_label + ' (Toggle)'
     else:
@@ -63,9 +63,9 @@ def draw_unwrap(self, context: bpy.types.Context):
         "uv.zenuv_unwrap",
         icon_value=icon_get(ZuvLabels.ZEN_UNWRAP_ICO)).action = "DEFAULT"
     row.popover(panel="ZENUNWRAP_PT_Properties", text="", icon="PREFERENCES")
-    col.operator("uv.zenuv_unwrap_constraint")
+    # col.operator("uv.zenuv_unwrap_constraint")
     if platform.system() == 'Windows':
-        from ZenUV.ops.auto_uv_unwrap import draw_auto_unwrap
+        from ..ops.auto_uv_unwrap import draw_auto_unwrap
         draw_auto_unwrap(layout, context)
     # layout.operator(ZUV_OT_ProjectByScreenCage.bl_idname)
 
@@ -109,11 +109,11 @@ def uv_draw_unwrap(self, context):
         icon_value=icon_get(ZuvLabels.ZEN_UNWRAP_ICO)).action = "DEFAULT"
     row.popover(panel="ZENUNWRAP_PT_Properties", text="", icon="PREFERENCES")
 
-    col.operator("uv.zenuv_unwrap_constraint")
+    # col.operator("uv.zenuv_unwrap_constraint")
     col.operator('uv.zenuv_unwrap_inplace')
 
     if platform.system() == 'Windows':
-        from ZenUV.ops.auto_uv_unwrap import draw_auto_unwrap
+        from ..ops.auto_uv_unwrap import draw_auto_unwrap
         draw_auto_unwrap(layout, context)
 
     # layout.operator(ZUV_OT_ProjectByScreenCage.bl_idname)

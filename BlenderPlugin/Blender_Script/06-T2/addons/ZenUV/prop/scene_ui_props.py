@@ -23,20 +23,20 @@ from mathutils import Vector
 
 from ast import literal_eval
 
-from ZenUV.ico import icon_get
-from ZenUV.utils.blender_zen_utils import (
+from ..ico import icon_get
+from ..utils.blender_zen_utils import (
     update_areas_in_uv,
     update_areas_in_view3d,
     show_message_box)
-from ZenUV.utils.vlog import Log
+from ..utils.vlog import Log
 
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import (
+from ..ops.transform_sys.transform_utils.tr_utils import (
     TransformSysOpsProps
 )
 
-from ZenUV.ops.texel_density.td_props import TdProps
+from ..ops.texel_density.td_props import TdProps
 
-from ZenUV.ui.labels import ZuvLabels
+from ..ui.labels import ZuvLabels
 
 
 _mode_items = []
@@ -308,7 +308,7 @@ class ZUV_UVToolProps(bpy.types.PropertyGroup, ZuvToolProps):
     )
 
     def poll_trim_snap_mode(self, context: bpy.types.Context):
-        from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+        from ..ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
         s_snap_mode = self.trim_snap_mode
 
         t_enabled = set()
@@ -353,16 +353,16 @@ class ZUV_UVToolProps(bpy.types.PropertyGroup, ZuvToolProps):
             self.tr_gizmo_display_xy_guidelines = (False, False)
 
             wm = context.window_manager
-            from ZenUV.prop.wm_props import ZuvWMTransformToolGroup
+            from ..prop.wm_props import ZuvWMTransformToolGroup
             wm_tool_props: ZuvWMTransformToolGroup = wm.zen_uv.uv_transform_tool
             wm_tool_props.clear_scale_spinner_event()
             if self.tr_gizmo_mode == 'TRANSFORM':
-                from ZenUV.utils.selection_utils import SelectionProcessor
+                from ..utils.selection_utils import SelectionProcessor
                 if not SelectionProcessor.is_uv_selected(context):
                     raise TrGizmoSetTransformException("Select something\nto start transformation!")
 
                 if self.tr_gizmo_distance <= 1e-6:
-                    from ZenUV.ui.tool.tool_ops import ZUV_OP_ToolTransform
+                    from ..ui.tool.tool_ops import ZUV_OP_ToolTransform
 
                     if not wm.operators or not isinstance(wm.operators[-1], ZUV_OP_ToolTransform):
                         raise TrGizmoSetTransformException("Increase distance between handles\nto start transformation")
@@ -465,7 +465,7 @@ class ZUV_UVToolProps(bpy.types.PropertyGroup, ZuvToolProps):
     def on_tr_gizmo_event_mode_update(self, context: bpy.types.Context):
         try:
             if self.tr_gizmo_event_mode != 'DEFAULT':
-                from ZenUV.utils.selection_utils import SelectionProcessor
+                from ..utils.selection_utils import SelectionProcessor
                 if not SelectionProcessor.is_uv_selected(context):
                     raise TrGizmoSetTransformException("Select something")
         except TrGizmoSetTransformException as e:
@@ -603,7 +603,7 @@ class ZUV_UVToolProps(bpy.types.PropertyGroup, ZuvToolProps):
         self.update_cursor_location_in_uv(context)
 
     def on_tr_gizmo_making_transform(self, context: bpy.types.Context):
-        from ZenUV.ui.tool.tool_ops import ZUV_OP_ToolTransform
+        from ..ui.tool.tool_ops import ZUV_OP_ToolTransform
         ZUV_OP_ToolTransform.modal_making_transform(context, self)
 
     def on_tr_gizmo_pivot_handle_update(self, context: bpy.types.Context):
@@ -829,7 +829,7 @@ class ZUV_UVToolProps(bpy.types.PropertyGroup, ZuvToolProps):
 
         if self.tr_gizmo_mode == 'TRANSFORM':
 
-            from ZenUV.ui.tool.tool_ops import ZuvTransformGizmoAxisLockPreset
+            from ..ui.tool.tool_ops import ZuvTransformGizmoAxisLockPreset
             p_axis_lock = ZuvTransformGizmoAxisLockPreset()
             p_axis_lock.setup_by_gizmo_lock(axes_lock_mode)
 
@@ -865,7 +865,7 @@ class ZUV_UVToolProps(bpy.types.PropertyGroup, ZuvToolProps):
         p_undo_item = self.tr_gizmo_undo_list[-1]
         p_undo_item.name = str(
             (*self.tr_gizmo_pivot_handle[:], *self.tr_gizmo_angle_handle[:], self.tr_gizmo_is_pivot))
-        from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+        from ..ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
         ZuvTrimsheetUtils.fix_undo()
 
         if commit_in_blender:
@@ -886,7 +886,7 @@ class ZUV_UVToolProps(bpy.types.PropertyGroup, ZuvToolProps):
         if self.tr_gizmo_mode == 'TRANSFORM':
             self.tr_gizmo_active = False
 
-            from ZenUV.ui.tool.tool_ops import ZUV_OP_ToolTransform
+            from ..ui.tool.tool_ops import ZUV_OP_ToolTransform
             wm = context.window_manager
             # NOTE: We should call only 'operators[-1]',
             #       'operator_properties_last' are filled only in invoke
@@ -905,7 +905,7 @@ class ZUV_UVToolProps(bpy.types.PropertyGroup, ZuvToolProps):
     def tr_gizmo_finalize_cursor_by_tool_op_matrix(self, context: bpy.types.Context, is_line: bool = True):
         if self.tr_gizmo_mode == 'TRANSFORM':
 
-            from ZenUV.ui.tool.tool_ops import ZUV_OP_ToolTransform
+            from ..ui.tool.tool_ops import ZUV_OP_ToolTransform
             wm = context.window_manager
             # NOTE: We should call only 'operators[-1]',
             #       'operator_properties_last' are filled only in invoke
@@ -1141,6 +1141,7 @@ class ZUV_SceneUIProps(bpy.types.PropertyGroup):
 
             ('UV_BORDERS', 'UV Borders', 'Display UV borders'),
             ('SEAMS', 'Seams', 'Display edge seams'),
+            ('SHARPS', 'Sharps', 'Display sharp edges'),
 
             ('SELF_INTERSECTING', 'Self-Intersecting', 'Display faces that have intersecting edges'),
         ],
@@ -1220,7 +1221,7 @@ class ZUV_PT_TrimSnapUV(bpy.types.Panel):
         return context.mode in {'OBJECT', 'EDIT_MESH'}
 
     def draw(self, context: bpy.types.Context):
-        from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+        from ..ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
 
         layout = self.layout
 

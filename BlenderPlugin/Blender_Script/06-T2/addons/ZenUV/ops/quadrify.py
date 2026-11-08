@@ -28,31 +28,33 @@ from dataclasses import dataclass, field
 import time
 from mathutils import Vector, Matrix
 
-from ZenUV.utils.transform import ZenLocRotScale
-from ZenUV.utils.transform import centroid
-from ZenUV.utils.bounding_box import BoundingBox2d
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.generic import (
+from ..utils.transform import ZenLocRotScale
+from ..utils.transform import centroid
+from ..utils.bounding_box import BoundingBox2d
+from ..utils.uv_factory import UvIslandUtils, SelectionUtils
+from ..utils.generic import (
     fit_uv_view,
-    ensure_facemap, set_face_int_tag)
-from ZenUV.utils.get_uv_islands import get_bound_edges_idxs_from_facelist, get_uv_bound_edges_indexes
-from ZenUV.utils.hops_integration import show_uv_in_3dview
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.ui.pie import ZsPieFactory
-from ZenUV.ops.texel_density.td_utils import TdContext, TexelDensityFactory
-from ZenUV.ops.zen_unwrap.finishing import FINISHED_FACEMAP_NAME
-from ZenUV.utils.blender_zen_utils import ZenPolls
-from ZenUV.ops.transform_sys.transform_utils.transform_loops import TransformLoops
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
+    ensure_facemap, set_face_int_tag,
+    is_edge_select_mode_in_uv)
+from ..utils.mesh_factory import MeshIslandUtils
+from ..utils.hops_integration import show_uv_in_3dview
+from ..utils.register_util import RegisterUtils
+from ..ui.pie import ZsPieFactory
+from ..ops.texel_density.td_utils import TdContext, TexelDensityFactory
+from ..ops.zen_unwrap.finishing import FINISHED_FACEMAP_NAME
+from ..utils.blender_zen_utils import ZenPolls, is_loop_domain, get_selection_mode
+from ..ops.transform_sys.transform_utils.transform_loops import TransformLoops
+from ..ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
+from ..utils.loops_factory import LoopsFactory
 
-from ZenUV.utils.progress import ProgressBar, ProgressCancelException
+from ..utils.progress import ProgressBar, ProgressCancelException
 
-from ZenUV.utils.annotations_toolbox.math_visualizer import MathVisualizer
+from ..utils.annotations_toolbox.math_visualizer import MathVisualizer
 
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.utils.generic import Timer
+from ..prop.zuv_preferences import get_prefs
+from ..utils.generic import Timer
 
-from ZenUV.utils.vlog import Log
+from ..utils.vlog import Log
 
 
 class QuadrifyMarkState:
@@ -390,7 +392,7 @@ class FaceFactory:
         is_correct_aspect: bool = False
     ):
 
-        from ZenUV.ops.transform_sys.transform_utils.transform_uvs import TransformUVS
+        from ..ops.transform_sys.transform_utils.transform_uvs import TransformUVS
 
         def adjust_edges(edge1_length: float, edge2_length: float, new_value: float):
             if edge1_length < edge2_length:
@@ -783,14 +785,14 @@ class ZenQuadrify:
         Log.debug('Quadrify', f' time {alg_report_name}: {t.delta()}')
 
         if is_correct_aspect:
-            from ZenUV.ops.transform_sys.transform_utils.transform_uvs import TransformUVS
+            from ..ops.transform_sys.transform_utils.transform_uvs import TransformUVS
 
             p_active_image = ActiveUvImage(context)
             p_hats_vec = p_active_image._get_hats()
             if influence == 'ISLAND':
                 loops = sum([f.loops[:] for f in island], [])
             elif influence == 'SELECTION':
-                loops = [lp for f in island for v in f.verts for lp in v.link_loops if lp[uv_layer].select]
+                LoopsFactory.get_selected_loops_by_island(context, bm, island, uv_layer)
             else:
                 raise RuntimeError("influence not in {'ISLAND', 'SELECTION'}")
 
@@ -819,7 +821,7 @@ class ZenQuadrify:
                     e.smooth = True
 
             edges = bm.edges
-            for i in get_uv_bound_edges_indexes(island, uv_layer):
+            for i in UvIslandUtils.get_uv_bound_edges_indexes(island, uv_layer):
                 e = edges[i]
                 if mark_seam:
                     e.seam = True
@@ -847,17 +849,15 @@ class ZenFollowQuad:
                 bm: bmesh.types.BMesh = None
             ) -> bool:
 
-        from ZenUV.utils.get_uv_islands import FacesFactory
-
         if progress:
             progress.set_text(prefix='Quadrifying: bound edges')
 
-        p_get_bound_edges = get_bound_edges_idxs_from_facelist(faces, progress=progress)
+        p_get_bound_edges = MeshIslandUtils.get_mesh_border_edge_indices_from_faces(faces, progress=progress)
 
         if progress:
             progress.set_text(prefix='Quadrifying: adjacent edges')
 
-        p_adjacent_faces = FacesFactory.find_adjacent_faces_bfs(face_init, p_get_bound_edges, progress=progress)
+        p_adjacent_faces = LoopsFactory.yield_loops_from_adjacent_faces_bfs(face_init, p_get_bound_edges, progress=progress)
 
         if progress:
             progress.set_text(prefix='Quadrifying: setting up positions')
@@ -958,11 +958,36 @@ class ZenFollowQuad:
                     master_loop[uv_layer].uv = uv
 
         if bm is not None:
-            p_get_uv_bound_edges_idxs = {i for i in get_uv_bound_edges_indexes(faces, uv_layer) if not bm.edges[i].is_boundary}
+            p_get_uv_bound_edges_idxs = {i for i in UvIslandUtils.get_uv_bound_edges_indexes(faces, uv_layer) if not bm.edges[i].is_boundary}
             p_verts = {v for i in p_get_uv_bound_edges_idxs for v in bm.edges[i].verts}
             cls.merge_uv_verts(context, p_verts, uv_layer, progress=progress)
         else:
             cls.merge_uv_verts(context, {v for f in faces for v in f.verts}, uv_layer, progress=progress)
+
+    @staticmethod
+    def _collect_edge_loops(vert, uv_layer, use_seams):
+        if ZenPolls.version_since_5_0_0:
+            if use_seams:
+                looplist = {p for p in vert.link_loops if not any(
+                    lp.edge.seam for lp in (p, p.link_loop_next, p.link_loop_prev)) and any(
+                        lp.uv_select_edge and not lp.edge.seam for lp in (p, p.link_loop_next, p.link_loop_prev))}
+            else:
+                looplist = {p for p in vert.link_loops if any(
+                    lp.uv_select_edge for lp in (p, p.link_loop_next, p.link_loop_prev))}
+        else:
+            if use_seams:
+                looplist = {p for p in vert.link_loops if not any(
+                    lp.edge.seam for lp in (p, p.link_loop_next, p.link_loop_prev)) and any(
+                        lp[uv_layer].select_edge and not lp.edge.seam for lp in (p, p.link_loop_next, p.link_loop_prev))}
+            else:
+                looplist = {p for p in vert.link_loops if any(
+                    lp[uv_layer].select_edge for lp in (p, p.link_loop_next, p.link_loop_prev))}
+
+        return looplist
+
+    @staticmethod
+    def _collect_loops_from_vert(vert, uv_layer):
+        return [p for p in vert.link_loops if p.uv_select_vert] if ZenPolls.version_since_5_0_0 else [p for p in vert.link_loops if p[uv_layer].select]
 
     @classmethod
     def merge_uv_verts(
@@ -976,7 +1001,6 @@ class ZenFollowQuad:
             use_seams: bool = False,
             progress: ProgressBar = None):
 
-        from ZenUV.utils.generic import is_pure_edge_mode
         from collections import defaultdict
         from math import isclose
 
@@ -985,19 +1009,12 @@ class ZenFollowQuad:
 
         distance_dict = dict()
         if b_is_not_sync:
-            if is_pure_edge_mode(context):
-
+            if is_edge_select_mode_in_uv(context):
                 for v in bmesh_verts:
                     ProgressBar.check_update_spinner_progress(progress)
 
                     p_first_collector = set()
-                    if use_seams:
-                        selected_edges = {p for p in v.link_loops if not any(
-                            lp.edge.seam for lp in (p, p.link_loop_next, p.link_loop_prev)) and any(
-                                lp[uv_layer].select_edge and not lp.edge.seam for lp in (p, p.link_loop_next, p.link_loop_prev))}
-                    else:
-                        selected_edges = {p for p in v.link_loops if any(
-                            lp[uv_layer].select_edge for lp in (p, p.link_loop_next, p.link_loop_prev))}
+                    selected_edges = cls._collect_edge_loops(v, uv_layer, use_seams)
                     p_first_collector.update(selected_edges)
 
                     if not len(p_first_collector):
@@ -1028,7 +1045,7 @@ class ZenFollowQuad:
                 for v in bmesh_verts:
                     ProgressBar.check_update_spinner_progress(progress)
 
-                    p_first_collector = [p for p in v.link_loops if p[uv_layer].select]
+                    p_first_collector = cls._collect_loops_from_vert(v, uv_layer)
                     for lp1 in p_first_collector:
                         lp1_distances = []
                         for lp2 in p_first_collector:
@@ -1271,7 +1288,7 @@ Works only in edge selection mode''',
 
     @classmethod
     def draw_properties(cls, instance, layout: bpy.types.UILayout, context: bpy.types.Context):
-        from ZenUV.utils.blender_zen_utils import ZenPolls
+        from ..utils.blender_zen_utils import ZenPolls
 
         addon_prefs = get_prefs()
 
@@ -1350,18 +1367,8 @@ Works only in edge selection mode''',
         active_object = context.active_object
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
-    def detect_edge_selection_mode(self, context):
-        if context.space_data.type == 'IMAGE_EDITOR':
-            if context.scene.tool_settings.use_uv_select_sync:
-                return context.tool_settings.mesh_select_mode[1]
-            else:
-                return context.scene.tool_settings.uv_select_mode == "EDGE"
-
-        if context.space_data.type == 'VIEW_3D':
-            return context.tool_settings.mesh_select_mode[1]
-
     def is_pack_allowed(self, context):
-        from ZenUV.utils.blender_zen_utils import ZenPolls
+        from ..utils.blender_zen_utils import ZenPolls
         if ZenPolls.version_equal_3_6_0:
             return False
         return self.use_pack_islands
@@ -1370,17 +1377,13 @@ Works only in edge selection mode''',
 
         ZsPieFactory.mark_pie_cancelled()
         from collections import Counter
-        from ZenUV.ops.texel_density.td_utils import TexelDensityProcessor
-        from ZenUV.utils.selection_utils import SelectionProcessor, UniSelectedObject
-        from ZenUV.utils.get_uv_islands import LoopsFactory, FacesFactory
+        from ..ops.texel_density.td_utils import TexelDensityProcessor
+        from ..utils.selection_utils import SelectionProcessor, UniSelectedObject
 
         SelectionProcessor.reset_state()
 
-        is_not_sync = context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync
-
         Storage = SelectionProcessor.collect_selected_objects(
             context,
-            is_not_sync,
             b_in_indices=True,
             b_is_skip_objs_without_selection=True,
             b_skip_uv_layer_fail=False)
@@ -1393,18 +1396,18 @@ Works only in edge selection mode''',
 
         QuadrifyMarkState.init(self.mark_borders, self.mark_seams, self.mark_sharp)
 
-        is_edge_selection_mode = self.detect_edge_selection_mode(context)
+        b_is_loop_domain = is_loop_domain(context)
+        b_is_edge_select_mode = get_selection_mode(context) == 'EDGE'
 
         s_obj: UniSelectedObject = None
 
         td_context: TdContext = None
 
         if self.influence == 'ISLAND':
-            for s_obj in SelectionProcessor.yield_selected_objects(Storage):
+            for s_obj in SelectionProcessor.yield_selected_objects(context, Storage, yield_no_uv_layer=False):
                 s_obj.attribute_storage['islands'] = [
                     [f.index for f in island]
-                    for island in island_util.get_island(context, s_obj.bm, s_obj.uv_layer)]
-
+                    for island in UvIslandUtils.get_selected_uv_islands(context, s_obj.bm, s_obj.uv_layer)]
             total_processing_faces = sum([len(k) for o in Storage for k in o.attribute_storage['islands']])
         else:
             total_processing_faces = sum([len(k) for o in Storage for k in o.selected_items.get_elements()])
@@ -1418,7 +1421,7 @@ Works only in edge selection mode''',
 
                 # Get Init TD
                 init_td = 0.0
-                for s_obj in SelectionProcessor.yield_selected_objects(Storage):
+                for s_obj in SelectionProcessor.yield_selected_objects(context, Storage):
                     bm = s_obj.bm
                     uv_layer = s_obj.uv_layer
                     if uv_layer is None:
@@ -1430,9 +1433,11 @@ Works only in edge selection mode''',
                 td_context.td = context.scene.zen_uv.td_props.td_global_preset
 
             # Determining the total number of selected edges.
-            if is_edge_selection_mode:
-                if is_not_sync:
-                    if ZenPolls.version_since_3_2_0:
+            if b_is_edge_select_mode:
+                if b_is_loop_domain:
+                    if ZenPolls.version_since_5_0_0:
+                        p_total_sel_edges = sum([len(o.selected_items.selected_loops) for o in Storage]) // 2
+                    elif ZenPolls.version_since_3_2_0:
                         p_total_sel_edges = len([k[1] for o in Storage for k in o.selected_items.selected_loops if k[1] is True]) // 2
                     else:
                         p_total_sel_edges = sum([len(o.selected_items.selected_loops) for o in Storage]) // 4
@@ -1442,7 +1447,7 @@ Works only in edge selection mode''',
                     p_total_sel_edges = sum([len(o.selected_items.selected_edges) for o in Storage])
 
 
-            for s_obj in SelectionProcessor.yield_selected_objects(Storage):
+            for s_obj in SelectionProcessor.yield_selected_objects(context, Storage):
                 bm = s_obj.bm
                 uv_layer = s_obj.uv_layer
 
@@ -1456,23 +1461,23 @@ Works only in edge selection mode''',
 
                 new_seam_edge_idxs = []
                 new_seam_loops = []
-                if self.use_selected_edges and is_edge_selection_mode:
-                    from ZenUV.ops.stitch import UvSplitProcessor
+                if self.use_selected_edges and b_is_edge_select_mode:
+                    from ..ops.stitch import UvSplitProcessor
+
                     if p_total_sel_edges <= self.quadrify_edge_detection_limit:
-                        is_pure_uv_edge_mode: bool = context.space_data.type == 'IMAGE_EDITOR' and is_not_sync and ZenPolls.version_since_3_2_0 and context.scene.tool_settings.uv_select_mode == "EDGE"
+                        new_seam_edge_idxs, new_seam_loops = self.assign_seams_in_edge_selection_mode(context, b_is_loop_domain, bm, uv_layer)
 
-                        new_seam_edge_idxs, new_seam_loops = self.assign_seams_in_edge_selection_mode(is_not_sync, bm, uv_layer)
-
-                        if is_pure_uv_edge_mode:
+                        if b_is_edge_select_mode:
                             for loop in new_seam_loops[0]:
-                                loop[uv_layer].select_edge = True
+                                LoopsFactory.select_loop(loop, uv_layer, select_edge=True, state=True)
                             for loop in new_seam_loops[1]:
-                                loop[uv_layer].select = True
+                                LoopsFactory.select_loop(loop, uv_layer, select_edge=False, state=True)
+
                         else:
                             for i in new_seam_edge_idxs:
                                 bm.edges[i].select = True
 
-                        SP = UvSplitProcessor(context)
+                        SP = UvSplitProcessor(context, uv_layer)
 
                         node_groups = SP.compound_nodes(uv_layer, [new_seam_loops[0].union(new_seam_loops[1]), ])
 
@@ -1487,14 +1492,17 @@ Works only in edge selection mode''',
 
                         SP.set_uv_coordinates(node_groups, uv_layer)
 
-                        if is_pure_uv_edge_mode:
-                            p_stored_loops = {k[0] for k in s_obj.selected_items.selected_loops if k[1] is True}
+                        if b_is_edge_select_mode:
+                            if ZenPolls.version_since_5_0_0:
+                                p_stored_loops = s_obj.selected_items.selected_loops
+                            else:
+                                p_stored_loops = {k[0] for k in s_obj.selected_items.selected_loops if k[1] is True}
                             for lp in new_seam_loops[0]:
                                 if lp.index not in p_stored_loops:
-                                    lp[uv_layer].select_edge = False
+                                    LoopsFactory.select_loop(lp, uv_layer, select_edge=True, state=False)
                             for lp in new_seam_loops[1]:
                                 if lp.index not in p_stored_loops:
-                                    lp[uv_layer].select = False
+                                    LoopsFactory.select_loop(lp, uv_layer, select_edge=False, state=False)
                         else:
                             for i in new_seam_edge_idxs:
                                 if i not in s_obj.selected_items.selected_edges:
@@ -1502,21 +1510,21 @@ Works only in edge selection mode''',
 
                 bm.faces.ensure_lookup_table()
                 if self.influence == 'ISLAND':
-                    if self.use_selected_edges and is_edge_selection_mode:
-                        storage = [[f.index for f in island] for island in island_util.get_island(context, bm, uv_layer)]
+                    if self.use_selected_edges and b_is_edge_select_mode:
+                        storage = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
                     else:
-                        storage = s_obj.attribute_storage['islands']
+                        storage = [[bm.faces[i] for i in island] for island in s_obj.attribute_storage['islands']]
                 else:
-                    if is_not_sync:
-                        storage = LoopsFactory.face_indexes_from_loops_selection(context, bm, uv_layer, groupped=True)
+                    if b_is_loop_domain:
+                        p_idxs = LoopsFactory.face_indexes_from_loops_selection(context, bm, uv_layer, groupped=True)
+                        storage = [[bm.faces[i] for i in group] for group in p_idxs]
                     else:
-                        p_selected_faces = FacesFactory.face_indexes_by_sel_mode(context, bm)
-                        storage = FacesFactory.compound_groups(
-                            bm, [bm.faces[i] for i in p_selected_faces],
-                            is_indices=True, is_split_seams=True)
-                for island_idxs in storage:
-                    island = [bm.faces[i] for i in island_idxs]
+                        p_selected_faces = SelectionUtils.get_faces_by_any_init_selection(context, bm, uv_layer, b_include_hidden=False)
+                        storage = MeshIslandUtils.compound_groups_from_faces(
+                            bm, p_selected_faces,
+                            is_indices=False, is_split_seams=True)
 
+                for island in storage:
                     p_counter = Counter([len(f.verts) == 4 for f in island])
 
                     # Anyway skip islands without quads
@@ -1542,7 +1550,7 @@ Works only in edge selection mode''',
 
                     ProgressBar.check_update_spinner_progress(progress)
 
-                    if is_edge_selection_mode:
+                    if b_is_edge_select_mode:
                         if self.mark_borders:
                             Log.debug('Quadrify', 'Mark borders is ON')
                             if len(new_seam_edge_idxs) != 0 and not QuadrifyMarkState.mark_seam:
@@ -1555,8 +1563,8 @@ Works only in edge selection mode''',
                     if not self.use_pack_islands and td_context is not None:
                         TexelDensityProcessor.set_td_to_faces(context, s_obj.obj, island, td_inputs=td_context)
 
-                    if self.orient in ("VERTICAL", "HORIZONTAL"):
-                        from ZenUV.ops.transform_sys.transform_utils.tr_rotate_utils import TrOrientProcessor
+                    if self.orient in {"VERTICAL", "HORIZONTAL"}:
+                        from ..ops.transform_sys.transform_utils.tr_rotate_utils import TrOrientProcessor
 
                         p_active_image = ActiveUvImage(context)
                         angle = TrOrientProcessor.get_orient_angle_by_props(BoundingBox2d(points=([lp[uv_layer].uv for f in island for lp in f.loops])), p_active_image.aspect, orient_direction=self.orient)
@@ -1630,16 +1638,18 @@ Works only in edge selection mode''',
         else:
             return [lp for f in island for lp in f.loops]
 
-    def assign_seams_in_edge_selection_mode(self, b_is_not_sync, bm, uv_layer):
-        from ZenUV.utils.get_uv_islands import LoopsFactory as LF
+    def assign_seams_in_edge_selection_mode(self, context, b_is_loop_domain, bm, uv_layer):
         p_new_seams: set = set()
         p_loops: list = [set(), set()]
         i_counter = 0
-        if b_is_not_sync:
+        if b_is_loop_domain:
+            looplist = [
+                lp for edge in bm.edges for lp in edge.link_loops
+                if LoopsFactory.is_loop_selected(lp, uv_layer, select_edge=False)
+                and LoopsFactory.is_loop_selected(lp, uv_layer, select_edge=True)]
+
             if ZenPolls.version_since_3_2_0:
-                for lp in LF.walk_edgeloop_along(
-                            [lp for edge in bm.edges for lp in edge.link_loops if lp[uv_layer].select and lp[uv_layer].select_edge],
-                            uv_layer, b_is_not_sync):
+                for lp in LoopsFactory.walk_edgeloop_along(looplist, uv_layer, b_is_loop_domain):
                     lp.edge.seam = True
                     p_new_seams.add(lp.edge.index)
                     p_loops[0].update({lp, lp.link_loop_radial_next})
@@ -1647,17 +1657,16 @@ Works only in edge selection mode''',
                     i_counter += 1
 
             else:
-                for lp in LF.walk_edgeloop_along(
-                            [lp for edge in bm.edges for lp in edge.link_loops if lp[uv_layer].select],
-                            uv_layer, b_is_not_sync):
+                looplist = [lp for edge in bm.edges for lp in edge.link_loops if LoopsFactory.is_loop_selected(lp, uv_layer, select_edge=False)]
+                for lp in LoopsFactory.walk_edgeloop_along(looplist, uv_layer, b_is_loop_domain):
                     lp.edge.seam = True
                     p_new_seams.add(lp.edge.index)
                     p_loops[0].update({lp, lp.link_loop_next, lp.link_loop_radial_next, lp.link_loop_radial_next.link_loop_next})
                     i_counter += 1
         else:
-            for lp in LF.walk_edgeloop_along(
+            for lp in LoopsFactory.walk_edgeloop_along(
                         [lp for edge in bm.edges for lp in edge.link_loops if edge.select],
-                        uv_layer, b_is_not_sync):
+                        uv_layer, b_is_loop_domain):
                 lp.edge.seam = True
                 p_new_seams.add(lp.edge.index)
                 p_loops[0].update({lp, lp.link_loop_next, lp.link_loop_radial_next, lp.link_loop_radial_next.link_loop_next})

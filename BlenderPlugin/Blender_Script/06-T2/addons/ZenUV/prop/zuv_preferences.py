@@ -1,3 +1,5 @@
+# -*- coding:utf-8 -*-
+from ..iBlender_ZenUV import _z
 # ##### BEGIN GPL LICENSE BLOCK #####
 #
 #  This program is free software; you can redistribute it and/or
@@ -20,9 +22,9 @@
 import os
 from timeit import default_timer as timer
 import platform
+import datetime
 
 import bpy
-import addon_utils
 from bpy.types import AddonPreferences
 from bpy.props import (
     BoolProperty,
@@ -34,41 +36,43 @@ from bpy.props import (
     PointerProperty
 )
 
-from ZenUV.utils.messages import zen_message
+from ..utils.messages import zen_message
 
-from ZenUV.ico import icon_get
-from ZenUV.ui.labels import ZuvLabels
+from ..ico import icon_get
+from ..ui.labels import ZuvLabels
 
-from ZenUV.utils.generic import get_padding_in_pct, get_padding_in_px
+from ..utils.generic import get_padding_in_pct, get_padding_in_px
 
-from ZenUV.ui.keymap_manager import draw_keymaps
-from ZenUV.utils.clib.lib_init import (
+from ..ui.keymap_manager import draw_keymaps
+from ..utils.clib.lib_init import (
     StackSolver, get_zenlib_name, get_zenlib_dir,
+    get_zenlib_path,
+    get_zenlib_temp_path,
     get_zenlib_version, is_zenlib_present)
 
-from ZenUV.sticky_uv_editor.stk_uv_props import UVEditorSettings, draw_sticky_editor_settings
-from ZenUV.zen_checker.properties import ZUV_CheckerAddonLevelProperties
+from ..sticky_uv_editor.stk_uv_props import UVEditorSettings, draw_sticky_editor_settings
+from ..zen_checker.properties import ZUV_CheckerAddonLevelProperties
 
-from ZenUV.ops.zen_unwrap.props import ZUV_ZenUnwrapOpAddonProps
-from ZenUV.ops.trimsheets.trimsheet_props import ZuvTrimsheetProps
+from ..ops.zen_unwrap.props import ZUV_ZenUnwrapOpAddonProps
+from ..ops.trimsheets.trimsheet_props import ZuvTrimsheetProps
 
-from ZenUV.ops.trimsheets.trimsheet_labels import TrimSheetLabels as TrsLabels
+from ..ops.trimsheets.trimsheet_labels import TrimSheetLabels as TrsLabels
 
-from ZenUV.utils.blender_zen_utils import (
+from ..utils.blender_zen_utils import (
     ZenPolls,
     update_areas_in_all_screens,
     on_prop_update_uv)
-from ZenUV.utils.vlog import Log
+from ..utils.vlog import Log
 
-from ZenUV.prop.demo_examples import ZUV_DemoExampleProps
-from ZenUV.prop.user_script_props import ZUV_UserScriptProps
-from ZenUV.prop.td_draw_props import ZUV_TexelDensityDrawProps
-from ZenUV.prop.adv_maps_props import ZUV_AdvMapsProps
-from ZenUV.prop.uv_borders_draw_props import ZUV_UVBordersDrawProps
-from ZenUV.prop.favourites_props import ZUV_FavProps
-from ZenUV.prop.world_size_props import ZUV_WorldSizeAddonProps
-from ZenUV.prop.uv_transform_tool_props import ZUV_UVTransformToolProps
-from ZenUV.prop.addon_op_props import ZUV_AddonOperatorProps
+from ..prop.demo_examples import ZUV_DemoExampleProps
+from ..prop.user_script_props import ZUV_UserScriptProps
+from ..prop.td_draw_props import ZUV_TexelDensityDrawProps
+from ..prop.adv_maps_props import ZUV_AdvMapsProps
+from ..prop.uv_borders_draw_props import ZUV_UVBordersDrawProps
+from ..prop.favourites_props import ZUV_FavProps
+from ..prop.world_size_props import ZUV_WorldSizeAddonProps
+from ..prop.uv_transform_tool_props import ZUV_UVTransformToolProps
+from ..prop.addon_op_props import ZUV_AddonOperatorProps
 
 
 resolutions_x = []
@@ -77,19 +81,9 @@ values_x = []
 values_y = []
 
 
-_CACHE_ADDON_VERSION = None
-
-
 def get_addon_version():
-    global _CACHE_ADDON_VERSION
-    if _CACHE_ADDON_VERSION is None:
-        for addon in addon_utils.modules():
-            if addon.bl_info['name'] == 'Zen UV':
-                ver = addon.bl_info['version']
-                _CACHE_ADDON_VERSION = '%i.%i.%i' % (ver[0], ver[1], ver[2])
-                break
-
-    return _CACHE_ADDON_VERSION if _CACHE_ADDON_VERSION else '0.0.0'
+    ver = ZenPolls.ADDON_VERSION
+    return '%i.%i.%i' % (ver[0], ver[1], ver[2])
 
 
 def get_name():
@@ -415,6 +409,66 @@ class ZuvComboSettings(bpy.types.PropertyGroup):
 class ZUV_AddonPreferences(AddonPreferences):
     bl_idname = ZenPolls.ADDON_PACKAGE  # "ZenUV"
 
+    def update_language(self, context):
+        try:
+            context.preferences.view.language = self.language
+            
+            if context.preferences.view.language != "en_US":
+                context.preferences.view.use_translate_new_dataname = False
+        
+            bpy.ops.script.reload()
+        except Exception as e:
+            print("Couldn't parse: {}".format(e))
+
+    if 'zh_CN' in bpy.app.translations.locales:
+        language: bpy.props.EnumProperty(
+            name = _z("Language"),
+            description = _z("Language Description"),
+            update = update_language,
+            default = bpy.context.preferences.view.language,
+            items =  [
+                ("en_US", "English", "English"),
+                # ("es", "Español", "Spanish"),
+                # ("it_IT", "Italiano", "Italian"),
+                # ("ja_JP", "日本語", "Japanese"),
+                ("zh_CN", "简体中文", "Simplified Chinese"),
+                ("zh_TW", "繁體中文", "Traditional Chinese"),
+                # ("ru_RU", "русский", "Russian"),
+                # ("fr_FR", "Français", "French"),
+                # ("de_DE", "Deutsch", "German"),
+                # ("ko_KR", "한국어(한국)", "Korean")
+                # ('pt_PT', 'Português', 'Portuguese'),
+                # ('nl_NL', 'Nederlands', 'Dutch'), 
+            ]
+        )
+    else:
+        language: bpy.props.EnumProperty(
+            name = _z("Language"),
+            description = _z("Language Description"),
+            update = update_language,
+            default = bpy.context.preferences.view.language,
+            items =  [
+                ("en_US", "English", "English"),
+                # ("es", "Español", "Spanish"),
+                # ("it_IT", "Italiano", "Italian"),
+                # ("ja_JP", "日本語", "Japanese"),
+                ("zh_HANS", "简体中文", "Simplified Chinese"),
+                ("zh_HANT", "繁體中文", "Traditional Chinese"),
+                # ("ru_RU", "русский", "Russian"),
+                # ("fr_FR", "Français", "French"),
+                # ("de_DE", "Deutsch", "German"),
+                # ("ko_KR", "한국어(한국)", "Korean")
+                # ('pt_PT', 'Português', 'Portuguese'),
+                # ('nl_NL', 'Nederlands', 'Dutch'), 
+            ]
+        )
+
+    enable_help_in_panle: bpy.props.BoolProperty(
+        name="Enable Help Icon",
+        default=True,
+        description="Whether Show help icon at the top of Addon panel"
+    )
+
     t_CONTEXT_PANEL_MAP = {
         "IMAGE_EDITOR": 'UV',
         "VIEW_3D": "VIEW_3D"
@@ -441,16 +495,30 @@ class ZUV_AddonPreferences(AddonPreferences):
             icon_value=icon_get(ZuvLabels.PANEL_HELP_DISCORD_ICO)
         ).url = ZuvLabels.PANEL_HELP_DISCORD_LINK
 
-        col.operator(
-            "wm.url_open",
-            text="Patreon",
-            icon_value=icon_get("patreon_32")
-        ).url = ZenPolls.donate_url
+        # col.operator(
+        #     "wm.url_open",
+        #     text="Patreon",
+        #     icon_value=icon_get("patreon_32")
+        # ).url = ZenPolls.donate_url
 
         op = col.operator('wm.url_open', text='Recommended Addons', icon='URL')
         op.url = f"{ZenPolls.doc_url}recommended_addons"
 
     def draw(self, context):
+
+        layout = self.layout
+        box = layout.box()       
+
+        box.prop(self, "language")
+        box.label(text=_z("Translation is in progress. Whole text isn't translated"))
+
+        row = self.layout.row()
+        row.operator("wm.url_open", text=_z("Watch online video tutorials")).url = "https://www.bilibili.com/video/BV1RXjGzpE6u/"
+        row.operator("wm.url_open", text=_z("Chat Room")).url = "http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=LOP7dt3N9TrKLQTzU0hO_rgqr_rOl8sb&authKey=iOM7p2Juuj%2BURJffZXBYNhSfdnb9TPjI5mAG1um2h8KSJJj1hsLNxFL%2BiyY%2BjgOu&noverify=0&group_code=242343175"
+        row.operator("wm.url_open", text=_z("Buy More")).url = "https://shop344526458.taobao.com/"
+        
+        row = self.layout.row()
+        row.prop(self, "enable_help_in_panle")
         layout = self.layout
         self.draw_update_note(layout)
 
@@ -547,8 +615,44 @@ class ZUV_AddonPreferences(AddonPreferences):
             b_is_zenlib_present = is_zenlib_present()
             row = box.row()
             row.alert = True
-            row.label(text=ZuvLabels.CLIB_NAME + (": not installed" if not b_is_zenlib_present else ": not registered"))
+            row.label(text=ZuvLabels.CLIB_NAME + (_z(": not installed") if not b_is_zenlib_present else _z(": not registered")))
             draw_zenlib_dir_op(row)
+
+            def draw_cache_operator(s_label, s_path):
+                row = box.row(align=False)
+
+                r1 = row.row(align=True)
+                r1.alignment = 'LEFT'
+                r1 = row.label(text=f"{s_label}:")
+
+                r2 = row.row(align=True)
+                r2.alignment = 'CENTER'
+                r2.label(text=get_zenlib_name())
+
+                t = os.path.getmtime(s_path)
+                dt = datetime.datetime.fromtimestamp(t)
+
+                r2.label(text=dt.strftime("%d.%m.%Y %H:%M:%S"))
+
+                r3 = row.row(align=True)
+                r3.alignment = 'RIGHT'
+                r3.operator_context = 'EXEC_DEFAULT'
+
+                op = r3.operator("view3d.zenuv_install_library", text='', icon='LINKED')
+                op.filepath = s_path
+
+                r3.separator()
+
+                op_set = r3.operator("wm.zenuv_script_exec", text='', icon='TRASH')
+                op_set.script = f"import os; os.remove({repr(s_path)})"
+                op_set.desc = "Delete file from cache"
+
+            if b_is_zenlib_present:
+                draw_cache_operator("From Addon", get_zenlib_path())
+
+            if os.path.exists(get_zenlib_temp_path()):
+                draw_cache_operator("From System", get_zenlib_temp_path())
+
             box.operator(
                     "wm.url_open",
                     text=ZuvLabels.PREF_ZEN_CORE_URL_DESC,
@@ -556,6 +660,7 @@ class ZUV_AddonPreferences(AddonPreferences):
                 ).url = ZuvLabels.PREF_ZEN_CORE_URL_LINK
 
             s_label = ("Register " if b_is_zenlib_present else "Install ") + ZuvLabels.CLIB_NAME
+
             box.operator("view3d.zenuv_install_library", text=s_label)
         else:
             result = get_zenlib_version()
@@ -568,13 +673,13 @@ class ZUV_AddonPreferences(AddonPreferences):
             box.label(text=ZuvLabels.UPDATE_WARNING_UNREGISTER)
 
         box = layout.box()
-        from ZenUV.utils.clib.lib_init import get_zen_relax_name
+        from ..utils.clib.lib_init import get_zen_relax_name
         s_relax_app_name = get_zen_relax_name()
         box.label(text=f'Zen UV Relax Application: {s_relax_app_name}')
         box.prop(self, 'use_relax_in_shell')
 
         if platform.system() == 'Windows':
-            from ZenUV.ops.auto_uv_unwrap import MinistryOfFlatData, ZUV_OT_AutoUVUnwrap, ZUV_OT_AutoUVUnwrapInstall
+            from ..ops.auto_uv_unwrap import MinistryOfFlatData, ZUV_OT_AutoUVUnwrap, ZUV_OT_AutoUVUnwrapInstall
             box = layout.box()
             b_is_installed = os.path.exists(ZUV_OT_AutoUVUnwrap.get_unwrapper_file_path())
             s_status = "installed" if b_is_installed else "not installed"
@@ -614,13 +719,13 @@ class ZUV_AddonPreferences(AddonPreferences):
             mes_box.label(text=ZuvLabels.UPDATE_WARNING_MAIN_02)
 
         row = upd_box.row()
-        row.prop(self, 'check_for_updates')
-        if self.check_for_updates:
-            if ZenPolls.new_addon_version:
-                s_version = '.'.join(map(str, ZenPolls.new_addon_version))
-                op = row.operator('wm.zenuv_show_addon_version_info', text=f'Ver. {s_version} available!')
-                op.is_silent = False
-                op.version = s_version
+        # row.prop(self, 'check_for_updates')
+        # if self.check_for_updates:
+        #     if ZenPolls.new_addon_version:
+        #         s_version = '.'.join(map(str, ZenPolls.new_addon_version))
+        #         op = row.operator('wm.zenuv_show_addon_version_info', text=_z("Ver. {} available!").format(s_version))
+        #         op.is_silent = False
+        #         op.version = s_version
 
         r2 = row.row(align=True)
         r2.alignment = 'RIGHT'
@@ -656,7 +761,7 @@ class ZUV_AddonPreferences(AddonPreferences):
     def update_uv_borders_draw(self, context: bpy.types.Context):
         p_scene = context.scene
         if p_scene.zen_uv.ui.draw_mode_UV == 'UV_BORDERS':
-            from ZenUV.ui.gizmo_draw import update_all_gizmos_UV
+            from ..ui.gizmo_draw import update_all_gizmos_UV
             update_all_gizmos_UV(context, force=True)
 
     def update_margin_px(self, context):
@@ -789,7 +894,8 @@ class ZUV_AddonPreferences(AddonPreferences):
                     if bpy.ops.wm.zuv_demo_examples_update.poll():
                         bpy.ops.wm.zuv_demo_examples_update('INVOKE_DEFAULT', True)
             except Exception as e:
-                Log.error("UPDATE DEMO EXAMPLES:", e)
+                pass
+                # Log.error("UPDATE DEMO EXAMPLES:", e)
 
     tabs: EnumProperty(
         items=[
@@ -1064,7 +1170,7 @@ class ZUV_AddonPreferences(AddonPreferences):
     )
 
     def on_uvpoints_display_update(self, context: bpy.types.Context):
-        from ZenUV.ui.gizmo_draw import update_all_gizmos_UV
+        from ..ui.gizmo_draw import update_all_gizmos_UV
         update_all_gizmos_UV(context)
 
     UvObjectPointsDisplay: bpy.props.BoolProperty(
@@ -1222,7 +1328,7 @@ class ZUV_AddonPreferences(AddonPreferences):
     check_for_updates: bpy.props.BoolProperty(
         name='Check For Updates',
         description='Check for available new addon version on the official Zen UV website',
-        default=True
+        default=False
     )
 
     demo: bpy.props.PointerProperty(

@@ -24,9 +24,9 @@ import gpu
 from gpu_extras.batch import batch_for_shader
 from mathutils import Matrix, Vector
 
-from ZenUV.utils.blender_zen_utils import ZenPolls, ZenCompat
-from ZenUV.utils.shaders import get_dashed_shader_line
-from ZenUV.ops.transform_sys.transform_utils.tr_object_data import transform_object_data
+from ....utils.blender_zen_utils import ZenPolls, ZenCompat
+from ....utils.shaders import get_dashed_shader_line
+from ....ops.transform_sys.transform_utils.tr_object_data import transform_object_data
 
 
 # NOTE: safe to use in background mode

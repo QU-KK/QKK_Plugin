@@ -28,8 +28,8 @@ DEF_OVERRIDE_IMAGE_NAME = 'No Image'
 
 
 def get_prefs():
-    from ZenUV.ui.labels import ZuvLabels
-    return bpy.context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
+    from ..utils.blender_zen_utils import ZenPolls
+    return bpy.context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
 
 
 def get_path():

@@ -22,16 +22,16 @@
 import bpy
 import numpy as np
 from mathutils import Vector
-from ZenUV.ops.transform_sys.transform_utils.transform_uvs import TransformUVS
-from ZenUV.utils.constants import UV_AREA_BBOX
-from ZenUV.utils.bounding_box import BoundingBox2d, DirectionBboxStr, DirMatrixStr
+from ...ops.transform_sys.transform_utils.transform_uvs import TransformUVS
+from ...utils.constants import UV_AREA_BBOX
+from ...utils.bounding_box import BoundingBox2d, DirectionBboxStr, DirMatrixStr
 from . trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.ops.transform_sys.transform_utils.transform_loops import TransformLoops
-from ZenUV.utils.generic import ZenOperatorProperties
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import TrConstants
-from ZenUV.ico import icon_get
+from ...ops.transform_sys.transform_utils.transform_loops import TransformLoops
+from ...utils.generic import ZenOperatorProperties
+from ...ops.transform_sys.transform_utils.tr_utils import TrConstants
+from ...ico import icon_get
 
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ...utils.blender_zen_utils import ZenPolls
 
 
 class TrimTransformProps:

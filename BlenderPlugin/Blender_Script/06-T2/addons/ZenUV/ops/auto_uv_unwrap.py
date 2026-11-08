@@ -33,18 +33,18 @@ from io import BytesIO
 from collections import defaultdict
 import numpy as np
 
-from ZenUV.ui.pie import ZsPieFactory
-from ZenUV.utils.blender_zen_utils import ZuvPresets, ZenPolls
-from ZenUV.utils.generic import (
+from ..ui.pie import ZsPieFactory
+from ..utils.blender_zen_utils import ZuvPresets, ZenPolls, is_sync_off
+from ..utils.generic import (
     verify_uv_layer, has_overlapped_triangles_by_area,
     calc_uv_editor_image_aspect_ratio,
     correct_self_intersecting_face)
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.selection_utils import SelectionProcessor, UniSelectedObject
-from ZenUV.utils.get_uv_islands import get_uv_bound_edges_indexes
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.ops.texel_density.td_props import TdProps
-from ZenUV.ops.context_utils import WM_MT_zenuv_operator_presets
+from ..utils.vlog import Log
+from ..utils.selection_utils import SelectionProcessor, UniSelectedObject
+from ..utils.uv_factory import UvIslandUtils
+from ..ui.labels import ZuvLabels
+from ..ops.texel_density.td_props import TdProps
+from ..ops.context_utils import WM_MT_zenuv_operator_presets
 
 
 class MinistryOfFlatData:
@@ -63,25 +63,25 @@ class ZUV_OT_AutoUVUnwrap(bpy.types.Operator):
     force_hard_surface: bpy.props.BoolProperty(
         name="Force Hard Surface",
         description="Makes the algorithm treat the surface as Hard Surface, ensuring precise handling of sharp edges and rigid structures",
-        default=False
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "force_hard_surface", False)
     )
 
     separate_by_material: bpy.props.BoolProperty(
         name="Separate By Material",
         description="Mesh is splitted by materials before unwrapping",
-        default=False
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "separate_by_material", False)
     )
 
     separate_sharp_edges: bpy.props.BoolProperty(
         name="Separate By Sharp Edges",
         description="Mesh is splitted by sharp edges before unwrapping",
-        default=False
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "separate_sharp_edges", False)
     )
 
     triangulate_mesh: bpy.props.BoolProperty(
         name="Triangulate Mesh",
         description="All ngons with four or more vertices will be triangulated",
-        default=False
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "triangulate_mesh", False)
     )
 
     triangulate_ngon_method: bpy.props.EnumProperty(
@@ -90,7 +90,7 @@ class ZUV_OT_AutoUVUnwrap(bpy.types.Operator):
         items=[
             (item.identifier, item.name, item.description)
             for item in bpy.types.TriangulateModifier.bl_rna.properties["ngon_method"].enum_items_static],
-        default="CLIP"
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "triangulate_ngon_method", "CLIP")
     )
 
     triangulate_quad_method: bpy.props.EnumProperty(
@@ -99,50 +99,50 @@ class ZUV_OT_AutoUVUnwrap(bpy.types.Operator):
         items=[
             (item.identifier, item.name, item.description)
             for item in bpy.types.TriangulateModifier.bl_rna.properties["quad_method"].enum_items_static],
-        default="BEAUTY"
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "triangulate_quad_method", "BEAUTY")
     )
 
     auto_detect_hard_edges: bpy.props.BoolProperty(
         name="Auto Detect Hard Edges",
         description="UV unwrapper will try to separate all hard edges. Useful for lightmapping and Normalmapping",
-        default=False
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "auto_detect_hard_edges", False)
     )
 
     use_normal: bpy.props.BoolProperty(
         name="Use Normal",
         description="Use the models normals to help classify polygons",
-        default=False
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "use_normal", False)
     )
 
     overlap_identical_parts: bpy.props.BoolProperty(
         name="Overlap Identical Parts",
         description="Overlap identtical parts to take up the same texture space",
-        default=False
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "overlap_identical_parts", False)
     )
 
     overlap_mirrored_parts: bpy.props.BoolProperty(
         name="Overlap Mirrored parts",
         description="Overlap mirrored parts to take up the same texture space",
-        default=False
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "overlap_mirrored_parts", False)
     )
 
     world_scale: bpy.props.BoolProperty(
         name="Scale UV to Worldspace",
         description="Scales the UVs to match their real world scale going beyound the zero to one range",
-        default=True
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "world_scale", True)
     )
 
     use_texel_density: bpy.props.BoolProperty(
         name="Use Texel Density",
         description="Scales the UVs to match the texel density value",
-        default=False
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "use_texel_density", False)
     )
 
     texel_density: bpy.props.FloatProperty(
         name=ZuvLabels.PREF_TEXEL_DENSITY_LABEL,
         description=ZuvLabels.PREF_TEXEL_DENSITY_DESC,
         min=0.001,
-        default=1024.0,
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "texel_density", 1024.0),
         precision=2
     )
 
@@ -153,55 +153,61 @@ class ZUV_OT_AutoUVUnwrap(bpy.types.Operator):
     mark_seam_edges: bpy.props.BoolProperty(
         name="Mark Seams",
         description="Automatically assign seams",
-        default=True
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "mark_seam_edges", True)
     )
 
     correct_self_intersecting: bpy.props.BoolProperty(
         name="Correct Self-Intersecting",
         description="Correct uv faces that have self-intersecting uv edges",
-        default=True
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "correct_self_intersecting", True)
     )
 
     stretch: bpy.props.BoolProperty(
         name="Stretch",
         description="Stretch any island that is too wide to fit in the image",
-        default=False
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "stretch", False)
     )
 
     packing: bpy.props.BoolProperty(
         name="Packing",
         description="Pack islands in to a rectangle",
-        default=True
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "packing", True)
     )
 
     cut: bpy.props.BoolProperty(
         name="Cut",
         description="Cut down awkward shapes in order to optimize layout coverage",
-        default=False
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "cut", False)
     )
 
     squares: bpy.props.BoolProperty(
         name="Squares",
-        description="Finds various individual polygons that hare right angles",
-        default=False
+        description="Finds various individual polygons that have right angles",
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "squares", False)
     )
 
     quads: bpy.props.BoolProperty(
         name="Quads",
         description="Searches the model for triangle pairs that make good quads. Improves the use of patches",
-        default=True
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "quads", True)
     )
 
     weld: bpy.props.BoolProperty(
         name="Vertex Weld",
         description="Merges duplicate vertices, Does not efect the out put polygon or vertext data",
-        default=False
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "weld", False)
+    )
+
+    debug_info: bpy.props.BoolProperty(
+        name="Debug Info",
+        description="Enables terminal output of detailed diagnostics during auto unwrap processing",
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "debug_info", False)
     )
 
     extra_cmd: bpy.props.StringProperty(
         name="Extra Arguments",
         description="Extended command line arguments that can be passed to the uv unwrapping application",
-        default=""
+        default=ZenPolls.get_operator_defaults("UV_OT_zenuv_auto_uv_unwrap", "extra_cmd", "")
     )
 
     LITERAL_PRESET_AUTO_UV_UNWRAP = "auto_uv_unwrap"
@@ -219,7 +225,10 @@ class ZUV_OT_AutoUVUnwrap(bpy.types.Operator):
         """ Validate context """
         active_object = context.active_object
         if active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH':
-            return True
+            p_space = getattr(context, "space_data", None)
+            return (
+                not isinstance(p_space, bpy.types.SpaceImageEditor) or
+                context.tool_settings.use_uv_select_sync)
         return False
 
     def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
@@ -242,7 +251,7 @@ class ZUV_OT_AutoUVUnwrap(bpy.types.Operator):
     def do_draw(cls, op, layout: bpy.types.UILayout, context: bpy.types.Context):
         b_is_last_props = isinstance(op, bpy.types.OperatorProperties)
 
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ..prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
 
         layout.use_property_decorate = False  # No animation
@@ -258,7 +267,7 @@ class ZUV_OT_AutoUVUnwrap(bpy.types.Operator):
             col = p_box.column(align=False)
             col.active = op.use_texel_density
 
-            from ZenUV.ops.operators import ZUV_OT_SetTextureSizePreset
+            from ..ops.operators import ZUV_OT_SetTextureSizePreset
             s_last_props_td = 'window_manager.operator_properties_last("uv.zenuv_auto_uv_unwrap").td_im_size_presets'
 
             s_data_path = (
@@ -340,6 +349,7 @@ class ZUV_OT_AutoUVUnwrap(bpy.types.Operator):
             col.prop(op, "squares")
             col.prop(op, "weld")
             col.prop(op, "quads")
+            col.prop(op, "debug_info")
             col.prop(op, "extra_cmd")
 
     def draw(self, context: bpy.types.Context):
@@ -401,7 +411,7 @@ class ZUV_OT_AutoUVUnwrap(bpy.types.Operator):
         t_args.append(str(self.quads).upper())
 
         t_args.append("-SILENT")
-        t_args.append("TRUE")
+        t_args.append(str(not self.debug_info).upper())
 
         s_extra_args: str = self.extra_cmd.strip()
         if s_extra_args:
@@ -411,17 +421,17 @@ class ZUV_OT_AutoUVUnwrap(bpy.types.Operator):
 
         ZsPieFactory.mark_pie_cancelled()
 
-        if not context.scene.tool_settings.use_uv_select_sync:
+        if is_sync_off(context):
             context.scene.tool_settings.use_uv_select_sync = True
 
         bpy.ops.mesh.select_mode(type="FACE", action="ENABLE")
 
         stored_selection = SelectionProcessor.collect_selected_objects(
-            context, False,
+            context,
             b_skip_uv_layer_fail=True,
             b_is_skip_objs_without_selection=True, b_in_indices=True)
         if not stored_selection:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "Select something.")
             return {'CANCELLED'}
 
         s_target_dir = ZuvPresets.force_full_preset_path(ZUV_OT_AutoUVUnwrap.LITERAL_PRESET_AUTO_UV_UNWRAP)
@@ -461,45 +471,21 @@ class ZUV_OT_AutoUVUnwrap(bpy.types.Operator):
             p_obj = bpy.data.objects.new(s_temp_obj_name, mesh_new)
             bpy.context.collection.objects.link(p_obj)
 
-            bm_new = bmesh.new()
-            bm_new.from_mesh(mesh_new)
-            vert_map = {}  # Mapping from old vertices to new vertices
-
-            # Copy the faces and their related vertices/edges
-            for idx in indices:
-                face: bmesh.types.BMFace = bm.faces[idx]
-                new_verts = []
-                for vert in face.verts:
-                    if vert not in vert_map:
-                        new_vert = bm_new.verts.new(vert.co)
-                        vert_map[vert] = new_vert
-                        new_vert.normal = vert.normal[:]
-                    new_verts.append(vert_map[vert])
-                new_face: bmesh.types.BMFace = bm_new.faces.new(new_verts)
-                new_face.normal = face.normal[:]
-                new_face.smooth = face.smooth
+            bm_new = bm.copy()
 
             bm_new.verts.ensure_lookup_table()
             bm_new.edges.ensure_lookup_table()
             bm_new.faces.ensure_lookup_table()
 
-            for idx_out, idx_in in enumerate(indices):
-                f_in: bmesh.types.BMesh = bm.faces[idx_in]
-                f_out: bmesh.types.BMesh = bm_new.faces[idx_out]
-                t_in_edges = [e for e in f_in.edges]
-                t_out_edges = [e for e in f_out.edges]
-                if len(t_in_edges) == len(t_out_edges):
-                    for idx in range(len(t_in_edges)):
-                        t_out_edges[idx].seam = t_in_edges[idx].seam
-                        t_out_edges[idx].smooth = t_in_edges[idx].smooth
-                else:
-                    raise RuntimeError(f"Edge count mismatch: {len(t_in_edges)} != {len(t_out_edges)} !")
+            if len(indices) != len(bm_new.faces):
+                p_indices_set = set(indices)
+                bmesh.ops.delete(bm_new, geom=[face for face in bm_new.faces if face.index not in p_indices_set], context='FACES')
+
+                bm_new.verts.ensure_lookup_table()
+                bm_new.edges.ensure_lookup_table()
+                bm_new.faces.ensure_lookup_table()
 
             bm_new.normal_update()
-
-            bm_new.verts.ensure_lookup_table()
-            bm_new.edges.ensure_lookup_table()
-            bm_new.faces.ensure_lookup_table()
 
             edges = (
                 [e for e in bm_new.edges if e.seam or not e.smooth]
@@ -549,7 +535,7 @@ class ZUV_OT_AutoUVUnwrap(bpy.types.Operator):
             if b_is_groupping:
                 bpy.ops.mesh.reveal(select=False)
 
-            SelectionProcessor.restore_items_selection(u_obj)
+            SelectionProcessor.restore_items_selection(context, u_obj)
 
             si = u_obj.selected_items
 
@@ -673,39 +659,58 @@ class ZUV_OT_AutoUVUnwrap(bpy.types.Operator):
                 if temp_me:
                     bpy.data.meshes.remove(temp_me)
 
-        if 'FINISHED' in res:
-            t_args = [s_unwrapper_app, s_filename, s_filename_unwrapped]
+        def revert_back_active_object_and_switch_edit_mode():
+            p_act_obj = bpy.data.objects.get(s_act_obj_name)
+            if context.view_layer.objects.active != p_act_obj:
+                context.view_layer.objects.active = p_act_obj
 
-            self.update_unwrapper_arguments(t_args)
+            bpy.ops.object.mode_set(mode='EDIT')
 
-            subprocess.call(
-                t_args,
-                cwd=s_target_dir)
+        try:
+            if 'FINISHED' in res:
+                t_args = [s_unwrapper_app, s_filename, s_filename_unwrapped]
 
-            s_in_file = os.path.join(s_target_dir, s_filename_unwrapped)
+                self.update_unwrapper_arguments(t_args)
 
-            try:
-                # NOTE: we do not analyze the result of call, we just understand that it is failed by missing target file
-                if os.path.exists(s_in_file):
-                    all_objs = set(bpy.data.objects)
-                    if 'FINISHED' in bpy.ops.wm.obj_import(filepath=s_in_file):
-                        new_objs = set(bpy.data.objects) - all_objs
-                        if len(new_objs) == 0:
-                            self.report({'WARNING'}, "No objects were processed during unwrap!")
-                    else:
-                        self.report({'WARNING'}, "Import failed!")
-                else:
-                    self.report({'WARNING'}, "Unwrap failed!")
+                subprocess.call(
+                    t_args,
+                    cwd=s_target_dir)
 
-            finally:
+                s_in_file = os.path.join(s_target_dir, s_filename_unwrapped)
+
                 try:
-                    os.remove(s_out_file)
-                    os.remove(s_in_file)
-                except OSError as e:
-                    Log.error("AUTO UNWRAP:", e)
-                    pass
-        else:
-            self.report({'WARNING'}, "Export failed!")
+                    # NOTE: we do not analyze the result of call, we just understand that it is failed by missing target file
+                    if os.path.exists(s_in_file):
+                        all_objs = set(bpy.data.objects)
+                        if 'FINISHED' in bpy.ops.wm.obj_import(filepath=s_in_file):
+                            new_objs = set(bpy.data.objects) - all_objs
+                            if len(new_objs) == 0:
+                                raise RuntimeError("No objects were processed during auto unwrap!")
+                        else:
+                            raise RuntimeError("Can not import auto unwrapped object!")
+                    else:
+                        raise RuntimeError("Can not auto unwrap given mesh! Check parameters!")
+                finally:
+                    try:
+                        os.remove(s_out_file)
+                        os.remove(s_in_file)
+                    except OSError as e:
+                        Log.error("AUTO UNWRAP:", e)
+                        pass
+            else:
+                raise RuntimeError("Export failed!")
+        except Exception as e:
+            self.report({'ERROR'}, str(e))
+
+            bpy.ops.object.select_all(action='DESELECT')
+            for s_obj in p_all_object_names:
+                p_obj: bpy.types.Object = bpy.data.objects.get(s_obj)
+                if p_obj:
+                    p_obj.select_set(True)
+
+            revert_back_active_object_and_switch_edit_mode()
+
+            return {'FINISHED'}
 
         bpy.ops.object.select_all(action='DESELECT')
 
@@ -778,11 +783,7 @@ class ZUV_OT_AutoUVUnwrap(bpy.types.Operator):
             if d_uv_ratio:
                 d_uv_ratio = 1 / d_uv_ratio
 
-        p_act_obj = bpy.data.objects.get(s_act_obj_name)
-        if context.view_layer.objects.active != p_act_obj:
-            context.view_layer.objects.active = p_act_obj
-
-        bpy.ops.object.mode_set(mode='EDIT')
+        revert_back_active_object_and_switch_edit_mode()
 
         i_corrected_uvs = 0
 
@@ -846,7 +847,7 @@ class ZUV_OT_AutoUVUnwrap(bpy.types.Operator):
                                     i_corrected_uvs += 1
 
                                     correct_self_intersecting_face(
-                                        context, p_face, uv_layer_out, used_faces, image_aspect_ratio,
+                                        context, bm, p_face, uv_layer_out, used_faces, image_aspect_ratio,
                                         b_is_island_mode, False)
 
                         if self.mark_seam_edges:
@@ -856,7 +857,7 @@ class ZUV_OT_AutoUVUnwrap(bpy.types.Operator):
                             for e in p_edges:
                                 e.seam = False
 
-                            for i in get_uv_bound_edges_indexes((bm_out.faces[i] for i in indices), uv_layer_out):
+                            for i in UvIslandUtils.get_uv_bound_edges_indexes((bm_out.faces[i] for i in indices), uv_layer_out):
                                 bm_out.edges[i].seam = True
 
                     bpy.data.objects.remove(p_import_obj)
@@ -880,7 +881,7 @@ class ZUV_OT_AutoUVUnwrap(bpy.types.Operator):
                         bm.faces.ensure_lookup_table()
                         for idx in indices:
                             bm.faces[idx].hide_set(True)
-        SelectionProcessor.restore_selection_in_objects(context, stored_selection, False)
+        SelectionProcessor.restore_selection_in_objects(context, stored_selection)
 
         return {'FINISHED'}
 

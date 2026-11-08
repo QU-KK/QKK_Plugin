@@ -20,11 +20,12 @@
 
 import bpy
 
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.generic import resort_by_type_mesh_in_edit_mode_and_sel
-from ZenUV.utils.bounding_box import get_overall_bbox
-from ZenUV.utils.constants import GREASE_PEN_LAYER_NAME, GREASE_PEN_DATA_NAME
-from ZenUV.ops.transform_sys.tr_labels import TrLabels
+from ...utils.register_util import RegisterUtils
+from ...utils.bounding_box import get_overall_bbox
+from ...utils.constants import GREASE_PEN_LAYER_NAME, GREASE_PEN_DATA_NAME
+from ...ops.transform_sys.tr_labels import TrLabels
+from ...utils.blender_zen_utils import ZenPolls
+from ...utils.generic import ResortObjects
 
 from . transform_utils.tr_fit_utils import FitRegion, TrFitFactory
 from .transform_utils.tr_utils import (
@@ -168,9 +169,9 @@ class ZUV_OT_TrFit(bpy.types.Operator):
         return self.fit_mode != 'FILL'
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         order = self.op_order
@@ -278,7 +279,7 @@ class ZUV_OT_FitRegion(bpy.types.Operator):
             box.prop(self, 'align_to')
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
             return {'CANCELLED'}
         prop = context.scene.zen_uv
@@ -356,7 +357,7 @@ class ZUV_OT_FitShowRegion(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        from ZenUV.utils.annotations_toolbox.math_visualizer import MathVisualizer
+        from ...utils.annotations_toolbox.math_visualizer import MathVisualizer
         from mathutils import Vector
 
         prop = context.scene.zen_uv
@@ -409,9 +410,14 @@ class ZUV_OT_FitHideRegion(bpy.types.Operator):
 
     def execute(self, context):
         try:
-            gp_data = bpy.data.grease_pencils.get(GREASE_PEN_DATA_NAME)
-            if gp_data is not None:
-                bpy.data.grease_pencils.remove(gp_data)
+            if ZenPolls.version_since_5_0_0:
+                gp_data = bpy.data.annotations.get(GREASE_PEN_DATA_NAME)
+                if gp_data is not None:
+                    bpy.data.annotations.remove(gp_data)
+            else:
+                gp_data = bpy.data.grease_pencils.get(GREASE_PEN_DATA_NAME)
+                if gp_data is not None:
+                    bpy.data.grease_pencils.remove(gp_data)
 
         except Exception as e:
             print(e)

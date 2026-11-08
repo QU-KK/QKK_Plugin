@@ -22,9 +22,9 @@ import bpy
 
 from dataclasses import dataclass, field
 
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.blender_zen_utils import update_areas_in_view3d
-from ZenUV.utils.register_util import RegisterUtils
+from ...utils.vlog import Log
+from ...utils.blender_zen_utils import update_areas_in_view3d
+from ...utils.register_util import RegisterUtils
 
 # Tool Operators
 from .tool_ops import (
@@ -221,7 +221,7 @@ def zenuv_notify_tool_changed(handle):
 
         if s_mode in {'EDIT_MESH', 'OBJECT'}:
 
-            from ZenUV.prop.zuv_preferences import get_prefs
+            from ...prop.zuv_preferences import get_prefs
 
             global _notify_tool_cache
 
@@ -259,7 +259,7 @@ def zenuv_notify_tool_changed(handle):
 
 @bpy.app.handlers.persistent
 def zenuv_notify_object_mode_changed(handle):
-    from ZenUV.prop.zuv_preferences import get_prefs
+    from ...prop.zuv_preferences import get_prefs
     addon_prefs = get_prefs()
     if addon_prefs.draw_auto_disable:
         p_scene = bpy.context.scene
@@ -282,7 +282,7 @@ def _process_tool_scene_undo_redo(p_scene: bpy.types.Scene):
 
     # NOTE: we restrict to react for undo-redo only in our tool mode
     if ZuvUVTransformWorkSpaceTool.is_workspace_tool_active(bpy.context):
-        from ZenUV.prop.scene_ui_props import ZUV_UVToolProps
+        from ...prop.scene_ui_props import ZUV_UVToolProps
         p_tool_props: ZUV_UVToolProps = p_scene.zen_uv.ui.uv_tool
         p_tool_props.tr_gizmo_redo_last()
 
@@ -302,7 +302,7 @@ def zenuv_tool_load_scene_handler(_):
 
     p_scene = bpy.context.scene
     if p_scene:
-        from ZenUV.prop.scene_ui_props import ZUV_SceneUIProps, ZUV_UVToolProps
+        from ...prop.scene_ui_props import ZUV_SceneUIProps, ZUV_UVToolProps
 
         p_ui_props: ZUV_SceneUIProps = p_scene.zen_uv.ui
         if p_ui_props.draw_mode_UV != 'NONE':
@@ -347,7 +347,7 @@ def _subscribe_rna_common_types():
 
 
 def zenuv_image_pt_snapping_draw(self, context: bpy.types.Context):
-    from ZenUV.prop.scene_ui_props import ZUV_UVToolProps
+    from ...prop.scene_ui_props import ZUV_UVToolProps
 
     if ZuvUVTransformWorkSpaceTool.is_workspace_tool_active(context):
         p_scene = context.scene

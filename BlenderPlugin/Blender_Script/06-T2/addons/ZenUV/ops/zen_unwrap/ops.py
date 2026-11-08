@@ -22,20 +22,19 @@
 
 import bpy
 
-from ZenUV.utils.generic import fit_uv_view
+from ...utils.generic import fit_uv_view, ResortObjects, bpy_select_by_context
 
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.utils.hops_integration import show_uv_in_3dview
+from ...ui.labels import ZuvLabels
+from ...utils.hops_integration import show_uv_in_3dview
 from .ui import ZENUNWRAP_PT_Properties
 from .utils import (
     uObject,
     UIslandsManager
 )
 from .props import ZenUnwrapState, LiveUnwrapPropManager, ZenUnwrapProps
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.global_report import ZuvReporter
-from ZenUV.utils.generic import resort_by_type_mesh_in_edit_mode_and_sel
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ...utils.vlog import Log
+from ...utils.global_report import ZuvReporter
+from ...utils.blender_zen_utils import ZenPolls, is_sync_off
 
 
 CAT = "ZenUnwrap"
@@ -106,13 +105,13 @@ class ZUV_OT_ZenUnwrap(bpy.types.Operator, ZuvReporter):
         default=ZenPolls.get_operator_defaults("UV_OT_zenuv_unwrap", "correct_aspect", True))
 
     def get_markSeamEdges(self):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ...prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
         b_default = ZenPolls.get_operator_defaults("UV_OT_zenuv_unwrap", "markSeamEdges", True)
         return addon_prefs.markSeamEdges if addon_prefs.useGlobalMarkSettings else self.get('markSeamEdges', b_default)
 
     def set_markSeamEdges(self, value):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ...prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
         if addon_prefs.useGlobalMarkSettings:
             addon_prefs.markSeamEdges = value
@@ -126,13 +125,13 @@ class ZUV_OT_ZenUnwrap(bpy.types.Operator, ZuvReporter):
         set=set_markSeamEdges)
 
     def get_markSharpEdges(self):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ...prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
         b_default = ZenPolls.get_operator_defaults("UV_OT_zenuv_unwrap", "markSharpEdges", False)
         return addon_prefs.markSharpEdges if addon_prefs.useGlobalMarkSettings else self.get('markSharpEdges', b_default)
 
     def set_markSharpEdges(self, value):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ...prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
         if addon_prefs.useGlobalMarkSettings:
             addon_prefs.markSharpEdges = value
@@ -146,12 +145,12 @@ class ZUV_OT_ZenUnwrap(bpy.types.Operator, ZuvReporter):
         set=set_markSharpEdges)
 
     def get_unwrapAutoSorting(self):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ...prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
         return addon_prefs.op_zen_unwrap_props.unwrapAutoSorting
 
     def set_unwrapAutoSorting(self, value):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ...prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
         addon_prefs.op_zen_unwrap_props.unwrapAutoSorting = value
 
@@ -169,7 +168,7 @@ class ZUV_OT_ZenUnwrap(bpy.types.Operator, ZuvReporter):
 
     def draw(self, context: bpy.types.Context):
         layout = self.layout
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ...prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
         # switch_seam_mode = self.ProcessingMode == "SEAM_SWITCH"
         if context.tool_settings.mesh_select_mode[:] == (False, True, False):
@@ -212,7 +211,7 @@ class ZUV_OT_ZenUnwrap(bpy.types.Operator, ZuvReporter):
         row.prop(self, "post_td_mode")
 
         row = box.row()
-        from ZenUV.utils.blender_zen_utils import ZenPolls
+        from ...utils.blender_zen_utils import ZenPolls
         row.enabled = not ZenPolls.version_equal_3_6_0 and not self.ProcessingMode == 'SEL_ONLY'
         row.prop(self, "packAfUnwrap")
         if ZenPolls.version_equal_3_6_0:
@@ -241,19 +240,18 @@ class ZUV_OT_ZenUnwrap(bpy.types.Operator, ZuvReporter):
     def poll(cls, context):
         """ Validate context """
         is_active_object = context.active_object is not None and context.active_object.type == 'MESH'
-        is_sync_mode = context.area.type == "VIEW_3D" or context.area.type == "IMAGE_EDITOR" and context.scene.tool_settings.use_uv_select_sync
-        return is_active_object and context.mode == 'EDIT_MESH' and is_sync_mode and context.active_object.visible_get()
+        return is_active_object and context.mode == 'EDIT_MESH' and not is_sync_off(context) and context.active_object.visible_get()
 
     def execute(self, context):
         from .props import ZenUnwrapProps
         self.report_clear()
         Log.debug_header(" Zen Unwrap Processing ")
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         objs = [uObject(context, obj) for obj in objs]
         objs = [o for o in objs if o.l_all_faces]
 
         if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         STATE = ZenUnwrapState(context, objs, self)
@@ -327,6 +325,8 @@ class ZUV_OT_ZenUnwrap(bpy.types.Operator, ZuvReporter):
 
         # Pack Phase
         if STATE.is_pack_allowed():
+            if PROPS.ProcessingMode == 'WHOLE_MESH':
+                bpy_select_by_context(context, action='SELECT')
             kp_st = PROPS.KeepStacks
             PROPS.KeepStacks = '0'
             bpy.ops.uv.zenuv_pack('INVOKE_DEFAULT', display_uv=False, disable_overlay=True, fast_mode=True)
@@ -338,7 +338,7 @@ class ZUV_OT_ZenUnwrap(bpy.types.Operator, ZuvReporter):
                 uobj.sorting_finished(context)
 
         # Restore Initial Selection if works in Selection Mode
-        self.restore_init_selection(objs, STATE, PROPS)
+        self.restore_init_selection(context, objs, STATE, PROPS)
 
         fit_uv_view(context, mode=STATE.fit_view)
 
@@ -352,15 +352,17 @@ class ZUV_OT_ZenUnwrap(bpy.types.Operator, ZuvReporter):
         self.reset_values(context, STATE)
 
         if STATE.finished_came_across:
-            s_message = "Zen UV: Finised Islands is came across. They were not unwrapped."
+            s_message = "Zen UV: Some Finished Islands were not unwrapped."
             self.report_ex({'WARNING'}, s_message)
 
         return {'FINISHED'}
 
-    def restore_init_selection(self, objs, STATE: ZenUnwrapState, PROPS):
+    def restore_init_selection(self, context, objs, STATE: ZenUnwrapState, PROPS):
+        uobj: uObject = None
+        bpy_select_by_context(context, action='DESELECT')
         if STATE.b_is_selection_exist:
             for uobj in objs:
-                uobj.restore_selection(STATE.bl_selection_mode)
+                uobj.restore_selection(context, STATE.bl_selection_mode)
 
             if len(objs) == 1:
                 STATE.fit_view = "selected"
@@ -368,7 +370,6 @@ class ZUV_OT_ZenUnwrap(bpy.types.Operator, ZuvReporter):
                 STATE.fit_view = "all"
 
         else:
-            bpy.ops.mesh.select_all(action='DESELECT')
             if PROPS.SortFinished:
                 STATE.fit_view = "checker"
             else:
@@ -395,16 +396,16 @@ class ZUV_OT_ZenUnwrap(bpy.types.Operator, ZuvReporter):
             uobj.collect_init_pins()
             uobj.pin_all_but_not_sel()
 
-        bpy.ops.mesh.select_all(action='SELECT')
+        bpy_select_by_context(context, action='SELECT')
         IM._unwrap(context)
 
         for uobj in objs:
             uobj.restore_pins()
             uobj.restore_seams()
 
-        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy_select_by_context(context, action='DESELECT')
 
-        self.restore_init_selection(objs, STATE, PROPS)
+        self.restore_init_selection(context, objs, STATE, PROPS)
 
     def reset_values(self, context, STATE: ZenUnwrapState):
         from .props import ZenUnwrapProps
@@ -421,7 +422,7 @@ class ZUV_OT_ZenUnwrap(bpy.types.Operator, ZuvReporter):
 
     def _unwrap(self, context, objs, STATE: ZenUnwrapState):
         from .props import ZenUnwrapProps
-        from ZenUV.utils.mark_utils import MarkFactory
+        from ...utils.mark_utils import MarkFactory
         PROPS: ZenUnwrapProps = STATE.PROPS
 
         uobj: uObject = None
@@ -484,7 +485,7 @@ class ZUV_OT_ZenUnwrap(bpy.types.Operator, ZuvReporter):
                     if not STATE.operator_mode == "LIVE_UWRP":
                         uobj.clear_temp_seams()
 
-            bpy.ops.mesh.select_all(action='DESELECT')
+            bpy_select_by_context(context, action='DESELECT')
 
             IM.set_averaged_td(context, uobj)
             IM.set_islands_positions(offset=True)
@@ -532,17 +533,15 @@ class ZUV_OT_ProxyUnwrapAllSelected(bpy.types.Operator):
 
     def execute(self, context):
 
-        from ZenUV.utils.selection_utils import SelectionProcessor
-        from ZenUV.utils.generic import bpy_deselect_by_context
+        from ...utils.selection_utils import SelectionProcessor
+        from ...utils.generic import bpy_select_by_context
 
-        b_is_not_sync = context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync
-
-        p_act_objs = SelectionProcessor.collect_selected_objects(context, b_is_not_sync)
+        p_act_objs = SelectionProcessor.collect_selected_objects(context)
         if not p_act_objs:
             print('No selected objects')
             return {'CANCELLED'}
 
-        bpy_deselect_by_context(context)
+        bpy_select_by_context(context, action='DESELECT')
 
         if bpy.ops.uv.zenuv_unwrap.poll():
             if self.action == 'DEFAULT':
@@ -554,7 +553,7 @@ class ZUV_OT_ProxyUnwrapAllSelected(bpy.types.Operator):
 
             bpy.ops.uv.zenuv_unwrap(action=self.action, ProcessingMode='WHOLE_MESH')
 
-        SelectionProcessor.restore_selection_in_objects(context, p_act_objs, b_is_not_sync)
+        SelectionProcessor.restore_selection_in_objects(context, p_act_objs)
 
         return {'FINISHED'}
 

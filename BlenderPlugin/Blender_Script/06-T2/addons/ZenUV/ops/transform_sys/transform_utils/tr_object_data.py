@@ -25,10 +25,14 @@ from mathutils import kdtree, Vector
 from dataclasses import dataclass, field
 from timeit import default_timer as timer
 
-from ZenUV.utils.generic import get_mesh_data, verify_uv_layer
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.blender_zen_utils import is_uv_snap_enabled
+from ....utils.generic import verify_uv_layer
+from ....utils.loops_factory import LoopsFactory
+from ....utils.uvedit_select import (
+    uvedit_uv_select_test,
+    uvedit_get_bm_selected_loops,
+    uvedit_get_bm_unselected_loops,)
+from ....utils.vlog import Log
+from ....utils.blender_zen_utils import is_uv_snap_enabled, ZenPolls, is_loop_domain
 
 
 @dataclass
@@ -72,17 +76,24 @@ def get_uv_island_by_face(seed_face: bmesh.types.BMesh, used_faces: list, uv_lay
 
 
 def get_uv_islands_loops(context: bpy.types.Context, me: bpy.types.Mesh, bm: bmesh.types.BMesh, uv_layer: bmesh.types.BMLayerItem, return_unselected=True):
-    b_is_uv_no_sync = context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync
+    b_is_loop_domain = is_loop_domain(context)
 
     bm.faces.ensure_lookup_table()
 
     selected_island_faces = set()
     unselected_faces = set(bm.faces) if return_unselected else set()
 
-    if b_is_uv_no_sync:
-        p_selected_faces = {
-                    f for f in bm.faces if f.select and not f.hide for loop in f.loops
-                    if loop[uv_layer].select} if me.total_face_sel > 0 else {}
+    if b_is_loop_domain:
+        if ZenPolls.version_since_5_0_0:
+            p_selected_faces = {
+                f for f in bm.faces
+                if not f.hide and (context.tool_settings.use_uv_select_sync or f.select) and
+                any(uvedit_uv_select_test(context.tool_settings, bm, loop, uv_layer) for loop in f.loops)
+            }
+        else:
+            p_selected_faces = {
+                f for f in bm.faces if f.select and not f.hide for loop in f.loops
+                if loop[uv_layer].select} if me.total_face_sel > 0 else {}
     else:
         if context.tool_settings.mesh_select_mode[2]:
             p_selected_faces = {f for f in bm.faces if f.select and not f.hide} if me.total_face_sel > 0 else {}
@@ -106,7 +117,7 @@ def get_uv_islands_loops(context: bpy.types.Context, me: bpy.types.Mesh, bm: bme
 
     unselected_islands_loops = {}
     if return_unselected:
-        if b_is_uv_no_sync:
+        if b_is_loop_domain:
             unselected_islands_loops = {
                 loop: loop[uv_layer].uv.copy()
                 for face in unselected_faces
@@ -120,10 +131,16 @@ def get_uv_islands_loops(context: bpy.types.Context, me: bpy.types.Mesh, bm: bme
 
 def get_selection_loops(context: bpy.types.Context, me: bpy.types.Mesh, bm: bmesh.types.BMesh, uv_layer: bmesh.types.BMLayerItem, return_unselected=True):
     unselected_loops = {}
-    if context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync:
-        if return_unselected:
-            unselected_loops = {loop for v in bm.verts if v.select and not v.hide for loop in v.link_loops if loop.face.select} if me.total_face_sel > 0 else {}
-        selected_loops = {loop for v in bm.verts for loop in v.link_loops if loop.face.select and loop[uv_layer].select and not loop.face.hide} if me.total_face_sel > 0 else {}
+
+    if is_loop_domain(context):
+        if ZenPolls.version_since_5_0_0:
+            selected_loops = set(uvedit_get_bm_selected_loops(context.tool_settings, bm, uv_layer))
+            if return_unselected:
+                unselected_loops = set(uvedit_get_bm_unselected_loops(context.tool_settings, bm, uv_layer))
+        else:
+            if return_unselected:
+                unselected_loops = {loop for v in bm.verts if v.select and not v.hide for loop in v.link_loops if loop.face.select} if me.total_face_sel > 0 else {}
+            selected_loops = {loop for v in bm.verts for loop in v.link_loops if loop.face.select and loop[uv_layer].select and not loop.face.hide} if me.total_face_sel > 0 else {}
     else:
         if return_unselected:
             unselected_loops = {loop for v in bm.verts if not v.hide for loop in v.link_loops if not loop.face.hide}
@@ -181,16 +198,17 @@ class TrObjectData:
         i_total_loops_count = 0
 
         for obj in objs:
-            me, bm = get_mesh_data(obj)
+            me = obj.data
+            bm = bmesh.from_edit_mesh(me)
             uv_layer = verify_uv_layer(bm)
 
             if influence_mode == 'ISLAND':
-                loops = island_util.LoopsFactory.loops_by_islands(context, bm, uv_layer)
+                loops = LoopsFactory.get_loops_by_islands(context, bm, uv_layer)
                 for lp_cluster in loops:
                     if len(lp_cluster) == 0:
                         pass
             else:
-                loops = island_util.LoopsFactory.loops_by_sel_mode(context, bm, uv_layer, groupped=True)
+                loops = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer, groupped=True)
 
             if order == 'OVERALL':
                 if len(loops) > 0:
@@ -268,7 +286,8 @@ class TrObjectLoopData:
         t_loops = {}
 
         for obj in objs:
-            me, bm = get_mesh_data(obj)
+            me = obj.data
+            bm = bmesh.from_edit_mesh(me)
             uv_layer = bm.loops.layers.uv.active
             if uv_layer:
                 selected_loops, unselected_loops = get_selection_loops(context, me, bm, uv_layer)
@@ -308,7 +327,8 @@ class TrObjectLoopData:
         n_kd_tree_count = 0
 
         for obj in objs:
-            me, bm = get_mesh_data(obj)
+            me = obj.data
+            bm = bmesh.from_edit_mesh(me)
             uv_layer = verify_uv_layer(bm)
 
             if influence_mode == 'ISLAND':
@@ -362,7 +382,7 @@ class TrObjectLoopData:
                 # NOTE: We are making all grids snaps the same,
                 #       because Blender 2d cursor behaves in the same way
                 if b_grid_snap or b_grid_increment_snap:
-                    from ZenUV.ops.trimsheets.trimsheet import UvOverlayGrid
+                    from ....ops.trimsheets.trimsheet import UvOverlayGrid
                     snap_step_x, snap_step_y = UvOverlayGrid.get_snap(context)
                     x = UvOverlayGrid.snap_to_grid_x(v_mouse_view.x, snap_step_x)
                     y = UvOverlayGrid.snap_to_grid_y(v_mouse_view.y, snap_step_y)

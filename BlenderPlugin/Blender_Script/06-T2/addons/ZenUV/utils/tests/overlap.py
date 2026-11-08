@@ -19,19 +19,13 @@
 
 import bpy
 import bmesh
-from math import pi, radians
 from mathutils import Vector
 
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.generic import verify_uv_layer
-from ZenUV.utils.bounding_box import BoundingBox2d
-from ZenUV.ui.pie import ZsPieFactory
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
-from ZenUV.ops.transform_sys.transform_utils.transform_loops import TransformLoops
-from ZenUV.utils.generic import resort_by_type_mesh_in_edit_mode_and_sel
-from ZenUV.utils.get_uv_islands import get_islands, get_island
+from ...utils.uv_factory import UvIslandUtils
+from ...utils.iter_utils import IterUtils
+from ...utils.generic import ResortObjects
+from ...utils.bounding_box import BoundingBox2d
 from collections import defaultdict
-from pprint import pprint
 
 
 class OverlapIslandsFactoryMulti:
@@ -136,7 +130,7 @@ class OverlapIslandsFactoryMulti:
                 print(f"Object '{obj.name}' has no UV layers. Skipping.")
                 continue
 
-            islands = get_islands(context, bm)
+            islands = UvIslandUtils.get_all_uv_islands(context, bm, uv_layer)
             print(f'islands total: {len(islands)}')
 
             for island in islands:
@@ -186,27 +180,23 @@ class OverlapIslandsFactoryMulti:
 class OverlapIslandsFactory:
 
     @classmethod
-    def example_usage(self, context):
+    def example_usage(cls, context):
         """ Only example !!! """
         import bmesh
-        from ZenUV.utils.generic import resort_by_type_mesh_in_edit_mode_and_sel
-        from ZenUV.utils.get_uv_islands import OverlapIslandsFactory
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            cls.report({'WARNING'}, "No objects selected.")
             return {"CANCELLED"}
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
-            islands = get_islands(context, bm)
+            islands = UvIslandUtils.get_all_uv_islands(context, bm, uv_layer)
             print(f'{len(islands)=}')
             print(islands)
 
             # res = IslandsFactory.is_islands_overlapped(islands[0], islands[1], uv_layer)
-            res = OverlapIslandsFactory.get_overlapped_islands_by_groups(islands, uv_layer)
+            res = cls.get_overlapped_islands_by_groups(islands, uv_layer)
             print(res)
 
             for i_set in res:
@@ -302,17 +292,13 @@ class OverlapIslandsFactory:
         Detection method - Bounding Box
         """
         from collections import defaultdict
-        from ZenUV.utils.bounding_box import BoundingBox2d
 
         scope = defaultdict(list)
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            uv = verify_uv_layer(bm)
-            bm.faces.ensure_lookup_table()
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
-            for island in get_island(context, bm, uv):
-                p_i_center = tuple(round(v, 5) for v in BoundingBox2d(islands=[island], uv_layer=uv).center)
+            for island in UvIslandUtils.yield_uv_islands(context, bm, uv_layer, b_selected_only=True, b_include_hidden=False):
+                p_i_center = tuple(round(v, 5) for v in BoundingBox2d(islands=[island], uv_layer=uv_layer).center)
                 scope[p_i_center].append((obj, [f.index for f in island]))
 
         for obj_islands_list in scope.values():
@@ -322,17 +308,14 @@ class OverlapIslandsFactory:
             if len(obj_islands_list) > 1:
                 obj_islands_list.pop()
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            uv = bm.loops.layers.uv.verify()
-            bm.faces.ensure_lookup_table()
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
             for obj_islands_list in scope.values():
                 for obj_in_scope, indices in obj_islands_list:
                     if obj_in_scope == obj:
                         for idx in indices:
                             for loop in bm.faces[idx].loops:
-                                loop[uv].uv += unstack_direction
+                                loop[uv_layer].uv += unstack_direction
 
             bmesh.update_edit_mesh(obj.data)
 
@@ -376,25 +359,22 @@ class ZUV_OP_TestOperator(bpy.types.Operator):
         layout.prop(self, 'unstack_direction')
 
     def execute(self, context):
-        from ZenUV.utils.get_uv_islands import OverlapIslandsFactory, OverlapIslandsFactoryMulti
-        from ZenUV.utils.generic import bpy_deselect_by_context
-        objs = list(resort_by_type_mesh_in_edit_mode_and_sel(context))
+        from ...utils.generic import bpy_select_by_context
+        objs = list(ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context))
         if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {"CANCELLED"}
         print(f'\n{self.method} ------------------------------------------')
 
-        bpy_deselect_by_context(context)
+        bpy_select_by_context(context, action='DESELECT')
 
         if self.method == 'BBOX':
             OverlapIslandsFactory.bbox_ovelaps_detection(context, objs, self.unstack_direction)
 
         elif self.method == 'OVERLAP_FACES':
-            for obj in objs:
-                bm = bmesh.from_edit_mesh(obj.data)
-                uv_layer = verify_uv_layer(bm)
+            for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
-                islands = island_util.get_islands(context, bm)
+                islands = UvIslandUtils.get_all_uv_islands(context, bm, uv_layer)
                 print(f'{len(islands) = }')
 
                 # res = IslandsFactory.is_islands_overlapped(islands[0], islands[1], uv_layer)

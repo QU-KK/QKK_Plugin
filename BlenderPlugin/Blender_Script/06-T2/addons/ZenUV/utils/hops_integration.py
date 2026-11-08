@@ -18,22 +18,21 @@
 
 import bpy
 import bmesh
-from ZenUV.utils.generic import (
-    get_mesh_data,
+from ..utils.generic import (
     ensure_facemap,
     set_face_int_tag,
     remove_facemap,
-    verify_uv_layer,
     HOPS_SHOW_UV_FACEMAP_NAME,
 )
-import ZenUV.utils.get_uv_islands as island_util
-from ZenUV.ui.labels import ZuvLabels
+from ..utils.uv_factory import UvIslandUtils
+from ..utils.iter_utils import IterUtils
+from ..utils.blender_zen_utils import ZenPolls
 
 
-def draw_hops_popup(self, context):
+def draw_hops_popup(self, context: bpy.types.Context):
     ''' @Draw Hard Ops Popup '''
-    layout = self.layout
-    addon_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
+    layout: bpy.types.UILayout = self.layout
+    addon_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
     layout.label(text="It looks like HOps addon")
     layout.label(text="is not installed on your system.")
     layout.operator("wm.url_open",
@@ -45,19 +44,17 @@ def draw_hops_popup(self, context):
     layout.prop(addon_prefs, "hops_uv_activate")
 
 
-def show_hops_widget(context, use_selected_meshes, use_selected_faces, use_tagged_faces):
-    for obj in context.objects_in_mode:
-        me, bm = get_mesh_data(obj)
-        bm.faces.ensure_lookup_table()
-        uv_layer = verify_uv_layer(bm)
+def show_hops_widget(context: bpy.types.Context, use_selected_meshes, use_selected_faces, use_tagged_faces):
+    objs = context.objects_in_mode
+    for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
         hops_show_uv_facemap = ensure_facemap(bm, HOPS_SHOW_UV_FACEMAP_NAME)
         int_tag = 1
-        islands_for_process = island_util.get_island(context, bm, uv_layer)
+        islands_for_process = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
         if not islands_for_process:
-            islands_for_process = island_util.get_islands(context, bm)
+            islands_for_process = UvIslandUtils.get_all_uv_islands(context, bm, uv_layer)
             int_tag = 0
         set_face_int_tag(islands_for_process, hops_show_uv_facemap, int_tag=int_tag)
-        bmesh.update_edit_mesh(me, loop_triangles=False)
+        bmesh.update_edit_mesh(obj.data, loop_triangles=False)
     try:
         bpy.ops.hops.draw_uv_launcher(
             use_selected_meshes=use_selected_meshes,
@@ -73,20 +70,19 @@ def show_hops_widget(context, use_selected_meshes, use_selected_faces, use_tagge
     bpy.ops.object.mode_set(mode='EDIT')
 
     # Remove Facemap for display
-    for obj in context.objects_in_mode:
-        me, bm = get_mesh_data(obj)
-        bm.faces.ensure_lookup_table()
+    objs = context.objects_in_mode
+    for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
         remove_facemap(bm, HOPS_SHOW_UV_FACEMAP_NAME)
-        bmesh.update_edit_mesh(me, loop_triangles=False)
+        bmesh.update_edit_mesh(obj.data, loop_triangles=False)
 
 
-def show_uv_in_3dview(context, use_selected_meshes, use_selected_faces, use_tagged_faces):
+def show_uv_in_3dview(context: bpy.types.Context, use_selected_meshes, use_selected_faces, use_tagged_faces):
     """
     Shows UV map in View 3D using HOPS module ops.hops.draw_uv_launcher
     Conditions: Image Editon not in areas and ops.hops.draw_uv_launcher is
     activated.
     """
-    addon_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
+    addon_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
     if addon_prefs.hops_uv_activate:
         if not hasattr(bpy.types, bpy.ops.hops.draw_uv_launcher.idname()):
             context.window_manager.popup_menu(draw_hops_popup, title="Zen UV", icon='INFO')

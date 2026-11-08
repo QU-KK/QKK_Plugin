@@ -19,9 +19,7 @@
 
 from dataclasses import dataclass, field, asdict
 from mathutils import Vector
-from ZenUV.ui.labels import ZuvLabels
-
-ADDON_NAME = "ZenUV"
+from ..ui.labels import ZuvLabels
 
 zenuv_update_filename = "ZenUV_*.zip"
 zenuv_update_filter = "*ZenUV*.zip"

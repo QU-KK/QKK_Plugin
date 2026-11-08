@@ -19,7 +19,7 @@
 # Copyright 2025, Alex Zhornyak, alexander.zhornyak@gmail.com
 
 
-from ZenUV.ui.pie.mesh_pie import ZUV_OT_PieCallerTopRight
+from ...ui.pie.mesh_pie import ZUV_OT_PieCallerTopRight
 
 
 def register():
@@ -27,8 +27,8 @@ def register():
 
     ZUV_OT_PieCallerTopRight.bl_label = "Mark By Angle | Toggle Seams"
 
-    s_text = """from ZenUV.utils.blender_zen_utils import show_message_box; \
-        from ZenUV.ui.pie import ZsPieFactory; bpy.ops.wm.context_toggle(data_path='space_data.overlay.show_edge_seams') \
+    s_text = """from ...utils.blender_zen_utils import show_message_box; \
+        from ...ui.pie import ZsPieFactory; bpy.ops.wm.context_toggle(data_path='space_data.overlay.show_edge_seams') \
         if C.space_data.type == 'VIEW_3D' else \
         (ZsPieFactory.mark_pie_cancelled(), show_message_box(message='Available only in 3D Viewport', title='WARNING', icon='ERROR'))"""
 

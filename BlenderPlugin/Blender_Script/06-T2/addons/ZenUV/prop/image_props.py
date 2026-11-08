@@ -22,14 +22,14 @@ import bpy
 
 import uuid
 
-from ZenUV.ops.trimsheets.trimsheet import ZuvTrimsheetGroup
-from ZenUV.ops.trimsheets.trimsheet_preview import (
+from ..ops.trimsheets.trimsheet import ZuvTrimsheetGroup
+from ..ops.trimsheets.trimsheet_preview import (
     get_enum_previews,
     enum_previews_from_directory_items)
-from ZenUV.ops.trimsheets.trimsheet_props import ZuvTrimsheetOwnerProps
-from ZenUV.utils.blender_zen_utils import update_areas_in_all_screens
-from ZenUV.prop.world_size_props import ZUV_WorldSizeImageProps
-from ZenUV.utils.vlog import Log
+from ..ops.trimsheets.trimsheet_props import ZuvTrimsheetOwnerProps
+from ..utils.blender_zen_utils import update_areas_in_all_screens
+from ..prop.world_size_props import ZUV_WorldSizeImageProps
+from ..utils.vlog import Log
 
 
 LITERAL_UV_WORLD_SIZE_TRIMS = 'zenuv_world_size_trims'

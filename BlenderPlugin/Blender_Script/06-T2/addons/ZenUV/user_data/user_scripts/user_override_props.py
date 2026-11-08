@@ -20,7 +20,7 @@
 
 import bpy
 
-from ZenUV.prop.zuv_preferences import get_prefs
+from ...prop.zuv_preferences import get_prefs
 
 
 def register():

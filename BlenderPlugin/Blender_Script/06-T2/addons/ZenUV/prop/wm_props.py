@@ -26,10 +26,10 @@ from dataclasses import dataclass
 from timeit import default_timer as timer
 import uuid
 
-from ZenUV.utils.vlog import Log
-from ZenUV.ops.event_service import get_blender_event
-from ZenUV.ops.texel_density.td_props import TdProps
-from ZenUV.ico import icon_get
+from ..utils.vlog import Log
+from ..ops.event_service import get_blender_event
+from ..ops.texel_density.td_props import TdProps
+from ..ico import icon_get
 
 
 LITERAL_ZENUV_SPINNER_SCALE = "zenuv_transform_spinner_scale"
@@ -531,7 +531,7 @@ class ZuvWMTrimsheetLinkedGroup(bpy.types.PropertyGroup):
             TrimsheetPreviewUtils._on_zenuv_trimsheet_previews_update(p_image.zen_uv, context)
 
     def enum_previews_from_directory_items(self, context: bpy.types.Context):
-        from ZenUV.ops.trimsheets.trimsheet_preview import preview_collections, ZuvTrimPreviewer
+        from ..ops.trimsheets.trimsheet_preview import preview_collections, ZuvTrimPreviewer
         enum_items = []
 
         p_image = self.get_image()
@@ -586,14 +586,14 @@ def zenuv_reset_spinner():
 class ZuvWMTransformToolGroup(bpy.types.PropertyGroup):
 
     def get_translate_vector(self):
-        from ZenUV.ui.tool.tool_ops import ZUV_OP_ToolTransform
+        from ..ui.tool.tool_ops import ZUV_OP_ToolTransform
         op: ZUV_OP_ToolTransform = ZUV_OP_ToolTransform.get_active_operator(bpy.context)
         if op is not None:
             return Vector(op.transform_pos_matrix.to_translation())
         return Vector()
 
     def set_translate_vector(self, value: Vector):
-        from ZenUV.ui.tool.tool_ops import ZUV_OP_ToolTransform
+        from ..ui.tool.tool_ops import ZUV_OP_ToolTransform
 
         def fn_before_execute(p_op: ZUV_OP_ToolTransform, context: bpy.types.Context):
             p_op.transform_pos_matrix = Matrix.Translation(value)
@@ -603,8 +603,8 @@ class ZuvWMTransformToolGroup(bpy.types.PropertyGroup):
 
     @classmethod
     def get_scale_value_by_operator(cls, op):
-        from ZenUV.ui.tool.tool_ops import ZuvTransformGizmoAxisLockPreset
-        from ZenUV.utils.transform import matrix_by_image_aspect
+        from ..ui.tool.tool_ops import ZuvTransformGizmoAxisLockPreset
+        from ..utils.transform import matrix_by_image_aspect
         if op:
             if ZuvTransformGizmoAxisLockPreset.is_non_proptional_scale(op):
                 AM = matrix_by_image_aspect(op.image_aspect_ratio)
@@ -637,7 +637,7 @@ class ZuvWMTransformToolGroup(bpy.types.PropertyGroup):
 
     def get_scale_value(self):
         try:
-            from ZenUV.ui.tool.tool_ops import ZUV_OP_ToolTransform
+            from ..ui.tool.tool_ops import ZUV_OP_ToolTransform
             op: ZUV_OP_ToolTransform = ZUV_OP_ToolTransform.get_active_operator(bpy.context)
             return ZuvWMTransformToolGroup.get_scale_value_by_operator(op)
         except Exception as e:
@@ -651,8 +651,8 @@ class ZuvWMTransformToolGroup(bpy.types.PropertyGroup):
         bpy.app.driver_namespace[LITERAL_ZENUV_SPINNER_SCALE] = None
 
     def set_scale_value(self, value: float):
-        from ZenUV.ui.tool.tool_ops import ZUV_OP_ToolTransform, ZuvTransformGizmoAxisLockPreset
-        from ZenUV.utils.transform import UvTransformUtils, matrix_by_image_aspect
+        from ..ui.tool.tool_ops import ZUV_OP_ToolTransform, ZuvTransformGizmoAxisLockPreset
+        from ..utils.transform import UvTransformUtils, matrix_by_image_aspect
 
         def fn_before_execute(p_op: ZUV_OP_ToolTransform, context: bpy.types.Context):
             if ZuvTransformGizmoAxisLockPreset.is_non_proptional_scale(p_op):
@@ -769,7 +769,7 @@ class ZuvWMTransformToolGroup(bpy.types.PropertyGroup):
 
     @classmethod
     def get_rotation_angle_by_operator(cls, op):
-        from ZenUV.utils.transform import matrix_by_image_aspect
+        from ..utils.transform import matrix_by_image_aspect
         if op:
             AM = matrix_by_image_aspect(op.image_aspect_ratio)
             quat = (AM.to_4x4() @ op.transform_rot_matrix).to_quaternion()
@@ -782,13 +782,13 @@ class ZuvWMTransformToolGroup(bpy.types.PropertyGroup):
         return 0.0
 
     def get_rotation_angle(self):
-        from ZenUV.ui.tool.tool_ops import ZUV_OP_ToolTransform
+        from ..ui.tool.tool_ops import ZUV_OP_ToolTransform
         op: ZUV_OP_ToolTransform = ZUV_OP_ToolTransform.get_active_operator(bpy.context)
         return ZuvWMTransformToolGroup.get_rotation_angle_by_operator(op)
 
     def set_rotation_angle(self, value: float):
-        from ZenUV.ui.tool.tool_ops import ZUV_OP_ToolTransform
-        from ZenUV.utils.transform import UvTransformUtils
+        from ..ui.tool.tool_ops import ZUV_OP_ToolTransform
+        from ..utils.transform import UvTransformUtils
 
         value = -value
 
@@ -797,7 +797,7 @@ class ZuvWMTransformToolGroup(bpy.types.PropertyGroup):
                 p_origin_pivot = p_op.origin_head
             else:
                 p_origin_pivot = p_op.origin_pivot
-            from ZenUV.ui.tool.tool_ops import ZUV_OP_ToolTransform
+            from ..ui.tool.tool_ops import ZUV_OP_ToolTransform
             ZUV_OP_ToolTransform.calc_image_aspect_ratio(p_op, context)
             p_op.transform_rot_matrix = UvTransformUtils.get_rotation_matrix_from_value(value, p_origin_pivot, p_op.image_aspect_ratio)
 
@@ -830,7 +830,7 @@ class ZuvWMTransformToolGroup(bpy.types.PropertyGroup):
     )
 
     def draw(self, layout: bpy.types.UILayout, context: bpy.types.Context):
-        from ZenUV.ui.tool.tool_ops import ZUV_OP_ToolTransform, ZuvTransformGizmoAxisLockPreset, ZUV_OP_ToolTransformMouseDraw
+        from ..ui.tool.tool_ops import ZUV_OP_ToolTransform, ZuvTransformGizmoAxisLockPreset, ZUV_OP_ToolTransformMouseDraw
         from .scene_ui_props import ZUV_UVToolProps
 
         # NOTE: this is the case when user is drawing by mouse
@@ -866,7 +866,7 @@ class ZuvWMTransformToolGroup(bpy.types.PropertyGroup):
             row.prop(self, "scale_value", text="")
 
     def draw_header(self, layout: bpy.types.UILayout, context: bpy.types.Context):
-        from ZenUV.ui.tool.tool_ops import ZUV_OP_ToolTransform, ZuvTransformGizmoAxisLockPreset, ZUV_OP_ToolTransformMouseDraw
+        from ..ui.tool.tool_ops import ZUV_OP_ToolTransform, ZuvTransformGizmoAxisLockPreset, ZUV_OP_ToolTransformMouseDraw
         from .scene_ui_props import ZUV_UVToolProps
 
         # NOTE: this is the case when user is drawing by mouse
@@ -933,8 +933,12 @@ class ZUV_WMProps(bpy.types.PropertyGroup):
     )
 
     def get_trimsheet_data(self):
-        from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+        from ..ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
         p_trim_data = ZuvTrimsheetUtils.getTrimsheetOwner(bpy.context)
         if p_trim_data is None:
             raise RuntimeError("No active image to import-export trims!")
         return p_trim_data
+
+    def get_addon_prefs(self):
+        from ..prop.zuv_preferences import get_prefs
+        return get_prefs()

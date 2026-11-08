@@ -23,8 +23,8 @@ from .addon_test_utils import (
     AddonTestManual,
     get_prefs_within_tests,
 )
-from ZenUV.zen_checker.checker import ZEN_GENERIC_MAT_NAME
-from ZenUV.utils.vlog import Log
+from ...zen_checker.checker import ZEN_GENERIC_MAT_NAME
+from ...utils.vlog import Log
 
 
 def Test_view3d_zenuv_checker_toggle(context):

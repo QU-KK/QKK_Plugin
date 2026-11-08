@@ -19,7 +19,7 @@
 # Copyright 2023, Alex Zhornyak, alexander.zhornyak@gmail.com
 
 
-from ZenUV.ui.pie.mesh_pie import ZUV_OT_PieCallerRight
+from ...ui.pie.mesh_pie import ZUV_OT_PieCallerRight
 
 
 def register():

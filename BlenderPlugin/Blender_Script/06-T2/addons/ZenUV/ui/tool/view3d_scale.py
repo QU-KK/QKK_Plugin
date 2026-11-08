@@ -27,9 +27,9 @@ from timeit import default_timer as timer
 from mathutils import Vector, Matrix
 
 from .view3d_pos_sca import ZuvGizmoPosSca
-from ZenUV.ops.event_service import get_blender_event
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ...ops.event_service import get_blender_event
+from ...utils.vlog import Log
+from ...utils.blender_zen_utils import ZenPolls
 
 
 # Area Pointer must be a key
@@ -291,7 +291,7 @@ class ZUV_GGT_3DVTransformScale(bpy.types.GizmoGroup, ZuvGizmoPosSca):
 
         b_executed = False
 
-        from ZenUV.ops.transform_sys.trim_depend_transform import ZUV_OT_Tr3DVScaleInTrim
+        from ...ops.transform_sys.trim_depend_transform import ZUV_OT_Tr3DVScaleInTrim
 
         # prevent endless undo chain
         wm = context.window_manager

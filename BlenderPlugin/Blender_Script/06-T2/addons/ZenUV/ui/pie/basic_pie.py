@@ -21,9 +21,9 @@
 # blender
 import bpy
 
-from ZenUV.utils.blender_zen_utils import get_command_props
-from ZenUV.utils.global_report import ZuvReporter
-from ZenUV.utils.vlog import Log
+from ...utils.blender_zen_utils import get_command_props
+from ...utils.global_report import ZuvReporter
+from ...utils.vlog import Log
 
 
 class Struct:

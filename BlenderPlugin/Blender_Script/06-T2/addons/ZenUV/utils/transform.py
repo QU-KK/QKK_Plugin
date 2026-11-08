@@ -23,14 +23,7 @@ import numpy as np
 from functools import reduce
 from math import sin, cos, pi, atan2
 from mathutils import Vector, Matrix, Quaternion
-from ZenUV.utils.generic import (
-    resort_objects_by_selection,
-    verify_uv_layer
-)
-from ZenUV.utils.bounding_box import BoundingBox2d
-from ZenUV.utils import get_uv_islands as island_util
-# from ZenUV.utils.vlog import Log
-from ZenUV.utils.constants import UV_AREA_BBOX
+from ..utils.bounding_box import BoundingBox2d
 
 
 def ZenLocRotScale(location: Vector = None, rotation: Quaternion = None, scale: Vector = None) -> Matrix:
@@ -61,7 +54,7 @@ def ZenLocRotScale(location: Vector = None, rotation: Quaternion = None, scale: 
 
 
 def align_vertical(points, increment_angle=0, base_direction="tl"):
-    from ZenUV.ops.transform_sys.transform_utils.transform_uvs import TransformUVS
+    from ..ops.transform_sys.transform_utils.transform_uvs import TransformUVS
 
     angle = zen_box_fit_2d(points)
 
@@ -97,33 +90,13 @@ def calculate_fit_scale(pp_pos, padding, bbox, keep_proportion=True, bounds=Vect
         scale = (min_factor, min_factor)
 
         # Scale to fit one side
-        if pp_pos in ("lc", "rc"):
+        if pp_pos in {"lc", "rc"}:
             scale = (factor_v, factor_v)
-        elif pp_pos in ("tc", "bc"):
+        elif pp_pos in {"tc", "bc"}:
             scale = (factor_u, factor_u)
     else:
         scale = (factor_u, factor_v)
     return scale
-
-
-def get_bbox(context, from_selection=False):
-    objs = resort_objects_by_selection(context, context.objects_in_mode)
-    bb = []
-    for obj in objs:
-        bm = bmesh.from_edit_mesh(obj.data)
-        uv_layer = verify_uv_layer(bm)
-        if from_selection:
-            islands = island_util.get_islands_selected_only(bm, [f for f in bm.faces if f.select])
-        else:
-            islands = island_util.get_island(context, bm, uv_layer)
-        if islands:
-            cbbox = bound_box(islands=islands, uv_layer=uv_layer)
-            bb.extend((cbbox["bl"], cbbox["tr"]))
-    gbb = bound_box(points=bb)
-    if gbb["len_x"] + gbb["len_y"] == 0:
-        gbb = UV_AREA_BBOX.get_as_dict()
-
-    return gbb
 
 
 def centroid_legacy(vertexes):
@@ -341,8 +314,8 @@ class UvTransformUtils:
 
         near_dict = {abs((self.bbox.center - lp[self.uv_layer].uv).magnitude): lp for lp in self.loops.values()}
         origin_loop = near_dict[min(near_dict.keys())]
-
-        near_loops = [lp for lp in origin_loop.vert.link_loops if lp.face in self.island]
+        s_island = set(self.island)
+        near_loops = [lp for lp in origin_loop.vert.link_loops if lp.face in s_island]
 
         angled_loops = {}
         for loop in near_loops:
@@ -371,7 +344,7 @@ class UvTransformUtils:
         # image_aspect - aspect ratio
         # image_aspect = image.y / image.x
         """
-        from ZenUV.ops.transform_sys.transform_utils.transform_loops import TransformLoops
+        from ..ops.transform_sys.transform_utils.transform_loops import TransformLoops
 
         if not angle_in_radians:
             angle = np.radians(angle)
@@ -540,7 +513,7 @@ class UvTransformUtils:
         is_cycled: bool = False
     ) -> None:
 
-        from ZenUV.ops.transform_sys.transform_utils.transform_loops import TransformLoops
+        from ..ops.transform_sys.transform_utils.transform_loops import TransformLoops
 
         # loops, _ = cls._collect_loops(matched_island, uv_layer)
         if is_cycled is False:
@@ -589,7 +562,7 @@ class UvTransformUtils:
         if not any({apply_translation, apply_rotation, apply_scale}):
             return Matrix.Identity(4)
 
-        from ZenUV.ops.transform_sys.transform_utils.transform_loops import TransformLoops
+        from ..ops.transform_sys.transform_utils.transform_loops import TransformLoops
 
         # Convert inputs to Vector
         origin_pivot = Vector((origin_pivot[0], origin_pivot[1], 0))
@@ -690,7 +663,7 @@ class UvTransformUtils:
         if not any({apply_translation, apply_rotation, apply_scale}):
             return (Matrix.Identity(4), ) * 3
 
-        from ZenUV.ops.transform_sys.transform_utils.transform_loops import TransformLoops
+        from ..ops.transform_sys.transform_utils.transform_loops import TransformLoops
 
         # Convert inputs to Vector
         origin_pivot = Vector((origin_pivot[0], origin_pivot[1]))
@@ -872,7 +845,7 @@ class UvTransformUtils:
 
     @classmethod
     def get_rotation_matrix_from_value(cls, angle: float, pivot: Vector, image_aspect_ratio: float) -> Matrix:
-        from ZenUV.ops.transform_sys.transform_utils.transform_loops import TransformLoops
+        from ..ops.transform_sys.transform_utils.transform_loops import TransformLoops
         pivot = Vector(pivot).to_3d()
         Z = Matrix.Translation(-pivot)
         P = Matrix.Translation(pivot)

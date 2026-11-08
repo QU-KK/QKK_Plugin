@@ -23,31 +23,30 @@ import bpy
 from mathutils import Matrix
 import numpy as np
 import random
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.utils.base_clusters.base_cluster import (
+from ..prop.zuv_preferences import get_prefs
+from ..utils.base_clusters.base_cluster import (
     TransformCluster,
     ProjectCluster,
 )
-from ZenUV.utils.base_clusters.zen_cluster import ZenCluster
-# from ZenUV.utils.base_clusters.base_elements import UvVertex
-# from ZenUV.utils.base_clusters.diagnostic_clusters import CheckerZcluster
-from ZenUV.utils.base_clusters.stripes import UvStripes
-from ZenUV.utils.transform import UvTransformUtils
+from ..utils.base_clusters.zen_cluster import ZenCluster
+
+from ..utils.base_clusters.stripes import UvStripes
+from ..utils.transform import UvTransformUtils
 from mathutils import Vector
-# from ZenUV.ui.labels import ZuvLabels
-from ZenUV.utils.generic import (
-    resort_by_type_mesh_in_edit_mode_and_sel,
-    resort_objects_by_selection,
-    get_mesh_data,
+
+from ..utils.generic import (
+    ResortObjects,
     verify_uv_layer
 )
-from ZenUV.utils import get_uv_islands as island_util
+from ..utils.uv_factory import UvIslandUtils
+from ..utils.iter_utils import IterUtils
 
-from ZenUV.utils.clib.lib_init import get_zen_relax2_app
-from ZenUV.ui.third_party_popups import draw_zensets_popup
-from ZenUV.ui.pie import ZsPieFactory
-from ZenUV.utils.progress import ProgressBar, ProgressCancelException
-from ZenUV.ops.zen_unwrap.props import ZenUnwrapProps
+from ..utils.clib.lib_init import get_zen_relax2_app
+from ..ui.third_party_popups import draw_zensets_popup
+from ..ui.pie import ZsPieFactory
+from ..utils.progress import ProgressBar, ProgressCancelException
+from ..ops.zen_unwrap.props import ZenUnwrapProps
+from ..utils.blender_zen_utils import is_loop_domain
 
 
 LITERAL_CANCELLED_BY_USER = 'Cancelled by user'
@@ -239,7 +238,7 @@ class rCluster():
                 uvs = UvTransformUtils.fit_uvs(self.match_to_init_location(uvs), self.bbox, 'MAX')
 
                 if props.correct_aspect and self.image_aspect != 1.0:
-                    from ZenUV.utils.bounding_box import BoundingBox2d
+                    from ..utils.bounding_box import BoundingBox2d
                     p_bbox = BoundingBox2d(points=uvs)
                     if self.image_aspect > 1.0:
                         p_bbox.scale(Vector((1.0, 1.0 / self.image_aspect)))
@@ -387,7 +386,7 @@ class RelaxCluster(
             'RANDOM': self.random_color()
         }
 
-        from ZenUV.utils.generic import UvImage
+        from ..utils.generic import UvImage
         self.image_aspect = UvImage.get_aspect(context)
 
 
@@ -459,10 +458,10 @@ class ZUV_OT_Relax(bpy.types.Operator):
         ZsPieFactory.mark_pie_cancelled()
 
         self.check_zen_sets(context)
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
-        objs = resort_objects_by_selection(context, objs)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_objects_by_selection(context, objs)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         if self.method == "ZENRELAX":
@@ -560,27 +559,26 @@ class ZUV_OT_Relax(bpy.types.Operator):
             me = obj.data
             bm = bmesh.from_edit_mesh(me)
             uv_layer = verify_uv_layer(bm)
-            sync_uv = context.scene.tool_settings.use_uv_select_sync
 
             init_pins = []
             init_selection = set()
 
-            sync_mode = context.space_data.type == 'IMAGE_EDITOR' and sync_uv or context.space_data.type == 'VIEW_3D'
+            b_is_loop_domain = is_loop_domain(context)
             loops = {loop: loop[uv_layer] for face in bm.faces for loop in face.loops if not face.hide}
 
             for loop, uv_loop in loops.items():
                 if uv_loop.pin_uv:
                     init_pins.append(uv_loop)
                     uv_loop.pin_uv = False
-                if not sync_mode and uv_loop.select:
+                if b_is_loop_domain and uv_loop.select:
                     init_selection.add(loop)
-                if sync_mode and loop.vert.select:
+                if not b_is_loop_domain and loop.vert.select:
                     init_selection.add(loop.vert)
                 uv_loop.pin_uv = True
 
             bm.faces.ensure_lookup_table()
 
-            islands = island_util.get_island(context, bm, uv_layer)
+            islands = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
 
             p_loops = [loop[uv_layer] for island in islands for f in island for loop in f.loops]
 
@@ -589,7 +587,7 @@ class ZUV_OT_Relax(bpy.types.Operator):
                 for i in range(len(p_loops) - 1):
                     p_loops[i].pin_uv = False
 
-            if not sync_mode:
+            if b_is_loop_domain:
                 for loop in p_loops:
                     loop.select = True
             else:
@@ -613,7 +611,7 @@ class ZUV_OT_Relax(bpy.types.Operator):
 
             # Restore Init Selection
             if not _select:
-                if not sync_mode:
+                if b_is_loop_domain:
                     for loop, uv_loop in loops.items():
                         if loop not in init_selection:
                             uv_loop.select = False
@@ -640,10 +638,18 @@ class ZUV_OT_Relax(bpy.types.Operator):
 
         try:
 
-            for obj in objs:
-                me, bm = get_mesh_data(obj)
-                uv_layer = verify_uv_layer(bm)
-                islands = island_util.get_island(context, bm, uv_layer)
+            for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+
+                # if not uv_layer:
+                #     uv_layer = verify_uv_layer(bm)
+                #     bpy.ops.mesh.select_linked(delimit={'SEAM'})
+                #     if bpy.ops.uv.unwrap.poll():
+                #         bpy.ops.uv.unwrap(
+                #             method='ANGLE_BASED',
+                #             margin=0
+                #         )
+
+                islands = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
                 for idx, island in enumerate(islands):
                     cl = RelaxCluster(context, obj, island, bm, uv_layer)
                     cl.obj_name = obj.name
@@ -692,7 +698,7 @@ class ZUV_OT_Relax(bpy.types.Operator):
                         cl.select(context, state=True)
 
                 bm.select_flush_mode()
-                bmesh.update_edit_mesh(me)
+                bmesh.update_edit_mesh(obj.data)
 
             if self.use_zensets:
                 for cl in clusters:

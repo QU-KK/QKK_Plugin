@@ -18,9 +18,9 @@
 
 """ Zen UV Main Pie Menu """
 import bpy
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.ui.pie.basic_pie import ZsBasicPieCaller
-from ZenUV.utils.blender_zen_utils import get_command_props
+from ...ui.labels import ZuvLabels
+from ...ui.pie.basic_pie import ZsBasicPieCaller
+from ...utils.blender_zen_utils import get_command_props, ZenPolls
 
 
 class PieOperators:
@@ -71,9 +71,9 @@ class PieOperators:
     }
 
 
-def operator_text(context, input_text):
+def operator_text(context: bpy.types.Context, input_text):
     """ Detect mode for Pie Menu 4 and 6 sector """
-    addon_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
+    addon_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
     if addon_prefs.markSeamEdges:
         input_text += ' Seams'
         if addon_prefs.markSharpEdges:

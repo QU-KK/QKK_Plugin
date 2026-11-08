@@ -20,14 +20,14 @@
 
 import bpy
 
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import TransformSysOpsProps
+from ..ops.transform_sys.transform_utils.tr_utils import TransformSysOpsProps
 
 
 class ZuvWorldSizeUtils:
 
     @classmethod
     def getActiveImage(cls, context: bpy.types.Context) -> bpy.types.Image:
-        from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+        from ..ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
         p_image = ZuvTrimsheetUtils.getSpaceDataImage(context)
         if p_image is not None:
             return p_image

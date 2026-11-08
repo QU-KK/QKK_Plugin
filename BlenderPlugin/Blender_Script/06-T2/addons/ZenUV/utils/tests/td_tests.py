@@ -24,8 +24,9 @@ from .addon_test_utils import (
     AddonTestError,
     AddonTestManual
     )
+from ...utils.generic import switch_to_face_sel_mode, bpy_select_by_context
 from .addon_test_utils import TestGeometry
-from ZenUV.utils.vlog import Log
+from ...utils.vlog import Log
 
 
 # ---------------------------------------------------------------------------------------
@@ -109,7 +110,8 @@ class TdTestModule():
             uv_pos[0] += -1
 
         _set_edit_mode(context)
-        bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
+
+        switch_to_face_sel_mode(context)
 
         if context.mode != 'EDIT_MESH':
             raise AddonTestError('PREPARE> Edit mode is expected!')
@@ -125,7 +127,7 @@ class TdTestModule():
 
     @classmethod
     def UnitTestFull(cls, context: bpy.types.Context):
-        from ZenUV.utils.generic import ZenReport
+        from ...utils.generic import ZenReport
         RP = ZenReport()
         Log.debug_header("Unit Test Texel Density Sys")
         Log.debug('Not Performed. Currently in Dev.')
@@ -134,8 +136,8 @@ class TdTestModule():
 
     @classmethod
     def PropertiesTest(cls, context: bpy.types.Context):
-        # from ZenUV.prop.texel_density_props import ZUV_TdProperties
-        from ZenUV.prop.zuv_preferences import get_prefs
+        # from ...prop.texel_density_props import ZUV_TdProperties
+        from ...prop.zuv_preferences import get_prefs
         l_props = [
             'prp_current_td',
             'td_checker',
@@ -168,7 +170,7 @@ class TdTestModule():
 
         Log.info(f'Reference TD --> {ref_value}')
         Log.info(f'Temporary TD --> {temp_value}')
-        bpy.ops.mesh.select_all(action='SELECT')
+        bpy_select_by_context(context, action='SELECT')
         # _set_object_mode(context)
         _set_edit_mode(context)
 
@@ -212,7 +214,7 @@ def Test_uv_zenuv_get_texel_density(context):
     TdTestModule.prepare_dev_td_test(context)
     TdTestModule.reset_td_state(context)
 
-    bpy.ops.mesh.select_all(action='SELECT')
+    bpy_select_by_context(context, action='SELECT')
     # _set_object_mode(context)
     _set_edit_mode(context)
     temp_value = 12.5
@@ -428,7 +430,7 @@ def Test_zen_tdpr_select_by_texel_density(context):
     import bmesh
     tested_value = 128.0
     context.scene.zen_uv.td_props.prp_current_td = tested_value
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
     obj = context.object
     bm = bmesh.from_edit_mesh(obj.data).copy()
     s_faces = [f.index for f in bm.faces if f.select]
@@ -449,7 +451,7 @@ def Test_zen_tdpr_get_td_from_preset(context):
     TdTestModule.reset_td_state(context)
     bpy.ops.zen_tdpr.clear_presets()
     bpy.ops.zen_tdpr.new_item()
-    from ZenUV.ops.texel_density.td_presets import PRESET_NEW
+    from ...ops.texel_density.td_presets import PRESET_NEW
     default_new_value = PRESET_NEW["value"]
     Log.info(f"New List Item Created. Current Value: {default_new_value}")
     bpy.ops.zen_tdpr.get_td_from_preset()

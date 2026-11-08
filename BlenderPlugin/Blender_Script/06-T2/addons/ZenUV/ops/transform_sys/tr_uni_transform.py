@@ -23,11 +23,11 @@
 
 import bpy
 
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.hops_integration import show_uv_in_3dview
+from ...utils.register_util import RegisterUtils
+from ...utils.hops_integration import show_uv_in_3dview
 
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.utils.generic import resort_objects_by_selection
+from ...ui.labels import ZuvLabels
+from ...utils.generic import ResortObjects
 
 from . tr_move import MoveFactory, TrMoveProps, TrMove2dCursor
 from . tr_fit import FitRegion, TrFitFactory
@@ -117,10 +117,10 @@ class ZUV_OT_UnifiedTransform(bpy.types.Operator):
         # Any transforms blocked (operator CANCELLED) if no selection.
         # Except case 2D Cursor operation.
         # It allows positioning 2D Cursor over UV Area withot Selection.
-        objs = resort_objects_by_selection(context, context.objects_in_mode)
+        objs = ResortObjects.resort_objects_by_selection(context, context.objects_in_mode)
         if not objs:
             if not transform_mode == "2DCURSOR":
-                self.report({'WARNING'}, "Zen UV: Select something.")
+                self.report({'WARNING'}, "No objects selected.")
                 return {"CANCELLED"}
 
         pivot_point = TransformOrderSolver.get(context)
@@ -160,10 +160,10 @@ class ZUV_OT_UnifiedTransform(bpy.types.Operator):
                 pivot_point,
                 island_pivot='cen'
                 )
-            MF.move()
+            MF.move(context)
 
         # Flip/Scale Mode
-        if transform_mode in ("FLIP", "SCALE"):
+        if transform_mode in {"FLIP", "SCALE"}:
             SF = ScaleFactory(
                 context,
                 TrScaleProps(context, is_global=True),
@@ -215,10 +215,6 @@ class ZUV_OT_UnifiedTransform(bpy.types.Operator):
 
         # Align Mode
         if transform_mode == "ALIGN":
-            no_sync_mode = context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync
-            if tr_props.tr_align_to == "TO_ACTIVE_COMPONENT" and no_sync_mode:
-                self.report({'WARNING'}, "Active Component mode is not allowed in the UV Sync Selection is Off.")
-                return {'CANCELLED'}
             influence_mode = 'VERTICES' if tr_props.tr_type == 'SELECTION' and tr_props.tr_align_vertices else tr_props.tr_type
 
             MP = TrMoveProps(context, is_global=True)
@@ -237,7 +233,7 @@ class ZUV_OT_UnifiedTransform(bpy.types.Operator):
                 pivot_point,
                 self.pp_pos
             )
-            MF.move()
+            MF.move(context)
 
         # Display UV Widget from HOPS addon
         show_uv_in_3dview(context, use_selected_meshes=True, use_selected_faces=False, use_tagged_faces=True)

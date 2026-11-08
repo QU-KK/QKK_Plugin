@@ -24,32 +24,28 @@ import bpy
 import bmesh
 from bpy.props import BoolProperty
 from mathutils import Vector
-from ZenUV.utils.generic import (
-    get_mesh_data,
-    update_indexes,
-    get_dir_vector,
-    ZenKeyEventSolver
-)
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.utils.transform import bound_box
-from ZenUV.stacks.utils import (
+from ..utils.generic import get_dir_vector, ZenKeyEventSolver
+from ..prop.zuv_preferences import get_prefs
+from ..utils.transform import bound_box
+from ..stacks.utils import (
     StacksSystem,
     get_master_parameters,
     STATISTIC
 )
-from ZenUV.utils.generic import resort_by_type_mesh_in_edit_mode_and_sel, verify_uv_layer
+from ..utils.generic import ResortObjects, verify_uv_layer
 
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.utils.clib.lib_init import StackSolver
-from ZenUV.ui.pie import ZsPieFactory
-from ZenUV.utils.progress import ProgressBar, ProgressCancelException
-from ZenUV.utils.vlog import Log
+from ..utils.uv_factory import SelectionUtils, UvIslandUtils
+from ..ui.labels import ZuvLabels
+from ..utils.clib.lib_init import StackSolver
+from ..ui.pie import ZsPieFactory
+from ..utils.progress import ProgressBar, ProgressCancelException
+from ..utils.vlog import Log
 
 
 def unstack(context, data, offset: Vector, progress: ProgressBar, use_iterative_unstack: bool = False, in_uv_area_only: bool = True):
 
-    from ZenUV.utils.bounding_box import BoundingBox2d
-    from ZenUV.ops.transform_sys.transform_utils.transform_loops import TransformLoops
+    from ..utils.bounding_box import BoundingBox2d
+    from ..ops.transform_sys.transform_utils.transform_loops import TransformLoops
 
     for obj_name, islands in data["objs"].items():
         obj = context.scene.objects[obj_name]
@@ -133,7 +129,7 @@ def find_by_condition(context, stack, selected_only):
         # Create Distortion DICT for every island in every object
         for obj_name, islands in stack["objs"].items():
             obj = context.scene.objects[obj_name]
-            me, bm = get_mesh_data(obj)
+            bm = bmesh.from_edit_mesh(obj.data)
             uv_layer = verify_uv_layer(bm)
             for island, indices in islands.items():
                 if obj_name not in distortion_dict.keys():
@@ -192,23 +188,17 @@ def detect_masters(context, sim_data, selected_only):
 
 def get_master_position(context, data):
     """ Return position of the selected island """
-    sync_uv = context.scene.tool_settings.use_uv_select_sync
-    position = None
+
     for obj_name, islands in data["objs"].items():
-        if position:
-            return position
-        else:
-            obj = context.scene.objects[obj_name]
-            me, bm = get_mesh_data(obj)
-            uv_layer = verify_uv_layer(bm)
-            for island, indices in islands.items():
-                m_island = [bm.faces[index] for index in indices]
-                if sync_uv:
-                    if True in [f.select for f in m_island]:
-                        position = bound_box(islands=[m_island], uv_layer=uv_layer)["cen"]
-                else:
-                    if True in [loop[uv_layer].select for face in m_island for loop in face.loops]:
-                        position = bound_box(islands=[m_island], uv_layer=uv_layer)["cen"]
+        obj = context.scene.objects[obj_name]
+        bm = bmesh.from_edit_mesh(obj.data)
+        uv_layer = verify_uv_layer(bm)
+        for island, indices in islands.items():
+            m_island = [bm.faces[index] for index in indices]
+
+            if UvIslandUtils.is_island_selected(context, m_island, uv_layer):
+                position = bound_box(islands=[m_island], uv_layer=uv_layer)["cen"]
+
     return position
 
 
@@ -290,12 +280,10 @@ class ZUV_OT_Unstack(bpy.types.Operator):
         row.prop(self, "increment")
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
-
-        update_indexes(objs)
 
         if not self.breakStack:
             self.increment = 1.0
@@ -314,7 +302,7 @@ class ZUV_OT_Unstack(bpy.types.Operator):
         elif self.UnstackMode == "OVERLAPPED":
             sim_data = stacks.get_overlapped(use_seams_as_separator=self.use_seams_as_separator)
 
-        sim_data = detect_masters(context, sim_data, False)
+        sim_data = detect_masters(context, sim_data, self.UnstackMode == 'SELECTED')
 
         # stacks.show_sim_data(sim_data)
 
@@ -383,7 +371,7 @@ class ZUV_OT_Stack_Similar(bpy.types.Operator):
         objs = context.objects_in_mode
         if not objs:
             return {"CANCELLED"}
-        update_indexes(objs)
+
         move_only = addon_prefs.stackMoveOnly
         # Checking that LIB is present or activated
         if not move_only:
@@ -458,13 +446,11 @@ class ZUV_OT_Select_Similar(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        from ZenUV.utils.generic import resort_by_type_mesh_in_edit_mode_and_sel
-
         ZsPieFactory.mark_pie_cancelled()
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         if context.tool_settings.mesh_select_mode[:] != (False, False, True):
@@ -524,22 +510,22 @@ class ZUV_OT_Select_Stacked(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        from ZenUV.utils.generic import select_by_context, bpy_deselect_by_context
+        from ..utils.generic import bpy_select_by_context
 
         StackedSolver = StacksSystem(context)
-        stacked = StackedSolver.get_stacked()
+        stacked = StackedSolver.get_stacked(True)
         for_select = StackedSolver.get_stacked_faces_ids(stacked)
 
         if self.clear:
-            bpy_deselect_by_context(context)
+            bpy_select_by_context(context, action='DESELECT')
 
         for obj_name, faces_ids in for_select.items():
             obj = context.scene.objects[obj_name]
-            me = obj.data
-            bm = bmesh.from_edit_mesh(me)
-            select_by_context(context, bm, [[bm.faces[i] for i in faces_ids], ], state=True)
+            bm = bmesh.from_edit_mesh(obj.data)
+            uv_layer = verify_uv_layer(bm)
+            SelectionUtils.select_faces_any_context(context, [bm.faces[i] for i in faces_ids], state=True, bm=bm, uv_layer=uv_layer)
 
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         return {'FINISHED'}
 
@@ -593,13 +579,13 @@ class ZUV_OT_Select_Stack(bpy.types.Operator):
 
     def execute(self, context):
         from .utils import Cluster
-        from ZenUV.utils.generic import bpy_deselect_by_context
+        from ..utils.generic import bpy_select_by_context
 
         cl: Cluster = None
         master: Cluster = None
 
         if self.clear_selection:
-            bpy_deselect_by_context(context)
+            bpy_select_by_context(context, action='DESELECT')
 
         stacks = StacksSystem(context)
 

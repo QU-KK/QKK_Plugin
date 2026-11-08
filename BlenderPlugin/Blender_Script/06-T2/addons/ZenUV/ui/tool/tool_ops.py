@@ -29,22 +29,22 @@ import re
 import math
 from dataclasses import dataclass, asdict
 
-from ZenUV.utils.constants import UV_AREA_BBOX
-from ZenUV.utils.bounding_box import BoundingBox2d
-from ZenUV.utils.blender_zen_utils import (
+from ...utils.constants import UV_AREA_BBOX
+from ...utils.bounding_box import BoundingBox2d
+from ...utils.iter_utils import IterUtils
+from ...utils.blender_zen_utils import (
     update_areas_in_all_screens, rsetattr,
     get_view_1px_from_region, is_uv_snap_enabled,
     ZenPolls)
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.generic import (
-    resort_by_type_mesh_in_edit_mode_and_sel,
+from ...utils.vlog import Log
+from ...utils.generic import (
     verify_uv_layer,
-    resort_objects_by_selection,
+    ResortObjects,
     calc_uv_editor_image_aspect_ratio)
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.ops.transform_sys.transform_utils.tr_object_data import transform_object_loop_data
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import TransformSysOpsProps
-from ZenUV.prop.scene_ui_props import ZUV_UVToolProps, ZuvFitToSelectionProps
+from ...ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ...ops.transform_sys.transform_utils.tr_object_data import transform_object_loop_data
+from ...ops.transform_sys.transform_utils.tr_utils import TransformSysOpsProps
+from ...prop.scene_ui_props import ZUV_UVToolProps, ZuvFitToSelectionProps
 
 
 def zenuv_status_text_transform_draw(
@@ -143,13 +143,13 @@ class ZUV_OT_ToolTrimHandle(bpy.types.Operator):
     @classmethod
     def description(cls, context: bpy.types.Context, properties: bpy.types.OperatorProperties):
         if properties:
-            from ZenUV.ops.transform_sys.trim_depend_transform import (
+            from ...ops.transform_sys.trim_depend_transform import (
                 ZUV_OT_TrAlignToTrim,
                 ZUV_OT_TrFlipInTrim,
                 ZUV_OT_TrFitToTrim
             )
 
-            from ZenUV.ops.transform_sys.tr_rotate import (
+            from ...ops.transform_sys.tr_rotate import (
                 ZUV_OT_TrRotate3DV
             )
 
@@ -475,7 +475,7 @@ class ZUV_OT_TrimScrollFit(bpy.types.Operator):
         row.prop(self, "filter")
         row.prop_menu_enum(self, "trimsheet_categories", text="", icon="TRIA_DOWN")
 
-        from ZenUV.ops.transform_sys.trim_depend_transform import ZUV_OT_TrFitToTrim
+        from ...ops.transform_sys.trim_depend_transform import ZUV_OT_TrFitToTrim
         wm = context.window_manager
         op_props = wm.operator_properties_last(ZUV_OT_TrFitToTrim.bl_idname)
         if op_props:
@@ -1232,7 +1232,7 @@ class ZUV_OP_ToolTransform(bpy.types.Operator):
 
                     op.influence = tool_props.tr_gizmo_influence
 
-                    from ZenUV.ops.context_utils import FakeContext
+                    from ...ops.context_utils import FakeContext
                     overrided_dict = context.copy()
                     overrided_dict["space_data"] = t_context["space_data"]
                     overrided_context = FakeContext(overrided_dict)
@@ -1303,7 +1303,7 @@ class ZUV_OP_ToolTransform(bpy.types.Operator):
 
     def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
         self.info_message = ''
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if len(objs) > 0:
 
             interval = timer()
@@ -1331,7 +1331,7 @@ class ZUV_OP_ToolTransform(bpy.types.Operator):
 
                 return res
         else:
-            self.info_message = "There are no selected objects"
+            self.info_message = "No objects selected."
             self.report({'INFO'}, self.info_message)
 
         return {'CANCELLED'}
@@ -1349,7 +1349,7 @@ class ZUV_OP_ToolTransform(bpy.types.Operator):
 
     @classmethod
     def calculate_transform_matrix(cls, op_props, context: bpy.types.Context):
-        from ZenUV.utils.transform import UvTransformUtils
+        from ...utils.transform import UvTransformUtils
 
         tool_props: ZUV_UVToolProps = context.scene.zen_uv.ui.uv_tool
 
@@ -1449,11 +1449,11 @@ class ZUV_OP_ToolTransform(bpy.types.Operator):
         op_props.transform_sca_matrix = S.copy()
 
     def execute(self, context):
-        from ZenUV.utils.transform import UvTransformUtils
+        from ...utils.transform import UvTransformUtils
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.info_message = "There are no selected objects"
+            self.info_message = "No objects selected."
             self.report({'INFO'}, self.info_message)
             return {'CANCELLED'}
 
@@ -1510,7 +1510,7 @@ class ZUV_OP_ToolSnapTransformGizmo(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context: bpy.types.Context):
-        from ZenUV.ui.tool.uv.uv_transform_tool import ZuvUVTransformWorkSpaceTool
+        from ...ui.tool.uv.uv_transform_tool import ZuvUVTransformWorkSpaceTool
         return bpy.ops.uv.snap_cursor.poll() and ZuvUVTransformWorkSpaceTool.is_workspace_tool_active(context)
 
     def execute(self, context: bpy.types.Context):
@@ -1585,17 +1585,17 @@ class ZUV_OT_ToolTransformHandleClick(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context: bpy.types.Context):
-        from ZenUV.ui.tool.uv.uv_transform_tool import ZuvUVTransformWorkSpaceTool
+        from ...ui.tool.uv.uv_transform_tool import ZuvUVTransformWorkSpaceTool
         return context.space_data.type == 'IMAGE_EDITOR' and ZuvUVTransformWorkSpaceTool.is_workspace_tool_active(context)
 
     def scale_by_td(self, context: bpy.types.Context, tool_props: ZUV_UVToolProps):
-        from ZenUV.ops.texel_density.td_utils import TexelDensityFactory, TdContext
+        from ...ops.texel_density.td_utils import TexelDensityFactory, TdContext
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
             raise TransformClickError("No editable objects")
 
-        objs = resort_objects_by_selection(context, objs)
+        objs = ResortObjects.resort_objects_by_selection(context, objs)
         if not objs:
             raise TransformClickError("Nothing selected")
 
@@ -1653,7 +1653,7 @@ class ZUV_OT_ToolTransformHandleClick(bpy.types.Operator):
         self.handle_action = "SET_TRANSFORM"
 
     def rotate_by_action(self, context: bpy.types.Context, tool_props: ZUV_UVToolProps, angle_increment_rad: float):
-        from ZenUV.utils.transform import matrix_by_image_aspect
+        from ...utils.transform import matrix_by_image_aspect
 
         init_p_handle_position = Vector(tool_props.tr_gizmo_pivot_handle)
         init_a_handle_position = Vector(tool_props.tr_gizmo_angle_handle)
@@ -1681,15 +1681,15 @@ class ZUV_OT_ToolTransformHandleClick(bpy.types.Operator):
         self.handle_action = "SET_TRANSFORM"
 
     def rotate_by_world_orient_angle(self, context: bpy.types.Context, tool_props: ZUV_UVToolProps):
-        from ZenUV.utils.base_clusters.base_cluster import OrientCluster
-        from ZenUV.utils import get_uv_islands as island_util
-        from ZenUV.utils.transform import matrix_by_image_aspect
+        from ...utils.base_clusters.base_cluster import OrientCluster
+        from ...utils.uv_factory import UvIslandUtils
+        from ...utils.transform import matrix_by_image_aspect
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
             raise TransformClickError("No editable objects")
 
-        objs = resort_objects_by_selection(context, objs)
+        objs = ResortObjects.resort_objects_by_selection(context, objs)
         if not objs:
             raise TransformClickError("Nothing selected")
 
@@ -1708,7 +1708,7 @@ class ZUV_OT_ToolTransformHandleClick(bpy.types.Operator):
             bm = bmesh.from_edit_mesh(obj.data)
             uv_layer = verify_uv_layer(bm)
             bm.faces.ensure_lookup_table()
-            storage[obj.name] = island_util.get_selected_islands_in_indices(context, bm)
+            storage[obj.name] = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer, in_indices=True)
 
         islands_count = sum([len(k) for k in storage.values()])
 
@@ -1752,7 +1752,7 @@ class ZUV_OT_ToolTransformHandleClick(bpy.types.Operator):
     def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
         try:
             if self.handle_action == "NONE":
-                from ZenUV.ui.tool.uv.uv_transform_gizmo import (
+                from ...ui.tool.uv.uv_transform_gizmo import (
                     ZUV_GGT_UVTransformGizmo,
                     UV_GT_zenuv_transform_pivot, UV_GT_zenuv_transform_a_handle,
                     UV_GT_zenuv_draggable_line, UV_GT_zenuv_scale_handle, UV_GT_zenuv_rotate_handle)
@@ -1909,13 +1909,13 @@ class ZUV_OT_ToolTransformHandle(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context: bpy.types.Context):
-        from ZenUV.ui.tool.uv.uv_transform_tool import ZuvUVTransformWorkSpaceTool
+        from ...ui.tool.uv.uv_transform_tool import ZuvUVTransformWorkSpaceTool
         return context.space_data.type == 'IMAGE_EDITOR' and ZuvUVTransformWorkSpaceTool.is_workspace_tool_active(context)
 
     @classmethod
     def description(cls, context: bpy.types.Context, properties):
         if properties:
-            from ZenUV.ops.transform_sys.transform_utils.tr_utils import TransformSysOpsProps
+            from ...ops.transform_sys.transform_utils.tr_utils import TransformSysOpsProps
             p_scene = context.scene
             p_tool_props: ZUV_UVToolProps = p_scene.zen_uv.ui.uv_tool
             s_influence = bpy.types.UILayout.enum_item_name(p_tool_props, "tr_gizmo_influence", p_tool_props.tr_gizmo_influence).lower()
@@ -1941,13 +1941,13 @@ class ZUV_OT_ToolTransformHandle(bpy.types.Operator):
         return self.execute(context)
 
     def execute(self, context: bpy.types.Context):
-        from ZenUV.utils.transform import matrix_by_image_aspect
+        from ...utils.transform import matrix_by_image_aspect
         try:
             p_scene = context.scene
             p_tool_props: ZUV_UVToolProps = p_scene.zen_uv.ui.uv_tool
 
             if self.transform_mode == "FLIP":
-                from ZenUV.ops.transform_sys.transform_utils.tr_utils import TrConstants
+                from ...ops.transform_sys.transform_utils.tr_utils import TrConstants
                 p_handle = Vector(p_tool_props.tr_gizmo_pivot_handle)
                 a_handle = Vector(p_tool_props.tr_gizmo_angle_handle)
 
@@ -2021,7 +2021,7 @@ class ZUV_OP_ToolTransformMouseDraw(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context: bpy.types.Context):
-        from ZenUV.ui.tool.uv.uv_transform_tool import ZuvUVTransformWorkSpaceTool
+        from ...ui.tool.uv.uv_transform_tool import ZuvUVTransformWorkSpaceTool
         return context.space_data.type == 'IMAGE_EDITOR' and ZuvUVTransformWorkSpaceTool.is_workspace_tool_active(context)
 
     def __del__(self):
@@ -2097,7 +2097,7 @@ class ZUV_OP_ToolTransformMouseDraw(bpy.types.Operator):
                             op_transform.origin_pivot = v_origin_pivot.to_tuple()
                             op_transform.origin_head = v_origin_handle.to_tuple()
 
-                            objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+                            objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
                             if len(objs) > 0:
                                 n_loops = transform_object_loop_data.setup_uvs(context, objs, tool_props.tr_gizmo_influence, use_kdtree=True)
                                 if n_loops > 0:
@@ -2228,7 +2228,7 @@ class ZUV_OP_ToolTransformMouseDraw(bpy.types.Operator):
                                 transform_sca_matrix=op_transform.transform_sca_matrix,
                             )
 
-                            from ZenUV.prop.wm_props import ZuvWMTransformToolGroup
+                            from ...prop.wm_props import ZuvWMTransformToolGroup
                             rotation_angle = ZuvWMTransformToolGroup.get_rotation_angle_by_operator(op_transform)
                             scale_value = ZuvWMTransformToolGroup.get_scale_value_by_operator(op_transform)
                             s_header_text = f"Rotation: {math.degrees(rotation_angle):.1f}°, Scale: {scale_value:.2f}"
@@ -2295,7 +2295,7 @@ class ZUV_OP_ToolTransformMouseDraw(bpy.types.Operator):
             p_tool_props: ZUV_UVToolProps = context.scene.zen_uv.ui.uv_tool
 
             if p_tool_props.tr_gizmo_mode == 'TRANSFORM':
-                from ZenUV.utils.selection_utils import SelectionProcessor
+                from ...utils.selection_utils import SelectionProcessor
                 if not SelectionProcessor.is_uv_selected(context):
                     self.report({'WARNING'}, "Select something to draw with transformation!")
                     return {'CANCELLED'}
@@ -2306,10 +2306,10 @@ class ZUV_OP_ToolTransformMouseDraw(bpy.types.Operator):
             self.margin = 0
 
             if p_tool_props.tr_gizmo_draw_use_snap_margin:
-                from ZenUV.prop.zuv_preferences import get_prefs
+                from ...prop.zuv_preferences import get_prefs
                 addon_prefs = get_prefs()
                 if addon_prefs.uv_borders_draw.mode == 'PACK_MARGIN':
-                    from ZenUV.utils.generic import get_padding_in_pct
+                    from ...utils.generic import get_padding_in_pct
                     self.margin = (
                         get_padding_in_pct(context, addon_prefs.margin_px)
                         if addon_prefs.margin_show_in_px else addon_prefs.margin)
@@ -2321,7 +2321,7 @@ class ZUV_OP_ToolTransformMouseDraw(bpy.types.Operator):
 
             p_tool_props.tr_gizmo_undo_push(commit_in_blender=True)
 
-            objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+            objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
             if len(objs) > 0:
                 transform_object_loop_data.setup_full_kdtree(context, objs)
 
@@ -2385,7 +2385,7 @@ class ZUV_OP_ToolTransformFitToSelection(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context: bpy.types.Context):
-        from ZenUV.ui.tool.uv.uv_transform_tool import ZuvUVTransformWorkSpaceTool
+        from ...ui.tool.uv.uv_transform_tool import ZuvUVTransformWorkSpaceTool
         return context.space_data.type == 'IMAGE_EDITOR' and ZuvUVTransformWorkSpaceTool.is_workspace_tool_active(context)
 
     @classmethod
@@ -2401,18 +2401,18 @@ class ZUV_OP_ToolTransformFitToSelection(bpy.types.Operator):
         return self.execute(context)
 
     def execute(self, context):
-        from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-        from ZenUV.prop.scene_ui_props import ZUV_UVToolProps
-        from ZenUV.ops.transform_sys.transform_utils.tr_object_data import get_uv_islands_loops, get_selection_loops
-        from ZenUV.ops.transform_sys.transform_utils.transform_loops import TransformLoops
-        from ZenUV.utils.bounding_box import BoundingBox2dSimple, BoundingBoxUtils
+        from ...ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+        from ...prop.scene_ui_props import ZUV_UVToolProps
+        from ...ops.transform_sys.transform_utils.tr_object_data import get_uv_islands_loops, get_selection_loops
+        from ...ops.transform_sys.transform_utils.transform_loops import TransformLoops
+        from ...utils.bounding_box import BoundingBox2dSimple, BoundingBoxUtils
 
         ZUV_OP_ToolTransformFitToSelection.info_message = ""
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
 
         if not len(objs):
-            ZUV_OP_ToolTransformFitToSelection.info_message = "There are no selected objects"
+            ZUV_OP_ToolTransformFitToSelection.info_message = "No objects selected."
             self.report({'INFO'}, f"Zen UV: {ZUV_OP_ToolTransformFitToSelection.info_message}.")
             return {'CANCELLED'}
 
@@ -2435,17 +2435,12 @@ class ZUV_OP_ToolTransformFitToSelection(bpy.types.Operator):
 
         p_chain_loops = []
 
-        for obj in objs:
-            me: bpy.types.Mesh = obj.data
-            bm = bmesh.from_edit_mesh(me)
-            uv_layer = bm.loops.layers.uv.active
-            if not uv_layer:
-                continue
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
             p_loops = (
-                get_uv_islands_loops(context, me, bm, uv_layer, return_unselected=False)[0].values()
+                get_uv_islands_loops(context, obj.data, bm, uv_layer, return_unselected=False)[0].values()
                 if self.influence == 'ISLAND' else
-                get_selection_loops(context, me, bm, uv_layer, return_unselected=False)[0].values()
+                get_selection_loops(context, obj.data, bm, uv_layer, return_unselected=False)[0].values()
             )
             if p_loops:
                 p_chain_loops.extend(p_loops)
@@ -2520,7 +2515,7 @@ class ZUV_OP_ToolTransformSwapHandles(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context: bpy.types.Context):
-        from ZenUV.ui.tool.uv.uv_transform_tool import ZuvUVTransformWorkSpaceTool
+        from ...ui.tool.uv.uv_transform_tool import ZuvUVTransformWorkSpaceTool
         return context.space_data.type == 'IMAGE_EDITOR' and ZuvUVTransformWorkSpaceTool.is_workspace_tool_active(context)
 
     def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
@@ -2552,7 +2547,7 @@ class ZUV_OP_ToolTransformSetPerpendicular(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context: bpy.types.Context):
-        from ZenUV.ui.tool.uv.uv_transform_tool import ZuvUVTransformWorkSpaceTool
+        from ...ui.tool.uv.uv_transform_tool import ZuvUVTransformWorkSpaceTool
         return context.space_data.type == 'IMAGE_EDITOR' and ZuvUVTransformWorkSpaceTool.is_workspace_tool_active(context)
 
     def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
@@ -2561,7 +2556,7 @@ class ZUV_OP_ToolTransformSetPerpendicular(bpy.types.Operator):
         return self.execute(context)
 
     def execute(self, context: bpy.types.Context):
-        from ZenUV.utils.transform import matrix_by_image_aspect
+        from ...utils.transform import matrix_by_image_aspect
 
         image_aspect_ratio = calc_uv_editor_image_aspect_ratio(context)
 
@@ -2602,7 +2597,7 @@ class ZUV_OP_ToolTransformSetEnum(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context: bpy.types.Context):
-        from ZenUV.ui.tool.uv.uv_transform_tool import ZuvUVTransformWorkSpaceTool
+        from ...ui.tool.uv.uv_transform_tool import ZuvUVTransformWorkSpaceTool
         p_tool_props: ZUV_UVToolProps = context.scene.zen_uv.ui.uv_tool
         return (
             p_tool_props.tr_gizmo_mode == 'TRANSFORM' and
@@ -2650,7 +2645,7 @@ class ZUV_OP_ToolTransformSetupModal(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context: bpy.types.Context):
-        from ZenUV.ui.tool.uv.uv_transform_tool import ZuvUVTransformWorkSpaceTool
+        from ...ui.tool.uv.uv_transform_tool import ZuvUVTransformWorkSpaceTool
         return context.space_data.type == 'IMAGE_EDITOR' and ZuvUVTransformWorkSpaceTool.is_workspace_tool_active(context)
 
     def __del__(self):

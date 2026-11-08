@@ -29,9 +29,9 @@ from zipfile import ZipFile
 from io import BytesIO
 from timeit import default_timer as timer
 
-from ZenUV.utils.blender_zen_utils import ZenPolls, ZuvPresets
-from ZenUV.utils.tests.system_operators import ZUV_OT_OpenPresetsFolder
-from ZenUV.utils.vlog import Log
+from ..utils.blender_zen_utils import ZenPolls, ZuvPresets
+from ..utils.tests.system_operators import ZUV_OT_OpenPresetsFolder
+from ..utils.vlog import Log
 
 
 class ZuvDemoExample(bpy.types.PropertyGroup):
@@ -246,7 +246,7 @@ class ZUV_OT_DemoExamplesUpdate(bpy.types.Operator):
         return ZenPolls.internet_enabled()
 
     def execute(self, context: bpy.types.Context):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ..prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
 
         def plain_description(t_description):
@@ -378,7 +378,7 @@ class ZUV_OT_DemoExamplesDownload(bpy.types.Operator):
         return ZenPolls.internet_enabled()
 
     def execute(self, context: bpy.types.Context):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ..prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
 
         try:
@@ -428,7 +428,7 @@ class ZUV_OT_DemoExamplesDelete(bpy.types.Operator):
         return wm.invoke_confirm(self, event)
 
     def execute(self, context: bpy.types.Context):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ..prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
 
         try:

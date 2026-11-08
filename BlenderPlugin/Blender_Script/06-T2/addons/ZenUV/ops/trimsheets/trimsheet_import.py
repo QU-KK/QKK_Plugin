@@ -27,9 +27,9 @@ import json
 
 from .trimsheet_utils import ZuvTrimsheetUtils, TrimImportUtils
 
-from ZenUV.utils.vlog import Log
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.utils.blender_zen_utils import update_areas_in_all_screens
+from ...utils.vlog import Log
+from ...prop.zuv_preferences import get_prefs
+from ...utils.blender_zen_utils import update_areas_in_all_screens
 
 
 class ZUV_OT_TrimImportDecal(bpy.types.Operator, ImportHelper):

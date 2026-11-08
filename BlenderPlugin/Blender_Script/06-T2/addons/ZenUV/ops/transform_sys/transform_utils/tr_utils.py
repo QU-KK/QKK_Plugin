@@ -21,8 +21,8 @@
 import bpy
 from mathutils import Vector
 
-from ZenUV.utils.blender_zen_utils import rgetattr, rsetattr
-from ZenUV.utils.vlog import Log
+from ....utils.blender_zen_utils import rgetattr, rsetattr
+from ....utils.vlog import Log
 
 
 class TransformOrderSolver:

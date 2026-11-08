@@ -37,6 +37,8 @@ from bl_operators.presets import AddPresetBase
 import os
 from pathlib import Path
 
+from ..utils.blender_zen_utils import ZenPolls
+
 
 LITERAL_ADD = "zenuvlist.entry_add"
 LITERAL_REMOVE = "zenuvlist.entry_remove"
@@ -383,7 +385,10 @@ class ZenAddPresetBase(AddPresetBase):
                 print("Writing Preset: %r" % filepath)
 
                 if is_xml:
-                    import rna_xml
+                    if ZenPolls.version_since_5_0_0:
+                        import _rna_xml as rna_xml
+                    else:
+                        import rna_xml
                     rna_xml.xml_file_write(context,
                                            filepath,
                                            preset_menu_class.preset_xml_map)

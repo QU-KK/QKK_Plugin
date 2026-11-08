@@ -23,7 +23,6 @@ from mathutils import Vector, Euler
 from mathutils.geometry import area_tri, tessellate_polygon, intersect_line_line_2d, convex_hull_2d
 
 import itertools
-from numpy import empty_like, dot
 import re
 import time
 import math
@@ -31,11 +30,9 @@ import numpy as np
 from dataclasses import dataclass, field
 
 from .vlog import Log
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ..utils.blender_zen_utils import ZenPolls, get_selection_mode, is_loop_domain, is_sync_off
+from ..utils.uv_factory import SelectionUtils
 
-
-ADDON_NAME = "ZenUV"
 
 PROCESS_FACEMAP_NAME = "ZenUV_InProcess"
 PINNED_FACEMAP_NAME = "ZenUV_Pinned"
@@ -252,8 +249,6 @@ class ZenKeyEventSolver:
     def __init__(self, context, event, a_prefs) -> None:
         self.current_modifier = a_prefs.zen_key_modifier
         self.event = event
-        # print(f"Current Key Modifier: {self.current_modifier}")
-        # self._solve()
 
     # @classmethod
     def solve(self):
@@ -298,7 +293,7 @@ class ZenOperatorPropertiesBase:
 
     def get_properties_from(self, PROPS: bpy.types.OperatorProperties) -> None:
         """ Get properties from bpy.types.OperatorProperties class """
-        # print('PROPS Transfer')
+
         for prp in self.__annotations__.keys():
             attr = getattr(PROPS, prp, None)
             if attr is None:
@@ -355,37 +350,27 @@ class UvImage:
 class HideUnhideProcessor:
 
     @classmethod
-    def hide_by_context(cls, context: bpy.types.Context, uv_layer: bmesh.types.BMLayerItem, islands: list, action: str = 'HIDE', b_is_select: bool = False, is_reveal_in_no_sync: bool = False) -> None:
+    def hide_by_context(cls, context: bpy.types.Context, bm: bmesh.types.BMesh, uv_layer: bmesh.types.BMLayerItem, islands: list, action: str = 'HIDE', b_is_select: bool = False, is_reveal_in_no_sync: bool = False) -> None:
         if action not in {'HIDE', 'UNHIDE'}:
             raise RuntimeError('Variable "action" not in {"HIDE", "UNHIDE"}')
 
         p_faces = sum(islands, [])
 
-        if context.area.type == "IMAGE_EDITOR" and not context.scene.tool_settings.use_uv_select_sync:
+        if is_sync_off(context):
             if action == 'UNHIDE':
                 if is_reveal_in_no_sync:
-                    cls.unhide_faces(p_faces, True)
-                else:
-                    cls.select_faces(p_faces)
-                cls.select_loops(uv_layer, [lp for f in p_faces for lp in f.loops], b_is_select)
+                    cls.unhide_faces(p_faces)
+                    for f in p_faces:
+                        f.select = True
+                SelectionUtils.select_faces_any_context(context, p_faces, state=b_is_select, bm=bm, uv_layer=uv_layer)
             else:
                 cls.deselect_faces(p_faces)
         else:
             if action == 'UNHIDE':
-                cls.unhide_faces(p_faces, b_is_select)
+                cls.unhide_faces(p_faces)
+                SelectionUtils.select_faces_any_context(context, p_faces, state=b_is_select, bm=bm, uv_layer=uv_layer)
             else:
                 cls.hide_faces(p_faces)
-
-    @classmethod
-    def select_loops(cls, uv_layer, loops: list, is_select: bool = True):
-        from ZenUV.utils.blender_zen_utils import ZenPolls
-        if ZenPolls.version_since_3_2_0:
-            for loop in loops:
-                loop[uv_layer].select = is_select
-                loop[uv_layer].select_edge = is_select
-        else:
-            for loop in loops:
-                loop[uv_layer].select = is_select
 
     @classmethod
     def select_faces(cls, faces: list):
@@ -403,41 +388,27 @@ class HideUnhideProcessor:
             face.hide_set(True)
 
     @classmethod
-    def unhide_faces(cls, faces: list, b_is_select: bool = True):
+    def unhide_faces(cls, faces: list):
         for face in faces:
             face.hide_set(False)
-            face.select = b_is_select
 
 
 def calc_uv_editor_image_aspect_ratio(context: bpy.types.Context):
-    from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+    from ..ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
     p_image = ZuvTrimsheetUtils.getSpaceDataImage(context)
     if p_image and p_image.size[0] > 0 and p_image.size[1] > 0:
         return p_image.size[0] / p_image.size[1]
     return 1
 
 
-def is_pure_edge_mode(context: bpy.types.Context):
-    is_not_sync = context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync
-    return context.space_data.type == 'IMAGE_EDITOR' and is_not_sync and ZenPolls.version_since_3_2_0 and context.scene.tool_settings.uv_select_mode == "EDGE"
-
-
-def perp(a):
-    b = empty_like(a)
-    b[0] = -a[1]
-    b[1] = a[0]
-    return b
-
-
-def seg_intersect(a1, a2, b1, b2):
-    ''' Return the coordinates of the intersection point of two vectors '''
-    da = a2-a1
-    db = b2-b1
-    dp = a1-b1
-    dap = perp(da)
-    denom = dot(dap, db)
-    num = dot(dap, dp)
-    return (num / denom.astype(float))*db + b1
+def is_edge_select_mode_in_uv(context: bpy.types.Context):
+    if ZenPolls.version_since_5_0_0:
+        return get_selection_mode(context) == 'EDGE'
+    elif ZenPolls.version_since_3_2_0:
+        if is_loop_domain(context):
+            return get_selection_mode(context) == 'EDGE'
+        return False
+    return False
 
 
 def store_loops(bm):
@@ -465,7 +436,6 @@ def map_range(value, from_min, from_max, to_min, to_max):
 
 
 def remap_ranges(value, base_range, new_range):
-    # print("INPUTS", value, base_range, new_range)
     reverse = False
     if new_range[0] > new_range[1]:
         reverse = True
@@ -475,12 +445,11 @@ def remap_ranges(value, base_range, new_range):
     n_max = max(new_range)
     b_range = (b_max - b_min)
     n_range = (n_max - n_min)
-    # print("                         Ranges inside", base_range, new_range)
     if b_range == 0:
         result = n_min
     else:
         result = (((value - b_min) * n_range) / b_range) + n_min
-    # print("                         Result:", result)
+
     if reverse:
         result = new_range[1] + (new_range[0] - result)
     return result
@@ -539,6 +508,8 @@ def edge_loops_from_uvs(loops, uv_layer):
 
     closed loops have matching start and end values.
     """
+    s_loop_idxs = {lp.index for lp in loops}
+
     def loops_from_co(co, loops):
         stripes = []
         for stripe in co:
@@ -553,7 +524,7 @@ def edge_loops_from_uvs(loops, uv_layer):
         uv_edges = set()
         for loop in loops:
             next_loop = loop.link_loop_next
-            if next_loop in loops:
+            if next_loop.index in s_loop_idxs:
                 l1 = loop[uv_layer].uv.copy().freeze()
                 l2 = next_loop[uv_layer].uv.copy().freeze()
                 if (l2, l1) not in uv_edges:
@@ -694,43 +665,118 @@ def create_new_mesh(bm, name):
     scene.collection.objects.link(obj)
 
 
-def update_indexes(objs):
-    for obj in objs:
-        # obj.update_from_editmode()
-        me, bm = get_mesh_data(obj)
-        bm.verts.ensure_lookup_table()
-        bm.faces.ensure_lookup_table()
-        bm.edges.ensure_lookup_table()
-        bmesh.update_edit_mesh(me, loop_triangles=False)
+class ResortObjects:
 
+    result: bool = True
+    message: str = ''
 
-def resort_by_type_mesh(context):
-    return [obj for obj in context.selected_objects if obj.type == 'MESH' and len(obj.data.polygons) != 0]
+    @classmethod
+    def reset_state(cls):
+        cls.result = True
+        cls.message = ''
 
+    @staticmethod
+    def resort_by_type_mesh_for_stacks(context):
+        from ..utils.iter_utils import IterUtils
+        return [obj for obj, _, _ in IterUtils.iter_objs_with_bmesh_uv(context.selected_objects, context)]
 
-def resort_by_type_mesh_in_edit_mode(context):
-    return [obj for obj in context.objects_in_mode if obj.type == 'MESH' and len(obj.data.polygons) != 0]
+    @staticmethod
+    def resort_by_type_mesh(context):
+        return [obj for obj in context.selected_objects if obj.type == 'MESH' and len(obj.data.polygons) != 0]
 
+    @staticmethod
+    def resort_by_type_mesh_in_edit_mode_and_sel(context: bpy.types.Context, require_active_uv: bool = False):
+        """Return mesh objects in edit mode (or selected in object mode),
+        ignoring instances. Optionally skip objects without active UV map."""
 
-def resort_by_type_mesh_in_edit_mode_and_sel(context):
-    """ Return objects in edit mode and selected
-        without instances """
-    if context.mode == 'EDIT_MESH':
-        return {
-            obj for obj in context.objects_in_mode_unique_data
-            if obj.type == 'MESH' and len(obj.data.polygons) != 0
-            and obj.hide_get() is False
-            and obj.hide_viewport is False
-        }
-    else:
-        t_objects = {
-            obj.data: obj for obj in context.selected_objects
-            if obj.type == 'MESH'
-            and len(obj.data.polygons) != 0
-            and obj.hide_get() is False
-            and obj.hide_viewport is False
-        }
-        return t_objects.values()
+        def is_valid(obj):
+            me = obj.data
+
+            if require_active_uv and me.uv_layers.active is None:
+                return False
+
+            return (
+                obj.type == 'MESH'
+                and len(me.polygons) != 0
+                and not obj.hide_get()
+                and not obj.hide_viewport
+            )
+
+        if context.mode == 'EDIT_MESH':
+            return {obj for obj in context.objects_in_mode_unique_data if is_valid(obj)}
+        else:
+            t_objects = {
+                obj.data: obj
+                for obj in context.selected_objects
+                if is_valid(obj)
+            }
+            return t_objects.values()
+
+    @classmethod
+    def resort_objects_by_selection(cls, context: bpy.types.Context, objs: list, b_skip_uv_layer_fail: bool = True):
+        b_is_loop_domain = is_loop_domain(context)
+        if ZenPolls.version_since_5_0_0:
+            if b_is_loop_domain:
+                if is_sync_off(context):
+                    p_objects = []
+                    for obj in objs:
+                        me: bpy.types.Mesh = obj.data
+                        if me.total_face_sel > 0:
+                            bm = bmesh.from_edit_mesh(obj.data)
+                            uv_layer = bm.loops.layers.uv.active
+                            if not b_skip_uv_layer_fail and uv_layer is None:
+                                cls.result = False
+                                cls.message = 'One or more objects do not have a UV Map'
+                                return []
+                            if any(True for f in bm.faces if f.uv_select or any(lp.uv_select_vert for lp in f.loops)):
+                                p_objects.append(obj)
+                    return p_objects
+                else:  # UV Sync is on
+                    p_objects = []
+                    for obj in objs:
+                        bm = bmesh.from_edit_mesh(obj.data)
+                        uv_layer = bm.loops.layers.uv.active
+                        if ZenPolls.version_since_5_0_0 and uv_layer:
+                            if not bm.uv_select_sync_valid:
+                                bm.uv_select_sync_from_mesh()
+                        if not b_skip_uv_layer_fail and uv_layer is None:
+                            cls.result = False
+                            cls.message = 'One or more objects do not have a UV Map'
+                            return []
+                        if any(True for f in bm.faces if f.uv_select or any(lp.uv_select_vert for lp in f.loops)):
+                            p_objects.append(obj)
+                    return p_objects
+
+            else:  # VIEW_3D
+                if context.mode in {'EDIT_MESH', 'OBJECT'}:
+                    return [obj for obj in objs if sum(obj.data.count_selected_items()) != 0]
+        else:  # Below Blender 5.0
+            if b_is_loop_domain:
+                p_objects = []
+                for obj in objs:
+                    me: bpy.types.Mesh = obj.data
+                    if me.total_face_sel > 0:
+                        bm = bmesh.from_edit_mesh(obj.data)
+                        uv_layer = bm.loops.layers.uv.active
+                        if not b_skip_uv_layer_fail and uv_layer is None:
+                            cls.result = False
+                            cls.message = 'One or more objects do not have a UV Map'
+                            return []
+                        if uv_layer:
+                            if any(loop[uv_layer].select for f in bm.faces for loop in f.loops if f.select and not f.hide):
+                                p_objects.append(obj)
+                return p_objects
+            else:
+                if context.mode in {'EDIT_MESH', 'OBJECT'}:
+                    p_objs = []
+                    for obj in objs:
+                        if not b_skip_uv_layer_fail and not obj.data.uv_layers.active:
+                            cls.result = False
+                            cls.message = 'One or more objects do not have a UV Map'
+                            return []
+                        if sum(obj.data.count_selected_items()) != 0:
+                            p_objs.append(obj)
+                    return p_objs
 
 
 def get_unique_mesh_object_map_with_active(context):
@@ -745,46 +791,33 @@ def get_unique_mesh_object_map_with_active(context):
         if p_obj and p_obj.type == 'MESH'}
 
 
-def select_by_context(context: bpy.types.Context, bm: bmesh.types.BMesh, islands: list, state: bool = True):
-    is_uv_sync_mode = context.scene.tool_settings.use_uv_select_sync
-    uv_layer = verify_uv_layer(bm)
-    if context.area.type == "VIEW_3D":
-        select_faces(islands, state=state)
-    if context.area.type == "IMAGE_EDITOR":
-        if is_uv_sync_mode:
-            select_faces(islands, state=state)
-        elif not is_uv_sync_mode:
-            select_loops(islands, uv_layer, state=state)
+def bpy_select_by_context(context: bpy.types.Context, action: str = 'DESELECT', area_type=None):
 
+    if area_type is None:
+        p_space = getattr(context, "space_data", None)
+        if p_space:
+            area_type = p_space.type
 
-def select_faces(islands, state=True):
-    """ Select faces from tuple islands """
-    for face in sum([list(i) for i in islands], []):
-        face.select = state
+    b_is_uv_editor = area_type == 'IMAGE_EDITOR'
 
+    if ZenPolls.version_since_5_0_0:
+        if b_is_uv_editor:
+            if bpy.ops.uv.select_all.poll():
+                bpy.ops.uv.select_all(action=action)
+            if context.scene.tool_settings.use_uv_select_sync:
+                context.scene.tool_settings.use_uv_select_sync = False
+                context.scene.tool_settings.use_uv_select_sync = True
+        else:
+            if bpy.ops.mesh.select_all.poll():
+                bpy.ops.mesh.select_all(action=action)
 
-def select_loops(islands, uv_layer, state=True):
-    """ Select loops from tuple islands """
-    loops = [loop for island in islands for face in island for loop in face.loops]
-    for loop in loops:
-        loop[uv_layer].select = state
-    if ZenPolls.version_since_3_2_0:
-        for loop in loops:
-            loop[uv_layer].select = state
-            loop[uv_layer].select_edge = state
-
-
-def bpy_deselect_by_context(context: bpy.types.Context):
-    bpy_select_by_context(context, action='DESELECT')
-
-
-def bpy_select_by_context(context: bpy.types.Context, action: str = 'DESELECT'):
-    if context.area.type == "IMAGE_EDITOR" and not context.scene.tool_settings.use_uv_select_sync:
-        if bpy.ops.uv.select_all.poll():
-            bpy.ops.uv.select_all(action=action)
     else:
-        if bpy.ops.mesh.select_all.poll():
-            bpy.ops.mesh.select_all(action=action)
+        if is_sync_off(context, area_type=area_type):
+            if bpy.ops.uv.select_all.poll():
+                bpy.ops.uv.select_all(action=action)
+        else:
+            if bpy.ops.mesh.select_all.poll():
+                bpy.ops.mesh.select_all(action=action)
 
 
 def select_pure_loops(loops, uv_layer, state=True):
@@ -809,188 +842,15 @@ def get_padding_in_px(context, value_pct):
     return int(round(value_pct * side_min))
 
 
-def get_mesh_data_unified(context, obj):
-    """
-        Input obj or obj.name
-        Return me as obj.data and bm as bmesh.from_edit_mesh(me)
-    """
-    if isinstance(obj, str):
-        obj = context.scene.objects.get(obj)
-    if not obj:
-        return None
-    else:
-        return obj.data, bmesh.from_edit_mesh(obj.data)
-
-
-def get_mesh_data(obj):
-    "Return me as obj.data and bm as bmesh.from_edit_mesh(me)"
-    # obj = context.edit_object
-    # me = obj.data
-    return obj.data, bmesh.from_edit_mesh(obj.data)
-
-
-def is_selection_exist_in_object_in_edit_mode(context: bpy.types.Context, bm: bmesh.types.BMesh, obj: bpy.types.Object):
-
-    sync_uv = context.scene.tool_settings.use_uv_select_sync
-
-    if context.space_data.type == 'IMAGE_EDITOR' and not sync_uv:
-        uv_layer = bm.loops.layers.uv.active
-        if uv_layer:
-            return any(loop[uv_layer].select for f in bm.faces for loop in f.loops if f.select and not f.hide)
-        return False
-    else:
-        me = obj.data
-        return me.total_vert_sel > 0 or me.total_edge_sel > 0 or me.total_face_sel > 0
-
-
-def resort_objects_by_selection(context: bpy.types.Context, objs: list):
-    sync_uv = context.scene.tool_settings.use_uv_select_sync
-
-    if context.space_data.type == 'IMAGE_EDITOR' and not sync_uv:
-        p_objects = []
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            me: bpy.types.Mesh = obj.data
-            if me.total_face_sel > 0:
-                uv_layer = bm.loops.layers.uv.active
-                if uv_layer:
-                    if any(loop[uv_layer].select for f in bm.faces for loop in f.loops if f.select and not f.hide):
-                        p_objects.append(obj)
-        return p_objects
-    else:
-        if context.mode == 'EDIT_MESH':
-            p_objects = []
-            for obj in objs:
-                me = obj.data
-                bm = bmesh.from_edit_mesh(me)
-                if me.total_vert_sel > 0 or me.total_edge_sel > 0 or me.total_face_sel > 0:
-                    p_objects.append(obj)
-            return p_objects
-        elif context.mode == 'OBJECT':
-            return [obj for obj in objs if sum(obj.data.count_selected_items()) != 0]
-
-
-def resort_objects_by_data(objs):
-    objects = []
-    for obj in objs:
-        if len(obj.data.polygons) != 0:
-            if True in [x.select for x in obj.data.polygons] or \
-                True in [x.select for x in obj.data.edges] or \
-                    True in [x.select for x in obj.data.vertices]:
-                objects.append(obj)
-    return objects
-
-
-def pin_island(island, uv_layer, _pin_action):
-    for face in island:
-        for loop in face.loops:
-            loop[uv_layer].pin_uv = _pin_action
-
-
-def vert_border_from_island(uv_layer, island):
-    """ Return border edges of given island """
-    _vertices = []
-    _bound_verts = []
-    for face in island:
-        _vertices.extend([v for v in face.verts])
-    for vertex in _vertices:
-        uv_coords = []
-        for loop in vertex.link_loops:
-            if loop[uv_layer].uv not in uv_coords:
-                uv_coords.append(loop[uv_layer].uv)
-        if len(uv_coords) > 1:
-            _bound_verts.append(vertex)
-    return _bound_verts
-
-
-def move_2d_cursor(context, position=Vector((0.0, 0.0))):
-    for area in context.screen.areas:
-        if area.type == 'IMAGE_EDITOR':
-            area.spaces.active.cursor_location = position
-
-
-def edges_between_verts(_verts):
-    """ Return edges connectet between given vertices """
-    edges = []
-    between_edges = []
-    # collect all the edges
-    for vertex in _verts:
-        edges.extend([e for e in vertex.link_edges])
-
-    for edge in edges:
-        if edge.verts[0] in _verts and edge.verts[1] in _verts:
-            between_edges.append(edge)
-    return between_edges
-
-
 def Diff(li1, li2):
     """ Find difference of two lists """
     li_dif = [i for i in li1 + li2 if i not in li1 or i not in li2]
     return li_dif
 
 
-def check_selection_mode(context):
-    """ Detect current Blender Selection mode """
-    work_mode = 'VERTEX'
-    if context.tool_settings.mesh_select_mode[:] == (False, True, False):
-        work_mode = 'EDGE'
-    elif context.tool_settings.mesh_select_mode[:] == (False, False, True):
-        work_mode = 'FACE'
-    return work_mode
-
-
-def restore_selection(mode, faces, edges, verts=None, indexes=False, bm=None):
-    """ Restore selected elements depending of Blender selection Mode """
-    if mode == 'VERTEX' and verts:
-        if indexes and bm:
-            bm.verts.ensure_lookup_table()
-            for index in verts:
-                bm.verts[index].select = True
-        else:
-            for vert in verts:
-                vert.select = True
-    if mode == 'FACE':
-        if indexes and bm:
-            bm.faces.ensure_lookup_table()
-            for index in faces:
-                bm.faces[index].select = True
-        else:
-            for face in faces:
-                face.select = True
-    if mode == 'EDGE':
-        if indexes and bm:
-            bm.edges.ensure_lookup_table()
-            for index in edges:
-                bm.edges[index].select = True
-        else:
-            for edge in edges:
-                edge.select = True
-
-
-def collect_selected_objects_data(context):
-    """ Collect Mesh data from every selected object. (bm) """
-    bms = {}
-    objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
-    if not objs:
-        return {}
-    for obj in objs:
-        bm_data = bmesh.from_edit_mesh(obj.data)
-        bms[obj] = {
-            'data': bm_data,
-            'pre_selected_verts': [v for v in bm_data.verts if v.select],
-            'pre_selected_faces': [f for f in bm_data.faces if f.select],
-            'pre_selected_edges': [e for e in bm_data.edges if e.select],
-            'pre_selected_verts_index': [v.index for v in bm_data.verts if v.select],
-            'pre_selected_faces_index': [f.index for f in bm_data.faces if f.select],
-            'pre_selected_edges_index': [e.index for e in bm_data.edges if e.select],
-            'sel_islands': []
-        }
-    return bms
-
-
 def fit_uv_view(context, mode="selected"):
     """ Make Fit UV Viewport depends of specific types """
-    addon_prefs = context.preferences.addons[ADDON_NAME].preferences
+    addon_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
     if addon_prefs.autoFitUV:
         for window in context.window_manager.windows:
             screen = window.screen
@@ -1010,32 +870,65 @@ def fit_uv_view(context, mode="selected"):
                     break
 
 
-def switch_to_edge_sel_mode(context):
+def switch_to_edge_sel_mode(context: bpy.types.Context, area_type=None):
     ''' Switch to edge selection mode in any context '''
-    if context.space_data.type == 'IMAGE_EDITOR':
+
+    if area_type is None:
+        p_space = getattr(context, "space_data", None)
+        if p_space:
+            area_type = p_space.type
+
+    b_is_uv_editor = area_type == 'IMAGE_EDITOR'
+
+    if b_is_uv_editor:
         if context.scene.tool_settings.use_uv_select_sync:
             context.tool_settings.mesh_select_mode = [False, True, False]
         else:
             context.scene.tool_settings.uv_select_mode = "EDGE"
-
-    if context.space_data.type == 'VIEW_3D':
+    else:
         context.tool_settings.mesh_select_mode = [False, True, False]
 
 
-def switch_to_face_sel_mode(context):
+def switch_to_face_sel_mode(context: bpy.types.Context, area_type=None):
     ''' Switch to face selection mode in any context '''
-    if context.space_data.type == 'IMAGE_EDITOR':
+
+    if area_type is None:
+        p_space = getattr(context, "space_data", None)
+        if p_space:
+            area_type = p_space.type
+
+    b_is_uv_editor = area_type == 'IMAGE_EDITOR'
+
+    if b_is_uv_editor:
         if context.scene.tool_settings.use_uv_select_sync:
             context.tool_settings.mesh_select_mode = [False, False, True]
         else:
             context.scene.tool_settings.uv_select_mode = "FACE"
-
-    if context.space_data.type == 'VIEW_3D':
+    else:
         context.tool_settings.mesh_select_mode = [False, False, True]
 
 
+def switch_to_vert_sel_mode(context: bpy.types.Context, area_type=None):
+    ''' Switch to vertex selection mode in any context '''
+
+    if area_type is None:
+        p_space = getattr(context, "space_data", None)
+        if p_space:
+            area_type = p_space.type
+
+    b_is_uv_editor = area_type == 'IMAGE_EDITOR'
+
+    if b_is_uv_editor:
+        if context.scene.tool_settings.use_uv_select_sync:
+            context.tool_settings.mesh_select_mode = [True, False, False]
+        else:
+            context.scene.tool_settings.uv_select_mode = "VERTEX"
+    else:
+        context.tool_settings.mesh_select_mode = [True, False, False]
+
+
 def update_image_in_uv_layout(context, _image):
-    addon_prefs = context.preferences.addons[ADDON_NAME].preferences
+    addon_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
     screen = context.screen
     for area in screen.areas:
         if area.type == 'IMAGE_EDITOR':
@@ -1045,40 +938,11 @@ def update_image_in_uv_layout(context, _image):
                 area.spaces.active.image = None
 
 
-def select_islands(context, p_unique_mesh_objects):
-    b_is_not_sync = context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync
-    for obj in p_unique_mesh_objects:
-        me, bm = get_mesh_data(obj)
-        uv_layer = verify_uv_layer(bm)
-        p_islands = island_util.get_island(context, bm, uv_layer)
-        if not p_islands:
-            print('There is no selected islands.')
-            return False
-        if b_is_not_sync:
-            select_loops(p_islands, uv_layer)
-        else:
-            select_faces(p_islands)
-
-        bmesh.update_edit_mesh(me, loop_triangles=False, destructive=False)
-
-
-def select_all(bm, action=True):
-    """Select or deselect all depend on True or False accordingly"""
-    for face in bm.faces:
-        face.select = action
-    for edge in bm.edges:
-        edge.select = action
-    for vertex in bm.verts:
-        vertex.select = action
-
-
-def check_selection(context):
-    selection_exist = False
-    for obj in context.objects_in_mode:
-        me, bm = get_mesh_data(obj)
-        if not selection_exist and True in [x.select for x in bm.edges] or True in [x.select for x in bm.faces] or True in [x.select for x in bm.verts]:
-            selection_exist = True
-    return selection_exist
+def is_face_flipped(p_face, uv_layer):
+    return sum(
+        [
+            (lp.link_loop_next[uv_layer].uv - lp[uv_layer].uv).cross(lp[uv_layer].uv - lp.link_loop_prev[uv_layer].uv)
+            for lp in p_face.loops]) >= 0
 
 
 def set_face_int_tag(islands, facemap, int_tag):
@@ -1095,7 +959,7 @@ def ensure_facemap(bm, facemap_name):
     return facemap
 
 
-def enshure_text_block(name):
+def ensure_text_block(name):
     """ Return text block or create new """
     block = bpy.data.texts.get(name)
     if not block:
@@ -1137,108 +1001,6 @@ def set_texture_to_display(context):
                     space.shading.color_type = "TEXTURE"
                     return True
     return False
-
-
-def select_edges(_edges):
-    for edge in _edges:
-        edge.select = True
-    return "DONE"
-
-
-def select_elements(_set):
-    for element in _set:
-        element.select = True
-    return "DONE"
-
-
-def select_loop_edges(loops):
-    if ZenPolls.version_since_3_2_0:
-        for loop in loops:
-            loop.select_edge = True
-        return "DONE"
-    else:
-        return "VER_POLL"
-
-
-def set_seams_as_sharp(bm):
-    for edge in bm.edges:
-        if edge.seam:
-            edge.smooth = False
-        elif not edge.seam:
-            edge.smooth = True
-
-
-def uv_by_xy(bm, me):
-    uv_layer = verify_uv_layer(bm)
-
-    # adjust uv coordinates
-    faces = [f for f in bm.faces if not f.hide]
-    for face in faces:
-        for loop in face.loops:
-            loop_uv = loop[uv_layer]
-            # use xy position of the vertex as a uv coordinate
-            loop_uv.uv = loop.vert.co.xy
-    bmesh.update_edit_mesh(me, loop_triangles=False)
-
-
-def is_island_flipped(island, uv_layer):
-    """ Returns True if the island in the specified uv_layer has flipped faces. """
-
-    for face in island:
-        if is_face_flipped(face, uv_layer):
-            return True
-
-    return False
-
-
-def is_face_flipped(p_face, uv_layer):
-    return sum(
-        [
-            (lp.link_loop_next[uv_layer].uv - lp[uv_layer].uv).cross(lp[uv_layer].uv - lp.link_loop_prev[uv_layer].uv)
-            for lp in p_face.loops]) >= 0
-
-
-def rip_geometry_to_pydata(context):
-    import os
-
-    out_dirname = "G:\\My Drive\\ZenUV_Dev\\addon\\ZenUV\\Src\\ZenUV\\utils\\tests"
-    text_file = os.path.join(out_dirname, 'test_geom_rip.py')
-
-    obj = context.object
-    bm = bmesh.from_edit_mesh(obj.data)
-    uv_layer = verify_uv_layer(bm)
-
-    loops = [loop[uv_layer].uv for f in bm.faces for loop in f.loops]
-
-    faces = []
-
-    for face in bm.faces:
-        face_verts = [v for v in face.verts]
-        face_verts_ids = [v.index for v in face_verts]
-        faces.append(face_verts_ids)
-    verts = [v.co for v in bm.verts]
-
-    with open(text_file, 'w', newline='') as file:
-
-        file.write("faces = [\n")
-        for f in faces:
-            file.write("    " + str(f) + ",\n")
-        file.write("]\n")
-
-        file.write("verts = [\n")
-        for v in verts:
-            file.write("    Vector(" + str(v[:]) + "),\n")
-        file.write("]\n")
-
-        file.write("loops_uv_co = [\n")
-        for lp in loops:
-            file.write("    Vector(" + str(lp[:]) + "),\n")
-        file.write("]\n")
-
-        file.write("seams = [\n")
-        for e in bm.edges:
-            file.write("    " + str(e.seam) + ",\n")
-        file.write("]\n")
 
 
 def _switch(area, style, switch):
@@ -1329,8 +1091,8 @@ def verify_uv_layer(bm: bmesh.types.BMesh):
         s_name = find_new_name(s_name, p_names)
         p_uv_layer = bm.loops.layers.uv.new(s_name)
 
-        from ZenUV.ops.zen_unwrap.finishing import FINISHED_FACEMAP_NAME
-        from ZenUV.utils.constants import PACK_EXCLUDED_FACEMAP_NAME
+        from ..ops.zen_unwrap.finishing import FINISHED_FACEMAP_NAME
+        from ..utils.constants import PACK_EXCLUDED_FACEMAP_NAME
 
         for fmap_name in {FINISHED_FACEMAP_NAME, PACK_EXCLUDED_FACEMAP_NAME}:
             p_fmap = bm.faces.layers.int.get(fmap_name, None)
@@ -1338,24 +1100,6 @@ def verify_uv_layer(bm: bmesh.types.BMesh):
                 bm.faces.layers.int.remove(p_fmap)
 
     return p_uv_layer
-
-
-def adjust_to_significant(input_value, shift):
-    """
-    Adjusts a small input value by shifting its decimal point to place significant digits
-    at a specified position relative to the decimal point.
-
-    Parameters:
-    - input_value (float): The small numeric value to be adjusted.
-    - shift (int): The number of decimal places to position the significant part of `input_value`.
-
-    Returns:
-    - float: The adjusted value with the decimal point shifted to display the significant digits
-            at the desired position.
-    """
-    from math import log10
-    decimal_shift = int(log10(1/input_value))
-    return input_value * (10 ** (decimal_shift - shift))
 
 
 def has_unapplied_location(obj: bpy.types.Object):
@@ -1513,18 +1257,20 @@ def get_polygon_orientation_2D(polygon_points, by_convex_hull=True):
 
 def correct_self_intersecting_face(
         context: bpy.types.Context,
+        bm: bmesh.types.BMesh,
         p_face: bmesh.types.BMFace,
         uv_layer: bmesh.types.BMLayerItem,
         used_faces: list,
         image_aspect_ratio: float,
         is_island_mode: bool,
-        is_uv_no_sync: bool):
-    from ZenUV.utils.bounding_box import BoundingBox2d
-    from ZenUV.ops.transform_sys.transform_utils.tr_object_data import get_uv_island_by_face
-    from ZenUV.ops.transform_sys.transform_utils.transform_loops import TransformLoops
+        b_is_loop_domain: bool):
+    from ..utils.bounding_box import BoundingBox2d
+    from ..ops.transform_sys.transform_utils.tr_object_data import get_uv_island_by_face
+    from ..ops.transform_sys.transform_utils.transform_loops import TransformLoops
+    from ..utils.loops_factory import LoopsFactory
 
     island = (
-        get_uv_island_by_face(p_face, used_faces, uv_layer, skip_hidden=False)
+        get_uv_island_by_face(p_face, used_faces.copy(), uv_layer, skip_hidden=False)
         if is_island_mode else [p_face])
 
     p_island_loops = {loop: loop[uv_layer].uv.to_tuple() for it_face in island for loop in it_face.loops}
@@ -1536,12 +1282,10 @@ def correct_self_intersecting_face(
         # NOTE: if face is broken it is better to calculate orientation by rest of the island, if there are more faces left
         p_loops_co = [loop[uv_layer].uv.to_tuple() for it_face in island for loop in it_face.loops if it_face != p_face]
 
-    bpy_deselect_by_context(context)
+    bpy_select_by_context(context, action='DESELECT')
 
-    if is_uv_no_sync:
-        for loop in p_island_loops.keys():
-            loop[uv_layer].select = True
-            loop[uv_layer].select_edge = True
+    if b_is_loop_domain:
+        LoopsFactory.select_loops(context, bm, p_island_loops.keys(), uv_layer, state=True)
     else:
         it_face: bmesh.types.BMFace
         for it_face in island:

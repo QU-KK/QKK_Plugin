@@ -23,16 +23,17 @@ import bmesh
 from math import pi, cos, sin
 from mathutils import Matrix, Vector
 
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.ui.tool.view3d_base import ZuvGizmoBase
-from ZenUV.utils.blender_zen_utils import ZenPolls
-from ZenUV.utils.transform import ZenLocRotScale
-from ZenUV.utils.generic import view3d_find
-from ZenUV.utils.vlog import Log
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.utils.bounding_box import BoundingBox2d
-from ZenUV.utils.constants import UV_AREA_BBOX
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import TransformSysOpsProps
+from ....utils.register_util import RegisterUtils
+from ....ui.tool.view3d_base import ZuvGizmoBase
+from ....utils.transform import ZenLocRotScale
+from ....utils.generic import view3d_find
+from ....utils.vlog import Log
+from ....ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ....utils.bounding_box import BoundingBox2d
+from ....utils.constants import UV_AREA_BBOX
+from ....ops.transform_sys.transform_utils.tr_utils import TransformSysOpsProps
+from ....utils.loops_factory import LoopsFactory
+from ....utils.blender_zen_utils import is_sync_off
 
 
 class ZUV_OT_TrimToMesh(bpy.types.Operator):
@@ -113,6 +114,7 @@ class ZUV_OT_TrimToMesh(bpy.types.Operator):
             tr_bbox = UV_AREA_BBOX()
 
         meshMtx = ZuvGizmoBase.getActiveMeshMtx(context, obj)
+        meshMtx.scale = Matrix.Identity(4)
 
         bm = bmesh.from_edit_mesh(obj.data)
         bm.faces.ensure_lookup_table()
@@ -122,7 +124,7 @@ class ZUV_OT_TrimToMesh(bpy.types.Operator):
         uv_layer = bm.loops.layers.uv.active
         if p_face is not None and uv_layer is not None:
             bpy.ops.uv.select_all(action='DESELECT')
-            if context.scene.tool_settings.use_uv_select_sync:
+            if not is_sync_off(context):
                 bpy.ops.mesh.select_all(action='DESELECT')
             p_face_cen = p_face.calc_center_median()
 
@@ -167,9 +169,7 @@ class ZUV_OT_TrimToMesh(bpy.types.Operator):
 
                 for loop, uv in zip(face.loops, uv_co):
                     loop[uv_layer].uv = uv
-                    loop[uv_layer].select = True
-                    if ZenPolls.version_since_3_2_0:
-                        loop[uv_layer].select_edge = True
+                LoopsFactory.select_loops(context, bm, face.loops, uv_layer, state=True)
                 face.normal_update()
                 face.hide_set(False)
                 face.select_set(True)

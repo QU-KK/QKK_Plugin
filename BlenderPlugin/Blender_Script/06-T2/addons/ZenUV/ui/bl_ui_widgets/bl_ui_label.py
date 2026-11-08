@@ -24,7 +24,7 @@ import blf
 
 from . bl_ui_widget import BL_UI_Widget
 
-from ZenUV.utils.blender_zen_utils import ZenCompat
+from ...utils.blender_zen_utils import ZenCompat
 
 app_version = bpy.app.version
 

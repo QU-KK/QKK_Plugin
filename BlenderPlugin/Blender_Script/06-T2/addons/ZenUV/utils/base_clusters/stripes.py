@@ -18,9 +18,9 @@
 
 import numpy as np
 import bmesh
-from ZenUV.utils.transform import centroid_3d
-from ZenUV.utils.constants import u_axis, v_axis
-from ZenUV.utils.bounding_box import BoundingBox2d
+from ...utils.transform import centroid_3d
+from ...utils.constants import u_axis, v_axis
+from ...utils.bounding_box import BoundingBox2d
 
 
 class LimManager:
@@ -331,6 +331,16 @@ class Stripe():
             return True
         return False
 
+    def get_direction(self, base_point):
+        segment = self.stripe[0]
+        p_start = segment.verts_co[1]
+        p_end = segment.verts_co[0]
+
+        v1 = p_start - base_point
+        v2 = p_end - base_point
+
+        return v1.cross(v2)
+
 
 class UvStripes:
 
@@ -401,24 +411,24 @@ class UvStripes:
 
     def split_stripes_by_points(self, stripe, mode):
 
-        corners = []
+        corners = {}
         if mode == 'CORNER':
             self.update_corners()
-            corners = [edge.index for edge in stripe if edge.other_vert.corner]
+            corners = {edge.index for edge in stripe if edge.other_vert.corner}
             if not corners:
                 message = "No Corner vertices were found."
                 return self.return_break(stripe, message)
 
         elif mode == 'PINS':
             self.update_pinned()
-            corners = [edge.index for edge in stripe if edge.other_vert.pinned]
+            corners = {edge.index for edge in stripe if edge.other_vert.pinned}
             if not corners:
                 message = "No Pinned vertices were found."
                 return self.return_break(stripe, message)
 
         elif mode == 'CORNER_AND_PINS':
             self.update_corners_and_pinned()
-            corners = [edge.index for edge in stripe if edge.other_vert.pinned or edge.other_vert.corner]
+            corners = {edge.index for edge in stripe if edge.other_vert.pinned or edge.other_vert.corner}
             if not corners:
                 message = "No Corner or Pinned vertices were found."
                 return self.return_break(stripe, message)
@@ -431,7 +441,6 @@ class UvStripes:
             return "No Corners were found.", []
 
         stripe = self._refit_stripe(stripe)
-
         splitted = []
         n_stripe = []
         for edge in stripe:

@@ -2,8 +2,8 @@ import bpy
 
 from .trimsheet_utils import ZuvTrimsheetUtils
 
-from ZenUV.utils.blender_zen_utils import setnameex
-from ZenUV.ui.ui_call import popup_areas
+from ...utils.blender_zen_utils import setnameex
+from ...ui.ui_call import popup_areas
 
 
 TRIM_TAGS_LITERALS = {

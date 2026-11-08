@@ -18,7 +18,7 @@
 
 
 import bpy
-from ZenUV.utils.constants import ADV_UV_MAP_NAME_PATTERN, ZUV_COPIED, TEST_OBJ_NAME_CUBE
+from ...utils.constants import ADV_UV_MAP_NAME_PATTERN, ZUV_COPIED, TEST_OBJ_NAME_CUBE
 from .addon_test_utils import (
     AddonTestError,
     AddonTestManual,
@@ -29,7 +29,7 @@ from .addon_test_utils import (
     _get_bounding_box,
     _prepare_test
     )
-from ZenUV.utils.vlog import Log
+from ...utils.vlog import Log
 
 
 def _get_uv_layers_active_obj(context):

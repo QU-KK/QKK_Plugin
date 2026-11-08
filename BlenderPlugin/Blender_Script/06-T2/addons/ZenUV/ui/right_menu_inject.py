@@ -22,11 +22,11 @@
 import bpy
 
 
-from ZenUV.ico import icon_get
-from ZenUV.utils.vlog import Log
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.prop.favourites_props import ZUV_FavItem
-from ZenUV.utils.blender_zen_utils import update_areas_in_all_screens, get_command_props, ZenPolls
+from ..ico import icon_get
+from ..utils.vlog import Log
+from ..prop.zuv_preferences import get_prefs
+from ..prop.favourites_props import ZUV_FavItem
+from ..utils.blender_zen_utils import update_areas_in_all_screens, get_command_props, ZenPolls
 
 
 def _dump_object(obj, text):
@@ -282,7 +282,7 @@ def zen_uv_draw_uvs_snap(self, context: bpy.types.Context):
     if not addon_prefs.right_menu_assist:
         return
 
-    from ZenUV.ui.tool.uv.uv_transform_tool import ZuvUVTransformWorkSpaceTool
+    from ..ui.tool.uv.uv_transform_tool import ZuvUVTransformWorkSpaceTool
     if ZuvUVTransformWorkSpaceTool.is_workspace_tool_active(context):
         layout.separator()
         op = layout.operator("uv.zenuv_tool_snap_transform_gizmo", text='Gizmo Pivot To Selected')

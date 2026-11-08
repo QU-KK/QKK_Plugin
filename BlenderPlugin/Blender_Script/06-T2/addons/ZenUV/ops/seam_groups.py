@@ -25,19 +25,20 @@ from bpy.types import (
     Panel
 )
 from bpy.props import StringProperty
-from ZenUV.utils.generic import (
+from ..utils.generic import (
     ZUV_PANEL_CATEGORY,
     ZUV_REGION_TYPE,
-    ZUV_SPACE_TYPE,
-    resort_by_type_mesh_in_edit_mode_and_sel
-)
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.ico import icon_get
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.prop.common import get_combo_panel_order
-from ZenUV.ui.ui_call import popup_areas
+    ZUV_SPACE_TYPE)
+from ..utils.generic import ResortObjects
+from ..ui.labels import ZuvLabels
+from ..ico import icon_get
+from ..prop.zuv_preferences import get_prefs
+from ..prop.common import get_combo_panel_order
+from ..ui.ui_call import popup_areas
 
-from ZenUV.utils.mark_utils import ObjMarkState
+from ..utils.iter_utils import IterUtils2
+from ..utils.mark_utils import ObjMarkState
+from ..utils.blender_zen_utils import ZenPolls
 
 
 class SeamGroupsProcessor:
@@ -108,11 +109,10 @@ class SeamGroupsProcessor:
 
     @classmethod
     def assign_to_group(cls, layer_name, obj):
-        me = obj.data
-        bm = bmesh.from_edit_mesh(me)
+        bm = bmesh.from_edit_mesh(obj.data)
         s_layer = cls.enshure_seam_layer(bm, seam_layer_name=layer_name)
         cls.set_seams_to_group(bm, s_layer)
-        bmesh.update_edit_mesh(me, loop_triangles=False)
+        bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
     @classmethod
     def assign_particular_seams_to_group(cls, context, mark_objs: list):
@@ -280,11 +280,11 @@ class ZSG_OT_NewItem(Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
-        for obj in objs:
+        for obj, bm in IterUtils2.iter_objs_with_bmesh(objs):
             obj.zen_sg_list.add()
             name = "Seams"
             _layer_name = "zen_seam_grp"
@@ -298,11 +298,10 @@ class ZSG_OT_NewItem(Operator):
             obj.zen_sg_list[-1].layer_name = _layer_name
             obj.zsg_list_index = len(obj.zen_sg_list) - 1
 
-            me = obj.data
-            bm = bmesh.from_edit_mesh(me)
             s_layer = bm.edges.layers.int.new(_layer_name)
             SeamGroupsProcessor.set_seams_to_group(bm, s_layer)
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
+
         return {'FINISHED'}
 
 
@@ -320,18 +319,17 @@ class ZSG_OT_DeleteItem(Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH' and active_object.zen_sg_list
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
         ob = context.active_object
         list_index = ob.zsg_list_index
         init_layer_name = ob.zen_sg_list[list_index].layer_name
         if list_index in range(len(ob.zen_sg_list)):
             SeamGroupsProcessor.matching_groups(ob.zen_sg_list[list_index].layer_name, objs)
-        for obj in objs:
-            me = obj.data
-            bm = bmesh.from_edit_mesh(me)
+
+        for obj, bm in IterUtils2.iter_objs_with_bmesh(objs):
             layer = bm.edges.layers.int.get(init_layer_name)
             if layer:
                 bm.edges.layers.int.remove(layer)
@@ -396,9 +394,9 @@ class ZSG_OT_AssignToGroup(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
         SeamGroupsProcessor.assign_all_seams_to_group(context, objs)
         return {'FINISHED'}
@@ -418,7 +416,7 @@ class ZSG_OT_ActivateGroup(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
             self.report({'WARNING'}, "There are no selected objects")
             return {'CANCELLED'}
@@ -428,14 +426,12 @@ class ZSG_OT_ActivateGroup(bpy.types.Operator):
         if list_index in range(len(ob.zen_sg_list)):
             SeamGroupsProcessor.matching_groups(ob.zen_sg_list[list_index].layer_name, objs)
 
-        for obj in objs:
+        for obj, bm in IterUtils2.iter_objs_with_bmesh(objs):
             if obj.zsg_list_index in range(len(obj.zen_sg_list)):
                 p_seams_layer_name = obj.zen_sg_list[obj.zsg_list_index].layer_name
-                me = obj.data
-                bm = bmesh.from_edit_mesh(me)
                 s_layer = SeamGroupsProcessor.enshure_seam_layer(bm, seam_layer_name=p_seams_layer_name)
                 SeamGroupsProcessor.get_seams_from_group(bm, s_layer)
-                bmesh.update_edit_mesh(me, loop_triangles=False, destructive=False)
+                bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         return {'FINISHED'}
 
@@ -483,7 +479,7 @@ class ZUV_OT_AssignSelectionToGroup(bpy.types.Operator):
             seam_label = 'Mark Seams'
             sharp_label = 'Mark Sharp Edges'
 
-        addon_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
+        addon_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
         layout.prop(self, 'clear_inside')
         mark_box = layout.box()
         s_mark_settings = 'Mark Settings'
@@ -514,13 +510,13 @@ class ZUV_OT_AssignSelectionToGroup(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        from ZenUV.utils.mark_utils import (
+        from ..utils.mark_utils import (
             MarkStateManager,
             MarkFactory)
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         MarkFactory.initialize()

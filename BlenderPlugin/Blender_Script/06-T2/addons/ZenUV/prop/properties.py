@@ -23,23 +23,23 @@ from bpy.props import FloatProperty, BoolProperty, EnumProperty, FloatVectorProp
 
 import uuid
 
-from ZenUV.ops.texel_density.td_props import ZUV_TdProperties, ZUV_TdDrawProperties
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.zen_checker.zen_checker_labels import ZCheckerLabels as ch_labels
-from ZenUV.ico import icon_get
-from ZenUV.zen_checker.checker import (
+from ..ops.texel_density.td_props import ZUV_TdProperties, ZUV_TdDrawProperties
+from ..ui.labels import ZuvLabels
+from ..zen_checker.zen_checker_labels import ZCheckerLabels as ch_labels
+from ..ico import icon_get
+from ..zen_checker.checker import (
     ZEN_GLOBAL_OVERRIDER_NAME,
     ZEN_IMAGE_NODE_NAME,
     ZEN_TILER_NODE_NAME,
     ZEN_OFFSETTER_NODE_NAME
 )
-from ZenUV.utils.constants import UiConstants as uc
-from ZenUV.ops.trimsheets.trimsheet import ZuvTrimsheetGroup
-from ZenUV.ops.trimsheets.trimsheet_transform import ZuvTrimsheetTransformProps
-from ZenUV.ops.trimsheets.trimsheet_props import ZuvTrimsheetOwnerProps
-from ZenUV.prop.scene_ui_props import ZUV_SceneUIProps
-from ZenUV.prop.adv_maps_props import ZUV_AdvMapsSceneProps
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import TransformSysOpsProps
+from ..utils.constants import UiConstants as uc
+from ..ops.trimsheets.trimsheet import ZuvTrimsheetGroup
+from ..ops.trimsheets.trimsheet_transform import ZuvTrimsheetTransformProps
+from ..ops.trimsheets.trimsheet_props import ZuvTrimsheetOwnerProps
+from ..prop.scene_ui_props import ZUV_SceneUIProps
+from ..prop.adv_maps_props import ZUV_AdvMapsSceneProps
+from ..ops.transform_sys.transform_utils.tr_utils import TransformSysOpsProps
 
 
 class ZUV_Properties(bpy.types.PropertyGroup):

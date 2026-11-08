@@ -20,11 +20,11 @@
 
 import bpy
 
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.utils.blender_zen_utils import update_areas_in_uv, update_areas_in_view3d
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.utils.vlog import Log
+from ...utils.register_util import RegisterUtils
+from ...ui.labels import ZuvLabels
+from ...utils.blender_zen_utils import update_areas_in_uv, update_areas_in_view3d
+from ...prop.zuv_preferences import get_prefs
+from ...utils.vlog import Log
 
 from . td_utils import TdDrawUI
 
@@ -44,7 +44,7 @@ class TdProps:
         options={'HIDDEN', 'SKIP_SAVE'})
 
     def update_td_draw(self, context: bpy.types.Context, force):
-        from ZenUV.ui.gizmo_draw import update_all_gizmos_3D, update_all_gizmos_UV
+        from ...ui.gizmo_draw import update_all_gizmos_3D, update_all_gizmos_UV
         p_scene = context.scene
 
         if p_scene.zen_uv.ui.draw_mode_UV in {'TEXEL_DENSITY', 'UV_BORDERS'}:
@@ -190,7 +190,7 @@ class ZUV_TdColors(bpy.types.PropertyGroup):
     )
 
     def get_sel_col_lower(self):
-        from ZenUV.ui.gizmo_draw import GradientProperties
+        from ...ui.gizmo_draw import GradientProperties
         from . td_display_utils import TdDisplayLimits
 
         try:
@@ -201,7 +201,7 @@ class ZUV_TdColors(bpy.types.PropertyGroup):
         return [0, 0, 1]
 
     def get_sel_col_equal(self):
-        from ZenUV.ui.gizmo_draw import GradientProperties
+        from ...ui.gizmo_draw import GradientProperties
         from . td_display_utils import TdDisplayLimits
 
         try:
@@ -212,7 +212,7 @@ class ZUV_TdColors(bpy.types.PropertyGroup):
         return [0, 1, 0]
 
     def get_sel_col_over(self):
-        from ZenUV.ui.gizmo_draw import GradientProperties
+        from ...ui.gizmo_draw import GradientProperties
         from . td_display_utils import TdDisplayLimits
 
         try:
@@ -261,7 +261,7 @@ class ZUV_TdDrawProperties(bpy.types.PropertyGroup):
     def update_influence(self, context: bpy.types.Context):
         from .td_islands_storage import TdDataStorage as TDS
 
-        from ZenUV.ui.gizmo_draw import LITERAL_ZENUV_TD_SCOPE
+        from ...ui.gizmo_draw import LITERAL_ZENUV_TD_SCOPE
         bpy.app.driver_namespace[LITERAL_ZENUV_TD_SCOPE] = None
 
         TDS.calc_td_scope(context, self.influence)

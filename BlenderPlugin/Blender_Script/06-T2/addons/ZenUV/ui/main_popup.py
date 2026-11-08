@@ -18,9 +18,9 @@
 
 """ Zen UV Main Popup Menu """
 import bpy
-from ZenUV.ico import icon_get
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.ops.transform_sys.tr_labels import TrLabels
+from ..ico import icon_get
+from ..ui.labels import ZuvLabels
+from ..ops.transform_sys.tr_labels import TrLabels
 
 
 bl_info = {
@@ -37,7 +37,7 @@ class ZenUV_MT_Main_Popup(bpy.types.Menu):
     bl_idname = "ZUV_MT_Main_Popup"
 
     def draw(self, context):
-        from ZenUV.ui.panel_draws import draw_smooth_by_sharp_op
+        from ..ui.panel_draws import draw_smooth_by_sharp_op
         layout = self.layout
         area_type = context.area.type
 

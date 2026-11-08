@@ -30,25 +30,25 @@ import itertools
 from functools import cmp_to_key
 
 from bpy.types import Operator, Panel
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.utils.get_uv_islands import get_uv_bound_edges_indexes
-from ZenUV.utils.hops_integration import show_uv_in_3dview
-from ZenUV.utils.generic import (
+from ...ui.labels import ZuvLabels
+from ...utils.uv_factory import UvIslandUtils
+from ...utils.hops_integration import show_uv_in_3dview
+from ...utils.generic import (
     ZenKeyEventSolver,
-    resort_by_type_mesh_in_edit_mode_and_sel,
+    ResortObjects,
     verify_uv_layer
 )
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.prop.common import get_combo_panel_order
-from ZenUV.utils.constants import ADV_UV_MAP_NAME_PATTERN
-from ZenUV.ico import icon_get
+from ...prop.zuv_preferences import get_prefs
+from ...prop.common import get_combo_panel_order
+from ...utils.constants import ADV_UV_MAP_NAME_PATTERN
+from ...ico import icon_get
 from collections import defaultdict
-from ZenUV.prop.wm_props import TimeDataUVMap, ZuvUVMeshGroup
-from ZenUV.prop.adv_maps_props import ZUV_AdvMapsProps, ZUV_AdvMapsSceneProps
-from ZenUV.utils.blender_zen_utils import ZenPolls, ZenStrUtils
-from ZenUV.zen_checker.check_utils import draw_checker_display_items, DisplayItem
-from ZenUV.utils.adv_generic_ui_list import zenuv_draw_ui_list
-from ZenUV.utils.generic import find_new_name, ZUV_PANEL_CATEGORY
+from ...prop.wm_props import TimeDataUVMap, ZuvUVMeshGroup
+from ...prop.adv_maps_props import ZUV_AdvMapsProps, ZUV_AdvMapsSceneProps
+from ...utils.blender_zen_utils import ZenPolls, ZenStrUtils
+from ...zen_checker.check_utils import draw_checker_display_items, DisplayItem
+from ...utils.adv_generic_ui_list import zenuv_draw_ui_list
+from ...utils.generic import find_new_name, ZUV_PANEL_CATEGORY
 
 
 class ZUV_OT_AddUVMaps(bpy.types.Operator):
@@ -335,7 +335,7 @@ class ZUV_OT_RenameUVMaps(Operator):
         # if event.alt:
         if self.is_modifier_right:
             # for ob in context.selected_objects:
-            for ob in resort_by_type_mesh_in_edit_mode_and_sel(context):
+            for ob in ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context):
                 self.rename_uvs(ob)
         else:
             self.rename_uvs(context.active_object)
@@ -612,7 +612,7 @@ class ZUV_UVMapSetIndex(bpy.types.Operator):
                         bm.edges.ensure_lookup_table()
 
                         uv_layer = verify_uv_layer(bm)
-                        p_seam_edges = set(get_uv_bound_edges_indexes(bm.faces, uv_layer))
+                        p_seam_edges = set(UvIslandUtils.get_uv_bound_edges_indexes(bm.faces, uv_layer))
                         for edge in bm.edges:
                             edge.seam = edge.index in p_seam_edges
                         bmesh.update_edit_mesh(it_me, loop_triangles=False, destructive=False)
@@ -621,7 +621,7 @@ class ZUV_UVMapSetIndex(bpy.types.Operator):
                         bm.from_mesh(it_me)
                         bm.edges.ensure_lookup_table()
                         uv_layer = verify_uv_layer(bm)
-                        p_seam_edges = set(get_uv_bound_edges_indexes(bm.faces, uv_layer))
+                        p_seam_edges = set(UvIslandUtils.get_uv_bound_edges_indexes(bm.faces, uv_layer))
                         for edge in bm.edges:
                             edge.seam = edge.index in p_seam_edges
                         bm.to_mesh(it_me)
@@ -860,7 +860,7 @@ class DATA_PT_uv_texture_advanced(Panel):
 
     @classmethod
     def poll(cls, context):
-        addon_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
+        addon_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
         return addon_prefs.float_VIEW_3D_panels.enable_pt_adv_uv_map and cls.do_poll(context)
 
     @classmethod
@@ -894,7 +894,7 @@ class DATA_PT_UVL_uv_texture_advanced(Panel):
 
     @classmethod
     def poll(cls, context):
-        addon_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
+        addon_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
         return addon_prefs.float_UV_panels.enable_pt_adv_uv_map and DATA_PT_uv_texture_advanced.do_poll(context)
 
     combo_poll = DATA_PT_uv_texture_advanced.combo_poll
@@ -1204,9 +1204,14 @@ def draw_copy_paste(context: bpy.types.Context, layout: bpy.types.UILayout):
     ''' @Draw Copy Paste '''
     row = layout.row(align=True)
 
-    row.operator("uv.zenuv_copy_uv", icon="COPYDOWN")
-    row.operator("uv.zenuv_paste_uv", icon="PASTEDOWN")
-
+    if context.mode == 'OBJECT':
+        col = row.column(align=True)
+        col.operator("uv.zenuv_copy_object_uv", icon="COPYDOWN")
+        col.operator("uv.zenuv_paste_object_uv", icon="PASTEDOWN")
+    else:
+        col = row.column(align=True)
+        col.operator("uv.zenuv_copy_uv", icon="COPYDOWN")
+        col.operator("uv.zenuv_paste_uv", icon="PASTEDOWN")
 
     if context.mode in {'OBJECT'}:
         wm = context.window_manager
@@ -1477,8 +1482,8 @@ class ZUV_OT_AdvMapsBatchRename(bpy.types.Operator):
                 layout,
                 context,
                 class_name="ZUV_UL_AdvMapsReplaceTemplatesList",
-                list_path="preferences.addons['ZenUV'].preferences.adv_maps.rename_templates",
-                active_index_path="preferences.addons['ZenUV'].preferences.adv_maps.rename_templates_index",
+                list_path=f"preferences.addons['{ZenPolls.ADDON_PACKAGE}'].preferences.adv_maps.rename_templates",
+                active_index_path=f"preferences.addons['{ZenPolls.ADDON_PACKAGE}'].preferences.adv_maps.rename_templates_index",
                 unique_id="name_ex",
                 new_name_attr="name_ex",
                 new_name_val="Item"
@@ -1585,7 +1590,7 @@ class ZUV_OT_RemoveInactiveUVMaps(bpy.types.Operator):
     def execute(self, context: bpy.types.Context):
         p_act_obj = context.active_object
         b_is_modified = False
-        for obj in resort_by_type_mesh_in_edit_mode_and_sel(context):
+        for obj in ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context):
             if self.mode == 'ACTIVE' and obj != p_act_obj:
                 continue
 
@@ -1646,13 +1651,13 @@ class ZUV_OT_AdvMapsSetNameByPos(bpy.types.Operator):
     def execute(self, context: bpy.types.Context):
         b_is_modified = False
         if self.uv_name:
-            from ZenUV.prop.wm_props import ZuvUVMapWrapper
+            from ...prop.wm_props import ZuvUVMapWrapper
 
             i_pos = self.uv_position - 1
 
             p_act_obj = context.active_object
 
-            for obj in resort_by_type_mesh_in_edit_mode_and_sel(context):
+            for obj in ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context):
                 if self.mode == 'ACTIVE' and obj != p_act_obj:
                     continue
 

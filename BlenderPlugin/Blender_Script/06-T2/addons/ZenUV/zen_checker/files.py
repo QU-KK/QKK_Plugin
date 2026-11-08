@@ -32,9 +32,9 @@ from bpy.props import StringProperty
 from .zen_checker_labels import ZCheckerLabels as label
 from .get_prefs import get_prefs
 
-from ZenUV.utils.messages import zen_message
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.register_util import RegisterUtils
+from ..utils.messages import zen_message
+from ..utils.vlog import Log
+from ..utils.register_util import RegisterUtils
 
 
 _checker_previews = None
@@ -216,7 +216,7 @@ class ZUVChecker_OT_GetCheckerOverrideImage(bpy.types.Operator):
 
     @classmethod
     def getActiveImage(cls, context):
-        from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+        from ..ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
         p_image = ZuvTrimsheetUtils.getSpaceDataImage(context)
         if p_image is not None:
             return p_image

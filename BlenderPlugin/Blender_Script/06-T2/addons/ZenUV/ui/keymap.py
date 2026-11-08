@@ -21,9 +21,9 @@
 # Original idea Oleg Stepanov (DotBow)
 
 import bpy
-from ZenUV.ui import ui_call
-from ZenUV.ui.pie import ZUV_OT_PieMenu
-from ZenUV.zen_checker.checker import ZUVChecker_OT_CheckerToggle
+from ..ui import ui_call
+from ..ui.pie import ZUV_OT_PieMenu
+from ..zen_checker.checker import ZUVChecker_OT_CheckerToggle
 
 
 def _keymap():

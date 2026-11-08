@@ -104,7 +104,7 @@ class TextRect(Rectangle):
 
 
 def draw_circle_2d_filled(mx, my, radius, color=(1.0, 1.0, 1.0, 0.7)):
-    from ZenUV.utils.blender_zen_utils import ZenCompat
+    from ..utils.blender_zen_utils import ZenCompat
 
     radius = radius * 1.0
     sides = 12

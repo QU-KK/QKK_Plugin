@@ -23,9 +23,9 @@ class RegisterUtils:
 
     @classmethod
     def get_n_panel_name(cls):
-        from ZenUV.utils.blender_zen_utils import ZenPolls
+        from ..utils.blender_zen_utils import ZenPolls
         if not ZenPolls.n_panel_name:
-            from ZenUV.prop.zuv_preferences import get_prefs
+            from ..prop.zuv_preferences import get_prefs
             addon_prefs = get_prefs()
             ZenPolls.n_panel_name = bpy.types.UILayout.enum_item_name(
                 addon_prefs, "n_panel_name", addon_prefs.n_panel_name
@@ -36,7 +36,7 @@ class RegisterUtils:
     def register_class(cls, instance):
         if issubclass(instance, bpy.types.Panel):
             if hasattr(instance, "bl_category"):
-                from ZenUV.utils.generic import ZUV_PANEL_CATEGORY
+                from ..utils.generic import ZUV_PANEL_CATEGORY
 
                 if instance.bl_category == ZUV_PANEL_CATEGORY:
                     s_n_panel_name = cls.get_n_panel_name()

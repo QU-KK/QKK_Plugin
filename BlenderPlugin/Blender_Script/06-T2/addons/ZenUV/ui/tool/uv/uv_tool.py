@@ -20,8 +20,8 @@
 
 import bpy
 
-from ZenUV.ico import zenuv_tool_icon
-from ZenUV.prop.zuv_preferences import get_prefs
+from ....ico import zenuv_tool_icon
+from ....prop.zuv_preferences import get_prefs
 
 from ..tool_generic_keymap import get_tool_generic_keymap
 
@@ -68,7 +68,7 @@ def get_keymap():
 
         ("uv.zuv_trim_delete_all",
             {"type": 'X', "value": 'PRESS', "ctrl": False, "shift": False},
-            {"properties": [("use_dialog", False), ("mode", 'SELECTED')]}),
+            {"properties": [("use_dialog", False), ("mode", 'SELECTED'), ("disable_in_tool_transform", True)]}),
     ]
 
     if bpy.app.version < (3, 2, 0):
@@ -114,7 +114,7 @@ class ZuvUVWorkSpaceTool(bpy.types.WorkSpaceTool):
     bl_widget = '' if bpy.app.version < (3, 3, 0) else 'ZUV_GGT_UVTransformMove'
 
     def draw_settings(context: bpy.types.Context, layout: bpy.types.UILayout, tool):
-        from ZenUV.prop.scene_ui_props import ZUV_UVToolProps
+        from ....prop.scene_ui_props import ZUV_UVToolProps
 
         not_header = context.region.type != 'TOOL_HEADER'
 
@@ -215,7 +215,7 @@ class ZuvUVWorkSpaceTool(bpy.types.WorkSpaceTool):
             r_snap2.popover(panel='ZUV_PT_TrimSnapUV', text=s_text, icon=p_icon)
 
         if b_is_in_property_area:
-            from ZenUV.ui.combo_panel import ZuvComboBase, ZUV_PT_UVL_ComboPanel
+            from ....ui.combo_panel import ZuvComboBase, ZUV_PT_UVL_ComboPanel
             pnl = ZuvComboBase()
             pnl.column_align = 'RIGHT'
             pnl.bl_space_type = ZUV_PT_UVL_ComboPanel.bl_space_type

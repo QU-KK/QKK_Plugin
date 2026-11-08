@@ -24,7 +24,7 @@ import os
 import inspect
 
 # from .sets.factories import sets_factories, obj_collection_factories, obj_simple_factories, get_sets_mgr_by_id
-from ZenUV.prop.zuv_preferences import get_prefs
+from ...prop.zuv_preferences import get_prefs
 from ..vlog import Log
 from ..progress import start_progress, update_progress, end_progress
 from .addon_test_utils import (
@@ -33,7 +33,7 @@ from .addon_test_utils import (
     set_skip_tests,
     _prepare_test
 )
-from ZenUV.utils.register_util import RegisterUtils
+from ...utils.register_util import RegisterUtils
 # from .blender_zen_utils import ZenPolls
 
 from . adv_uv_maps_tests import (
@@ -218,7 +218,7 @@ class ZUV_OP_GrabCurveToFont(bpy.types.Operator):
         return context.window_manager.invoke_props_dialog(self)
 
     def execute(self, context):
-        from ZenUV.utils.annotations_toolbox.math_visualizer import TextFactory
+        from ...utils.annotations_toolbox.math_visualizer import TextFactory
         TextFactory.grab_curves_to_json_font(self.write_to_file, json_font_name=self.filename)
         return {'FINISHED'}
 

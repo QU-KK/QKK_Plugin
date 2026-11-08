@@ -22,12 +22,12 @@
 import bpy
 import bmesh
 
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.selection_utils import SelectionProcessor, UniSelectedObject
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.get_uv_islands import LoopsFactory
+from ..utils.register_util import RegisterUtils
+from ..utils.selection_utils import SelectionProcessor, UniSelectedObject
+from ..utils.uv_factory import UvIslandUtils
+from ..utils.loops_factory import LoopsFactory
 from mathutils import Vector
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import Cursor2D
+from ..ops.transform_sys.transform_utils.tr_utils import Cursor2D
 
 
 class ZUV_OT_MirrorUV(bpy.types.Operator):
@@ -155,7 +155,6 @@ class ZUV_OT_MirrorUV(bpy.types.Operator):
         SelectionProcessor.reset_state()
         Storage = SelectionProcessor.collect_selected_objects(
             context,
-            b_is_not_sync=False,
             b_in_indices=True,
             b_is_skip_objs_without_selection=True,
             b_skip_uv_layer_fail=False,
@@ -171,7 +170,7 @@ class ZUV_OT_MirrorUV(bpy.types.Operator):
         for s_obj in Storage:
             s_obj.attribute_storage['islands'] = [
                 [f.index for f in island]
-                for island in island_util.get_island(context, s_obj.bm, s_obj.uv_layer)]
+                for island in UvIslandUtils.get_selected_uv_islands(context, s_obj.bm, s_obj.uv_layer)]
 
         for s_obj in Storage:
             bm = s_obj.bm
@@ -183,11 +182,11 @@ class ZUV_OT_MirrorUV(bpy.types.Operator):
             # else:
             #     p_loops = LoopsFactory.loops_by_sel_mode(context, bm, uv_layer)
 
-            p_loops = LoopsFactory.loops_by_sel_mode(context, bm, uv_layer)
+            p_loops = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer)
 
             # Get selection bound loops
             # p_faces = (lp.face for lp in p_loops)
-            # p_sel_bound_edges = island_util.get_uv_bound_edges_indexes(p_faces, uv_layer)
+            # p_sel_bound_edges = UvIslandUtils.get_uv_bound_edges_indexes(p_faces, uv_layer)
             # bm.edges.ensure_lookup_table()
             # p_sel_bound_verts = (v for i in p_sel_bound_edges for v in bm.edges[i].verts)
             # bound_loops = [lp for v in p_sel_bound_verts for lp in v.link_loops if lp in p_loops]
@@ -205,7 +204,7 @@ class ZUV_OT_MirrorUV(bpy.types.Operator):
                 p_axis = Vector.Fill(2, 0.5)
 
             elif self.axis_position == 'ACTIVE_UDIM':
-                from ZenUV.ops.adv_uv_maps_sys.udim_utils import UdimFactory
+                from ..ops.adv_uv_maps_sys.udim_utils import UdimFactory
                 UdimFactory.reset_report()
                 a_tile = UdimFactory.get_active_udim_tile(context)
                 if a_tile is None:
@@ -214,7 +213,7 @@ class ZUV_OT_MirrorUV(bpy.types.Operator):
                 p_axis = UdimFactory.get_bbox_of_udim(a_tile.number).center
 
             elif self.axis_position == 'BBOX':
-                from ZenUV.utils.bounding_box import BoundingBox2d
+                from ..utils.bounding_box import BoundingBox2d
                 p_loops_co = [lp[uv_layer].uv for lp in p_loops]
                 if not len(p_loops_co):
                     self.report({'WARNING'}, 'There is no selection')
@@ -230,7 +229,7 @@ class ZUV_OT_MirrorUV(bpy.types.Operator):
                     p_axis = p_bbox.bot_center
 
             elif self.axis_position == 'ACTIVE_TRIM':
-                from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+                from ..ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
                 trim = ZuvTrimsheetUtils.getActiveTrim(context)
                 if trim is None:
                     self.report({'WARNING'}, "There are no Active Trim.")
@@ -258,6 +257,7 @@ class ZUV_OT_MirrorUV(bpy.types.Operator):
             mesh_loops_cache = self.collect_mesh_cache(precision, bm, p_loops)
 
             for co, selection_loops in selection.items():
+                set_sel_loops = set(selection_loops)
                 adj_mesh_loops = mesh_loops_cache.get((co[0] * m_x, co[1] * m_y, co[2] * m_z))
                 if adj_mesh_loops is None or not len(adj_mesh_loops):
                     continue
@@ -265,13 +265,13 @@ class ZUV_OT_MirrorUV(bpy.types.Operator):
                 adj_verts = {v.co.to_tuple(precision): v.index for v in [lp.vert for lp in adj_mesh_loops]}
 
                 selection_verts = {}
-                for v in ((v.co.to_tuple(precision), v.index) for v in [lp.vert for lp in selection_loops]):
+                for v in ((v.co.to_tuple(precision), v.index) for v in [lp.vert for lp in set_sel_loops]):
                     selection_verts[v[0]] = v[1]
 
                 for co, i in selection_verts.items():
                     adj_mesh_index = adj_verts.get((co[0] * m_x, co[1] * m_y, co[2] * m_z))
                     if adj_mesh_index is not None:
-                        for lt, rt in zip([lp for lp in bm.verts[i].link_loops if lp in selection_loops],
+                        for lt, rt in zip([lp for lp in bm.verts[i].link_loops if lp in set_sel_loops],
                                           [lp for lp in bm.verts[adj_mesh_index].link_loops if lp in adj_mesh_loops]):
                             rt[uv_layer].uv = lt[uv_layer].uv * p_side + p_axis
 
@@ -283,7 +283,7 @@ class ZUV_OT_MirrorUV(bpy.types.Operator):
         return {f.calc_center_bounds().to_tuple(precision): [lp for lp in f.loops if lp not in p_loops] for f in bm.faces}
 
     def collect_loops_using_zen_scope(self, precision: int, p_loops: list) -> dict[list, list]:
-        from ZenUV.utils.generic import Scope
+        from ..utils.generic import Scope
         scp = Scope()
         for lp in p_loops:
             scp.append(lp.face.calc_center_bounds().to_tuple(precision), lp)

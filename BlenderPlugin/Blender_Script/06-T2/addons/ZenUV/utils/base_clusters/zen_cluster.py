@@ -16,13 +16,15 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
-from ZenUV.utils.base_clusters.base_elements import UvEdge, UvFace, UvVertex
+import bpy
 
-from ZenUV.utils.generic import Scope, Distortion, ZenReport
-from ZenUV.utils.base_clusters.base_cluster import BaseCluster
-from ZenUV.utils.constants import u_axis
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.bounding_box import BoundingBox2d
+from ...utils.base_clusters.base_elements import UvEdge, UvFace, UvVertex
+
+from ...utils.generic import Scope, Distortion, ZenReport
+from ...utils.base_clusters.base_cluster import BaseCluster
+from ...utils.constants import u_axis
+from ...utils.vlog import Log
+from ...utils.bounding_box import BoundingBox2d
 
 
 class CheckerZcluster:
@@ -174,10 +176,6 @@ class ZenCluster(BaseCluster, CheckerZcluster):
         if not self.analyser.is_warning:
             self.analyser.message = 'Finished'
 
-    def deselect_all_edges(self):
-        for edge in self.uv_edges:
-            edge.select(self.context, state=False)
-
     def get_edges_by_orientation(self, _dir=u_axis):
         # for edge in self.uv_edges:
         #     Log.debug(edge.get_orientation())
@@ -253,11 +251,12 @@ class ZenCluster(BaseCluster, CheckerZcluster):
         ambiguous_edges = []
         self.uv_edges.clear()
         if self.uv_verts:
+            s_idxs = set(self.loops.keys())
             index = 0
             loops_scope = list(self.loops.values())
             while loops_scope:
                 loop = loops_scope[0]
-                prev_loops = [lp for lp in loop.edge.link_loops if lp.index in self.loops.keys() and len(lp.edge.link_faces) != 0]
+                prev_loops = [lp for lp in loop.edge.link_loops if lp.index in s_idxs and len(lp.edge.link_faces) != 0]
 
                 l1 = loop[self.uv_layer].uv.to_tuple()
                 l1_mv_iindex = loop.vert.index
@@ -304,6 +303,9 @@ class ZenCluster(BaseCluster, CheckerZcluster):
         uv_edge.index = len(self.uv_edges) + 1
         if isinstance(uv_edge, UvEdge):
             self.uv_edges.append(uv_edge)
+
+    def get_selected_faces(self, context: bpy.types.Context):
+        return [f.mesh_face for f in self.uv_faces if f.is_face_selected(context, self.uv_layer)]
 
 
 class ZenClusterAlt():
@@ -359,9 +361,10 @@ class ZenClusterAlt():
         if self.uv_verts:
             index = 0
             loops_scope = list(self.loops.values())
+            s_idxs = set(self.loops.keys())
             while loops_scope:
                 loop = loops_scope[0]
-                prev_loops = [lp for lp in loop.edge.link_loops if lp.index in self.loops.keys()]
+                prev_loops = [lp for lp in loop.edge.link_loops if lp.index in s_idxs]
 
                 l1 = loop[self.uv_layer].uv
                 l2 = loop.link_loop_next[self.uv_layer].uv
@@ -370,7 +373,7 @@ class ZenClusterAlt():
                     loop_co = lp[self.uv_layer]
                     next_loop_co = lp.link_loop_next[self.uv_layer]
 
-                    if loop_co.uv in [l1, l2] and next_loop_co.uv in [l1, l2]:
+                    if loop_co.uv in {l1, l2} and next_loop_co.uv in {l1, l2}:
                         loops.append(lp)
                         loops_scope.remove(lp)
 

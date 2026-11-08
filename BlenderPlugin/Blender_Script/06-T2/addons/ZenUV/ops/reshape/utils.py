@@ -18,7 +18,7 @@
 
 import numpy as np
 from mathutils import Vector
-from ZenUV.utils.constants import u_axis, v_axis
+from ...utils.constants import u_axis, v_axis
 
 
 class DistributeUtils:

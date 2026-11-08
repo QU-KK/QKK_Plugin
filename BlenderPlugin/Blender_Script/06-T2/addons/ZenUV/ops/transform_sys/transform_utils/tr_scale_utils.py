@@ -22,17 +22,19 @@
 import bpy
 import bmesh
 from mathutils import Vector
+
 from .tr_utils import TransformLimitsManager
 from .transform_loops import TransformLoops
 from .tr_object_data import transform_object_data
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.bounding_box import BoundingBox2d, get_overall_bbox
+
+from ....utils.iter_utils import IterUtils
+from ....utils.loops_factory import LoopsFactory
+from ....utils.bounding_box import BoundingBox2d, get_overall_bbox
 from . tr_utils import (
     TrConstants,
     Cursor2D,
     TrOrder
     )
-from ZenUV.utils.generic import get_mesh_data, verify_uv_layer
 
 
 class TrScaleProps:
@@ -214,7 +216,6 @@ class TrScaleFlipProcessorEx:
             transform_object_data.setup(context, objs, influence_mode, order)
 
         for obj, info in transform_object_data.object_storage.items():
-            me = info.me
             uv_layer = info.uv_layer
             loops = info.loops
             info.loops_data.clear()
@@ -233,7 +234,7 @@ class TrScaleFlipProcessorEx:
                     TransformLoops.scale_loops(lp_cluster, uv_layer, scale, anchor)
                     info.loops_data[idx] = anchor
 
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
     @classmethod
     def scale_in_trim(
@@ -270,7 +271,6 @@ class TrScaleFlipProcessorEx:
         i_out_trim_element_count = 0
 
         for obj, info in transform_object_data.object_storage.items():
-            me = info.me
             uv_layer = info.uv_layer
             loops = info.loops
             info.loops_data.clear()
@@ -293,7 +293,7 @@ class TrScaleFlipProcessorEx:
 
                 info.loops_data[idx] = anchor
 
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         if False in TransformLimitsManager.results:
             return 'Limit reached'
@@ -335,20 +335,18 @@ class TrScaleFlipProcessor:
                 message = 'Current scale_mode is "UNITS". PROPS must be filled in.'
                 raise RuntimeError(message)
 
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
             if influence_mode == 'ISLAND':
-                loops = island_util.LoopsFactory.loops_by_islands(context, bm, uv_layer)
+                loops = LoopsFactory.get_loops_by_islands(context, bm, uv_layer)
             else:  # influence_mode != 'ISLAND'
                 from . tr_utils import BlPivotPoint
                 is_groupped = order == 'ONE_BY_ONE' or (order == 'SYSTEM_PIVOT' and BlPivotPoint.get(context) == 'INDIVIDUAL_ORIGINS')
 
                 if is_groupped:
-                    loops = island_util.LoopsFactory.loops_by_sel_mode(context, bm, uv_layer, groupped=True)
+                    loops = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer, groupped=True)
                 else:
-                    loops = [island_util.LoopsFactory.loops_by_sel_mode(context, bm, uv_layer, groupped=False), ]
+                    loops = [LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer, groupped=False), ]
 
             if not len(loops):
                 message = 'Select something.'
@@ -367,7 +365,7 @@ class TrScaleFlipProcessor:
                     anchor = BoundingBox2d(points=[loop[uv_layer].uv for loop in lp_cluster]).center if anchor is None else anchor
                     TransformLoops.scale_loops(lp_cluster, uv_layer, scale, anchor)
 
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         return message
 
@@ -395,14 +393,12 @@ class TrScaleFlipProcessor:
         :param limits_bbox: BoundingBox2d
         """
         message = cls.message
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
             if influence_mode == 'ISLAND':
-                loops = island_util.LoopsFactory.loops_by_islands(context, bm, uv_layer)
+                loops = LoopsFactory.get_loops_by_islands(context, bm, uv_layer)
             else:  # influence_mode != 'ISLAND'
-                loops = island_util.LoopsFactory.loops_by_sel_mode(context, bm, uv_layer, groupped=True)
+                loops = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer, groupped=True)
 
             if order == 'OVERALL':
                 loops = [[lp for group in loops for lp in group], ]
@@ -422,7 +418,7 @@ class TrScaleFlipProcessor:
                 else:
                     TransformLoops.scale_loops(cluster, uv_layer, scale, anchor)
 
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         if False in TransformLimitsManager.results:
             return 'Limit reached'

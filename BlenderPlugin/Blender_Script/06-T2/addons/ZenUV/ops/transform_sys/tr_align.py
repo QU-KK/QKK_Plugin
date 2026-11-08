@@ -21,24 +21,20 @@
 import bpy
 import bmesh
 from mathutils import Vector
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.generic import (
-    resort_objects_by_selection,
-    get_mesh_data,
-    resort_by_type_mesh_in_edit_mode_and_sel,
-    verify_uv_layer
-)
+from ...utils.register_util import RegisterUtils
+from ...utils.generic import ResortObjects
 from .transform_utils.tr_utils import TransformSysOpsProps
 from .tr_move import TrMoveProps, MoveFactory
-from ZenUV.utils.transform import (
-    get_bbox,
+from ...utils.bounding_box import get_overall_bbox
+from ...utils.transform import (
     bound_box,
     UvTransformUtils
 )
-from ZenUV.utils.bounding_box import get_bbox_loops
+from ...utils.bounding_box import get_bbox_loops
 from . tr_labels import TrLabels
-from ZenUV.ops.adv_uv_maps_sys.udim_utils import UdimFactory
+from ...ops.adv_uv_maps_sys.udim_utils import UdimFactory
+from ...utils.uv_factory import UvIslandUtils
+from ...utils.iter_utils import IterUtils
 
 
 class ZUV_OT_TrAlign(bpy.types.Operator):
@@ -133,9 +129,9 @@ class ZUV_OT_TrAlign(bpy.types.Operator):
         row.prop(self, "island_pivot")
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         if self.influence_mode == 'VERTICES':
@@ -161,7 +157,7 @@ class ZUV_OT_TrAlign(bpy.types.Operator):
             self.op_order,
             self.island_pivot
         )
-        if not MF.move():
+        if not MF.move(context):
             self.report(MF.message[0], MF.message[1])
             return {'CANCELLED'}
 
@@ -258,14 +254,14 @@ class ZUV_OT_SimpleStack(bpy.types.Operator):
             self.custom_position = p_position
 
     def execute(self, context):
-        objs = resort_objects_by_selection(context, context.objects_in_mode)
+        objs = ResortObjects.resort_objects_by_selection(context, context.objects_in_mode)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         position = Vector((0.5, 0.5))
         if self.position == "AVERAGE":
-            position = get_bbox(context)['cen']
+            position = get_overall_bbox(context, from_islands=True, as_dict=False).center
         elif self.position == "CUSTOM":
             position = self.custom_position
         elif self.position == "CURSOR":
@@ -273,14 +269,12 @@ class ZUV_OT_SimpleStack(bpy.types.Operator):
                 if area.type == 'IMAGE_EDITOR':
                     position = area.spaces.active.cursor_location
 
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
-            for island in island_util.get_island(context, bm, uv_layer):
+            for island in UvIslandUtils.yield_uv_islands(context, bm, uv_layer, b_selected_only=True, b_include_hidden=False):
                 UvTransformUtils.move_island_to_position(island, uv_layer, position)
 
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False)
 
         return {"FINISHED"}
 
@@ -337,20 +331,17 @@ class ZUV_OT_SimpleUnstack(bpy.types.Operator):
         layout.prop(self, 'use_seams_as_separator')
 
     def execute(self, context):
-        objs = resort_objects_by_selection(context, context.objects_in_mode)
+        objs = ResortObjects.resort_objects_by_selection(context, context.objects_in_mode)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
             p_islands = sorted(
                 [
-                    list(cluster) for cluster in island_util.get_island(
-                        context, bm, uv_layer,
-                        use_seams_as_separator=self.use_seams_as_separator)
+                    list(cluster) for cluster
+                    in UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer, use_seams_as_separator=self.use_seams_as_separator)
                 ], key=lambda x: x[0].index)
 
             if self.mode == 'EXPAND':
@@ -370,7 +361,7 @@ class ZUV_OT_SimpleUnstack(bpy.types.Operator):
                 self.report({'WARNING', 'mode incorrect'})
                 return {'FINISHED'}
 
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False)
 
         return {"FINISHED"}
 

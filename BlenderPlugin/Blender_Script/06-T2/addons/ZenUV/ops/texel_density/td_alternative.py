@@ -22,12 +22,9 @@
 import bpy
 import numpy as np
 
-from ZenUV.utils.register_util import RegisterUtils
+from ...utils.register_util import RegisterUtils
 
-from ZenUV.utils.generic import (
-    resort_objects_by_selection,
-    resort_by_type_mesh_in_edit_mode_and_sel,
-)
+from ...utils.generic import ResortObjects
 
 
 def get_image_size(context):
@@ -127,15 +124,15 @@ class ZUV_OT_GetTexelDensityWeighted(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH'
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         if context.mode == 'EDIT_MESH':
-            objs = resort_objects_by_selection(context, objs)
+            objs = ResortObjects.resort_objects_by_selection(context, objs)
             if not objs:
-                self.report({'WARNING'}, "Zen UV: Select something.")
+                self.report({'WARNING'}, "No objects selected.")
                 return {'CANCELLED'}
 
         for obj in objs:

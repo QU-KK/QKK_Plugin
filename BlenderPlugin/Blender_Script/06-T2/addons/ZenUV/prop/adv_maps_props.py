@@ -20,14 +20,14 @@
 
 import bpy
 
-from ZenUV.utils.blender_zen_utils import _setnameex
-from ZenUV.prop.common import update_addon_prop
+from ..utils.blender_zen_utils import _setnameex
+from ..prop.common import update_addon_prop
 
 
 class ZUV_AdvMapsRenameTemplateGroup(bpy.types.PropertyGroup):
 
     def set_name_ex(self, value):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ..prop.zuv_preferences import get_prefs
 
         def _collection_from_element(self):
             addon_prefs = get_prefs()

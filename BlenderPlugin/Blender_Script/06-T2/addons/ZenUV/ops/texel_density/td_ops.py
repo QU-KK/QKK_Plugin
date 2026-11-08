@@ -23,15 +23,13 @@
 import bpy
 import bmesh
 
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.utils.generic import (
-    resort_objects_by_selection,
-    get_mesh_data,
-    resort_by_type_mesh_in_edit_mode_and_sel,
+from ...ui.labels import ZuvLabels
+from ...utils.generic import (
+    ResortObjects,
     verify_uv_layer,
     UnitsConverter
 )
-from ZenUV.utils.blender_zen_utils import update_areas_in_all_screens
+from ...utils.blender_zen_utils import update_areas_in_all_screens
 
 from . td_utils import (
     TexelDensityFactory,
@@ -45,6 +43,7 @@ from . td_utils import (
 from .td_display_utils import TdDisplayLimits, TdSysUtils
 from .td_islands_storage import TdDataStorage as TDS
 from .td_props import TdProps
+from ...utils.iter_utils import IterUtils
 
 
 class ZUV_OT_GetTexelDensity(bpy.types.Operator):
@@ -60,15 +59,15 @@ class ZUV_OT_GetTexelDensity(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH'
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         if context.mode == 'EDIT_MESH':
-            objs = resort_objects_by_selection(context, objs)
+            objs = ResortObjects.resort_objects_by_selection(context, objs)
             if not objs:
-                self.report({'WARNING'}, "Zen UV: Select something.")
+                self.report({'WARNING'}, "No objects selected.")
                 return {'CANCELLED'}
 
         td_inputs = TdContext(context)
@@ -117,28 +116,24 @@ class ZUV_OT_GetUVCoverage(bpy.types.Operator):
 
     def execute(self, context):
         coverage = 0
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
 
         if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             CoverageReport.clear()
             return {"CANCELLED"}
 
         if context.mode == 'EDIT_MESH':
 
             if self.mode == 'GENERIC':
-                for obj in objs:
-                    _, bm = get_mesh_data(obj)
-                    uv_layer = verify_uv_layer(bm)
+                for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
                     coverage += UvFaceArea.calculate_uv_coverage(uv_layer, bm.faces)
 
             elif self.mode == 'SELECTED':
-                from ZenUV.utils import get_uv_islands as island_util
+                from ...utils.uv_factory import UvIslandUtils
                 p_i_count = 0
-                for obj in objs:
-                    _, bm = get_mesh_data(obj)
-                    uv_layer = verify_uv_layer(bm)
-                    islands = island_util.get_island(context, bm, uv_layer)
+                for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+                    islands = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
                     p_i_count += len(islands)
                     p_faces = [f for i in islands for f in i]
                     coverage += UvFaceArea.calculate_uv_coverage(uv_layer, p_faces)
@@ -149,14 +144,14 @@ class ZUV_OT_GetUVCoverage(bpy.types.Operator):
                     return {"CANCELLED"}
 
             elif self.mode == 'ALREADY_STACKED':
-                from ZenUV.stacks.utils import StacksSystem
-                from ZenUV.stacks.utils_for_td import get_unique_islands
+                from ...stacks.utils import StacksSystem
+                from ...stacks.utils_for_td import get_unique_islands
 
                 stacks_state = StacksSystem(context).get_current_stacks_state()
 
                 for obj_name, ids in get_unique_islands(stacks_state).items():
                     obj = context.scene.objects[obj_name]
-                    _, bm = get_mesh_data(obj)
+                    bm = bmesh.from_edit_mesh(obj.data)
                     uv_layer = verify_uv_layer(bm)
                     bm.faces.ensure_lookup_table()
                     coverage += UvFaceArea.calculate_uv_coverage(uv_layer, [bm.faces[i] for i in ids])
@@ -267,15 +262,15 @@ class ZUV_OT_SetTexelDensity(bpy.types.Operator):
             box.prop(self, 'island_pivot')
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         if context.mode == 'EDIT_MESH':
-            objs = resort_objects_by_selection(context, objs)
+            objs = ResortObjects.resort_objects_by_selection(context, objs)
             if not objs:
-                self.report({'WARNING'}, "Zen UV: Select something.")
+                self.report({'WARNING'}, "No objects selected.")
                 return {'CANCELLED'}
 
         td_inputs = TdContext(context)
@@ -309,14 +304,14 @@ class ZUV_OT_GetIslandSize(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
-        objs = resort_objects_by_selection(context, objs)
+        objs = ResortObjects.resort_objects_by_selection(context, objs)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         from .td_utils import IslandSizeProcessor
@@ -419,14 +414,14 @@ class ZUV_OT_SetIslandSize(bpy.types.Operator):
     def execute(self, context):
         from .td_utils import IslandSizeProcessor, SzContext
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
-        objs = resort_objects_by_selection(context, objs)
+        objs = ResortObjects.resort_objects_by_selection(context, objs)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         sz_inputs = SzContext(context)
@@ -459,7 +454,7 @@ class ZUV_OT_GetTdRange(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        # from ZenUV.ui.gizmo_draw import GradientProperties
+        # from ...ui.gizmo_draw import GradientProperties
         td_inputs = TdContext(context)
         props = context.scene.zen_uv.td_props
         if props.td_range_mode == 'SCENE':
@@ -467,7 +462,7 @@ class ZUV_OT_GetTdRange(bpy.types.Operator):
             objs = [obj for obj in context.scene.objects if obj.type == 'MESH']
         elif props.td_range_mode == 'SELECTION':
             td_inputs.obj_mode = context.mode == 'OBJECT'
-            objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+            objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         td_values = TdUtils.get_td_data_with_precision(context, objs, td_inputs).get_sorted_td_values()
 
         TdDisplayLimits.cl_td_limits = [min(td_values), max(td_values)]
@@ -482,10 +477,9 @@ class ZUV_OT_GetTdRange(bpy.types.Operator):
 
 
 class ZUV_OT_SelectByTd(bpy.types.Operator):
-    """ Select Islands By Texel Density """
     bl_idname = "uv.zenuv_select_by_texel_density"
-    bl_label = 'Select by TD'
-    bl_description = 'Select islands by texel density'
+    bl_label = 'Select by Custom TD'
+    bl_description = 'Select islands by custom texel density'
     bl_options = {'REGISTER', 'UNDO'}
 
     influence: bpy.props.EnumProperty(
@@ -550,33 +544,27 @@ class ZUV_OT_SelectByTd(bpy.types.Operator):
         description='Select islands with a TD value greater than the highest TD value in the preset',
         default=False)
 
-    desc: bpy.props.StringProperty(
-        name="Description",
-        default='Select islands by texel density',
-        options={'HIDDEN'}
-    )
-
     @classmethod
-    def description(cls, context, properties):
+    def description(cls, context: bpy.types.Context, properties: bpy.types.OperatorProperties):
         if properties:
-            return properties.desc
+            return f"{cls.bl_description}: {properties.texel_density:.2g}"
         else:
-            return cls.bl_desctiption
+            return cls.bl_description
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context: bpy.types.Context):
         """ Validate context """
         active_object = context.active_object
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
-    def invoke(self, context, event):
-        from ZenUV.ops.texel_density.td_utils import TdUtils
+    def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
+        from ...ops.texel_density.td_utils import TdUtils
 
         TDS.clear()
 
-        p_objects = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        p_objects = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not p_objects:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         TDS.objs = p_objects
@@ -620,13 +608,13 @@ class ZUV_OT_SelectByTd(bpy.types.Operator):
     def execute(self, context):
         TDS.i_count = 0
         if TDS.is_empty():
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         TDS.calc_td_scope(context, self.influence)
 
         if self.clear_selection:
-            from ZenUV.utils.generic import bpy_select_by_context
+            from ...utils.generic import bpy_select_by_context
             bpy_select_by_context(context, action='DESELECT')
 
         if self.selection_mode == 'TRESHOLD':
@@ -720,13 +708,13 @@ class ZUV_OT_SelectByCurrentTd(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def invoke(self, context, event):
-        from ZenUV.ops.texel_density.td_utils import TdUtils
+        from ...ops.texel_density.td_utils import TdUtils
 
         TDS.clear()
 
-        p_objects = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        p_objects = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not p_objects:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         TDS.objs = p_objects
@@ -754,13 +742,13 @@ class ZUV_OT_SelectByCurrentTd(bpy.types.Operator):
     def execute(self, context):
         TDS.i_count = 0
         if TDS.is_empty():
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         TDS.calc_td_scope(context, self.influence)
 
         if self.clear_selection:
-            from ZenUV.utils.generic import bpy_select_by_context
+            from ...utils.generic import bpy_select_by_context
             bpy_select_by_context(context, action='DESELECT')
 
         TDS.min_range = self.texel_density - self.treshold
@@ -911,9 +899,9 @@ class ZUV_OT_SelectBySize(bpy.types.Operator):
 
         TDS.clear()
 
-        p_objects = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        p_objects = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not p_objects:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         TDS.objs = p_objects
@@ -956,10 +944,10 @@ class ZUV_OT_SelectBySize(bpy.types.Operator):
     def execute(self, context):
         TDS.i_count = 0
         if TDS.is_empty():
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
-        from ZenUV.utils.generic import bpy_select_by_context
+        from ...utils.generic import bpy_select_by_context
 
         if self.clear_selection:
             bpy_select_by_context(context, action='DESELECT')

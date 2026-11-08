@@ -26,10 +26,20 @@ from mathutils import Vector, Color, Matrix
 
 from dataclasses import dataclass
 
-from ZenUV.utils.blender_zen_utils import ZenPolls
-from ZenUV.utils.vlog import Log
+from ...utils.blender_zen_utils import ZenPolls
+from ...utils.vlog import Log
 
 from .shapes import AnnotationShapes
+
+
+if ZenPolls.version_since_5_0_0:
+    Annotation_T = bpy.types.Annotation
+    AnnotationFrame_T = bpy.types.AnnotationFrame
+    AnnotationLayer_T = bpy.types.AnnotationLayer
+else:
+    Annotation_T = bpy.types.GreasePencil
+    AnnotationFrame_T = bpy.types.GPencilFrame
+    AnnotationLayer_T = bpy.types.GPencilLayer
 
 
 @dataclass
@@ -37,8 +47,9 @@ class FramePrepareStorage:
     frame_idx: int = 0
     stroke_placement_2d: str = 'IMAGE'
     stroke_placement_3d: str = 'CURSOR'
-    frame: bpy.types.GPencilFrame = None
-    layer: bpy.types.GPencilLayer = None
+
+    frame: AnnotationFrame_T = None
+    layer: AnnotationLayer_T = None
 
     def restore(self):
         if not ZenPolls.version_lower_4_3_0:
@@ -144,20 +155,33 @@ class MathVisualizer:
 
         self.display_mode = '3DSPACE' if context.space_data.type == 'VIEW_3D' else '2DSPACE'
 
-        self.pencil = None
+        self.pencil: Annotation_T = None
         if pencil_name:
-            self.pencil = bpy.data.grease_pencils.get(pencil_name, None)
+            if ZenPolls.version_since_5_0_0:
+                self.pencil = bpy.data.annotations.get(pencil_name, None)
+            else:
+                self.pencil = bpy.data.grease_pencils.get(pencil_name, None)
         else:
             self.pencil = bpy.context.annotation_data
         if not self.pencil:
-            bpy.ops.gpencil.annotation_add()
-            self.pencil = bpy.data.grease_pencils[-1]
-            if pencil_name:
-                self.pencil.name = pencil_name
+            if 'FINISHED' in bpy.ops.gpencil.annotation_add():
+                if ZenPolls.version_since_5_0_0:
+                    self.pencil = bpy.data.annotations[-1]
+                else:
+                    self.pencil = bpy.data.grease_pencils[-1]
+                if pencil_name:
+                    self.pencil.name = pencil_name
+            else:
+                raise RuntimeError("Can not create annotation!")
 
         gpd_owner = bpy.context.annotation_data_owner
-        if gpd_owner and gpd_owner.grease_pencil != self.pencil:
-            gpd_owner.grease_pencil = self.pencil
+        if gpd_owner:
+            if ZenPolls.version_since_5_0_0:
+                if gpd_owner.annotation != self.pencil:
+                    gpd_owner.annotation = self.pencil
+            else:
+                if gpd_owner.grease_pencil != self.pencil:
+                    gpd_owner.grease_pencil = self.pencil
 
     def clear(self, group: str, frame_idx: int):
         layer = self.pencil.layers.get(group, None)
@@ -374,7 +398,7 @@ class MathVisualizer:
 
         return storage
 
-    def _add_stroke_by_gpencil_annotate(self, points: tuple, pencil: bpy.types.GreasePencil, layer: bpy.types.GPencilLayer):
+    def _add_stroke_by_gpencil_annotate(self, points: tuple, pencil: Annotation_T, layer: AnnotationFrame_T):
         try:
             strokes = [
                 {
@@ -423,7 +447,7 @@ class MathVisualizer:
         except Exception as e:
             Log.error("GPENCIL STROKE:", e, "Points:", str(points))
 
-    def _activate_layer(self, layer: bpy.types.GPencilLayer):
+    def _activate_layer(self, layer):  #: bpy.types.GPencilLayer):
         if ZenPolls.version_lower_4_3_0:
             self.pencil.layers.active = layer
         else:

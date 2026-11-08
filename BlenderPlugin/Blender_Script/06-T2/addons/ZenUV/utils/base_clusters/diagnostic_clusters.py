@@ -16,9 +16,9 @@
 #
 # ##### END GPL LICENSE BLOCK #####
 
-# from ZenUV.utils.base_clusters.zen_cluster import UvVertex
-from ZenUV.utils.base_clusters.base_elements import UvVertex
-from ZenUV.utils.generic import Distortion, Scope
+# from ...utils.base_clusters.zen_cluster import UvVertex
+from ...utils.base_clusters.base_elements import UvVertex
+from ...utils.generic import Distortion, Scope
 
 
 class CheckerZcluster:

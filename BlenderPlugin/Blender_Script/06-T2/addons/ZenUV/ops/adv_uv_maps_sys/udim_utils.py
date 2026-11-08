@@ -22,8 +22,8 @@ import bpy
 import bmesh
 import numpy as np
 
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.generic import verify_uv_layer
+from ...utils.vlog import Log
+from ...utils.iter_utils import IterUtils
 
 
 class UdimFactory:
@@ -144,11 +144,9 @@ class UdimFactory:
         return False
 
     @classmethod
-    def get_udims_from_loops(cls, objs: list, groupped: bool = False) -> list:
+    def get_udims_from_loops(cls, context: bpy.types.Context, objs: list, groupped: bool = False) -> list:
         p_uv_co = []
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
             p_uv_co.extend(cls.get_unique_uvs(bm, uv_layer))
         p_udims = cls.convert_uv_coords_to_udim_number(p_uv_co)
 
@@ -158,12 +156,10 @@ class UdimFactory:
 
     @classmethod
     def get_udims_from_selected_loops(cls, context: bpy.types.Context, objs: list, groupped: bool = False) -> list:
-        import ZenUV.utils.get_uv_islands as island_util
+        from ...utils.loops_factory import LoopsFactory
         p_uv_co = []
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            uv_layer = verify_uv_layer(bm)
-            loops = island_util.LoopsFactory.loops_by_sel_mode(context, bm, uv_layer, groupped=False)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+            loops = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer, groupped=False)
             p_uv_co.extend(list({lp[uv_layer].uv.copy().freeze() for lp in loops}))
 
         p_udims = cls.convert_uv_coords_to_udim_number(cls.filtering_uvs(p_uv_co))
@@ -250,7 +246,7 @@ class UdimFactory:
 
     @classmethod
     def get_bbox_of_udim(cls, udim_number):
-        from ZenUV.utils.bounding_box import BoundingBox2d
+        from ...utils.bounding_box import BoundingBox2d
         p_start_co = cls.convert_udim_name_to_id(udim_number)
         return BoundingBox2d(
             points=(

@@ -23,23 +23,23 @@
 import bpy
 import bmesh
 
-from ZenUV.utils.transform import move_island
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.generic import (
+from ...utils.transform import move_island
+from ...utils.generic import (
     fit_uv_view,
-    select_by_context,
     set_face_int_tag,
-    resort_by_type_mesh_in_edit_mode_and_sel,
-    bpy_deselect_by_context,
+    ResortObjects,
+    bpy_select_by_context,
     verify_uv_layer
 )
+from ...utils.uv_factory import UvIslandUtils, SelectionUtils
+from ...utils.iter_utils import IterUtils, IterUtils2
 
-from ZenUV.prop.zuv_preferences import get_prefs
+from ...prop.zuv_preferences import get_prefs
 
-from ZenUV.utils.generic import ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE, ZUV_SPACE_TYPE
-from ZenUV.utils.constants import PACK_EXCLUDED_FACEMAP_NAME, PACK_EXCLUDED_V_MAP_NAME
-from ZenUV.utils.blender_zen_utils import prop_with_icon
-from ZenUV.utils.register_util import RegisterUtils
+from ...utils.generic import ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE, ZUV_SPACE_TYPE
+from ...utils.constants import PACK_EXCLUDED_FACEMAP_NAME, PACK_EXCLUDED_V_MAP_NAME
+from ...utils.blender_zen_utils import prop_with_icon, is_sync_off
+from ...utils.register_util import RegisterUtils
 
 
 class pLogger:
@@ -176,7 +176,7 @@ def draw_pack_excluded_section(self, context: bpy.types.Context):
     row.operator(ZUV_OT_Hide_PackExcluded.bl_idname, text='Hide').action = 'HIDE'
     row.operator(ZUV_OT_Hide_PackExcluded.bl_idname, text='Unhide').action = 'UNHIDE'
 
-    from ZenUV.zen_checker.check_utils import draw_checker_display_items, DisplayItem
+    from ...zen_checker.check_utils import draw_checker_display_items, DisplayItem
     draw_checker_display_items(col, context, {'EXCLUDED': DisplayItem({'EDIT_MESH'}, {'UV', '3D'}, '', 'Display Excluded')})
 
 
@@ -215,22 +215,21 @@ class PackExcludedFactory:
         Tag or untag Pack Excluded depend on action='TAG' / 'UNTAG'
         """
         log = pLogger()
-        for obj in objs:
-            me, bm, uv_layer = cls._get_obj_bm_data(obj)
-            if True in (v.select for v in bm.verts):
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+            if any(v.select for v in bm.verts):
                 pack_excluded_facemap = cls.ensure_facemap(bm, PACK_EXCLUDED_FACEMAP_NAME)
-                islands_for_process = island_util.get_island(context, bm, uv_layer)
+                islands = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
             else:
                 continue
-            log.store(len(islands_for_process) != 0)
+            log.store(len(islands) != 0)
 
             if action == "TAG":
                 tag = 1
             elif action == "UNTAG":
                 tag = 0
 
-            set_face_int_tag(islands_for_process, pack_excluded_facemap, int_tag=tag)
-            bmesh.update_edit_mesh(me)
+            set_face_int_tag(islands, pack_excluded_facemap, int_tag=tag)
+            bmesh.update_edit_mesh(obj.data)
 
         return log.get_result()
 
@@ -246,45 +245,47 @@ class PackExcludedFactory:
     @classmethod
     def offset_tagged_islands(cls, context, objs, direction):
         log = pLogger()
-        for obj in objs:
-            me, bm, uv_layer = cls._get_obj_bm_data(obj)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
             pack_excluded_facemap = cls._get_excluded_facemap(bm)
             if pack_excluded_facemap is None:
                 continue
 
-            for island in island_util.get_islands(context, bm):
-                if True in [face[pack_excluded_facemap] for face in island]:
+            for island in UvIslandUtils.yield_uv_islands(context, bm, uv_layer, b_selected_only=False, b_include_hidden=False, b_include_partially_hidden=False):
+                if any(face[pack_excluded_facemap] for face in island):
                     log.store(True)
                     move_island(island, uv_layer, direction)
                 log.store(False)
-            bmesh.update_edit_mesh(me)
+            bmesh.update_edit_mesh(obj.data)
         return log.get_result()
 
     @classmethod
     def select_excluded(cls, context: bpy.types.Context, objs: list, clear: bool, action: str = 'SELECT'):
         log = pLogger()
-        for obj in objs:
-            me, bm, uv_layer = cls._get_obj_bm_data(obj)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
             pack_excluded_facemap = cls._get_excluded_facemap(bm)
             if pack_excluded_facemap is None:
                 continue
-            islands_for_select = [island for island in island_util.get_islands(context, bm) if True in [f[pack_excluded_facemap] for f in island]]
-            log.store(len(islands_for_select) != 0)
-
-            select_by_context(context, bm, islands_for_select, state=action == 'SELECT')
-            bmesh.update_edit_mesh(me)
+            islands = [
+                island for island
+                in UvIslandUtils.yield_uv_islands(
+                    context, bm, uv_layer,
+                    b_selected_only=False, b_include_hidden=False,
+                    b_include_partially_hidden=False) if any(f[pack_excluded_facemap] for f in island)]
+            log.store(len(islands) != 0)
+            for island in islands:
+                SelectionUtils.select_faces_any_context(context, island, state=action == 'SELECT', bm=bm, uv_layer=uv_layer)
+            bmesh.update_edit_mesh(obj.data)
         return log.get_result()
 
     @classmethod
     def hide_by_facemap(cls, context, objs):
         cls.exclusion.clear()
         log = pLogger()
-        for obj in objs:
-            me, bm, uv_layer = cls._get_obj_bm_data(obj)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
             _facemap = bm.faces.layers.int.get(PACK_EXCLUDED_FACEMAP_NAME, None)
             if _facemap is None:
                 continue
-            islands = [island for island in island_util.get_islands(context, bm) if True in [f[_facemap] for f in island]]
+            islands = [island for island in UvIslandUtils.get_all_uv_islands(context, bm, uv_layer) if any(f[_facemap] for f in island)]
             log.store(len(islands) != 0)
 
             ex_faces = [f.index for island in islands for f in island]
@@ -294,14 +295,13 @@ class PackExcludedFactory:
             for i in ex_faces:
                 bm.faces[i].hide_set(True)
 
-            bmesh.update_edit_mesh(me)
+            bmesh.update_edit_mesh(obj.data)
         return log.get_result()
 
     @classmethod
-    def unhide_by_facemap(cls, objs):
+    def unhide_by_facemap(cls, context, objs):
         log = pLogger()
-        for obj in objs:
-            me, bm, uv_layer = cls._get_obj_bm_data(obj)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
             _facemap = cls._get_excluded_facemap(bm)
             if _facemap is None:
                 continue
@@ -311,18 +311,18 @@ class PackExcludedFactory:
             for i in hidden_faces:
                 bm.faces[i].hide_set(False)
 
-            bmesh.update_edit_mesh(me)
+            bmesh.update_edit_mesh(obj.data)
         return log.get_result()
 
     @classmethod
     def unhide_by_stored(cls, context):
         if cls.exclusion:
             for st in cls.exclusion:
-                me, bm, uv_layer = cls._get_obj_bm_data(context.scene.objects[st.obj_name])
-                if st.faces:
-                    for i in st.faces:
-                        bm.faces[i].hide_set(False)
-                bmesh.update_edit_mesh(me)
+                for obj, bm in IterUtils2.iter_objs_with_bmesh_uv([context.scene.objects[st.obj_name], ]):
+                    if st.faces:
+                        for i in st.faces:
+                            bm.faces[i].hide_set(False)
+                    bmesh.update_edit_mesh(obj.data)
             return True
         return False
 
@@ -330,11 +330,11 @@ class PackExcludedFactory:
     def restore_selection(cls, context):
         if cls.exclusion:
             for st in cls.exclusion:
-                me, bm, uv_layer = cls._get_obj_bm_data(context.scene.objects[st.obj_name])
-                if st.selection:
-                    for i in st.selection:
-                        bm.faces[i].select = True
-                bmesh.update_edit_mesh(me)
+                for obj, bm in IterUtils2.iter_objs_with_bmesh_uv([context.scene.objects[st.obj_name], ]):
+                    if st.selection:
+                        for i in st.selection:
+                            bm.faces[i].select = True
+                    bmesh.update_edit_mesh(obj.data)
             return True
         return False
 
@@ -360,9 +360,9 @@ class ZUV_OT_OffsetPackExcluded(bpy.types.Operator):
 
     def execute(self, context):
         PEF = PackExcludedFactory()
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         res = PEF.offset_tagged_islands(context, objs, self.offset)
@@ -389,9 +389,9 @@ class ZUV_OT_Tag_PackExcluded(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         res = PackExcludedFactory.tag_pack_excluded(context, objs, action="TAG")
@@ -419,9 +419,9 @@ class ZUV_OT_UnTag_PackExcluded(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         res = PackExcludedFactory.tag_pack_excluded(context, objs, action="UNTAG")
@@ -459,13 +459,13 @@ class ZUV_OT_Select_PackExcluded(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         if self.action == 'SELECT' and self.clear_selection:
-            bpy_deselect_by_context(context)
+            bpy_select_by_context(context, action='DESELECT')
 
         result = PackExcludedFactory.select_excluded(context, objs, self.clear_selection, self.action)
 
@@ -499,7 +499,7 @@ class ZUV_OT_Hide_PackExcluded(bpy.types.Operator):
     reveal_anyway: bpy.props.BoolProperty(
         name='Reveal Anyway',
         description='Anyway reveal excluded islands if UV Sync Selection is off',
-        default=False)
+        default=True)
 
     @classmethod
     def poll(cls, context):
@@ -513,22 +513,19 @@ class ZUV_OT_Hide_PackExcluded(bpy.types.Operator):
         row.enabled = self.action == 'UNHIDE'
         row.prop(self, 'select')
         row = layout.row()
-        row.enabled = not context.scene.tool_settings.use_uv_select_sync
+        row.enabled = is_sync_off(context)
         row.prop(self, 'reveal_anyway')
 
     def execute(self, context):
-        from ZenUV.utils.generic import HideUnhideProcessor
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        from ...utils.generic import HideUnhideProcessor
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         result = []
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            uv_layer = verify_uv_layer(bm)
-            bm.faces.ensure_lookup_table()
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
             p_fmap = PackExcludedFactory._get_excluded_facemap(bm)
             if p_fmap is None:
@@ -539,6 +536,7 @@ class ZUV_OT_Hide_PackExcluded(bpy.types.Operator):
 
             HideUnhideProcessor.hide_by_context(
                 context,
+                bm,
                 uv_layer,
                 [[face for face in bm.faces if face[p_fmap]], ],
                 self.action,

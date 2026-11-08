@@ -30,15 +30,16 @@ from timeit import default_timer as timer
 
 from bpy.props import BoolProperty
 from bpy.types import GizmoGroup, Operator
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.utils.generic import ZenReport
-from ZenUV.utils.blender_zen_utils import (
+from ..ui.labels import ZuvLabels
+from ..utils.generic import ZenReport
+from ..utils.blender_zen_utils import (
     ZenPolls, show_message_box, get_ui_region_width, get_tools_region_width)
+from ..utils.vlog import Log
 
 
 def get_prefs():
     """ Return Zen UV Properties obj """
-    return bpy.context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
+    return bpy.context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
 
 
 _solver = None
@@ -76,36 +77,43 @@ def zenuv_handle_snooper():
         return
 
     if _solver.warp_it == 0:
-
-        if math.fabs(_solver.view3d_area.width - (_solver.warp_was_width + math.fabs(_solver.delta))) < 2.0:
+        AREA_DIFF = 4.0  # NOTE: this value was increased after Blender 4.5, previously was 2.0, it should be investigated in the future
+        # NOTE: we understand here that command was done and area was expanded/collapsed
+        if math.fabs(_solver.view3d_area.width - (_solver.warp_was_width + math.fabs(_solver.delta))) < AREA_DIFF:
             return None
-
-    _solver.context["window"].cursor_warp(_solver.warp_x, _solver.warp_y)
 
     _solver.warp_it += 1
 
-    # no need to wait more than 1 sec, something wrong
-    if timer() - _solver.warp_timer > 1.0:
-        return None
+    try:
+        # no need to wait more than 1 sec, something wrong
+        if timer() - _solver.warp_timer > 1.0:
+            raise RuntimeError("INTERNAL ERROR! Could not move area!")
 
-    if ZenPolls.version_since_3_2_0:
+        _solver.context["window"].cursor_warp(_solver.warp_x, _solver.warp_y)
 
-        if not _solver.context['area'].regions:
-            return None
+        if ZenPolls.version_since_3_2_0:
 
-        with bpy.context.temp_override(**_solver.context):
-            if not bpy.ops.screen.area_move.poll():
+            if not _solver.context['area'].regions:
+                raise RuntimeError("INTERNAL ERROR! Could not detect regions!")
+
+            with bpy.context.temp_override(**_solver.context):
+                # NOTE: this case is detected in "Shading" layout !
+                if not bpy.ops.screen.area_move.poll():
+                    return 0.001
+
+                # NOTE: everything is ready to move
+                bpy.ops.screen.area_move(x=_solver.warp_x, y=_solver.warp_y, delta=_solver.delta)
+        else:
+            if not bpy.ops.screen.area_move.poll(_solver.context, 'INVOKE_REGION_WIN'):
                 return 0.001
 
             # should poll now
             bpy.ops.screen.area_move(x=_solver.warp_x, y=_solver.warp_y, delta=_solver.delta)
-    else:
-        if not bpy.ops.screen.area_move.poll(_solver.context, 'INVOKE_REGION_WIN'):
-            return 0.001
+    except Exception as e:
+        Log.error(e)
+        pass
 
-        # should poll now
-        bpy.ops.screen.area_move(x=_solver.warp_x, y=_solver.warp_y, delta=_solver.delta)
-
+    # NOTE: revert cursor back
     w = _solver.context["window"]
     w.cursor_warp(_solver.imp_x, _solver.imp_y)
     return None
@@ -353,6 +361,11 @@ class StkUvEditorSolver():
 
         self.stk_props.set(self.context['scene'], uv_area)
 
+    def _register_snooper(self):
+        if bpy.app.timers.is_registered(zenuv_handle_snooper):
+            bpy.app.timers.unregister(zenuv_handle_snooper)
+        bpy.app.timers.register(zenuv_handle_snooper)
+
     def _warp(self):
         a = self.view3d_area
         if not a:
@@ -374,9 +387,7 @@ class StkUvEditorSolver():
         self.warp_timer = timer()
         self.warp_it = 0
 
-        if bpy.app.timers.is_registered(zenuv_handle_snooper):
-            bpy.app.timers.unregister(zenuv_handle_snooper)
-        bpy.app.timers.register(zenuv_handle_snooper)
+        self._register_snooper()
 
     def _force_update_layout(self, area):
         space = area.spaces.active
@@ -529,7 +540,7 @@ class ZUV_StickyUVEditor_UI_Button(GizmoGroup):
 
             self.foo_gizmo.matrix_basis[1][3] = context.region.height * addon_prefs.stk_ed_button_v_position * 0.01
         else:
-            from ZenUV.ui.gizmo_draw import GizmoColumnButton
+            from ..ui.gizmo_draw import GizmoColumnButton
             GizmoColumnButton.set_position(self.foo_gizmo, context, 'STICKY')
 
     def setup(self, context):

@@ -33,7 +33,7 @@ from functools import partial
 from timeit import default_timer as timer
 import ctypes
 
-from ZenUV.utils.blender_zen_utils import (
+from ....utils.blender_zen_utils import (
     get_view_1px_from_region,
     show_message_box,
     get_gizmo_scale,
@@ -43,17 +43,17 @@ from ZenUV.utils.blender_zen_utils import (
     ZenPolls,
     ZenCompat,
     ZenDrawConstants)
-from ZenUV.utils.shaders import get_dashed_shader_line_2, Dash_UBO_struct
-from ZenUV.ops.transform_sys.transform_utils.tr_object_data import transform_object_loop_data
-from ZenUV.prop.scene_ui_props import ZUV_UVToolProps
-from ZenUV.utils.constants import UV_AREA_BBOX
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.simple_geometry import (
+from ....utils.shaders import get_dashed_shader_line_2, Dash_UBO_struct
+from ....ops.transform_sys.transform_utils.tr_object_data import transform_object_loop_data
+from ....prop.scene_ui_props import ZUV_UVToolProps
+from ....utils.constants import UV_AREA_BBOX
+from ....utils.vlog import Log
+from ....utils.simple_geometry import (
     TextRect, Rectangle,
     draw_circle_2d_filled, draw_rounded_rect)
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.utils.generic import calc_uv_editor_image_aspect_ratio
-from ZenUV.utils.transform import matrix_by_image_aspect
+from ....prop.zuv_preferences import get_prefs
+from ....utils.generic import calc_uv_editor_image_aspect_ratio
+from ....utils.transform import matrix_by_image_aspect
 
 from .uv_transform_handle import ZuvTransformHandleBase
 from ..custom_gizmo_shapes import CustomShapes
@@ -847,7 +847,7 @@ class ZuvTransformGizmoBase:
                     tool_props.set_tr_gizmo_angle_handle(self.init_operator_transform_data["matched_head"])
                     tool_props.tr_gizmo_setup_cursor_2d(context)
 
-                    from ZenUV.ui.tool.tool_ops import ZUV_OP_ToolTransform
+                    from ....ui.tool.tool_ops import ZUV_OP_ToolTransform
                     ZUV_OP_ToolTransform.revert_transform(context, tool_props, self.init_operator_transform_data)
 
     def modal(self: bpy.types.Gizmo, context: bpy.types.Context, event: bpy.types.Event, tweak):
@@ -1132,7 +1132,7 @@ class ZuvTransformGizmoBase:
             else:
                 v_delta_view = Vector(tool_props.tr_gizmo_origin) - self.init_cursor_location
 
-                from ZenUV.prop.wm_props import ZuvWMTransformToolGroup
+                from ....prop.wm_props import ZuvWMTransformToolGroup
                 p_wm_tool: ZuvWMTransformToolGroup = wm.zen_uv.uv_transform_tool
 
                 s_header_text = ""
@@ -1177,7 +1177,7 @@ class ZuvTransformGizmoBase:
                 if b_is_rotation:
                     step_rotation = self.gizmo_rotate_with_step
 
-                from ZenUV.ui.tool.tool_ops import zenuv_status_text_transform_draw
+                from ....ui.tool.tool_ops import zenuv_status_text_transform_draw
                 context.workspace.status_text_set(
                     lambda self, context: zenuv_status_text_transform_draw(
                         self, context, b_is_snap_enabled,
@@ -1298,7 +1298,7 @@ class ZuvTransformGizmoBase:
         if tool_props.tr_gizmo_mode == 'TRANSFORM':
 
             # 1) Nothing Selected
-            from ZenUV.utils.selection_utils import SelectionProcessor
+            from ....utils.selection_utils import SelectionProcessor
             if not SelectionProcessor.is_uv_selected(context):
                 show_message_box(message="Select something!", title="WARNING", icon="ERROR")
                 return {'FINISHED'}
@@ -1324,7 +1324,7 @@ class ZuvTransformGizmoBase:
 
         if tool_props.tr_gizmo_mode == 'TRANSFORM':
 
-            from ZenUV.ui.tool.tool_ops import ZUV_OP_ToolTransform
+            from ....ui.tool.tool_ops import ZUV_OP_ToolTransform
             wm = context.window_manager
             op_transform = None
             op_transform_last = None
@@ -1468,7 +1468,7 @@ class ZuvTransformGizmoMainHandles(ZuvTransformGizmoBase):
         self.draw_preset_box(mtx)
 
     def test_select_internal(self, context: bpy.types.Context, location):
-        from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+        from ....ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
 
         v_pos = self.matrix_world.to_translation()
 
@@ -2796,10 +2796,10 @@ class ZUV_GGT_UVTransformButton(bpy.types.GizmoGroup):
             self.mpr_set_transform_mode.color_highlight = 0.8, 0.8, 0.8
             self.mpr_set_transform_mode.alpha_highlight = 0.2
 
-            from ZenUV.ui.gizmo_draw import GizmoColumnButton
+            from ....ui.gizmo_draw import GizmoColumnButton
             GizmoColumnButton.set_position(self.mpr_set_transform_mode, context, 'TOOL_TRANSFORM')
         if not self.mpr_set_setup_mode.hide:
-            from ZenUV.ui.gizmo_draw import GizmoColumnButton
+            from ....ui.gizmo_draw import GizmoColumnButton
             GizmoColumnButton.set_position(self.mpr_set_setup_mode, context, 'TOOL_TRANSFORM')
 
     def setup(self, context):

@@ -23,20 +23,22 @@
 
 import bpy
 import bmesh
+
 from mathutils import Vector
 from bpy.props import BoolProperty, EnumProperty
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.generic import (
-    get_mesh_data,
-    resort_objects_by_selection,
-    update_indexes,
-    resort_by_type_mesh_in_edit_mode_and_sel,
-    verify_uv_layer
-)
-from ZenUV.stacks.utils import Cluster
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.utils.clib.lib_init import StackSolver
-from ZenUV.utils.constants import ZUV_COPIED, ZUV_STORED
+
+import ast
+import array
+
+from ..utils.uv_factory import UvIslandUtils, SelectionUtils
+from ..utils.loops_factory import LoopsFactory
+from ..utils.iter_utils import IterUtils
+from ..utils.generic import ResortObjects, verify_uv_layer
+from ..stacks.utils import Cluster
+from ..ui.labels import ZuvLabels
+from ..utils.clib.lib_init import StackSolver
+from ..utils.constants import ZUV_STORED
+from ..utils.vlog import Log
 
 
 class ZUV_OT_UV_Copy_Param(bpy.types.Operator):
@@ -84,42 +86,42 @@ class ZUV_OT_UV_Copy_Param(bpy.types.Operator):
 
     def invoke(self, context, event):
         scene = context.scene
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context, require_active_uv=True)
 
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
-        self.objs = resort_objects_by_selection(context, objs)
+        self.objs = ResortObjects.resort_objects_by_selection(context, objs)
         if not self.objs:
             self.check_copy_conditions(scene)
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No selection.")
             return {"CANCELLED"}
-        update_indexes(self.objs)
+
         return self.execute(context)
 
     def execute(self, context):
         scene = context.scene
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
-        if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
-            return {'CANCELLED'}
-
-        self.objs = resort_objects_by_selection(context, objs)
         if not self.objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
-            return {'CANCELLED'}
-        # self.uv_copy_dict = dict()
-        for obj in self.objs:
+            objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context, require_active_uv=True)
+            if not objs:
+                self.report({'WARNING'}, "No objects selected. Or no active UV Map.")
+                return {'CANCELLED'}
+
+            self.objs = ResortObjects.resort_objects_by_selection(context, objs)
+            if not self.objs:
+                self.report({'WARNING'}, "No selection.")
+                return {'CANCELLED'}
+
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(self.objs, context, skip_obj_if_no_uv=True):
             self.uv_copy_dict = dict()
-            me, bm = get_mesh_data(obj)
-            bm.faces.ensure_lookup_table()
-            uv_layer = verify_uv_layer(bm)
+
             if self.st_store_mode == "ISLAND":
-                islands_for_process = island_util.get_island(context, bm, uv_layer)
+                islands_for_process = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
             else:
-                islands_for_process = island_util.get_selected_faces(context, bm)
+                islands_for_process = [SelectionUtils.get_faces_by_any_init_selection(context, bm, uv_layer), ]
+
             self.uv_copy_dict.update({obj.name: {"faces": [face.index for island in islands_for_process for face in island], "uv_layer": uv_layer.name}})
         total = sum([len(faces) for name, faces in self.uv_copy_dict.items()])
         if total:
@@ -134,7 +136,7 @@ class ZUV_OT_UV_Copy_Param(bpy.types.Operator):
     def check_copy_conditions(self, scene):
         if scene.zen_uv.get(ZUV_STORED, None):
             del scene.zen_uv[ZUV_STORED]
-        self.report({"WARNING"}, "Zen UV: There are no selection.")
+        self.report({"WARNING"}, "No selection in objects.")
 
 
 class ZUV_OT_UV_Paste_Param(bpy.types.Operator):
@@ -250,12 +252,12 @@ class ZUV_OT_UV_Paste_Param(bpy.types.Operator):
     objs = None
 
     def invoke(self, context, event):
-        self.objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        self.objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
 
         if not self.objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
-        update_indexes(self.objs)
+
         self.master_data = context.scene.zen_uv.get(ZUV_STORED).to_dict()
         return self.execute(context)
 
@@ -318,10 +320,10 @@ class ZUV_OT_UV_Paste_Param(bpy.types.Operator):
                 "Zen UV Library is not installed! Install Library for activate Stack mode."
             )
             self.TransferMode = 'TRANSFER'
-        self.objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        self.objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
 
         if not self.objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         faces_mode = self.st_store_mode == 'FACES'
@@ -333,21 +335,29 @@ class ZUV_OT_UV_Paste_Param(bpy.types.Operator):
                 self.master.sim_index = int(self.master.sim_index)
 
         clusters = []
-        for obj in self.objs:
-            me, bm = get_mesh_data(obj)
-            bm.faces.ensure_lookup_table()
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(self.objs, context, skip_obj_if_no_uv=False):
+            if not uv_layer:
+                uv_layer = verify_uv_layer(bm)
             if self.st_store_mode == "ISLAND":
-                islands_for_process = island_util.get_island(context, bm, uv_layer)
+                islands_for_process = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
             else:
-                islands_for_process = island_util.get_selected_faces(context, bm)
+                p_faces = SelectionUtils.get_faces_by_any_init_selection(context, bm, uv_layer)
+                if not p_faces:
+                    continue
+                islands_for_process = [p_faces, ]
+
+            if not islands_for_process:
+                continue
 
             for island in islands_for_process:
-                # if island:
                 cluster = Cluster(context, obj, island)
                 if not self.AreaMatch:
                     cluster.sim_index = int(cluster.sim_index)
                 clusters.append(cluster)
+
+        if not clusters:
+            self.report({'WARNING'}, "No selection")
+            return {'FINISHED'}
 
         for cl in clusters:
             cl.mode = faces_mode
@@ -368,175 +378,372 @@ class ZUV_OT_UV_Paste_Param(bpy.types.Operator):
 
 
 class ZUV_OT_Copy_UV(bpy.types.Operator):
-    ''' Store selected UV island to mesh data '''
     bl_idname = "uv.zenuv_copy_uv"
-    bl_label = ZuvLabels.OT_COPY_UV_LABEL
+    bl_label = "Copy UV from Map"
     bl_description = ZuvLabels.OT_COPY_UV_DESC
     bl_options = {'REGISTER', 'UNDO'}
 
-    desc: bpy.props.StringProperty(name="Description", default=ZuvLabels.OT_COPY_UV_DESC, options={'HIDDEN'})
+    LITERAL_ZENUV_COPY = "ZENUV_COPY_UV"
 
     @classmethod
-    def description(cls, context, properties):
-        if properties:
-            return properties.desc
-        else:
-            return cls.bl_description
-
-    uv_copy_dict = dict()
-    objs = None
+    def get_zenuv_copy_literal(cls, context: bpy.types.Context):
+        return cls.LITERAL_ZENUV_COPY + "." + context.mode
 
     @classmethod
     def poll(cls, context):
         """ Validate context """
         active_object = context.active_object
-        return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
+        return active_object is not None and active_object.type == 'MESH' and context.mode in {'EDIT_MESH'}
 
-    def invoke(self, context, event):
-        return self.execute(context)
+    def execute(self, context: bpy.types.Context):
+        uv_copy_dict = dict()
 
-    def execute(self, context):
-        scene = context.scene
-        uv_sync = scene.tool_settings.use_uv_select_sync
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
-        if not objs:
-            self.check_copy_conditions(scene)
-            return {"CANCELLED"}
-        self.uv_copy_dict = dict()
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            bm.faces.ensure_lookup_table()
-            uv_layer = verify_uv_layer(bm)
+        objs = context.objects_in_mode
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
-            data_type = "LOOP"
-            if context.area.type == 'IMAGE_EDITOR':
-                if uv_sync:
-                    if scene.tool_settings.mesh_select_mode[:] == (False, False, True):
-                        data_type = "FACE"
+            p_loops = [lp.index for lp in LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer)]
+
+            if p_loops:
+                uv_copy_dict[obj.name] = {
+                    "loops": [lp.index for lp in LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer)],
+                    "uv_layer": uv_layer.name,
+                    "data_type": None
+                }
+
+        if uv_copy_dict:
+            # NOTE: we created dictionary with root node "ZENUV_COPY_UV" for faster clipboard paste detection!
+            t_output = {
+                ZUV_OT_Copy_UV.get_zenuv_copy_literal(context): uv_copy_dict
+            }
+
+            context.window_manager.clipboard = str(t_output)
+
+            t_objects = list(uv_copy_dict.keys())
+            n_count = len(t_objects)
+            if n_count > 1:
+                s_msg = f"{t_objects[0]}: {uv_copy_dict[t_objects[0]]['uv_layer']} and more {n_count - 1} object(s)"
             else:
-                if scene.tool_settings.mesh_select_mode[:] == (False, False, True):
-                    data_type = "FACE"
+                s_msg = f"{t_objects[0]}: {uv_copy_dict[t_objects[0]]['uv_layer']}"
 
-            self.uv_copy_dict.update({obj.name: {"loops": self.detect_loops(context, bm, data_type), "uv_layer": uv_layer.name, "data_type": data_type}})
-
-            bmesh.update_edit_mesh(me, loop_triangles=False)
-
-        total = sum([len(loops) for name, loops in self.uv_copy_dict.items()])
-        if total:
-            scene.zen_uv[ZUV_COPIED] = self.uv_copy_dict
-            self.report({"INFO"}, "Zen UV: UV data stored.")
+            self.report({"INFO"}, f"Object: {s_msg} - UV data stored.")
             return {"FINISHED"}
         else:
-            self.check_copy_conditions(scene)
+            self.report({'WARNING'}, "No UV coordinates selected!")
             return {"CANCELLED"}
-
-    def check_copy_conditions(self, scene):
-        if scene.zen_uv.get(ZUV_COPIED, None):
-            del scene.zen_uv[ZUV_COPIED]
-        self.report({"WARNING"}, "Zen UV: There are no selection.")
-
-    def detect_loops(self, context, bm, data_type):
-        in_loops = [loop for f in bm.faces for loop in f.loops]
-
-        for index, ele in enumerate(in_loops):
-            ele.index = index
-
-        source_layer = verify_uv_layer(bm)
-        uv_sync = context.scene.tool_settings.use_uv_select_sync
-
-        if context.area.type == "IMAGE_EDITOR":
-            if not uv_sync:
-                loops = [loop.index for loop in in_loops if loop[source_layer].select and loop.vert.select]
-            elif uv_sync:
-                if data_type == "FACE":
-                    loops = [loop.index for loop in in_loops if loop.face.select]
-                else:
-                    loops = [loop.index for loop in in_loops if loop.vert.select]
-        else:
-            if data_type == "FACE":
-                loops = [loop.index for loop in in_loops if loop.face.select]
-            else:
-                loops = [loop.index for loop in in_loops if loop.vert.select]
-
-        return loops
 
 
 class ZUV_OT_Paste_UV(bpy.types.Operator):
-
     bl_idname = "uv.zenuv_paste_uv"
-    bl_label = ZuvLabels.OT_PASTE_UV_LABEL
-    bl_description = "Paste the parameters saved earlier to selected Islands/Faces"
+    bl_label = "Paste UV to Map"
+    bl_description = ZuvLabels.OT_PASTE_UV_DESC
+    bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
-    def description(cls, context, properties):
-        if properties:
-            return properties.desc
-        else:
-            return cls.bl_description
+    def description(cls, context: bpy.types.Context, properties: bpy.types.OperatorProperties):
+        # NOTE: use this fast detection that format is valid !
+        s_literal = ZUV_OT_Copy_UV.get_zenuv_copy_literal(context)
+        if s_literal in context.window_manager.clipboard:
+            try:
+                t_uv_copy_data: dict = ast.literal_eval(context.window_manager.clipboard)[s_literal]
+                t_msg = ["Transfer UV coordinates:"]
 
-    desc: bpy.props.StringProperty(name="Description", default=ZuvLabels.OT_PASTE_UV_DESC, options={'HIDDEN'})
+                t_errors = []
+
+                p_objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
+
+                i_processed = 0
+
+                for idx, (s_obj_name, v) in enumerate(t_uv_copy_data.items()):
+                    source_layer_name = v["uv_layer"]
+                    target_layer_name = "UNDEFINED"
+
+                    p_obj: bpy.types.Object = bpy.data.objects.get(s_obj_name, None)
+                    if p_obj and p_obj in p_objs:
+                        me: bpy.types.Mesh = p_obj.data
+
+                        p_source_layer = me.uv_layers.get(source_layer_name, None)
+                        if p_source_layer:
+                            p_target_layer = me.uv_layers.active
+                            if p_target_layer:
+                                target_layer_name = me.uv_layers.active.name
+
+                                if source_layer_name == target_layer_name:
+                                    t_errors.append(f"* Change active UV map in: {s_obj_name}")
+                            else:
+                                t_errors.append(f"* No active UV map in: {s_obj_name}")
+                        else:
+                            t_errors.append(f"* Source UV map not found in: {s_obj_name}")
+                    else:
+                        t_errors.append(f"* Object: {s_obj_name} - is not editable")
+
+                    if idx < 3:
+                        t_msg.append(f"* {s_obj_name}: {source_layer_name} -> {target_layer_name}")
+
+                if i_processed != idx:
+                    n_diff = idx - i_processed
+                    t_msg.append(f"** and more {n_diff} object(s)")
+
+                n_err_count = len(t_errors)
+                if n_err_count:
+                    t_msg.append("")
+                    t_msg.append("Action required:")
+                    if n_err_count > 3:
+                        n_diff = n_err_count - 3
+                        t_msg.extend(t_errors[:3])
+                        t_msg.append(f"** and more {n_diff} action(s)")
+                    else:
+                        t_msg.extend(t_errors)
+
+                return "\n".join(t_msg)
+            except Exception as e:
+                Log.error("PASTE UV:", e)
+
+        return cls.bl_description
 
     @classmethod
-    def poll(cls, context):
-        return (
-            context.mode == "EDIT_MESH"
-            and context.scene.zen_uv.get(ZUV_COPIED, False)
-        )
+    def poll(cls, context: bpy.types.Context):
+        if context.mode in {'EDIT_MESH'}:
+            # NOTE: use this fast detection that format is valid !
+            s_literal = ZUV_OT_Copy_UV.get_zenuv_copy_literal(context)
+            return s_literal in context.window_manager.clipboard
+        return False
 
-    def invoke(self, context, event):
-        return self.execute(context)
+    def execute(self, context: bpy.types.Context):
+        try:
+            p_objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
+            if not p_objs:
+                raise RuntimeError("There are no selected objects!")
 
-    def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
-        if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
-            return {'CANCELLED'}
+            s_literal = ZUV_OT_Copy_UV.get_zenuv_copy_literal(context)
+            t_dict = ast.literal_eval(context.window_manager.clipboard)
+            t_uv_copy_data: dict = t_dict.get(s_literal, None)
+            if not t_uv_copy_data:
+                raise RuntimeError("Invalid UV data clipboard format!")
 
-        if context.scene.zen_uv.get(ZUV_COPIED, None) is None:
-            self.report({'WARNING'}, "Zen UV: There is no stored data.")
-            return {'CANCELLED'}
+            for s_obj_name, v in t_uv_copy_data.items():
+                source_layer_name = v["uv_layer"]
 
-        self.master_data = context.scene.zen_uv.get(ZUV_COPIED).to_dict()
+                try:
+                    p_obj: bpy.types.Object = bpy.data.objects.get(s_obj_name, None)
+                    if not p_obj or p_obj not in p_objs:
+                        raise RuntimeError("Object is not editable!")
 
-        objs_dict = dict()
-        for obj in objs:
-            objs_dict.update({obj.name: obj})
+                    # NOTE: if UV map was copied in Object mode then copy all loops
+                    source_loops_idxs = v.get("loops", None)
 
-        processed = False
-        for master_obj_name, data in self.master_data.items():
-            if master_obj_name in objs_dict:
-                obj = objs_dict[master_obj_name]
-                me = obj.data
-                bm = bmesh.from_edit_mesh(me)
-                source_loops_idxs = data["loops"]
-                source_layer_name = data["uv_layer"]
-                source_layer = bm.loops.layers.uv.get(source_layer_name)
-                dest_layer = verify_uv_layer(bm)
-                dest_layer_name = dest_layer.name
+                    bm = bmesh.from_edit_mesh(p_obj.data)
 
-                if source_layer_name == dest_layer_name:
-                    self.report({'WARNING'}, "Zen UV: Source and Destination UV Map is the same.")
-                    return {'CANCELLED'}
+                    dest_layer = bm.loops.layers.uv.active
+                    if not dest_layer:
+                        raise RuntimeError("No active UV map!")
 
-                if source_layer:
-                    self.paste_uv(context, bm, source_layer, source_loops_idxs, dest_layer)
-                    processed = True
+                    source_layer = bm.loops.layers.uv.get(source_layer_name, None)
+                    if not source_layer:
+                        raise RuntimeError("UV map is not found!")
 
-                bmesh.update_edit_mesh(me)
+                    if source_layer_name == dest_layer.name:
+                        raise RuntimeError("Same destination!")
 
-            if not processed:
-                self.report({'WARNING'}, "Zen UV: There is no stored data for selected objects.")
-                return {'CANCELLED'}
+                    self.paste_uv(bm, source_layer, source_loops_idxs, dest_layer)
 
-        return {"FINISHED"}
+                    bmesh.update_edit_mesh(p_obj.data, loop_triangles=False, destructive=False)
+                except Exception as e:
+                    self.report({'WARNING'}, f"Can not paste UV to - {s_obj_name}: {source_layer_name} - {str(e)}")
 
-    def paste_uv(self, context, bm, source_layer, source_loops_idxs, dest_layer):
+            return {'FINISHED'}
+        except Exception as e:
+            Log.error("PASTE UV:", e)
+            self.report({'WARNING'}, str(e))
+
+        return {"CANCELLED"}
+
+    def paste_uv(self, bm: bmesh.types.BMesh, source_layer, source_loops_idxs, dest_layer):
         in_loops = [loop for f in bm.faces for loop in f.loops]
-        loops = [in_loops[idx] for idx in source_loops_idxs]
+
+        loops = [in_loops[idx] for idx in source_loops_idxs] if source_loops_idxs is not None else in_loops
 
         for loop in loops:
             loop[dest_layer].uv = loop[source_layer].uv
 
 
-if __name__ == '__main__':
-    pass
+class ZUV_OT_CopyObjectUV(bpy.types.Operator):
+    bl_idname = "uv.zenuv_copy_object_uv"
+    bl_label = "Copy UV from Active"
+    bl_description = "Copy active UV map of the active object to clipboard"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    LITERAL_ZENUV_COPY = "ZENUV_COPY_UV"
+
+    @classmethod
+    def get_zenuv_copy_literal(cls, context: bpy.types.Context):
+        return cls.LITERAL_ZENUV_COPY + "." + context.mode
+
+    @classmethod
+    def poll(cls, context):
+        """ Validate context """
+        active_object = context.active_object
+        return active_object is not None and active_object.type == 'MESH' and context.mode in {'OBJECT'}
+
+    def execute(self, context: bpy.types.Context):
+        uv_copy_dict = dict()
+
+        obj = context.active_object
+        if obj and obj.type == 'MESH':
+            me: bpy.types.Mesh = obj.data
+
+            if me.uv_layers.active:
+                uv_copy_dict[obj.name] = {
+                    "uv_layer": me.uv_layers.active.name
+                }
+        else:
+            self.report({'WARNING'}, "Active object is not a mesh!")
+            return {'CANCELLED'}
+
+        if uv_copy_dict:
+            # NOTE: we created dictionary with root node "ZENUV_COPY_UV" for faster clipboard paste detection!
+            t_output = {
+                ZUV_OT_CopyObjectUV.get_zenuv_copy_literal(context): uv_copy_dict
+            }
+
+            context.window_manager.clipboard = str(t_output)
+
+            t_objects = list(uv_copy_dict.keys())
+            n_count = len(t_objects)
+            if n_count > 1:
+                s_msg = f"{t_objects[0]}: {uv_copy_dict[t_objects[0]]['uv_layer']} and more {n_count - 1} object(s)"
+            else:
+                s_msg = f"{t_objects[0]}: {uv_copy_dict[t_objects[0]]['uv_layer']}"
+
+            self.report({"INFO"}, f"Object: {s_msg} - UV data stored.")
+            return {"FINISHED"}
+        else:
+            self.report({'WARNING'}, "No UV coordinates selected!")
+            return {"CANCELLED"}
+
+
+class ZUV_OT_PasteObjectUV(bpy.types.Operator):
+    bl_idname = "uv.zenuv_paste_object_uv"
+    bl_label = "Paste UV to Selected"
+    bl_description = ZuvLabels.OT_PASTE_UV_DESC
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def description(cls, context: bpy.types.Context, properties: bpy.types.OperatorProperties):
+        # NOTE: use this fast detection that format is valid !
+        s_literal = ZUV_OT_CopyObjectUV.get_zenuv_copy_literal(context)
+        if s_literal in context.window_manager.clipboard:
+            try:
+                t_uv_copy_data: dict = ast.literal_eval(context.window_manager.clipboard)[s_literal]
+                t_msg = ["Transfer UV coordinates:"]
+
+                t_errors = []
+
+                s_obj_name = next(iter(t_uv_copy_data))
+                p_obj = bpy.data.objects.get(s_obj_name, None)
+                idx = 0
+                i_processed = 0
+                if p_obj and p_obj in context.visible_objects:
+                    source_layer_name = t_uv_copy_data[s_obj_name]["uv_layer"]
+                    t_msg.append(f"* {s_obj_name}: {source_layer_name}:")
+                    p_objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
+                    for obj in p_objs:
+                        if idx < 3:
+                            p_target_layer = obj.data.uv_layers.active
+                            s_uv_layer = p_target_layer.name if p_target_layer else "NEW"
+                            t_msg.append(f"* -> {obj.name}: {s_uv_layer}")
+                            i_processed += 1
+                        idx += 1
+
+                if i_processed == 0:
+                    t_msg.append("* -> UNDEFINED")
+                    t_errors.append("* Select objects with the same topology")
+                elif i_processed != idx:
+                    n_diff = idx - i_processed
+                    t_msg.append(f"** and more {n_diff} object(s)")
+
+                if i_processed != idx:
+                    n_diff = idx - i_processed
+                    t_msg.append(f"** and more {n_diff} object(s)")
+
+                n_err_count = len(t_errors)
+                if n_err_count:
+                    t_msg.append("")
+                    t_msg.append("Action required:")
+                    if n_err_count > 3:
+                        n_diff = n_err_count - 3
+                        t_msg.extend(t_errors[:3])
+                        t_msg.append(f"** and more {n_diff} action(s)")
+                    else:
+                        t_msg.extend(t_errors)
+
+                return "\n".join(t_msg)
+            except Exception as e:
+                Log.error("PASTE UV:", e)
+
+        return cls.bl_description
+
+    @classmethod
+    def poll(cls, context: bpy.types.Context):
+        if context.mode in {'OBJECT'}:
+            # NOTE: use this fast detection that format is valid !
+            s_literal = ZUV_OT_CopyObjectUV.get_zenuv_copy_literal(context)
+            return s_literal in context.window_manager.clipboard
+        return False
+
+    def execute(self, context: bpy.types.Context):
+        try:
+            p_objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
+            if not p_objs:
+                raise RuntimeError("There are no selected objects!")
+
+            s_literal = ZUV_OT_CopyObjectUV.get_zenuv_copy_literal(context)
+            t_dict = ast.literal_eval(context.window_manager.clipboard)
+            t_uv_copy_data: dict = t_dict.get(s_literal, None)
+            if not t_uv_copy_data:
+                raise RuntimeError("Invalid UV data clipboard format!")
+
+            for s_obj_name, v in t_uv_copy_data.items():
+                source_layer_name = v["uv_layer"]
+
+                p_obj: bpy.types.Object = bpy.data.objects.get(s_obj_name, None)
+                if p_obj:
+                    try:
+                        p_obj: bpy.types.Object = bpy.data.objects.get(s_obj_name, None)
+                        if not p_obj:
+                            raise RuntimeError("Object is not available!")
+
+                        me: bpy.types.Mesh = p_obj.data
+                        nbr_loops = len(me.loops)
+                        uv_array = array.array("f", [0.0] * 2) * nbr_loops
+
+                        source_layer: bpy.types.MeshUVLoopLayer = me.uv_layers.get(source_layer_name, None)
+                        if not source_layer:
+                            raise RuntimeError("UV map is not found!")
+
+                        source_layer.data.foreach_get("uv", uv_array)
+
+                        for obj_other in p_objs:
+                            me_other: bpy.types.Mesh = obj_other.data
+                            if len(me_other.loops) != nbr_loops:
+                                self.report(
+                                    {'WARNING'},
+                                    f"Object: {obj_other.name} has: {len(me.loops)} loops (for: {len(me.polygons)} faces), expected: {nbr_loops}")
+                            else:
+                                uv_other = me_other.uv_layers.active
+                                if not uv_other:
+                                    uv_other = me_other.uv_layers.new()
+
+                                if uv_other:
+                                    uv_other.data.foreach_set("uv", uv_array)
+                                    me_other.update()
+
+                    except Exception as e:
+                        self.report({'WARNING'}, f"Can not paste UV to - {s_obj_name}: {source_layer_name} - {str(e)}")
+                    break
+
+            return {'FINISHED'}
+        except Exception as e:
+            Log.error("PASTE UV:", e)
+            self.report({'WARNING'}, str(e))
+
+        return {"CANCELLED"}

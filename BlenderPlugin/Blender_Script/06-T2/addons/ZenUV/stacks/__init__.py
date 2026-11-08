@@ -19,25 +19,27 @@
 import bpy
 from bpy.props import IntProperty
 
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.stacks.copy_paste import (
+from ..utils.register_util import RegisterUtils
+from ..stacks.copy_paste import (
     ZUV_OT_UV_Copy_Param,
     ZUV_OT_UV_Paste_Param,
     ZUV_OT_Copy_UV,
-    ZUV_OT_Paste_UV
+    ZUV_OT_Paste_UV,
+    ZUV_OT_CopyObjectUV,
+    ZUV_OT_PasteObjectUV
 )
 
-from ZenUV.stacks.stacks import (
+from ..stacks.stacks import (
     ZUV_OT_Stack_Similar,
     ZUV_OT_Unstack,
     ZUV_OT_Select_Similar,
     ZUV_OT_Select_Stacked,
     ZUV_OT_Select_Stack
 )
-from ZenUV.stacks.stacks_ui import ZUV_PT_UVL_DisplayAndSelect, ZUV_PT_3DV_DisplayAndSelect
-from ZenUV.stacks.utils import ZMS_OT_ShowSimIndex
+from ..stacks.stacks_ui import ZUV_PT_UVL_DisplayAndSelect, ZUV_PT_3DV_DisplayAndSelect
+from ..stacks.utils import ZMS_OT_ShowSimIndex
 
-from ZenUV.stacks.manual_stacks import (
+from ..stacks.manual_stacks import (
     ZMSListGroup,
     ZMS_UL_List,
     ZMS_OT_SelectStack,
@@ -64,6 +66,8 @@ stack_classes = (
     ZUV_OT_UV_Paste_Param,
     ZUV_OT_Copy_UV,
     ZUV_OT_Paste_UV,
+    ZUV_OT_CopyObjectUV,
+    ZUV_OT_PasteObjectUV,
     ZMSListGroup,
     ZMS_UL_List,
     ZMS_OT_SelectStack,

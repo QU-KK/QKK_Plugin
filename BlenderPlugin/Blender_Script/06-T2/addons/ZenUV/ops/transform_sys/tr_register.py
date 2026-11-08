@@ -26,6 +26,7 @@ from .tr_scale import register_tr_scale, unregister_tr_scale
 from .tr_move import register_tr_move, unregister_tr_move
 from .tr_rotate import register_tr_rotate, unregister_tr_rotate
 from .trim_depend_transform import register_trim_dep, unregister_trim_dep
+from .misc_transform_ops import register_misc_transform_tools, unregister_misc_transform_tools
 
 
 def register_transform_sys():
@@ -38,6 +39,8 @@ def register_transform_sys():
     register_tr_rotate()
     register_trim_dep()
 
+    register_misc_transform_tools()
+
 
 def unregister_transform_sys():
     uregister_uni_transform()
@@ -48,3 +51,5 @@ def unregister_transform_sys():
     unregister_tr_move()
     unregister_tr_rotate()
     unregister_trim_dep()
+
+    unregister_misc_transform_tools()

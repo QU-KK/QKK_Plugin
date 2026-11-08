@@ -20,19 +20,14 @@
 
 import bpy
 import bmesh
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.utils.bounding_box import BoundingBox2d
-from ZenUV.utils.generic import (
-    resort_by_type_mesh_in_edit_mode_and_sel,
-    get_mesh_data,
-    bpy_deselect_by_context,
-    select_by_context,
-    verify_uv_layer
-)
-from ZenUV.utils.constants import UV_AREA_BBOX
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import TransformSysOpsProps
+from ....utils.register_util import RegisterUtils
+from ....ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ....utils.bounding_box import BoundingBox2d
+from ....utils.generic import ResortObjects, bpy_select_by_context
+from ....utils.constants import UV_AREA_BBOX
+from ....utils.uv_factory import UvIslandUtils, SelectionUtils
+from ....utils.iter_utils import IterUtils
+from ....ops.transform_sys.transform_utils.tr_utils import TransformSysOpsProps
 
 
 class ZUV_OT_TrimSelectByFace(bpy.types.Operator):
@@ -108,13 +103,13 @@ class ZUV_OT_TrimSelectIslandsByTrim(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         if self.clear_sel:
-            bpy_deselect_by_context(context)
+            bpy_select_by_context(context, action='DESELECT')
 
         trim = ZuvTrimsheetUtils.getActiveTrim(context)
         if trim is not None:
@@ -122,20 +117,18 @@ class ZUV_OT_TrimSelectIslandsByTrim(bpy.types.Operator):
         else:
             tr_bbox = BoundingBox2d(points=(UV_AREA_BBOX().bl, UV_AREA_BBOX().tr))
 
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
-            for island in island_util.get_islands(context, bm):
+            for island in UvIslandUtils.yield_uv_islands(context, bm, uv_layer, b_selected_only=False, b_include_hidden=False):
                 if self.mode == 'INSIDE':
                     if BoundingBox2d(islands=[island, ], uv_layer=uv_layer).inside_of_bbox(tr_bbox):
-                        select_by_context(context, bm, [island], state=True)
+                        SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
                 elif self.mode == 'OVERLAP':
                     if BoundingBox2d(islands=[island, ], uv_layer=uv_layer).overlapped_with_bbox(tr_bbox):
-                        select_by_context(context, bm, [island], state=True)
+                        SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
                 else:
                     pass
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False)
 
         return {"FINISHED"}
 
@@ -173,13 +166,13 @@ class ZUV_OT_TrimSelectIslandsByTrimName(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         if self.clear_sel:
-            bpy_deselect_by_context(context)
+            bpy_select_by_context(context, action='DESELECT')
 
         p_data = ZuvTrimsheetUtils.getTrimsheetOwner(context)
         if p_data is None:
@@ -191,24 +184,22 @@ class ZUV_OT_TrimSelectIslandsByTrimName(bpy.types.Operator):
         trim = p_names.get(self.trim_name, None)
         if trim is None:
             self.report({'WARNING'}, "There are no Trims with given name.")
-            return {'CANCELLED'}
+            return {'FINISHED'}
 
         tr_bbox = BoundingBox2d(points=(trim.left_bottom, trim.top_right))
 
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
-            for island in island_util.get_islands(context, bm):
+            for island in UvIslandUtils.yield_uv_islands(context, bm, uv_layer, b_selected_only=False, b_include_hidden=False):
                 if self.mode == 'INSIDE':
                     if BoundingBox2d(islands=[island, ], uv_layer=uv_layer).inside_of_bbox(tr_bbox):
-                        select_by_context(context, bm, [island], state=True)
+                        SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
                 elif self.mode == 'OVERLAP':
                     if BoundingBox2d(islands=[island, ], uv_layer=uv_layer).overlapped_with_bbox(tr_bbox):
-                        select_by_context(context, bm, [island], state=True)
+                        SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
                 else:
                     pass
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False)
 
         return {"FINISHED"}
 

@@ -18,6 +18,8 @@
 
 import bpy
 
+from ..utils.blender_zen_utils import ZenPolls
+
 
 class ZenUV_MT_ZenMark_Popup(bpy.types.Menu):
     bl_label = "Zen Mark"
@@ -25,16 +27,24 @@ class ZenUV_MT_ZenMark_Popup(bpy.types.Menu):
     bl_icon = "KEYTYPE_EXTREME_VEC"
 
     def draw(self, context):
-        from ZenUV.ops.zen_unwrap.ops import ZUV_OT_ProxyUnwrapAllSelected
+        from ..ops.zen_unwrap.ops import ZUV_OT_ProxyUnwrapAllSelected
         layout = self.layout
 
         layout.label(text="Nothing is produced. Selected polygons do not have a borders. You can use following functions:")
-        layout.separator
+
+        layout.separator()
 
         # layout.operator("uv.zenuv_unwrap", text="Auto Mark & Unwrap").action = "AUTO"
         layout.operator(ZUV_OT_ProxyUnwrapAllSelected.bl_idname, text="Auto Mark & Unwrap").action = "AUTO"
         layout.operator("uv.zenuv_auto_mark")
         layout.operator("uv.zenuv_seams_by_sharp")
+
+        layout.separator()
+
+        op = layout.operator(
+            'wm.url_open',
+            text="Help", icon='INFO')
+        op.url = f'{ZenPolls.doc_url}/unwrap/#face-selection-mode'
 
 
 if __name__ == "__main__":

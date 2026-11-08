@@ -20,9 +20,9 @@
 
 import bpy
 
-from ZenUV.utils.adv_generic_ui_list import zenuv_draw_ui_list
-from ZenUV.ico import zenuv_tool_transform_icon
-from ZenUV.utils.vlog import Log
+from ....utils.adv_generic_ui_list import zenuv_draw_ui_list
+from ....ico import zenuv_tool_transform_icon
+from ....utils.vlog import Log
 
 
 def get_keymap():
@@ -107,7 +107,7 @@ class ZuvUVTransformWorkSpaceTool(bpy.types.WorkSpaceTool):
         return False
 
     def draw_settings(context: bpy.types.Context, layout: bpy.types.UILayout, tool):
-        from ZenUV.prop.scene_ui_props import ZUV_UVToolProps
+        from ....prop.scene_ui_props import ZUV_UVToolProps
 
         wm = context.window_manager
 
@@ -262,7 +262,7 @@ class ZUV_PT_ToolTransformDrawSettings(bpy.types.Panel):
         return context.mode in {'OBJECT', 'EDIT_MESH'}
 
     def draw(self, context: bpy.types.Context):
-        from ZenUV.prop.scene_ui_props import ZUV_UVToolProps
+        from ....prop.scene_ui_props import ZUV_UVToolProps
 
         layout = self.layout
         p_scene = context.scene
@@ -283,7 +283,7 @@ class ZUV_PT_ToolTransformDisplayState(bpy.types.Panel):
         return context.mode in {'OBJECT', 'EDIT_MESH'}
 
     def draw(self, context: bpy.types.Context):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ....prop.zuv_preferences import get_prefs
 
         addon_prefs = get_prefs()
 
@@ -301,7 +301,7 @@ class ZUV_PT_ToolTransformEditingMode(bpy.types.Panel):
         return context.mode in {'OBJECT', 'EDIT_MESH'}
 
     def draw(self, context: bpy.types.Context):
-        from ZenUV.prop.scene_ui_props import ZUV_UVToolProps
+        from ....prop.scene_ui_props import ZUV_UVToolProps
 
         layout = self.layout
         p_scene = context.scene
@@ -330,7 +330,7 @@ class ZUV_PT_ToolTransformFitToSelection(bpy.types.Panel):
         return context.mode in {'OBJECT', 'EDIT_MESH'}
 
     def draw(self, context: bpy.types.Context):
-        from ZenUV.prop.scene_ui_props import ZUV_UVToolProps
+        from ....prop.scene_ui_props import ZUV_UVToolProps
 
         layout = self.layout
         p_scene = context.scene

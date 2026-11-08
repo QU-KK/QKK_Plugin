@@ -36,16 +36,16 @@ from .selections import unregister as unregister_selections
 from .trim_to_mesh import register as register_trim_to_mesh
 from .trim_to_mesh import unregister as unregister_trim_to_mesh
 
-from ZenUV.ico import icon_get
-from ZenUV.prop.zuv_preferences import get_prefs
+from ....ico import icon_get
+from ....prop.zuv_preferences import get_prefs
 
 
 def draw_trim_batch_ops(self, context: bpy.types.Context, layout: bpy.types.UILayout):
     ''' @Draw Trim Batch Operators '''
 
-    from ZenUV.ops.trimsheets.trimsheet_transform import ZUV_OT_SetActiveTrimMouseover
-    from ZenUV.ops.trimsheets.trimsheet_preview import ZUV_OT_TrimPreview
-    from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+    from ....ops.trimsheets.trimsheet_transform import ZUV_OT_SetActiveTrimMouseover
+    from ....ops.trimsheets.trimsheet_preview import ZUV_OT_TrimPreview
+    from ....ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
 
     layout.operator(ZUV_OT_TrHotspot.bl_idname, icon_value=icon_get("hotspot-mapping"))
 

@@ -28,13 +28,13 @@ from mathutils import Vector
 from .tr_utils import TrConstants, TrOrder, ActiveUvImage
 from .tr_object_data import TrObjectInfo
 
-from ZenUV.ops.transform_sys.transform_utils.transform_loops import TransformLoops
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.generic import get_mesh_data, verify_uv_layer
-from ZenUV.utils.bounding_box import BoundingBox2d, get_overall_bbox
-from ZenUV.utils.constants import UV_AREA_BBOX
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.ops.adv_uv_maps_sys.udim_utils import UdimFactory
+from ....ops.transform_sys.transform_utils.transform_loops import TransformLoops
+from ....utils.loops_factory import LoopsFactory
+from ....utils.bounding_box import BoundingBox2d
+from ....utils.constants import UV_AREA_BBOX
+from ....ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ....ops.adv_uv_maps_sys.udim_utils import UdimFactory
+from ....utils.iter_utils import IterUtils
 
 
 class FitRegion:
@@ -186,16 +186,14 @@ class TrFitProcessorEx:
         self.influence_mode = influence_mode
         self.object_storage.clear()
         self.order = order
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = bm.loops.layers.uv.active
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
             if uv_layer:
                 if influence_mode == 'ISLAND':
-                    loops = island_util.LoopsFactory.loops_by_islands(context, bm, uv_layer)
+                    loops = LoopsFactory.get_loops_by_islands(context, bm, uv_layer)
                 elif influence_mode == 'SELECTION':
-                    loops = island_util.LoopsFactory.loops_by_sel_mode(context, bm, uv_layer, groupped=True)
+                    loops = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer, groupped=True)
                 elif influence_mode == 'FACES':
-                    loops = island_util.LoopsFactory.loops_by_sel_mode(context, bm, uv_layer, groupped=False, per_face=True)
+                    loops = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer, groupped=False, per_face=True)
                     self.order = 'ONE_BY_ONE'
                 else:
                     message = f"current influence_mode is '{influence_mode}' not in ['ISLAND', 'SELECTION', 'FACES']"
@@ -205,7 +203,7 @@ class TrFitProcessorEx:
                     if self.order == 'ONE_BY_ONE':
                         self.loops = [[lp for group in loops for lp in group], ]
 
-                    self.object_storage[obj] = TrObjectInfo(bm=bm, me=me, loops=loops, uv_layer=uv_layer)
+                    self.object_storage[obj] = TrObjectInfo(bm=bm, me=obj.data, loops=loops, uv_layer=uv_layer)
 
     def process(
         self,
@@ -248,7 +246,7 @@ class TrFitProcessorEx:
             self.setup(context, objs, influence_mode, op_order)
 
         for obj, info in self.object_storage.items():
-            me = info.me
+
             uv_layer = info.uv_layer
 
             loops = info.loops
@@ -298,7 +296,7 @@ class TrFitProcessorEx:
                     info.loops_data[idx] = fit_pivot.copy()
                     idx += 1
 
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
     @classmethod
     def _get_matching_angle(cls, context, fr_bbox, uv_layer, lp_cluster, image_aspect):
@@ -357,19 +355,14 @@ class TrFitProcessor:
 
         obj_loops = []
         obj_count = len(objs)
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            uv_layer = verify_uv_layer(bm)
-            bm.verts.ensure_lookup_table()
-            bm.edges.ensure_lookup_table()
-            bm.faces.ensure_lookup_table()
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
             if influence_mode == 'ISLAND':
-                loops = island_util.LoopsFactory.loops_by_islands(context, bm, uv_layer)
+                loops = LoopsFactory.get_loops_by_islands(context, bm, uv_layer)
             elif influence_mode == 'SELECTION':
-                loops = island_util.LoopsFactory.loops_by_sel_mode(context, bm, uv_layer, groupped=True)
+                loops = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer, groupped=True)
             elif influence_mode == 'FACES':
-                loops = island_util.LoopsFactory.loops_by_sel_mode(context, bm, uv_layer, groupped=False, per_face=True)
+                loops = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer, groupped=False, per_face=True)
                 order = 'ONE_BY_ONE'
             else:
                 message = f"current influence_mode is '{influence_mode}' not in {'ISLAND', 'SELECTION', 'FACES'}"

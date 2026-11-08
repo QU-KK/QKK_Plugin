@@ -27,23 +27,25 @@ from bpy.props import (
     FloatProperty
 )
 from mathutils import Vector
-from ZenUV.utils.generic import (
-    resort_objects_by_selection,
-    get_mesh_data,
-    verify_uv_layer
+from ...utils.generic import (
+    ResortObjects,
+    switch_to_edge_sel_mode
 )
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.ops.reshape.labels import ReshapeLabels as Rlabels
-from ZenUV.utils.base_clusters.zen_cluster import ZenCluster
-from ZenUV.utils.base_clusters.stripes import UvStripes, StripesLimits
-from ZenUV.ops.reshape.utils import DistributeUtils
-from ZenUV.utils.constants import u_axis, v_axis
-from ZenUV.utils.selection_utils import SelectionProcessor
-from ZenUV.ops.reshape.props import ReshapeProperties
-from ZenUV.utils.blender_zen_utils import ZenPolls
-from ZenUV.ops.zen_unwrap.props import ZenUnwrapProps
+from ...utils.uv_factory import UvIslandUtils
+from ...ops.reshape.labels import ReshapeLabels as Rlabels
+from ...utils.base_clusters.zen_cluster import ZenCluster
+from ...utils.base_clusters.stripes import UvStripes, StripesLimits
+from ...ops.reshape.utils import DistributeUtils
+from ...utils.constants import u_axis, v_axis
+from ...utils.selection_utils import SelectionProcessor
+from ...ops.reshape.props import ReshapeProperties
+from ...utils.blender_zen_utils import ZenPolls, is_loop_domain
+from ...ops.zen_unwrap.props import ZenUnwrapProps
+from ...utils.loops_factory import LoopsFactory
+from ...utils.uv_factory import SelectionUtils
+from ...utils.iter_utils import IterUtils
 
-from ZenUV.utils.vlog import Log
+from ...utils.vlog import Log
 
 
 class ZUV_OT_DistributeGeneric(bpy.types.Operator):
@@ -62,20 +64,17 @@ class ZUV_OT_DistributeGeneric(bpy.types.Operator):
             return cls.bl_description
 
     def execute(self, context):
-        objs = resort_objects_by_selection(context, context.objects_in_mode)
+        objs = ResortObjects.resort_objects_by_selection(context, context.objects_in_mode)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {"CANCELLED"}
 
-        uv_sync = context.scene.tool_settings.use_uv_select_sync
         if self.lock_pos:
             self.ends_pos = self.starts_pos
 
         # props.base_position = v_axis
         # props.end_position = Vector((0.5, 0.0))
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
             props = ReshapeProperties(
                 self.sources,
@@ -94,8 +93,7 @@ class ZUV_OT_DistributeGeneric(bpy.types.Operator):
                 self.detect_corners
             )
 
-            islands = island_util.get_island(context, bm, uv_layer)
-            # clusters = []
+            islands = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
             scope = []
             z_stripes = None
             for island in islands:
@@ -111,26 +109,23 @@ class ZUV_OT_DistributeGeneric(bpy.types.Operator):
                         axis = u_axis
                     elif self.sources == "VAXIS":
                         axis = v_axis
-                    cl.deselect_all_edges()
-                    self.deselect_faces(context, uv_sync, uv_layer, island)
+                    SelectionUtils.select_faces_any_context(context, island, state=False, bm=bm, uv_layer=uv_layer)
+                    self.deselect_faces(context, bm, uv_layer, island)
                     edges = cl.get_edges_by_angle_to_axis(radians(self.angle), axis)
                     z_stripes = UvStripes(edges, cl.uv_layer).get_stripes_from_selection()
 
                 elif self.sources == "BORDERS":
                     self.orient_along = props.orient_along = "ORIGINAL"
                     self.spacing = props.spacing = 'GEOMETRY'
-                    self.deselect_faces(context, uv_sync, uv_layer, island)
-                    if context.area.type == 'IMAGE_EDITOR' and not uv_sync:
-                        context.scene.tool_settings.uv_select_mode = "EDGE"
-                    else:
-                        bpy.ops.mesh.select_mode(type="EDGE")
+                    self.deselect_faces(context, bm, uv_layer, island)
+                    switch_to_edge_sel_mode(context)
                     if self.relax_linked:
-                        cl.deselect_all_edges()
+                        SelectionUtils.select_faces_any_context(context, island, state=False, bm=bm, uv_layer=uv_layer)
                     edges = cl.get_bound_edges()
-                    # print("Bound edges: ", edges)
+
                     if self.select_border or self.relax_linked:
-                        for edge in edges:
-                            edge.select(context, True)
+                        looplist = [lp for e in edges for lp in e.loops]
+                        LoopsFactory.select_loops(context, bm, looplist, uv_layer, state=True)
                     z_stripes = UvStripes(edges, cl.uv_layer).get_stripes_from_borders(self.detect_corners)
 
                 if not z_stripes.result_message:
@@ -164,7 +159,7 @@ class ZUV_OT_DistributeGeneric(bpy.types.Operator):
                         props
                     )
 
-                bmesh.update_edit_mesh(me, loop_triangles=False)
+                bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         if self.relax_linked:
             p_use_pinned = self.use_pinned if self.sources == "SELECTED" else False
@@ -172,18 +167,8 @@ class ZUV_OT_DistributeGeneric(bpy.types.Operator):
 
         return {'FINISHED'}
 
-    def deselect_faces(self, context, uv_sync, uv_layer, island):
-        if context.area.type == 'IMAGE_EDITOR' and not uv_sync:
-            if ZenPolls.version_since_3_2_0:
-                for lp in [loop[uv_layer] for f in island for loop in f.loops]:
-                    lp.select = False
-                    lp.select_edge = False
-            else:
-                for lp in [loop[uv_layer] for f in island for loop in f.loops]:
-                    lp.select = False
-        else:
-            for face in island:
-                face.select = False
+    def deselect_faces(self, context, bm, uv_layer, island):
+        SelectionUtils.select_faces_any_context(context, island, state=False, bm=bm, uv_layer=uv_layer)
 
     def draw_preset_by_axis(self, layout):
         box = layout.box()
@@ -670,14 +655,10 @@ class ZUV_OT_DistributeVerts(ZUV_OT_DistributeGeneric):
 
 
 def do_relax_linked(self, context, use_pinned: bool) -> bool:
-
     SelectionProcessor.reset_state()
-
-    is_not_sync = context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync
 
     stored_selection = SelectionProcessor.collect_selected_objects(
         context,
-        is_not_sync,
         b_in_indices=True,
         b_is_skip_objs_without_selection=True,
         b_skip_uv_layer_fail=False)
@@ -686,14 +667,13 @@ def do_relax_linked(self, context, use_pinned: bool) -> bool:
         Log.warn('Reshape', SelectionProcessor.message)
         return False
 
-    for s_obj in SelectionProcessor.yield_selected_objects(stored_selection):
+    for s_obj in SelectionProcessor.yield_selected_objects(context, stored_selection):
         bm = s_obj.bm
         uv_layer = s_obj.uv_layer
 
-        islands = island_util.get_island(context, bm, uv_layer)
-        s_obj.attribute_storage['islands'] = [
-                [f.index for f in island]
-                for island in island_util.get_island(context, bm, uv_layer)]
+        islands = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
+
+        s_obj.attribute_storage['islands'] = [[f.index for f in island] for island in islands]
         p_init_pins = {lp: lp[uv_layer].pin_uv for island in islands for f in island for lp in f.loops}
         s_obj.attribute_storage['init_pins_state'] = list(p_init_pins.values())
 
@@ -701,23 +681,22 @@ def do_relax_linked(self, context, use_pinned: bool) -> bool:
             for loop in (lp for lp, state in p_init_pins.items() if state):
                 loop[uv_layer].pin_uv = False
 
-        if is_not_sync:
-            loops_state = {lp: lp[uv_layer].select for island in islands for f in island for lp in f.loops}
+        if ZenPolls.version_since_5_0_0:
+            if context.space_data.type == 'IMAGE_EDITOR':
+                loops_state = {lp: LoopsFactory.is_loop_selected(lp, uv_layer, select_edge=False) for island in islands for f in island for lp in f.loops}
+            else:
+                loops_state = {lp: lp.vert.select for island in islands for f in island for lp in f.loops}
         else:
-            loops_state = {lp: lp.vert.select for island in islands for f in island for lp in f.loops}
+            if is_loop_domain(context):
+                loops_state = {lp: LoopsFactory.is_loop_selected(lp, uv_layer, select_edge=False) for island in islands for f in island for lp in f.loops}
+            else:
+                loops_state = {lp: lp.vert.select for island in islands for f in island for lp in f.loops}
 
         for loop in (lp for lp, state in loops_state.items() if state):
             loop[uv_layer].pin_uv = True
 
-        if is_not_sync:
-            for island in islands:
-                for f in island:
-                    for loop in f.loops:
-                        loop[uv_layer].select = True
-        else:
-            for island in islands:
-                for f in island:
-                    f.select = True
+        for island in islands:
+            SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
 
     if bpy.ops.uv.unwrap.poll():
         bpy.ops.uv.unwrap(
@@ -725,16 +704,15 @@ def do_relax_linked(self, context, use_pinned: bool) -> bool:
             margin=0
         )
 
-    for s_obj in SelectionProcessor.yield_selected_objects(stored_selection):
+    for s_obj in SelectionProcessor.yield_selected_objects(context, stored_selection):
         bm = s_obj.bm
         uv_layer = s_obj.uv_layer
         islands = s_obj.attribute_storage['islands']
-        p_faces = bm.faces
-        p_loops = [lp for island in islands for i in island for lp in p_faces[i].loops]
+        p_loops = [lp for island in islands for i in island for lp in bm.faces[i].loops]
         for loop, pin in zip(p_loops, s_obj.attribute_storage['init_pins_state']):
             loop[uv_layer].pin_uv = pin
 
-    SelectionProcessor.restore_selection_in_objects(context, stored_selection, is_not_sync)
+    SelectionProcessor.restore_selection_in_objects(context, stored_selection)
 
     return True
 

@@ -25,9 +25,9 @@ import math
 
 from .uv_base import ZuvUVGizmoBase
 
-from ZenUV.ops.event_service import get_blender_event
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ....ops.event_service import get_blender_event
+from ....utils.vlog import Log
+from ....utils.blender_zen_utils import ZenPolls
 
 
 class ZUV_GGT_UVTransformRot(bpy.types.GizmoGroup, ZuvUVGizmoBase):
@@ -84,7 +84,7 @@ class ZUV_GGT_UVTransformRot(bpy.types.GizmoGroup, ZuvUVGizmoBase):
             if not self.are_gizmos_modal() and self.is_uv_selected():
                 rgn2d = context.region.view2d
 
-                x, y, = rgn2d.view_to_region(self.uv_selection_center.x, self.uv_selection_center.y, clip=False)
+                x, y, = rgn2d.view_to_region(ZuvUVGizmoBase.uv_selection_center.x, ZuvUVGizmoBase.uv_selection_center.y, clip=False)
 
                 mtx = Matrix.Translation(Vector((x, y, 0)))
                 self.mpr_rot.matrix_basis = mtx
@@ -161,7 +161,7 @@ class ZUV_GGT_UVTransformRot(bpy.types.GizmoGroup, ZuvUVGizmoBase):
 
         b_executed = False
 
-        from ZenUV.ops.transform_sys.trim_depend_transform import ZUV_OT_TrUVRotateInTrim
+        from ....ops.transform_sys.trim_depend_transform import ZUV_OT_TrUVRotateInTrim
 
         if self.drag_started and wm.operators:
             op = wm.operators[-1]

@@ -27,16 +27,17 @@ import itertools
 import os
 import sys
 
-from ZenUV.ui.labels import ZuvLabels
+from ...ui.labels import ZuvLabels
 from bpy.props import BoolProperty
-from ZenUV.utils.generic import fit_uv_view, UvImage
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.ui.pie import ZsPieFactory
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ...utils.generic import fit_uv_view, UvImage
+from ...prop.zuv_preferences import get_prefs
+from ...ui.pie import ZsPieFactory
+from ...ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ...utils.uv_factory import UvIslandUtils
 
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ...utils.blender_zen_utils import ZenPolls, is_loop_domain
 
-from ZenUV.utils.vlog import Log
+from ...utils.vlog import Log
 
 from .pack_utils import PackObjectsStorage, PackUtils
 from .uvpm_props import get_main_props
@@ -60,14 +61,29 @@ class UVPmData:
 
     @classmethod
     def update_data(cls):
-        if cls._CACHE_UVPM_VERSION is None:
+        p_used_addons = bpy.context.preferences.addons
+        # NOTE: we must check when UVP was disabled
+        if cls._CACHE_UVPM_PACKAGE is None or cls._CACHE_UVPM_PACKAGE not in p_used_addons:
+            # NOTE: Cleanup if was previously filled
+            cls._CACHE_UVPM_VERSION = None
+            cls._CACHE_UVPM_PATH = None
+            cls._CACHE_UVPM_PACKAGE = None
+
+            # NOTE: the list of all addons (disabled, duplicated, etc.)
             for addon in addon_utils.modules():
-                if addon.bl_info['name'] in cls.packmaster_names:
-                    ver = addon.bl_info['version']
-                    cls._CACHE_UVPM_VERSION = (ver[0], ver[1], ver[2])
-                    cls._CACHE_UVPM_PACKAGE = addon.__name__
-                    cls._CACHE_UVPM_PATH = os.path.dirname(addon.__file__)
-                    break
+                try:
+                    info = addon_utils.module_bl_info(addon)
+                    if info and info.get('name', None) in cls.packmaster_names:
+                        s_module_name = addon.__name__
+                        # NOTE: we detect here the first used addon
+                        if s_module_name in p_used_addons:
+                            ver = info['version']
+                            cls._CACHE_UVPM_VERSION = (ver[0], ver[1], ver[2])
+                            cls._CACHE_UVPM_PACKAGE = s_module_name
+                            cls._CACHE_UVPM_PATH = os.path.dirname(addon.__file__)
+                            break
+                except Exception as e:
+                    Log.error("UVP: ADDON INFO:", e)
 
     @classmethod
     def get_packmaster_version(cls):
@@ -218,61 +234,103 @@ class GenericPackerManager(UnifiedPackerProps):
 
 
 class UVPackerManager(GenericPackerManager):
+    """UV Packer keeps version 1.0; we use our own versioning to distinguish releases."""
+
+    packer_map = {
+        "UvPacker": {
+            "rotate_key": "uvp_rotate",
+            "padding_key": "uvp_padding",
+            "selection_key": "uvp_selection_only",
+            "op_poll": bpy.ops.uvpackeroperator.packbtn.poll,
+            "op_call": lambda: bpy.ops.uvpackeroperator.packbtn('INVOKE_DEFAULT'),
+            "parsed_props": {
+                "uvp_width": "TD_TextureSizeX",
+                "uvp_height": "TD_TextureSizeY",
+                "uvp_rescale": "averageBeforePack",
+                "uvp_prerotate": "rotateOnPack",
+                "uvp_rotate": None,
+                "uvp_padding": None,
+                "uvp_selection_only": "packSelectedIslOnly",
+            },
+            "prop_attr": "UVPackerProps",
+            "padding_check": "uvp_padding",
+        },
+        "UnwrellaConnect": {
+            "rotate_key": "uio_rotate",
+            "padding_key": "uio_padding",
+            "selection_key": "uio_selection_only",
+            "op_poll": bpy.ops.unwrellaoperator.unwrapbtn.poll,
+            "op_call": lambda: bpy.ops.unwrellaoperator.unwrapbtn('INVOKE_DEFAULT'),
+            "parsed_props": {
+                "uio_width": "TD_TextureSizeX",
+                "uio_height": "TD_TextureSizeY",
+                "uio_rescale": "averageBeforePack",
+                "uio_prerotate": "rotateOnPack",
+                "uio_rotate": None,
+                "uio_padding": None,
+                "uio_selection_only": "packSelectedIslOnly",
+            },
+            "prop_attr": "UnwrellaProps",
+            "padding_check": "uio_padding",
+        },
+    }
+
+    packer_version = None
 
     def __init__(self, context, addon_prefs) -> None:
-        GenericPackerManager.__init__(self, context, addon_prefs)
-        self.packer_parsed_props = {
-            "uvp_width": "TD_TextureSizeX",
-            "uvp_height": "TD_TextureSizeY",
-            "uvp_rescale": "averageBeforePack",
-            "uvp_prerotate": "rotateOnPack",
-            "uvp_rotate": None,
-            "uvp_padding": None,
-            "uvp_selection_only": "packSelectedIslOnly",
-        }
+        super().__init__(context, addon_prefs)
+        self.packer_parsed_props = None
         self.packer_name = "UV-Packer"
         self.show_transfer = False
 
     def pack(self, context: bpy.types.Context, Storage: PackObjectsStorage, addon_prefs: bpy.types.AddonPreferences):
-        print("Zen UV - Pack: UV-Packer Engine activated.")
+        Log.debug('Pack', "Zen UV - Pack: UV-Packer Engine activated.")
         if UvImage.get_aspect(context) != 1.0:
-            print('UV-Packer can not pack correctly if UV Editor image is non-square.')
+            print("UV-Packer may not pack correctly with non-square UV image.")
         self.result, self.message = self._do_pack(context, Storage, addon_prefs)
 
     def _is_engine_present(self):
-        if hasattr(bpy.types, bpy.ops.uvpackeroperator.packbtn.idname()):
-            if hasattr(self.context.scene, "UVPackerProps") and hasattr(self.context.scene.UVPackerProps, "uvp_padding"):
-                if self.show_transfer:
-                    print("Engine present. Props Pointer created.")
-                self.packer_props_pointer = self.context.scene.UVPackerProps
-                return True
+        for version, data in self.packer_map.items():
+            poll_id = data["op_poll"].__self__.idname()
+            if hasattr(bpy.types, poll_id):
+                Log.debug("Pack", f"UV Packer version {version}.")
+                UVPackerManager.packer_version = version
+                self.packer_parsed_props = data["parsed_props"]
+
+                props = getattr(self.context.scene, data["prop_attr"], None)
+                if props and hasattr(props, data["padding_check"]):
+                    if self.show_transfer:
+                        print("Engine present. Props Pointer created.")
+                    self.packer_props_pointer = props
+                    return True
         return False
 
     def _do_pack(self, context: bpy.types.Context, Storage: PackObjectsStorage, addon_prefs: bpy.types.AddonPreferences):
-
         if not self._is_engine_present():
             self.raise_popup_id_name = 'ZUV_MT_ZenPack_Uvpacker_Popup'
-            return False, f"Nothing is produced. Seems like {self.packer_name} is not installed on your system."
+            return False, f"{self.packer_name} is not installed."
 
         self._store_packer_props()
-
         if self.stored_props is None:
-            return False, 'No UVPacker properties found.'
+            return False, "No UVPacker properties found."
 
-        # Setting additional Packer Properties
-        self.packer_parsed_props["uvp_rotate"] = self.context.scene.UVPackerProps.uvp_rotate
-        if not addon_prefs.rotateOnPack:
-            self.packer_parsed_props["uvp_rotate"] = "0"
-        self.packer_parsed_props["uvp_padding"] = self.context.scene.zen_uv.pack_uv_packer_margin
+        version = self.packer_version
+        pmap = self.packer_map.get(version)
+        if not pmap:
+            return False, "UV Packer version is undefined"
+
+        rotate_val = self.packer_props_pointer.get(pmap["rotate_key"], "0")
+        self.packer_parsed_props[pmap["rotate_key"]] = rotate_val if addon_prefs.rotateOnPack else "0"
+        self.packer_parsed_props[pmap["padding_key"]] = context.scene.zen_uv.pack_uv_packer_margin
 
         self._trans_props_zen_to_packer()
 
-        if addon_prefs.packSelectedIslOnly is False and Storage.is_hidden_faces_in_objects():
-            PackUtils.resolve_pack_selected_only(context, addon_prefs, Storage, set_sel_only=True)
-            context.scene.UVPackerProps.uvp_selection_only = True
-        elif addon_prefs.packSelectedIslOnly is True and Storage.is_hidden_faces_in_objects():
-            PackUtils.resolve_pack_selected_only(context, addon_prefs, Storage)
-            context.scene.UVPackerProps.uvp_selection_only = True
+        if Storage.is_hidden_faces_in_objects():
+            PackUtils.resolve_pack_selected_only(
+                context, addon_prefs, Storage,
+                set_sel_only=not addon_prefs.packSelectedIslOnly
+            )
+            setattr(self.packer_props_pointer, pmap["selection_key"], True)
         else:
             PackUtils.resolve_pack_selected_only(context, addon_prefs, Storage)
 
@@ -280,22 +338,19 @@ class UVPackerManager(GenericPackerManager):
         out_msg = []
 
         try:
-            if not bpy.ops.uvpackeroperator.packbtn.poll():
-                raise RuntimeError(f"For some reason, {self.packer_name} cannot be launched. Check out its performance separately from Zen UV.")
-
-            bpy.ops.uvpackeroperator.packbtn('INVOKE_DEFAULT')
+            if not pmap["op_poll"]():
+                raise RuntimeError(f"{self.packer_name} cannot be launched. Test it standalone.")
+            pmap["op_call"]()
             out_msg.append("Finished")
         except Exception as e:
             res = False
             out_msg.append(str(e))
 
-        restored = self._restore_packer_props()
-
-        if not restored:
+        if not self._restore_packer_props():
             res = False
-            out_msg.append(f"The properties of the {self.packer_name} are not restored.")
+            out_msg.append(f"{self.packer_name} properties not restored.")
 
-        return res, '.'.join(out_msg)
+        return res, '. '.join(out_msg)
 
 
 class UVPMmanager(GenericPackerManager):
@@ -358,7 +413,7 @@ class UVPMmanager(GenericPackerManager):
         self.stored_t_b = None
 
     def pack(self, context, Storage: PackObjectsStorage, addon_prefs, disable_overlay):
-        print("Zen UV - Pack: UV Packmaster Engine activated.")
+        Log.debug('Pack', "Zen UV - Pack: UV Packmaster Engine activated.")
 
         PackUtils.resolve_pack_selected_only(context, addon_prefs, Storage)
 
@@ -374,8 +429,7 @@ class UVPMmanager(GenericPackerManager):
         self.result, self.message = self._do_pack(context)
         self.raise_popup_id_name = self.raise_popup_id_name
 
-        # bpy.ops.mesh.select_all(action='DESELECT')
-        PackUtils.bpy_select_by_context(context, action='DESELECT')
+        PackUtils.pack_bpy_select_by_context(context, action='DESELECT')
         self.restore_uvpm3_target_box(context)
 
     def get_engine_version(self, context: bpy.types.Context):
@@ -555,7 +609,7 @@ class UVPMmanager(GenericPackerManager):
 
         except Exception as e:
             self._restore_packer_props()
-            from ZenUV.utils.messages import zen_message
+            from ...utils.messages import zen_message
             zen_message(context, str(e))
             return False, str(e)
 
@@ -595,7 +649,8 @@ class BlenderPackManager(UnifiedPackerProps):
 
     def __init__(self, context) -> None:
         self.show_transfer = False
-        self.is_not_sync = context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync
+        self.is_loop_based = is_loop_domain(context)
+        self.context = context
 
     def is_pack_allowed(cls):
         if ZenPolls.version_equal_3_6_0:
@@ -603,7 +658,7 @@ class BlenderPackManager(UnifiedPackerProps):
         return True
 
     def pack(self, context: bpy.types.Context, Storage: PackObjectsStorage, addon_prefs: bpy.types.AddonPreferences, fast_mode: bool):
-        print("Zen UV - Pack: Blender Engine activated.")
+        Log.debug('Pack', "Zen UV - Pack: Blender Engine activated.")
         if not self.is_pack_allowed():
             self.result = False
             self.message = 'Blender Pack Engine: In Blender v3.6.0 pack is not allowed because Packer is modal. Use Blender v3.6.1 istead'
@@ -624,7 +679,7 @@ class BlenderPackManager(UnifiedPackerProps):
 
         self.result, self.message = self._do_pack(addon_prefs, fast_mode, Storage)
         Storage.remove_marker_faces()
-        PackUtils.bpy_select_by_context(context, action='DESELECT')
+        PackUtils.pack_bpy_select_by_context(context, action='DESELECT')
 
     def _do_pack(self, addon_prefs: bpy.types.AddonPreferences, fast_mode: bool, Storage: PackObjectsStorage):
         if addon_prefs.averageBeforePack:
@@ -718,10 +773,16 @@ class BlenderPackManager(UnifiedPackerProps):
 
     def get_chk_coordinates(self, bm: bmesh.types.BMesh, uv_layer):
         bm.edges.ensure_lookup_table()
-        if self.is_not_sync:
-            p_edge_idxs = [edge.index for edge in bm.edges if edge.link_loops and not edge.hide and edge.select]
+        if ZenPolls.version_since_5_0_0:
+            if self.is_loop_based:
+                p_edge_idxs = list({lp.edge.index for f in bm.faces for lp in f.loops if lp.uv_select_vert or lp.uv_select_edge})
+            else:
+                p_edge_idxs = [edge.index for edge in bm.edges if edge.link_loops and edge.select and not edge.hide]
         else:
-            p_edge_idxs = [edge.index for edge in bm.edges if edge.link_loops and not edge.hide]
+            if self.is_loop_based:
+                p_edge_idxs = list({lp.edge.index for f in bm.faces for lp in f.loops if lp[uv_layer].select or lp[uv_layer].select_edge})
+            else:
+                p_edge_idxs = [edge.index for edge in bm.edges if edge.link_loops and edge.select and not edge.hide]
 
         if p_edge_idxs:
             e0 = 0
@@ -730,7 +791,9 @@ class BlenderPackManager(UnifiedPackerProps):
         else:
             return [(0.0, 0.0)] * 3
 
-        if self.is_not_sync:
+        p_edge_idxs.sort()
+
+        if self.is_loop_based:
             return list(itertools.chain(
                 loop[uv_layer].uv[:]
                 for edge_index in (p_edge_idxs[e0], p_edge_idxs[e1], p_edge_idxs[e2])
@@ -824,21 +887,30 @@ class PackerProcessor:
 
         self.fast_mode: bool = PROPS.fast_mode
 
+        self.current_engine = get_prefs().packEngine
+
     def pack(self, context: bpy.types.Context, Storage: PackObjectsStorage):
         addon_prefs = get_prefs()
-        current_engine = addon_prefs.packEngine
 
-        if current_engine == "UVP":
+        if addon_prefs.packSelectedIslOnly and not self.fast_mode:
+            is_selection = sum([len(s_obj.attribute_storage['islands']) for s_obj in Storage.objs]) != 0
+            if not is_selection:
+                self.result = False
+                self.message = "No islands selected in 'Pack Selected Islands' mode."
+                self.raise_popup_id_name = 'ZUV_MT_ZenPack_SelMode_Popup'
+                return
+
+        if self.current_engine == "UVP":
 
             Packer = UVPMmanager(context, addon_prefs)
             Packer.pack(context, Storage, addon_prefs, self.disable_overlay)
 
-        elif current_engine == "BLDR":
+        elif self.current_engine == "BLDR":
 
             Packer = BlenderPackManager(context)
             Packer.pack(context, Storage, addon_prefs, self.fast_mode)
 
-        elif current_engine == "UVPACKER":
+        elif self.current_engine == "UVPACKER":
 
             Packer = UVPackerManager(context, addon_prefs)
             Packer.pack(context, Storage, addon_prefs)
@@ -885,7 +957,7 @@ class ZUV_OT_Pack(bpy.types.Operator):
         p_res = self.Storage.collect_objects(context)
         self.invoked = True
         if p_res is False:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
         return self.execute(context)
 
@@ -893,12 +965,17 @@ class ZUV_OT_Pack(bpy.types.Operator):
         if not self.invoked:
             p_res = self.Storage.collect_objects(context)
             if p_res is False:
-                self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+                self.report({'WARNING'}, "No objects selected.")
                 return {'CANCELLED'}
 
         ZsPieFactory.mark_pie_cancelled()
 
         self.Storage.hide_pack_excluded(context)
+
+        for s_obj in self.Storage.objs:
+            s_obj.attribute_storage['islands'] = [
+                [f.index for f in island]
+                for island in UvIslandUtils.get_selected_uv_islands(context, s_obj.bm, s_obj.uv_layer)]
 
         PackProcessor = PackerProcessor(self.properties)
         PackProcessor.pack(context, self.Storage)
@@ -913,13 +990,14 @@ class ZUV_OT_Pack(bpy.types.Operator):
         print(PackProcessor.message)
 
         self.Storage.unhide_pack_excluded()
-        self.Storage.restore_selection_all_objects(context)
+        if PackProcessor.current_engine != "UVPACKER":
+            self.Storage.restore_selection_all_objects(context)
 
         fit_uv_view(context, mode="all")
 
-        if self.display_uv and get_prefs().packEngine != "UVPACKER":
+        if self.display_uv and PackProcessor.current_engine != "UVPACKER":
             # Display UV Widget from HOPS addon
-            from ZenUV.utils.hops_integration import show_uv_in_3dview
+            from ...utils.hops_integration import show_uv_in_3dview
             show_uv_in_3dview(context, use_selected_meshes=True, use_selected_faces=False, use_tagged_faces=False)
 
         return {'FINISHED'}

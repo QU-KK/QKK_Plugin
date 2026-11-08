@@ -20,7 +20,7 @@
 
 import bpy
 
-from ZenUV.ops.mark import ZUV_OT_Auto_Mark
+from ...ops.mark import ZUV_OT_Auto_Mark
 
 
 class ZUV_OT_Auto_Mark2(ZUV_OT_Auto_Mark):

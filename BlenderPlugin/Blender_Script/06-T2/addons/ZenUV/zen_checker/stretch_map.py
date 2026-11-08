@@ -24,18 +24,14 @@ import bpy
 import bmesh
 import math
 from mathutils import Vector, Color
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.generic import resort_by_type_mesh
-from ZenUV.utils.generic import (
-    get_mesh_data,
-    select_islands,
-    verify_uv_layer
-)
-from ZenUV.zen_checker.zen_checker_labels import ZCheckerLabels as label
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.ui.pie import ZsPieFactory
-from ZenUV.utils.blender_zen_utils import ZenPolls
-# from ZenUV.utils.vlog import Log
+from ..utils.register_util import RegisterUtils
+from ..utils.generic import verify_uv_layer, ResortObjects, switch_to_face_sel_mode
+from ..utils.uv_factory import UvIslandUtils, SelectionUtils
+from ..utils.iter_utils import IterUtils
+from ..ui.labels import ZuvLabels
+from ..ui.pie import ZsPieFactory
+from ..utils.blender_zen_utils import ZenPolls, is_sync_off
+# from ..utils.vlog import Log
 
 
 class StretchMap():
@@ -46,7 +42,7 @@ class StretchMap():
 
     def __init__(self, context):
         self.context = context
-        self.objs = resort_by_type_mesh(context)
+        self.objs = ResortObjects.resort_by_type_mesh(context)
 
     def get_stretched_faces_indices(self, bm: bmesh.types. BMesh, face_mask: list, factor_list: list, n_gons_only: bool):
         p_select = []
@@ -160,51 +156,17 @@ class StretchMap():
         return bm, obj
 
 
-class ZUV_OT_SelectStretchedIslands(bpy.types.Operator):
-    bl_idname = "uv.zenuv_select_stretched_islands"
-    bl_label = label.OT_STRETCH_SELECT_LABEL
-    bl_description = label.OT_STRETCH_SELECT_DESC
-    bl_options = {'REGISTER', 'UNDO'}
-
-    Filter: bpy.props.FloatProperty(
-        name=label.PROP_STRETCHED_FILTER_LABEL,
-        description=label.PROP_STRETCHED_FILTER_DESC,
-        min=0.1,
-        default=0.1,
-        precision=2,
-    )
-
-    def draw(self, context):
-        self.layout.prop(self, "Filter")
-
-    def invoke(self, context, event):
-        self.objs = resort_by_type_mesh(context)
-        if not self.objs:
-            return {"CANCELLED"}
-        sm = StretchMap(context)
-        self.data = sm.get_stretched_verts()
-        return self.execute(context)
-
-    def execute(self, context):
-        context.tool_settings.mesh_select_mode = [True, False, False]
-        for obj, fac in self.data.items():
-            me, bm = get_mesh_data(obj)
-            bm.verts.ensure_lookup_table()
-            for i in range(len(fac)):
-                bm.verts[i].select = fac[i] > self.Filter
-            bmesh.update_edit_mesh(me, loop_triangles=False)
-        select_islands(context, self.objs)
-        context.tool_settings.mesh_select_mode = [False, False, True]
-
-        return {'FINISHED'}
-
-
 class ZUV_OT_SelectStretchedFaces(bpy.types.Operator):
     bl_idname = "uv.zenuv_select_stretched_faces"
     bl_label = "Select Stretched Faces"
     bl_zen_short_name = "Stretched Faces"
     bl_description = "Selects faces with stretched UV coordinates"
     bl_options = {'REGISTER', 'UNDO'}
+
+    clear_selection: bpy.props.BoolProperty(
+        name='Clear Selection',
+        description='Clears the initial selection before applying the operation',
+        default=True)
 
     influence: bpy.props.EnumProperty(
         name="Influence",
@@ -214,11 +176,6 @@ class ZUV_OT_SelectStretchedFaces(bpy.types.Operator):
             ("ISLAND", "Island", "Selects entire islands containing stretched faces"),
             ],
         default='FACE')
-
-    clear_selection: bpy.props.BoolProperty(
-        name='Clear Selection',
-        description='Clears the initial selection before applying the operation',
-        default=True)
 
     threshold: bpy.props.FloatProperty(
         name="Threshold",
@@ -233,27 +190,21 @@ class ZUV_OT_SelectStretchedFaces(bpy.types.Operator):
         default=False)
 
     def invoke(self, context, event):
-        self.objs = resort_by_type_mesh(context)
+        self.objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context, require_active_uv=True)
         if not self.objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {"CANCELLED"}
         sm = StretchMap(context)
         self.data = sm.collect_distortion_data_by_faces()
         return self.execute(context)
 
     def execute(self, context):
-        b_is_image_editor = context.space_data.type == 'IMAGE_EDITOR'
-        b_is_not_sync = b_is_image_editor and not context.scene.tool_settings.use_uv_select_sync
-        if b_is_not_sync:
-            bpy.ops.uv.select_mode(type='FACE')
-        else:
-            bpy.ops.mesh.select_mode(type='FACE')
+        b_is_not_sync = is_sync_off(context)
+        switch_to_face_sel_mode(context)
 
         masks = dict()
-        for obj in self.data.keys():
-            bm = bmesh.from_edit_mesh(obj.data)
-            uv_layer = verify_uv_layer(bm)
-            bm.faces.ensure_lookup_table()
+        objs = self.data.keys()
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
             if b_is_not_sync:
                 masks.update({obj.name: [f.select and not f.hide for f in bm.faces]})
             else:
@@ -264,14 +215,17 @@ class ZUV_OT_SelectStretchedFaces(bpy.types.Operator):
                 return {'CANCELLED'}
 
         if self.clear_selection:
-            from ZenUV.utils.generic import bpy_deselect_by_context
-            bpy_deselect_by_context(context)
+            from ..utils.generic import bpy_select_by_context
+            bpy_select_by_context(context, action='DESELECT')
 
         for obj, factor_list in self.data.items():
             bm = bmesh.from_edit_mesh(obj.data)
             uv_layer = verify_uv_layer(bm)
             bm.faces.ensure_lookup_table()
             mask = masks[obj.name]
+
+            if ZenPolls.version_since_5_0_0 and self.clear_selection:
+                SelectionUtils.select_all(bm, False)
 
             p_select = []
             if self.n_gons_only:
@@ -281,27 +235,20 @@ class ZUV_OT_SelectStretchedFaces(bpy.types.Operator):
                 for f in bm.faces:
                     p_select.append(mask[f.index] and any(abs(1 - factor) > self.threshold for factor in factor_list[f.index]))
 
-            if b_is_not_sync:
-                if ZenPolls.version_since_3_2_0:
-                    for f in bm.faces:
-                        if p_select[f.index]:
-                            for loop in f.loops:
-                                loop[uv_layer].select = True
-                                loop[uv_layer].select_edge = True
-                else:
-                    for f in bm.faces:
-                        if p_select[f.index]:
-                            for loop in f.loops:
-                                loop[uv_layer].select = True
-            else:
-                for f in bm.faces:
-                    f.select = p_select[f.index]
+            island = [f for f, state in zip(bm.faces, p_select) if state]
+
+            SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
 
             bm.select_flush_mode()
-            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
             if self.influence == 'ISLAND':
-                select_islands(context, self.objs)
+                objs = list(self.data.keys())
+
+                for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+                    for island in UvIslandUtils.yield_uv_islands(context, bm, uv_layer, b_selected_only=True, b_include_hidden=False, b_include_partially_hidden=False):
+                        SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
+
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         return {'FINISHED'}
 
@@ -333,7 +280,6 @@ class ZUV_OT_StretchMapSwitch(bpy.types.Operator):
 
 classes = [
     ZUV_OT_StretchMapSwitch,
-    ZUV_OT_SelectStretchedIslands,
     ZUV_OT_SelectStretchedFaces
 ]
 

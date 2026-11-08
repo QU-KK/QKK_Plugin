@@ -22,26 +22,26 @@ import bpy
 
 from functools import partial
 
-from ZenUV.utils.generic import ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE, ZUV_SPACE_TYPE
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.prop.common import get_combo_panel_order
+from ...utils.generic import ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE, ZUV_SPACE_TYPE
+from ...prop.zuv_preferences import get_prefs
+from ...prop.common import get_combo_panel_order
 
 from .trimsheet_utils import ZuvTrimsheetUtils
 from .color_palette import ZUV_PT_3DV_ColorPresets, ZUV_PT_UV_ColorPresets
 
-from ZenUV.ops.transform_sys.trim_batch_operators.directional_hotspot import (
+from ...ops.transform_sys.trim_batch_operators.directional_hotspot import (
     ZUV_PT_3DV_DirectionalHotspot, ZUV_PT_UV_DirectionalHotspot)
-from ZenUV.ops.transform_sys.trim_batch_operators.selections import ZUV_OT_TrimSelectIslandsByTrimName
-from ZenUV.ops.trimsheets.trimsheet_labels import TrimSheetLabels as TrsLabels
-from ZenUV.ops.trimsheets.trimsheet_from_mesh import ZUV_OT_SetTrimWorldSize
-from ZenUV.ops.trimsheets.trimsheet_ops import ZUV_OT_TrimsSetProps
-from ZenUV.ops.trimsheets.trimsheet_preview import update_preview
-from ZenUV.ico import icon_get
-from ZenUV.utils.tests.system_operators import ZUV_OT_OpenPresetsFolder
-from ZenUV.ui.tool.uv.uv_tool import ZuvUVWorkSpaceTool
-from ZenUV.ui.tool.view3d_tool import Zuv3DVWorkSpaceTool
-from ZenUV.utils.blender_zen_utils import getattr_for_repr, update_areas_in_all_screens
-from ZenUV.utils.vlog import Log
+from ...ops.transform_sys.trim_batch_operators.selections import ZUV_OT_TrimSelectIslandsByTrimName
+from ...ops.trimsheets.trimsheet_labels import TrimSheetLabels as TrsLabels
+from ...ops.trimsheets.trimsheet_from_mesh import ZUV_OT_SetTrimWorldSize
+from ...ops.trimsheets.trimsheet_ops import ZUV_OT_TrimsSetProps
+from ...ops.trimsheets.trimsheet_preview import update_preview
+from ...ico import icon_get
+from ...utils.tests.system_operators import ZUV_OT_OpenPresetsFolder
+from ...ui.tool.uv.uv_tool import ZuvUVWorkSpaceTool
+from ...ui.tool.view3d_tool import Zuv3DVWorkSpaceTool
+from ...utils.blender_zen_utils import ZenPolls, getattr_for_repr, update_areas_in_all_screens
+from ...utils.vlog import Log
 
 
 _last_uv_tool = ''
@@ -327,8 +327,8 @@ class ZUV_PT_3DV_SubTransformInTrim(bpy.types.Panel):
         return ''
 
     def draw(self, context):
-        from ZenUV.ops.transform_sys.trim_batch_operators.system import draw_trim_batch_ops
-        from ZenUV.ops.transform_sys.tr_ui import draw_trim_transform_panel
+        from ...ops.transform_sys.trim_batch_operators.system import draw_trim_batch_ops
+        from ...ops.transform_sys.tr_ui import draw_trim_transform_panel
         draw_trim_transform_panel(self, is_uv=False)
         draw_trim_batch_ops(self, context, self.layout)
 
@@ -347,8 +347,8 @@ class ZUV_PT_UVL_SubTransformInTrim(bpy.types.Panel):
     poll_reason = ZUV_PT_3DV_SubTransformInTrim.poll_reason
 
     def draw(self, context):
-        from ZenUV.ops.transform_sys.trim_batch_operators.system import draw_trim_batch_ops
-        from ZenUV.ops.transform_sys.tr_ui import draw_trim_transform_panel
+        from ...ops.transform_sys.trim_batch_operators.system import draw_trim_batch_ops
+        from ...ops.transform_sys.tr_ui import draw_trim_transform_panel
         draw_trim_transform_panel(self, is_uv=True)
         draw_trim_batch_ops(self, context, self.layout)
 
@@ -415,7 +415,7 @@ class ZUV_PT_3DV_SubTrimsheetTransform(bpy.types.Panel):
         return ''
 
     def draw(self, context):
-        from ZenUV.ops.trimsheets.trimsheet_transform import draw_trims_transform_ui_tools
+        from ...ops.trimsheets.trimsheet_transform import draw_trims_transform_ui_tools
         draw_trims_transform_ui_tools(context, self.layout)
 
 
@@ -476,7 +476,7 @@ class ZUV_PT_3DV_SubTrimSettings(bpy.types.Panel):
 
                 b_is_pixels = addon_prefs.trimsheet.size_mode == 'PIXEL'
                 op = row.operator('wm.context_set_enum', text='px', depress=b_is_pixels)
-                op.data_path = 'preferences.addons["ZenUV"].preferences.trimsheet.size_mode'
+                op.data_path = f'preferences.addons["{ZenPolls.ADDON_PACKAGE}"].preferences.trimsheet.size_mode'
                 op.value = 'PERCENT' if b_is_pixels else 'PIXEL'
 
     def draw(self, context):
@@ -787,8 +787,8 @@ class ZUV_PT_3DV_SubTrimsheetImport(bpy.types.Panel):
         layout = self.layout
         p_owner = ZuvTrimsheetUtils.getTrimsheetOwner(context)
         if p_owner:
-            from ZenUV.ops.trimsheets.trimsheet import ZUV_MT_TrimsheetMenu
-            from ZenUV.ops.transform_sys.trim_batch_operators.trim_to_mesh import ZUV_OT_TrimToMesh
+            from ...ops.trimsheets.trimsheet import ZUV_MT_TrimsheetMenu
+            from ...ops.transform_sys.trim_batch_operators.trim_to_mesh import ZUV_OT_TrimToMesh
 
             b_is_menu = isinstance(self, ZUV_MT_TrimsheetMenu)
             if b_is_menu:

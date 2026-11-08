@@ -20,49 +20,49 @@
 
 import bpy
 
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.ops.adv_uv_maps_sys.adv_uv_maps import DATA_PT_uv_texture_advanced, DATA_PT_UVL_uv_texture_advanced
-from ZenUV.ui import main_panel, ots_local_props
+from ..utils.register_util import RegisterUtils
+from ..ops.adv_uv_maps_sys.adv_uv_maps import DATA_PT_uv_texture_advanced, DATA_PT_UVL_uv_texture_advanced
+from ..ui import main_panel, ots_local_props
 
-from ZenUV.ops.texel_density.td_ui import register as register_td_ui
-from ZenUV.ops.texel_density.td_ui import unregister as unregister_td_ui
+from ..ops.texel_density.td_ui import register as register_td_ui
+from ..ops.texel_density.td_ui import unregister as unregister_td_ui
 
-from ZenUV.zen_checker.panel import ZUV_PT_Checker, ZUV_PT_Checker_UVL
-from ZenUV.ui import ui_call
+from ..zen_checker.panel import ZUV_PT_Checker, ZUV_PT_Checker_UVL
+from ..ui import ui_call
 
-from ZenUV.ops.pack_sys.pack_ui import ZUV_PT_Pack, ZUV_PT_UVL_Pack, pack_ui_parented_panels
+from ..ops.pack_sys.pack_ui import ZUV_PT_Pack, ZUV_PT_UVL_Pack, pack_ui_parented_panels
 
-from ZenUV.ops.select_sys.select_ui import ZUV_PT_Select, ZUV_PT_UVL_Select
+from ..ops.select_sys.select_ui import ZUV_PT_Select, ZUV_PT_UVL_Select
 
-from ZenUV.ui.zen_pack_popup import register as register_pack_popups
-from ZenUV.ui.zen_pack_popup import unregister as unregister_pack_popups
+from ..ui.zen_pack_popup import register as register_pack_popups
+from ..ui.zen_pack_popup import unregister as unregister_pack_popups
 
-from ZenUV.ui import zen_mark_popup
-from ZenUV.ui import keymap_operator
-from ZenUV.ui import uv_panel
-from ZenUV.ops import seam_groups
-# from ZenUV.ui.user_alt_commands import ZUV_OT_search_operator
-from ZenUV.ui import third_party_popups
-from ZenUV.ui import manual_map
-from ZenUV.ui.pie import ZsPieFactory
+from ..ui import zen_mark_popup
+from ..ui import keymap_operator
+from ..ui import uv_panel
+from ..ops import seam_groups
+# from ..ui.user_alt_commands import ZUV_OT_search_operator
+from ..ui import third_party_popups
+from ..ui import manual_map
+from ..ui.pie import ZsPieFactory
 
 # Importing Parented panels classes
-from ZenUV.ops.pack_sys.pack_exclusion import pack_exclusion_parented_panels
-from ZenUV.ops.texel_density.td_ui import td_parented_panels
-from ZenUV.stacks import m_stacks_parented_panels
+from ..ops.pack_sys.pack_exclusion import pack_exclusion_parented_panels
+from ..ops.texel_density.td_ui import td_parented_panels
+from ..stacks import m_stacks_parented_panels
 
-from ZenUV.ui.main_panel import main_panel_parented_panels
-from ZenUV.ui.uv_panel import main_panel_uv_parented_panels
-from ZenUV.ops.trimsheets.trimsheet_panel import (
+from ..ui.main_panel import main_panel_parented_panels
+from ..ui.uv_panel import main_panel_uv_parented_panels
+from ..ops.trimsheets.trimsheet_panel import (
     ZUV_PT_UVL_Trimsheet, ZUV_PT_3DV_Trimsheet, ZUV_PT_PopupTrimsheetMaterial, trimsheet_parented_panels)
-from ZenUV.zen_checker.check_utils import checker_parented_panels
+from ..zen_checker.check_utils import checker_parented_panels
 
 from .combo_panel import (
     ZUV_PT_UVL_ComboPanel, ZUV_PT_3DV_ComboPanel,
     ZUV_OT_SetComboPanel, ZUV_OT_ExpandComboPanel, ZUV_OT_PinComboPanel,
     ZUV_OT_ExpandFavCategory)
 
-from ZenUV.ui import tool
+from ..ui import tool
 
 from .gizmo_draw import (
     ZUV_GGT_DetectionUV,
@@ -75,16 +75,16 @@ from .gizmo_draw import (
     zenuv_despgraph_delayed,
     zenuv_depsgraph_ui_update)
 
-from ZenUV.ops.transform_sys.tr_ui import transform_parented_panels
-from ZenUV.ops.adv_uv_maps_sys.udims import udims_parented_panels
-from ZenUV.ops.zen_unwrap.finishing import finishing_parented_panels
+from ..ops.transform_sys.tr_ui import transform_parented_panels
+from ..ops.adv_uv_maps_sys.udims import udims_parented_panels
+from ..ops.zen_unwrap.finishing import finishing_parented_panels
 
-from ZenUV.ui import right_menu_inject
+from ..ui import right_menu_inject
 
-from ZenUV.stacks.stacks_ui import ZUV_PT_UVL_Stack, ZUV_PT_Stack
+from ..stacks.stacks_ui import ZUV_PT_UVL_Stack, ZUV_PT_Stack
 
 # Transform Extended panel
-# from ZenUV.ops.transform_sys.tr_ui import (
+# from ..ops.transform_sys.tr_ui import (
 #     # ZUV_PT_3DV_ExtendedTransform,
 #     # ZUV_PT_UVL_ExtendedTransform
 # )
@@ -240,7 +240,7 @@ def register():
 
     # register_class(ZUV_OT_search_operator)
 
-    if zenuv_depsgraph_ui_update not in bpy.app.handlers.depsgraph_update_post:
+    if zenuv_depsgraph_ui_update not in bpy.app.handlers.depsgraph_update_post and not bpy.app.background:
         bpy.app.handlers.depsgraph_update_post.append(zenuv_depsgraph_ui_update)
 
     right_menu_inject.register()
@@ -278,7 +278,7 @@ def unregister():
     if hasattr(bpy.types, "ZUV_PT_System_UVL"):
         RegisterUtils.unregister_class(bpy.types.ZUV_PT_System_UVL)
     if hasattr(bpy.types, 'ZUV_OT_UnitTestTexelDensity'):
-        from ZenUV.utils.tests.td_tests import unregister as unregister_td_tests
+        from ..utils.tests.td_tests import unregister as unregister_td_tests
         unregister_td_tests()
     # unregister_class(ZUV_OT_search_operator)
 

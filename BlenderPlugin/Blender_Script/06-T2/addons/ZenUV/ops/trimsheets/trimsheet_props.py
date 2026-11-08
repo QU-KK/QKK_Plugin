@@ -25,10 +25,10 @@ from dataclasses import dataclass
 from timeit import default_timer as timer
 
 from .trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.ops.event_service import get_blender_event
-from ZenUV.utils.blender_zen_utils import update_areas_in_all_screens
-from ZenUV.utils.vlog import Log
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import TransformSysOpsProps
+from ...ops.event_service import get_blender_event
+from ...utils.blender_zen_utils import update_areas_in_all_screens
+from ...utils.vlog import Log
+from ...ops.transform_sys.transform_utils.tr_utils import TransformSysOpsProps
 
 
 class ZuvTrimTextPropsConsts:

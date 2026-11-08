@@ -24,25 +24,25 @@ from json import dumps
 
 from bpy.props import PointerProperty
 from bpy.utils import register_class, unregister_class
-from ZenUV.prop.zuv_preferences import ZuvPanelEnableGroup, ZuvComboSettings, ZUV_AddonPreferences, get_prefs
-from ZenUV.zen_checker.files import update_files_info
-from ZenUV.utils.vlog import Log
+from ..prop.zuv_preferences import ZuvPanelEnableGroup, ZuvComboSettings, ZUV_AddonPreferences, get_prefs
+from ..zen_checker.files import update_files_info
+from ..utils.vlog import Log
 
 from ..ops.texel_density.td_props import register as register_td_props
 from ..ops.texel_density.td_props import unregister as unregister_td_props
-from ZenUV.zen_checker.properties import register as register_checker_addon_level_props
-from ZenUV.zen_checker.properties import unregister as unregister_checker_addon_level_props
-from ZenUV.prop.properties import ZUV_Properties
-from ZenUV.sticky_uv_editor.stk_uv_props import UVEditorSettings
-from ZenUV.ops.zen_unwrap.props import (
+from ..zen_checker.properties import register as register_checker_addon_level_props
+from ..zen_checker.properties import unregister as unregister_checker_addon_level_props
+from ..prop.properties import ZUV_Properties
+from ..sticky_uv_editor.stk_uv_props import UVEditorSettings
+from ..ops.zen_unwrap.props import (
     ZUV_ZenUnwrapOpAddonProps,
     )
-from ZenUV.prop.scene_ui_props import (
+from ..prop.scene_ui_props import (
     ZUV_UVToolProps,
     ZUV_3DVToolProps,
     ZUV_SceneUIProps,
     ZUV_PT_TrimSnapUV)
-from ZenUV.prop.demo_examples import (
+from ..prop.demo_examples import (
     ZuvDemoExample,
     ZUV_DemoExampleProps,
     ZUV_OT_DemoExamplesUpdate,
@@ -50,13 +50,13 @@ from ZenUV.prop.demo_examples import (
     ZUV_OT_DemoExamplesDelete,
     ZUV_UL_DemoExampleList,
 )
-from ZenUV.prop.material_props import ZUV_MaterialProps
-from ZenUV.prop.user_script_props import (
+from ..prop.material_props import ZUV_MaterialProps
+from ..prop.user_script_props import (
     ZUV_UserScriptProps,
     ZUV_OT_UserScriptTemplate,
     ZUV_OT_UserScriptSelect)
-from ZenUV.prop.td_draw_props import ZUV_TexelDensityDrawProps
-from ZenUV.prop.wm_props import (
+from ..prop.td_draw_props import ZUV_TexelDensityDrawProps
+from ..prop.wm_props import (
     ZuvUVMapWrapper,
     ZuvUVMeshGroup,
     ZuvObjUVGroup,
@@ -65,11 +65,11 @@ from ZenUV.prop.wm_props import (
     ZuvWMTrimsheetLinkedGroup,
     ZuvWMTransformToolGroup,
     ZUV_WMProps)
-from ZenUV.prop.adv_maps_props import ZUV_AdvMapsProps, ZUV_AdvMapsSceneProps, ZUV_AdvMapsRenameTemplateGroup
-from ZenUV.prop.image_props import ZuvImageProperties
-from ZenUV.prop.world_size_props import ZUV_WorldSizeImageProps
-from ZenUV.prop.uv_borders_draw_props import ZUV_UVBordersDrawProps
-from ZenUV.prop.favourites_props import (
+from ..prop.adv_maps_props import ZUV_AdvMapsProps, ZUV_AdvMapsSceneProps, ZUV_AdvMapsRenameTemplateGroup
+from ..prop.image_props import ZuvImageProperties
+from ..prop.world_size_props import ZUV_WorldSizeImageProps
+from ..prop.uv_borders_draw_props import ZUV_UVBordersDrawProps
+from ..prop.favourites_props import (
     ZUV_FavItem, ZUV_FavProps,
     ZUV_UL_FavouritesList,
     ZUV_MT_StoreFavPresetsUV,
@@ -91,11 +91,11 @@ from ZenUV.prop.favourites_props import (
 
     ZUV_MT_FavCommandMenu3D,
     ZUV_MT_FavCommandMenuUV)
-from ZenUV.prop.world_size_props import (
+from ..prop.world_size_props import (
     ZUV_WorldSizeItem,
     ZUV_WorldSizeAddonProps)
-from ZenUV.prop.uv_transform_tool_props import ZUV_UVTransformToolProps
-from ZenUV.prop.addon_op_props import ZUV_AddonOperatorProps
+from ..prop.uv_transform_tool_props import ZUV_UVTransformToolProps
+from ..prop.addon_op_props import ZUV_AddonOperatorProps
 
 
 classes = (

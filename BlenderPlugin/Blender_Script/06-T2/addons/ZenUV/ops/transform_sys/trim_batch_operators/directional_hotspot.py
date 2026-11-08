@@ -27,22 +27,24 @@ from math import pi
 from mathutils import Vector, Matrix
 from random import choice
 
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.get_uv_islands import FacesFactory
-from ZenUV.utils.bounding_box import BoundingBox2d
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ....utils.register_util import RegisterUtils
+from ....utils.uv_factory import UvIslandUtils
+from ....utils.iter_utils import IterUtils2
+from ....utils.mesh_factory import MeshIslandUtils
+from ....utils.bounding_box import BoundingBox2d
+from ....ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
 
-from ZenUV.utils.generic import resort_by_type_mesh_in_edit_mode_and_sel, verify_uv_layer
-from ZenUV.ops.transform_sys.transform_utils.transform_loops import TransformLoops
+from ....utils.iter_utils import IterUtils
+from ....utils.generic import ResortObjects
+from ....ops.transform_sys.transform_utils.transform_loops import TransformLoops
 
 from .hotspot import HspPropertiesBase
 
-from ZenUV.ops.world_orient import oCluster
-from ZenUV.ops.transform_sys.transform_utils.tr_rotate_utils import TrOrientProcessor
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
+from ....ops.world_orient import oCluster
+from ....ops.transform_sys.transform_utils.tr_rotate_utils import TrOrientProcessor
+from ....ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
 
-from ZenUV.utils.generic import ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE, ZUV_SPACE_TYPE
+from ....utils.generic import ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE, ZUV_SPACE_TYPE
 
 
 CAT = 'DIR_HOTSPOT'
@@ -100,7 +102,7 @@ class DirHotspotFactory(HspProperties):
                 continue
             if trim.normal.magnitude == 0.0:
                 continue
-            island_normal = FacesFactory.get_poly_island_normal(poly_island).normalized()
+            island_normal = MeshIslandUtils.get_poly_island_normal(poly_island).normalized()
             if island_normal.magnitude == 0.0:
                 continue
             angle = trim.normal.angle(object_matrix.to_3x3() @ island_normal)
@@ -110,7 +112,7 @@ class DirHotspotFactory(HspProperties):
             if selection_mode == 'ALL':
                 yield trim
             else:
-                direction = (object_matrix @ FacesFactory.get_poly_island_center(poly_island) - trim.world_position).normalized()
+                direction = (object_matrix @ MeshIslandUtils.get_poly_island_center(poly_island) - trim.world_position).normalized()
                 dot_product = direction.dot(trim.normal)
                 if selection_mode == 'FRONT' and dot_product <= 0:
                     continue
@@ -119,7 +121,7 @@ class DirHotspotFactory(HspProperties):
                 yield trim
 
     def do_directional_hotspotting(self, context: bpy.types.Context, objs: list, trimsheet: list):
-        from ZenUV.ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
+        from ....ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
         from collections import defaultdict
 
         if self.trims_preselection == 'SELECTED':
@@ -128,12 +130,9 @@ class DirHotspotFactory(HspProperties):
         i_counter = 0
         t_counter = 0
         p_processed_data = defaultdict(list)
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            bm.faces.ensure_lookup_table()
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
-            for island in island_util.get_island(context, bm, uv_layer):
+            for island in UvIslandUtils.yield_uv_islands(context, bm, uv_layer, b_selected_only=True, b_include_hidden=False):
                 i_counter += 1
                 suitable_trims = list(
                     self.get_normal_suitable_trims(
@@ -173,16 +172,16 @@ class DirHotspotFactory(HspProperties):
                 if self.select_processed_islands:
                     p_processed_data[obj.name].extend([f.index for f in island])
 
-            bmesh.update_edit_mesh(obj.data)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         if self.select_processed_islands:
             self.select_processed(context, p_processed_data)
         return i_counter, t_counter
 
     def select_processed(self, context: bpy.types.Context, data: dict):
-        from ZenUV.utils.generic import bpy_deselect_by_context
+        from ....utils.generic import bpy_select_by_context
 
-        bpy_deselect_by_context(context)
+        bpy_select_by_context(context, action='DESELECT')
 
         for obj_name, f_idxs in data.items():
             p_obj = bpy.data.objects.get(obj_name, None)
@@ -311,9 +310,9 @@ class ZUV_OT_DirectionalHotspot(bpy.types.Operator):
         box.prop(self, 'seed')
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         p_trimsheet = ZuvTrimsheetUtils.getTrimsheet(context)
@@ -328,11 +327,15 @@ class ZUV_OT_DirectionalHotspot(bpy.types.Operator):
         HSP = DirHotspotFactory(self.properties)
         i_counter, t_counter = HSP.do_directional_hotspotting(context, objs, p_trimsheet)
 
+        message = ''
         if not i_counter:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            message += "No islands selected."
 
         if not t_counter:
-            self.report({'WARNING'}, "No suitable trims found.")
+            message += " No suitable trims found."
+
+        if message:
+            self.report({'WARNING'}, message)
 
         return {"FINISHED"}
 
@@ -349,10 +352,16 @@ class ZUV_OT_SetFaceNormalToTrimProps(bpy.types.Operator):
         default=False
     )
 
+    @classmethod
+    def poll(cls, context):
+        """ Validate context """
+        active_object = context.active_object
+        return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
+
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         a_trim = ZuvTrimsheetUtils.getActiveTrim(context)
@@ -361,9 +370,7 @@ class ZUV_OT_SetFaceNormalToTrimProps(bpy.types.Operator):
             return {'CANCELLED'}
 
         reference_data = []
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            bm.faces.ensure_lookup_table()
+        for obj, bm in IterUtils2.iter_objs_with_bmesh(objs):
             M = obj.matrix_world
 
             for face in (f for f in bm.faces if f.select):

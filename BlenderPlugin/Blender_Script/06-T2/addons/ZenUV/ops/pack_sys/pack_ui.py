@@ -23,14 +23,14 @@
 
 import bpy
 
-from ZenUV.ico import icon_get
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.utils.generic import (
+from ...ico import icon_get
+from ...ui.labels import ZuvLabels
+from ...utils.generic import (
     ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE,
     ZUV_SPACE_TYPE)
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.prop.common import get_combo_panel_order
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ...prop.zuv_preferences import get_prefs
+from ...prop.common import get_combo_panel_order
+from ...utils.blender_zen_utils import ZenPolls
 
 from .pack import UVPmPoll, UVPmData
 
@@ -59,7 +59,7 @@ def draw_pack_engine(self, context):
 
 def draw_pack(self, context):
     ''' @Draw Pack '''
-    from ZenUV.zen_checker.check_utils import ZUV_OT_CalculateRecommendedMargin
+    from ...zen_checker.check_utils import ZUV_OT_CalculateRecommendedMargin
     addon_prefs = get_prefs()
     layout = self.layout
     prop = context.scene.zen_uv
@@ -111,7 +111,7 @@ def draw_packer_props(self, context: bpy.types.Context):
         box.label(text=' if UV Editor image is non-square.')
     box = layout.box()
     if addon_prefs.packEngine != 'UVP':
-        from ZenUV.ops.operators import ZUV_OT_SetTextureSizePreset
+        from ...ops.operators import ZUV_OT_SetTextureSizePreset
         ZUV_OT_SetTextureSizePreset.draw_image_size_preset(
             'scene.zen_uv.td_props.td_im_size_presets',
             context, box)

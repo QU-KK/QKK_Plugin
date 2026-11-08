@@ -29,7 +29,7 @@ class ZUV_UVBordersDrawProps(bpy.types.PropertyGroup):
     def on_mode_update(self, context):
         p_scene = context.scene
         if p_scene.zen_uv.ui.draw_mode_UV == 'UV_BORDERS':
-            from ZenUV.ui.gizmo_draw import update_all_gizmos_UV
+            from ..ui.gizmo_draw import update_all_gizmos_UV
             update_all_gizmos_UV(context, force=True)
 
     mode: bpy.props.EnumProperty(

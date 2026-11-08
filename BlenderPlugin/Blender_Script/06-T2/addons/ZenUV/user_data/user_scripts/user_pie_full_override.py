@@ -19,7 +19,7 @@
 # Copyright 2023, Alex Zhornyak, alexander.zhornyak@gmail.com
 
 
-from ZenUV.ui.pie.mesh_pie import (
+from ...ui.pie.mesh_pie import (
     ZUV_OT_PieCallerRight, ZUV_OT_PieCallerLeft,
     ZUV_OT_PieCallerTop, ZUV_OT_PieCallerBottom,
     ZUV_OT_PieCallerTopLeft, ZUV_OT_PieCallerBottomLeft,

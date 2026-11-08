@@ -24,12 +24,12 @@ import gpu
 from gpu_extras.batch import batch_for_shader
 from mathutils import Matrix, Vector
 
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.ops.trimsheets.trimsheet_modal import BoxSelectRect
-from ZenUV.utils.blender_zen_utils import ZenPolls, ZenCompat
-from ZenUV.utils.simple_geometry import TextRect
-from ZenUV.utils.constants import UV_AREA_BBOX
+from ....prop.zuv_preferences import get_prefs
+from ....ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ....ops.trimsheets.trimsheet_modal import BoxSelectRect
+from ....utils.blender_zen_utils import ZenPolls, ZenCompat
+from ....utils.simple_geometry import TextRect
+from ....utils.constants import UV_AREA_BBOX
 
 
 if not bpy.app.background:

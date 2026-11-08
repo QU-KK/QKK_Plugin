@@ -22,14 +22,15 @@ import bpy
 import bmesh
 from dataclasses import dataclass, field
 
-from ZenUV.utils.selection_utils import SelectionProcessor, UniSelectedObject
+from ...utils.selection_utils import SelectionProcessor, UniSelectedObject
 
-from ZenUV.utils.generic import (
-    resort_by_type_mesh_in_edit_mode_and_sel,
+from ...utils.generic import (
+    ResortObjects,
     verify_uv_layer)
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.utils.vlog import Log
+from ...utils.uv_factory import UvIslandUtils, SelectionUtils
+from ...prop.zuv_preferences import get_prefs
+from ...utils.vlog import Log
+from ...utils.blender_zen_utils import is_loop_domain
 
 
 @dataclass
@@ -46,23 +47,28 @@ class PackSelectedObject(UniSelectedObject):
         self.bm = bm
         self.uv_layer = verify_uv_layer(bm)
 
-        b_is_not_sync = context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync
+        b_is_store_loops = is_loop_domain(context)
 
 
         self.selected_items = SelectionProcessor.get_selected_items(
-            me, bm, self.uv_layer,
-            b_is_store_loops=b_is_not_sync)
+            context, me, bm, self.uv_layer,
+            b_is_store_loops=b_is_store_loops)
 
     def restore_selection(self, context: bpy.types.Context) -> None:
         """ Restore selected elements depending of Blender selection Mode """
-        b_is_not_sync = context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync
-        SelectionProcessor.restore_selection_in_object(self, b_is_not_sync)
+        SelectionProcessor.restore_selection_in_object(context, self)
 
     def hide_p_excluded(self, context: bpy.types.Context):
         p_facemap = self.get_p_excl_facemap()
         if p_facemap is None:
             return
-        islands = [island for island in island_util.get_islands(context, self.bm) if True in [f[p_facemap] for f in island]]
+
+        islands = [
+            island for island
+            in UvIslandUtils.yield_uv_islands(
+                context, self.bm, self.uv_layer,
+                b_selected_only=False, b_include_hidden=False,
+                b_include_partially_hidden=False) if any(f[p_facemap] for f in island)]
 
         self.f_pack_excluded_idxs.extend([f.index for island in islands for f in island])
         self.bm.faces.ensure_lookup_table()
@@ -77,7 +83,7 @@ class PackSelectedObject(UniSelectedObject):
             self.bm.faces[i].hide_set(False)
 
     def get_p_excl_facemap(self):
-        from ZenUV.utils.constants import PACK_EXCLUDED_FACEMAP_NAME
+        from ...utils.constants import PACK_EXCLUDED_FACEMAP_NAME
         return self.bm.faces.layers.int.get(PACK_EXCLUDED_FACEMAP_NAME, None)
 
     def is_pack_excluded_present(self):
@@ -98,14 +104,12 @@ class PackObjectsStorage:
 
     def __init__(self) -> None:
         self.objs: list = []
-        self.is_sync_mode: bool = None
-        self.selection_mode: str = None  # in ['EDGE', 'FACE', 'VERTEX']
+        # self.selection_mode: str = None  # in ['EDGE', 'FACE', 'VERTEX']
         self.marker_face_idxs: list = []
 
     def clear(self) -> None:
         self.objs.clear()
-        self.is_sync_mode = None
-        self.selection_mode = None
+        # self.selection_mode = None
         self.marker_face_idxs.clear()
 
     def is_hidden_faces_in_objects(self) -> bool:
@@ -130,15 +134,12 @@ class PackObjectsStorage:
 
     def collect_objects(self, context: bpy.types.Context) -> bool:
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
 
         if not objs:
             return False
         else:
-            self.selection_mode = self.check_selection_mode(context)
-            self.is_sync_mode = context.space_data.type == 'VIEW_3D' \
-                or context.space_data.type == 'IMAGE_EDITOR' \
-                and context.scene.tool_settings.use_uv_select_sync is True
+            # self.selection_mode = self.check_selection_mode(context)
             for obj in objs:
                 s_obj = PackSelectedObject(obj)
                 s_obj.store_selection(context)
@@ -148,42 +149,20 @@ class PackObjectsStorage:
         return True
 
     def restore_selection_all_objects(self, context: bpy.types.Context) -> None:
-        PackUtils.bpy_select_by_context(context, action='DESELECT')
+        PackUtils.pack_bpy_select_by_context(context, action='DESELECT')
 
         s_obj: PackSelectedObject = None
         if not get_prefs().packEngine == "UVPACKER":
             for s_obj in self.objs:
                 s_obj.restore_selection(context)
 
-    def check_selection_mode(self, context: bpy.types.Context) -> str:
-        if context.tool_settings.mesh_select_mode[:] == (False, True, False):
-            return 'EDGE'
-        elif context.tool_settings.mesh_select_mode[:] == (False, False, True):
-            return 'FACE'
-        return 'VERTEX'
-
     def select_islands(self, context) -> None:
-        from ZenUV.utils.generic import select_loops
-        if context.area.type == "IMAGE_EDITOR" and not context.scene.tool_settings.use_uv_select_sync:
-            for s_obj in self.objs:
-                bm = s_obj.bm
-                uv_layer = s_obj.uv_layer
-                select_loops(island_util.get_island(context, bm, uv_layer), uv_layer, state=True)
-                bm.select_flush_mode()
-                # bmesh.update_edit_mesh(s_obj.obj.data, loop_triangles=False, destructive=False)
-        else:
-            s_obj: PackSelectedObject = None
-            for s_obj in self.objs:
-                bm = s_obj.bm
-                uv_layer = s_obj.uv_layer
-                islands = island_util.get_island(context, bm, uv_layer)
-                for island in islands:
-                    for f in island:
-                        f.select_set(True)
-                if not context.scene.tool_settings.use_uv_select_sync:
-                    select_loops(islands, uv_layer, state=True)
-                bm.select_flush_mode()
-                # bmesh.update_edit_mesh(s_obj.obj.data, loop_triangles=False, destructive=False)
+        for s_obj in self.objs:
+            bm = s_obj.bm
+            uv_layer = s_obj.uv_layer
+            facelist = [bm.faces[i] for group in s_obj.attribute_storage['islands'] for i in group]
+
+            SelectionUtils.select_faces_any_context(context, facelist, state=True, bm=bm, uv_layer=uv_layer)
 
     def yield_selected_objects(self):
         s_obj: UniSelectedObject = None
@@ -220,45 +199,14 @@ class PackUtils:
             set_sel_only: bool = False) -> None:
 
         if set_sel_only:
-            cls.bpy_select_by_context(context, action='SELECT')
+            cls.pack_bpy_select_by_context(context, action='SELECT')
         else:
             if addon_prefs.packSelectedIslOnly:
                 Storage.select_islands(context)
             else:
-                cls.bpy_select_by_context(context, action='SELECT')
+                cls.pack_bpy_select_by_context(context, action='SELECT')
 
     @classmethod
-    def bpy_select_by_context(cls, context: bpy.types.Context, action: str = 'DESELECT'):
-        if not context.scene.tool_settings.use_uv_select_sync:
-            if context.space_data.type == 'IMAGE_EDITOR':
-                if action == 'SELECT':
-                    if bpy.ops.uv.select_all.poll():
-                        bpy.ops.uv.select_all(action='SELECT')
-                else:
-                    if bpy.ops.uv.select_all.poll():
-                        bpy.ops.mesh.select_all(action='SELECT')
-
-                    if bpy.ops.uv.select_all.poll():
-                        bpy.ops.uv.select_all(action='DESELECT')
-
-                    if bpy.ops.uv.select_all.poll():
-                        bpy.ops.mesh.select_all(action='DESELECT')
-            else:
-                if action == 'SELECT':
-                    if bpy.ops.uv.select_all.poll():
-                        bpy.ops.mesh.select_all(action='SELECT')
-
-                    if bpy.ops.uv.select_all.poll():
-                        bpy.ops.uv.select_all(action='SELECT')
-                else:
-                    if bpy.ops.uv.select_all.poll():
-                        bpy.ops.mesh.select_all(action='SELECT')
-
-                    if bpy.ops.uv.select_all.poll():
-                        bpy.ops.uv.select_all(action='DESELECT')
-
-                    if bpy.ops.uv.select_all.poll():
-                        bpy.ops.mesh.select_all(action='DESELECT')
-        else:
-            if bpy.ops.uv.select_all.poll():
-                bpy.ops.mesh.select_all(action=action)
+    def pack_bpy_select_by_context(cls, context: bpy.types.Context, action: str = 'DESELECT'):
+        from ...utils.generic import bpy_select_by_context
+        bpy_select_by_context(context, action=action)

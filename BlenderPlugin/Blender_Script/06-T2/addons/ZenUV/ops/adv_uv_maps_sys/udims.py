@@ -22,13 +22,12 @@ import bpy
 
 from .udim_utils import UdimFactory
 
-from ZenUV.utils.generic import ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE
-from ZenUV.utils.generic import resort_by_type_mesh_in_edit_mode_and_sel
-from ZenUV.ops.trimsheets.trimsheet import ZuvTrimsheetUtils
-from ZenUV.utils.blender_zen_utils import ZenPolls
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.vlog import Log
-from ZenUV.prop.zuv_preferences import get_prefs
+from ...utils.generic import ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE, ResortObjects
+from ...ops.trimsheets.trimsheet import ZuvTrimsheetUtils
+from ...utils.blender_zen_utils import ZenPolls
+from ...utils.register_util import RegisterUtils
+from ...utils.vlog import Log
+from ...prop.zuv_preferences import get_prefs
 
 
 class ZUV_OT_AddMissedUdimTile(bpy.types.Operator):
@@ -120,9 +119,9 @@ class ZUV_OT_AddMissedUdimTile(bpy.types.Operator):
         box.prop(self, 'float_depth')
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
         UdimFactory.reset_report()
 
@@ -147,7 +146,7 @@ class ZUV_OT_AddMissedUdimTile(bpy.types.Operator):
             geo_udims = set(p_udims)
 
         else:
-            geo_udims = set(UdimFactory.get_udims_from_loops(objs, groupped=False))
+            geo_udims = set(UdimFactory.get_udims_from_loops(context, objs, groupped=False))
             if not geo_udims:
                 self.report({'WARNING'}, "Zen UV: There are no islands")
                 return {'FINISHED'}
@@ -249,7 +248,7 @@ class ZUV_OT_SetActiveUdimTileMouseover(bpy.types.Operator):
     def execute(self, context):
         self.cancel(context)
 
-        from ZenUV.ops.event_service import get_blender_event
+        from ...ops.event_service import get_blender_event
 
         UdimFactory.reset_report()
         UdimFactory.report_style = 'SHORT'
@@ -307,9 +306,9 @@ class ZUV_OT_SetActiveUdimTile(bpy.types.Operator):
     def execute(self, context):
         UdimFactory.reset_report()
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         p_image_udims = UdimFactory.get_active_image_udim_tiles_numbers(context)
@@ -384,9 +383,9 @@ class ZUV_OT_RemoveActiveUdimTile(bpy.types.Operator):
     def execute(self, context):
         UdimFactory.reset_report()
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         UdimFactory.remove_active_tile(context)
@@ -414,9 +413,9 @@ def draw_udims(context: bpy.types.Context, layout):
 
 
 def draw_zen_udims(context: bpy.types.Context, layout):
-    from ZenUV.ops.select_sys.select_islands import ZUV_OT_SelectInTile
-    from ZenUV.ops.transform_sys.tr_move import ZUV_OT_MoveToUvArea
-    from ZenUV.ops.transform_sys.tr_move import ZUV_OT_MoveToUvAreaMouseover
+    from ...ops.select_sys.select_islands import ZUV_OT_SelectInTile
+    from ...ops.transform_sys.tr_move import ZUV_OT_MoveToUvArea
+    from ...ops.transform_sys.tr_move import ZUV_OT_MoveToUvAreaMouseover
     col = layout.column()
     col.enabled = context.space_data.image.source == 'TILED'
 
@@ -503,7 +502,7 @@ def zuv_uv_draw_uvs_context_menu(self, context: bpy.types.Context):
     if not addon_prefs.right_menu_assist:
         return
 
-    from ZenUV.ops.transform_sys.tr_move import ZUV_OT_Move2dCursorTo
+    from ...ops.transform_sys.tr_move import ZUV_OT_Move2dCursorTo
     layout: bpy.types.UILayout = self.layout
 
     layout.separator()

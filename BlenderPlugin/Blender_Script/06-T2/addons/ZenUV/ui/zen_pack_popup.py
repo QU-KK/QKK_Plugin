@@ -18,8 +18,8 @@
 
 import bpy
 
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.ui.labels import ZuvLabels
+from ..utils.register_util import RegisterUtils
+from ..utils.blender_zen_utils import ZenPolls
 
 
 class ZUV_MT_ZenPack_Uvp_Popup(bpy.types.Menu):
@@ -29,7 +29,7 @@ class ZUV_MT_ZenPack_Uvp_Popup(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
-        addon_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
+        addon_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
         layout.label(text="Nothing is produced.")
         layout.label(text="It looks like UVPackmaster addon")
         layout.label(text="is not installed on your system.")
@@ -54,7 +54,7 @@ class ZUV_MT_ZenPack_Uvpacker_Popup(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
-        addon_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
+        addon_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
         layout.label(text="Nothing is produced.")
         layout.label(text="It looks like UV-Packer addon")
         layout.label(text="is not installed on your system.")
@@ -71,6 +71,17 @@ class ZUV_MT_ZenPack_Uvpacker_Popup(bpy.types.Menu):
         layout.prop(addon_prefs, "packEngine", text="")
 
 
+class ZUV_MT_ZenPack_SelMode_Popup(bpy.types.Menu):
+    bl_label = "Zen Unwrap"
+    bl_idname = "ZUV_MT_ZenPack_SelMode_Popup"
+    bl_icon = "KEYTYPE_EXTREME_VEC"
+
+    def draw(self, context):
+        layout = self.layout
+
+        layout.label(text="No islands selected in 'Pack Selected Islands' mode.")
+
+
 class ZUV_MT_ZenWarningV36Popup(bpy.types.Menu):
     bl_label = "Zen Pack"
     bl_idname = "ZUV_MT_ZenWarningV36Popup"
@@ -78,7 +89,7 @@ class ZUV_MT_ZenWarningV36Popup(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
-        # addon_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
+        # addon_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
 
         layout.label(text="In Blender v3.6.0, the Blender Pack Engine")
         layout.label(text="cannot be used because the engine has become modal.")
@@ -95,7 +106,8 @@ class ZUV_MT_ZenWarningV36Popup(bpy.types.Menu):
 classes = [
     ZUV_MT_ZenPack_Uvp_Popup,
     ZUV_MT_ZenPack_Uvpacker_Popup,
-    ZUV_MT_ZenWarningV36Popup
+    ZUV_MT_ZenWarningV36Popup,
+    ZUV_MT_ZenPack_SelMode_Popup
 ]
 
 

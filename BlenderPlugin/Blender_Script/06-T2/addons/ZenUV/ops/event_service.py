@@ -22,7 +22,7 @@ import bpy
 from mathutils import Vector
 from timeit import default_timer as timer
 
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ..utils.blender_zen_utils import ZenPolls
 
 
 LITERAL_ZENUV_EVENT = 'zenuv_event'

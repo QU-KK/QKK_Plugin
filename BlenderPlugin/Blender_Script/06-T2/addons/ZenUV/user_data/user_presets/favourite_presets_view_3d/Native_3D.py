@@ -1,5 +1,5 @@
 import bpy
-prefs = bpy.context.preferences.addons["ZenUV"].preferences.favourite_props_VIEW_3D
+prefs = bpy.context.window_manager.zen_uv.get_addon_prefs().favourite_props_VIEW_3D
 
 prefs.favourites.clear()
 

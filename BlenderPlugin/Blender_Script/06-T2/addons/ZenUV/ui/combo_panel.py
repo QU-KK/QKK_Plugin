@@ -25,11 +25,11 @@ import bpy
 from collections import namedtuple
 from typing import List, Tuple
 
-from ZenUV.utils.generic import ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE, ZUV_SPACE_TYPE
-from ZenUV.utils.vlog import Log
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.prop.common import uv_enblr
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ..utils.generic import ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE, ZUV_SPACE_TYPE
+from ..utils.vlog import Log
+from ..prop.zuv_preferences import get_prefs
+from ..prop.common import uv_enblr
+from ..utils.blender_zen_utils import ZenPolls
 
 
 class Struct:
@@ -284,7 +284,7 @@ class ZuvComboBase:
                             t_panels = {}
                             t_panels[s_type] = [box, 0]
 
-                            from ZenUV.ui import parented_groups
+                            from ..ui import parented_groups
                             for group in parented_groups:
                                 for panel in group:
                                     p_parent_pair = t_panels.get(panel.bl_parent_id, None)  # type: bpy.types.UILayout
@@ -401,12 +401,12 @@ class ZUV_PT_3DV_ComboPanel(ZuvComboBase, bpy.types.Panel):
     def draw_header_preset(self, context: bpy.types.Context):
         layout = self.layout
         addon_prefs = get_prefs()
-        if addon_prefs.check_for_updates:
-            if ZenPolls.new_addon_version:
-                s_version = '.'.join(map(str, ZenPolls.new_addon_version))
-                op = layout.operator('wm.zenuv_show_addon_version_info', text=f'Ver. {s_version} available!')
-                op.is_silent = False
-                op.version = s_version
+        # if addon_prefs.check_for_updates:
+        #     if ZenPolls.new_addon_version:
+        #         s_version = '.'.join(map(str, ZenPolls.new_addon_version))
+        #         op = layout.operator('wm.zenuv_show_addon_version_info', text=f'Ver. {s_version} available!')
+        #         op.is_silent = False
+        #         op.version = s_version
 
     @classmethod
     def poll(cls, context: bpy.types.Context):

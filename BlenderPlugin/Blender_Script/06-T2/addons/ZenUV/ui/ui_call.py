@@ -35,13 +35,13 @@ class ZUV_OT_Main_Popup_call(bpy.types.Operator):
 
         if hasattr(context, 'space_data') and context.space_data is not None:
             if context.space_data.type == 'IMAGE_EDITOR':
-                from ZenUV.ui.combo_panel import ZuvComboBase, ZUV_PT_UVL_ComboPanel
+                from ..ui.combo_panel import ZuvComboBase, ZUV_PT_UVL_ComboPanel
                 pnl = ZuvComboBase()
                 pnl.bl_space_type = ZUV_PT_UVL_ComboPanel.bl_space_type
                 pnl.layout = self.layout
                 pnl.draw(context)
             elif context.space_data.type == 'VIEW_3D':
-                from ZenUV.ui.combo_panel import ZuvComboBase, ZUV_PT_3DV_ComboPanel
+                from ..ui.combo_panel import ZuvComboBase, ZUV_PT_3DV_ComboPanel
                 pnl = ZuvComboBase()
                 pnl.bl_space_type = ZUV_PT_3DV_ComboPanel.bl_space_type
                 pnl.layout = self.layout
@@ -49,6 +49,6 @@ class ZUV_OT_Main_Popup_call(bpy.types.Operator):
 
     def execute(self, context: bpy.types.Context):
         wm = context.window_manager
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ..prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
         return wm.invoke_popup(self, width=addon_prefs.combo_panel.combo_popup_width)

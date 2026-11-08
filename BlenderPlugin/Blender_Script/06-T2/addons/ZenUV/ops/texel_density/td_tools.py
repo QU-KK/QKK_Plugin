@@ -24,17 +24,17 @@
 import bpy
 import bmesh
 
-from ZenUV.utils.register_util import RegisterUtils
+from ...utils.register_util import RegisterUtils
 
 from .td_islands_storage import TdDataStorage as TDS
 from .td_utils import TdUtils, TdContext
 
-from ZenUV.utils.generic import (
+from ...utils.generic import (
     UnitsConverter,
-    resort_by_type_mesh_in_edit_mode_and_sel,
+    ResortObjects,
     switch_shading_style
 )
-from ZenUV.utils.vlog import Log
+from ...utils.vlog import Log
 
 
 class TDPR_OT_CreatePresets(bpy.types.Operator):
@@ -60,9 +60,9 @@ class TDPR_OT_CreatePresets(bpy.types.Operator):
         from .td_presets import new_list_item
         from .td_display_utils import TdSysUtils
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         td_inputs = TdContext(context)
@@ -97,7 +97,7 @@ class TDPR_OT_CreatePresets(bpy.types.Operator):
             if bpy.ops.zen_tdpr.colorize_presets.poll():
                 bpy.ops.zen_tdpr.colorize_presets()
 
-        from ZenUV.ops.trimsheets.trimsheet import ZuvTrimsheetUtils
+        from ...ops.trimsheets.trimsheet import ZuvTrimsheetUtils
         ZuvTrimsheetUtils.fix_undo()
 
         return {'FINISHED'}
@@ -117,9 +117,9 @@ class TDPR_OT_ColorizePresets(bpy.types.Operator):
     def execute(self, context):
         from . td_display_utils import TdColorProcessor, TdSysUtils
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         Scope = TdUtils.create_scope_from_presets(context)
@@ -233,21 +233,21 @@ class ZUV_OT_TD_Calculator(bpy.types.Operator):
             self.without_stacked = False
             self.report({'WARNING'}, "Zen UV: 'Without Stacked Islands' works in Edit Mode only")
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         import math
-        from ZenUV.utils.generic import UnitsConverter
+        from ...utils.generic import UnitsConverter
         from .td_utils import TdUtils
 
         td_props = context.scene.zen_uv.td_props
 
         faces_area = 0.0
         if self.without_stacked:
-            from ZenUV.stacks.utils import StacksSystem
-            from ZenUV.stacks.utils_for_td import get_unique_islands
+            from ...stacks.utils import StacksSystem
+            from ...stacks.utils_for_td import get_unique_islands
 
             Stacks = StacksSystem(context)
 
@@ -422,9 +422,9 @@ class ZUV_OT_Bake_TD_to_VC(bpy.types.Operator):
 
         TDS.clear()
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         TDS.td_inputs = TdContext(context)
@@ -486,8 +486,8 @@ class ZUV_OT_Clear_Baked_TD(bpy.types.Operator):
         return context.selected_objects or context.objects_in_mode
 
     def execute(self, context):
-        from ZenUV.utils import vc_processor as vc
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        from ...utils import vc_processor as vc
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if self.map_type == "BALANCED":
             for obj in objs:
                 vc.disable_zen_vc_map(obj, vc.Z_TD_BALANCED_V_MAP_NAME)

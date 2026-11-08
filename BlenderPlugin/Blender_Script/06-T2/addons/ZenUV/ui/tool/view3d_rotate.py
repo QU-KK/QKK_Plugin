@@ -24,7 +24,7 @@ import math
 from mathutils import Matrix
 
 from .view3d_base import ZuvGizmoBase
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ...utils.blender_zen_utils import ZenPolls
 
 
 class ZUV_GGT_3DVTransformRot(bpy.types.GizmoGroup, ZuvGizmoBase):
@@ -111,7 +111,7 @@ class ZUV_GGT_3DVTransformRot(bpy.types.GizmoGroup, ZuvGizmoBase):
 
         b_executed = False
 
-        from ZenUV.ops.transform_sys.trim_depend_transform import ZUV_OT_Tr3DVRotateInTrim
+        from ...ops.transform_sys.trim_depend_transform import ZUV_OT_Tr3DVRotateInTrim
 
         if self.drag_started and wm.operators:
             op = wm.operators[-1]

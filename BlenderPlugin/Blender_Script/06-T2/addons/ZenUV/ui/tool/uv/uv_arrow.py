@@ -22,7 +22,7 @@ import bpy
 from timeit import default_timer as timer
 from mathutils import Vector, Matrix
 
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ....ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
 
 
 class UV_GT_zenuv_arrow(bpy.types.Gizmo):

@@ -23,8 +23,8 @@ from bl_operators.presets import AddPresetOperator
 from bl_operators.wm import rna_path_prop, context_path_validate, context_path_to_rna_property
 from bpy_extras.io_utils import ImportHelper, ExportHelper
 
-from ZenUV.utils.blender_zen_utils import update_areas_in_all_screens, reset_properties_modified, ZenPolls
-from ZenUV.prop.zuv_preferences import get_prefs
+from ..utils.blender_zen_utils import update_areas_in_all_screens, reset_properties_modified, ZenPolls
+from ..prop.zuv_preferences import get_prefs
 
 
 class FakeContext:
@@ -331,7 +331,7 @@ class ZUV_OT_ExportToJson(bpy.types.Operator, ExportHelper):
                                 if bl_rna:
                                     s_suffix = bl_rna.name
                     if s_suffix:
-                        return f'Import from json: {s_suffix}'
+                        return f'Export to json: {s_suffix}'
         except Exception:
             pass
         return cls.bl_description

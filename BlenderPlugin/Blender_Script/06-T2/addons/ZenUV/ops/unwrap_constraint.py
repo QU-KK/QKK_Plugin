@@ -22,19 +22,21 @@
 import bpy
 import bmesh
 from mathutils import Vector
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.transform import UvTransformUtils
-from ZenUV.utils.bounding_box import BoundingBox2d
-from ZenUV.utils.generic import (
-    resort_by_type_mesh_in_edit_mode_and_sel,
-    select_by_context,
-    bpy_deselect_by_context
+from ..utils.register_util import RegisterUtils
+from ..utils.transform import UvTransformUtils
+from ..utils.bounding_box import BoundingBox2d
+from ..utils.generic import (
+    ResortObjects,
+    bpy_select_by_context
 )
-from ZenUV.utils.mark_utils import MarkStateManager
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.blender_zen_utils import ZenPolls
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.ops.zen_unwrap.props import ZenUnwrapProps
+from ..utils.mark_utils import MarkStateManager
+from ..utils.blender_zen_utils import is_loop_domain, get_selection_mode, is_sync_off
+from ..utils.loops_factory import LoopsFactory
+from ..utils.uv_factory import SelectionUtils
+from ..prop.zuv_preferences import get_prefs
+from ..ops.zen_unwrap.props import ZenUnwrapProps
+from ..utils.uv_factory import UvIslandUtils
+from ..utils.mesh_factory import MeshIslandUtils
 
 
 class UC_Lables:
@@ -131,7 +133,7 @@ class UC_IslandState:
         return pins_state
 
     def _restore_reserved_pins(self, island):
-        if True in self.reserved_pins:
+        if any(self.reserved_pins):
             loops = [lp[self.uv_layer] for f in island for lp in f.loops]
             for loop, state in zip(loops, self.reserved_pins):
                 loop.pin_uv = state
@@ -141,7 +143,7 @@ class UC_IslandState:
 
     def _collect_p_edges_fast(self, island):
         edges = {}
-        bound_edges = island_util.get_uv_bound_edges_indexes(island, self.uv_layer)
+        bound_edges = UvIslandUtils.get_uv_bound_edges_indexes(island, self.uv_layer)
         for axis in (Vector((1.0, 0.0)), Vector((0.0, 1.0))):
             edges.update(
                 {
@@ -158,9 +160,9 @@ class UC_IslandState:
         if len(island) == 1:
             influence = 'SELECTION'
         if influence == 'SELECTION':
-            border_edges = island_util.get_bound_edges_idxs_from_selected_faces(island)
+            border_edges = MeshIslandUtils.get_mesh_border_edge_indices_from_faces(island)
         else:
-            border_edges = set(island_util.get_uv_bound_edges_indexes(island, self.uv_layer))
+            border_edges = set(UvIslandUtils.get_uv_bound_edges_indexes(island, self.uv_layer))
         in_edges_idxs = {e.index for f in island for e in f.edges}.difference(border_edges)
         if not in_edges_idxs:
             e_loops = [lp for i in border_edges for lp in bm.edges[i].link_loops]
@@ -245,7 +247,8 @@ class UC_IslandState:
         }[axis]
 
     def _pin_edges_set(self, bm, uv_layer, island_loops_idxs, action):
-        for lp in [lp for lp in bm.edges[self.p_edge].link_loops if lp.index in island_loops_idxs]:
+        s_isl_loops_idxs = set(island_loops_idxs)
+        for lp in [lp for lp in bm.edges[self.p_edge].link_loops if lp.index in s_isl_loops_idxs]:
             lp[uv_layer].pin_uv = action
             lp.link_loop_next[uv_layer].pin_uv = action
 
@@ -271,36 +274,29 @@ class UC_ObjState:
 
         self._select_islands(context, bm, islands)
 
-    def _is_no_sync(self, context):
-        return context.area.type == "IMAGE_EDITOR" and not context.scene.tool_settings.use_uv_select_sync
-
     def _store_selection(self, context, bm, uv_layer):
-        if self._is_no_sync(context):
-            if context.scene.tool_settings.uv_select_mode == "EDGE":
-                return [lp[uv_layer].select_edge for f in bm.faces for lp in f.loops]
-            else:
-                return [lp[uv_layer].select for f in bm.faces for lp in f.loops]
+        if is_loop_domain(context):
+            selection_mode = get_selection_mode(context)
+            selected_loops = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer, only_uv_edges=selection_mode == 'EDGE')
+            return [lp.index for lp in selected_loops]
         else:
             return [f.index for f in bm.faces if f.select]
 
     def _select_islands(self, context, bm, islands):
-        select_by_context(context, bm, islands, state=True)
+        for island in islands:
+            SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=self.uv_layer)
 
     def _collect_islands(self, bm, islands, uv_layer, influence):
         return [UC_IslandState(bm, i, uv_layer, influence) for i in islands]
 
     def restore_selection(self, context, bm, uv_layer):
-        if self._is_no_sync(context):
-            loops = [lp[uv_layer] for f in bm.faces for lp in f.loops]
-            if ZenPolls.version_since_3_2_0:
-                for loop, state in zip(loops, self.selection):
-                    loop.select = state
-                    loop.select_edge = state
-            else:
-                for loop, state in zip(loops, self.selection):
-                    loop.select = state
+        if is_loop_domain(context):
+            loops = [lp for f in bm.faces for lp in f.loops]
+            looplist = [loops[i] for i in self.selection]
+            LoopsFactory.select_loops(context, bm, looplist, uv_layer, state=True)
         else:
-            select_by_context(context, bm, [[bm.faces[i] for i in self.selection], ], state=True)
+            facelist = [bm.faces[i] for i in self.selection]
+            SelectionUtils.select_faces_any_context(context, facelist, state=True, bm=bm, uv_layer=uv_layer)
         bm.select_flush_mode()
 
 
@@ -373,8 +369,7 @@ class ZUV_OT_UnwrapConstraint(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        is_sync_mode = context.area.type == "VIEW_3D" or context.area.type == "IMAGE_EDITOR" and context.scene.tool_settings.use_uv_select_sync
-        return context.mode == "EDIT_MESH" and is_sync_mode
+        return context.mode == "EDIT_MESH" and not is_sync_off(context)
 
     def draw_mark_section(self, layout, uv_sync):
         addon_prefs = get_prefs()
@@ -399,9 +394,9 @@ class ZUV_OT_UnwrapConstraint(bpy.types.Operator):
 
     def draw(self, context):
         _lt = self.layout
-        uv_sync = context.scene.tool_settings.use_uv_select_sync
+        is_uv_sync_on = not is_sync_off(context)
         row = _lt.row()
-        row.enabled = uv_sync
+        row.enabled = is_uv_sync_on
         row.prop(self, "influence_mode")
         op_box = _lt.box()
         op_box.label(text=UC_Lables.LAB_UWRP_CONSTR_OP_BOX_L)
@@ -414,7 +409,7 @@ class ZUV_OT_UnwrapConstraint(bpy.types.Operator):
         row.prop(self, "axis", expand=True)
         op_box.label(text=UC_Lables.PROP_UWRP_CONSTR_CURRENT_AXIS + ': ' + self.current_axis)
 
-        self.draw_mark_section(_lt, uv_sync)
+        self.draw_mark_section(_lt, is_uv_sync_on)
 
         box = _lt.box()
         box.use_property_split = True
@@ -425,20 +420,20 @@ class ZUV_OT_UnwrapConstraint(bpy.types.Operator):
         box.prop(self, "use_subsurf_data")
 
     def execute(self, context):
-        from ZenUV.ui.gizmo_draw import UvSelectionStorage
-        b_is_uv_sync: bool = context.scene.tool_settings.use_uv_select_sync
-        if b_is_uv_sync is False:
+        from ..ui.gizmo_draw import UvSelectionStorage
+        b_is_loop_domain = is_loop_domain(context)
+        if b_is_loop_domain:
             self.report({'WARNING'}, "Only when UV Sync Selection On")
             return {'CANCELLED'}
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         b_is_axis_constraint = self.constraint_method == 'AXIS'
 
-        p_stored_objs = UvSelectionStorage.store_selection(objs, not b_is_uv_sync)
+        p_stored_objs = UvSelectionStorage.store_selection(objs, b_is_loop_domain)
 
         # Collect phase
         uc_objs_collector = []
@@ -449,10 +444,10 @@ class ZUV_OT_UnwrapConstraint(bpy.types.Operator):
             bm.faces.ensure_lookup_table()
             bm.edges.ensure_lookup_table()
 
-            if self.influence_mode == 'ISLAND' or not b_is_uv_sync:
-                islands = island_util.get_island(context, bm, uv_layer)
+            if self.influence_mode == 'ISLAND' or b_is_loop_domain:
+                islands = UvIslandUtils.get_uv_islands(context, bm, uv_layer, b_selected_only=True)
             else:
-                islands = island_util.get_islands_selected_only(bm, [f for f in bm.faces if f.select])
+                islands = UvIslandUtils.get_islands_by_facelist(bm, uv_layer, [f for f in bm.faces if f.select])
 
             if len(islands):
                 uc_objs_collector.append(
@@ -493,8 +488,8 @@ class ZUV_OT_UnwrapConstraint(bpy.types.Operator):
                         self.current_axis = UC_Lables.LAB_UWRP_CONSTR_NONUNIFORM_L
 
         # Seam mark phase
-        if self.influence_mode == 'SELECTION' and self.mark and b_is_uv_sync:
-            from ZenUV.utils.mark_utils import MarkFactory
+        if self.influence_mode == 'SELECTION' and self.mark and not b_is_loop_domain:
+            from ..utils.mark_utils import MarkFactory
 
             b_mSeam, b_mSharp = MarkStateManager(
                 context
@@ -513,15 +508,15 @@ class ZUV_OT_UnwrapConstraint(bpy.types.Operator):
             )
 
         # Restore selection
-        bpy_deselect_by_context(context)
+        bpy_select_by_context(context, action='DESELECT')
 
-        UvSelectionStorage.restore_selection(context, not b_is_uv_sync, p_stored_objs)
+        UvSelectionStorage.restore_selection(context, b_is_loop_domain, p_stored_objs)
 
         return {'FINISHED'}
 
 
 system_classes = (
-    ZUV_OT_UnwrapConstraint,
+    # ZUV_OT_UnwrapConstraint,
 )
 
 

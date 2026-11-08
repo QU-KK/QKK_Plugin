@@ -20,15 +20,15 @@
 
 import bpy
 
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.utils.generic import ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE, ZUV_SPACE_TYPE, ZUV_CONTEXT
-from ZenUV.prop.common import get_combo_panel_order
-from ZenUV.ico import icon_get
-from ZenUV.prop.zuv_preferences import get_prefs
+from ..ui.labels import ZuvLabels
+from ..utils.generic import ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE, ZUV_SPACE_TYPE, ZUV_CONTEXT
+from ..prop.common import get_combo_panel_order
+from ..ico import icon_get
+from ..prop.zuv_preferences import get_prefs
 
 
 def draw_stack_in_favourites(layout):
-    from ZenUV.stacks.stacks import ZUV_OT_Stack_Similar, ZUV_OT_Unstack
+    from ..stacks.stacks import ZUV_OT_Stack_Similar, ZUV_OT_Unstack
     row = layout.row(align=True)
     row.operator(ZUV_OT_Stack_Similar.bl_idname, icon_value=icon_get("stack_32"), text="Stack")
     row.operator(ZUV_OT_Unstack.bl_idname, text="Unstack")
@@ -36,8 +36,8 @@ def draw_stack_in_favourites(layout):
 
 def draw_stack(self, context):
     ''' @Draw Stack '''
-    from ZenUV.stacks.stacks import ZUV_OT_Stack_Similar, ZUV_OT_Unstack
-    from ZenUV.ops.transform_sys.tr_align import ZUV_OT_SimpleStack, ZUV_OT_SimpleUnstack
+    from ..stacks.stacks import ZUV_OT_Stack_Similar, ZUV_OT_Unstack
+    from ..ops.transform_sys.tr_align import ZUV_OT_SimpleStack, ZUV_OT_SimpleUnstack
 
     layout = self.layout
 
@@ -62,7 +62,7 @@ def draw_stack(self, context):
 
 def draw_stack_tools(self, context):
     ''' @Draw Stack Tools '''
-    from ZenUV.zen_checker.check_utils import ZUV_OT_IslandCounter
+    from ..zen_checker.check_utils import ZUV_OT_IslandCounter
 
     layout = self.layout
     box = layout.box()
@@ -77,7 +77,7 @@ def draw_stack_tools(self, context):
 
 def draw_substack(layout: bpy.types.UILayout, context: bpy.types.Context):
     ''' @Draw Stacks Sub Panel '''
-    from ZenUV.zen_checker.check_utils import draw_checker_display_items, t_draw_stack_modes
+    from ..zen_checker.check_utils import draw_checker_display_items, t_draw_stack_modes
 
     draw_checker_display_items(layout, context, t_draw_stack_modes)
 

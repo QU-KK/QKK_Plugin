@@ -19,16 +19,40 @@
 
 import bpy
 
-from shutil import copy
-import os
 from bpy.types import Operator
 from bpy_extras.io_utils import ImportHelper
 from bpy.props import StringProperty
 
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.clib.lib_init import register_library, unregister_library, get_zenlib_name, is_zenlib_present
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.utils.constants import zenuv_update_filename, zenuv_update_filter
+import addon_utils
+
+from shutil import copy, copy2
+import os
+from pathlib import Path
+
+from ...utils.register_util import RegisterUtils
+from ...utils.clib.lib_init import (
+    register_library, unregister_library,
+    get_zenlib_name, is_zenlib_present, get_zenlib_path, get_zenlib_temp_path)
+from ...ui.labels import ZuvLabels
+from ...utils.constants import zenuv_update_filename, zenuv_update_filter
+from ...utils.blender_zen_utils import are_paths_equal_pathlib, ZenPolls
+from ...utils.vlog import Log
+
+
+def manage_library_in_temp_folder(create_or_delete: bool):
+    try:
+        s_zen_lib_path = get_zenlib_path()
+        s_temp_file_name = get_zenlib_temp_path()
+
+        if create_or_delete:
+            if is_zenlib_present():
+                copy2(s_zen_lib_path, s_temp_file_name)
+        else:
+            if os.path.exists(s_temp_file_name):
+                os.remove(s_temp_file_name)
+
+    except Exception as e:
+        Log.error("STORE CLIB IN TEMP:", e)
 
 
 class ZUVLibrary_OT_InstallFile(Operator, ImportHelper):
@@ -36,20 +60,24 @@ class ZUVLibrary_OT_InstallFile(Operator, ImportHelper):
     bl_label = "Install " + ZuvLabels.CLIB_NAME
     bl_description = "Install and Register Zen UV Dynamic Library"
 
-    def extention():
-        filename, file_extension = os.path.splitext(get_zenlib_name())
+    def extension():
+        _, file_extension = os.path.splitext(get_zenlib_name())
         return file_extension
 
+    use_filter = True
     filter_glob: StringProperty(
-        default="*{}".format(extention()),
+        default=f"*{extension()}",
         options={'HIDDEN'}
     )
     files: bpy.props.CollectionProperty(type=bpy.types.PropertyGroup)
-    filename: StringProperty(maxlen=1024)
-    directory: StringProperty(maxlen=1024)
+    filename: StringProperty(maxlen=1024, subtype="FILE_NAME")
+    directory: StringProperty(maxlen=1024, subtype="DIR_PATH")
 
     def check(self, context: bpy.types.Context):
+        s_path = get_zenlib_path()
         self.filename = get_zenlib_name()
+        if os.path.exists(s_path):
+            self.filepath = s_path
 
     def execute(self, context: bpy.types.Context):
         try:
@@ -69,11 +97,14 @@ class ZUVLibrary_OT_InstallFile(Operator, ImportHelper):
                 copy(self.filepath, path)
                 print("Zen UV: File ", self.filepath)
                 print("          Copied to: ", path)
+
                 if is_zenlib_present():
                     register_library()
                     self.report({"INFO"}, ZuvLabels.CLIB_NAME + " was installed!")
                 else:
                     self.report({"ERROR"}, "For some reason, the library cannot be installed. Try to do it manually")
+
+            manage_library_in_temp_folder(True)
 
         except Exception as e:
             self.report({'ERROR'}, str(e))
@@ -92,7 +123,7 @@ class ZUVLibrary_OT_Check(Operator):
     bl_description = "Check Zen UV Dynamic Library"
 
     def execute(self, context):
-        # addon_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
+        # addon_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
         if is_zenlib_present():
             # addon_prefs.zen_lib = True
             self.report({"INFO"}, "The library is already installed.  Trying to activate...")
@@ -114,8 +145,14 @@ class ZUV_OT_Update(Operator, ImportHelper):
         options={'HIDDEN'}
     )
     files: bpy.props.CollectionProperty(type=bpy.types.PropertyGroup)
-    filename: StringProperty(maxlen=1024)
-    directory: StringProperty(maxlen=1024)
+    filename: StringProperty(maxlen=1024, subtype="FILE_NAME")
+    directory: StringProperty(maxlen=1024, subtype="DIR_PATH")
+
+    keep_core_library: bpy.props.BoolProperty(
+        name="Keep Zen UV Core Library",
+        description="If option is set, Zen UV core library will be saved to temporary placed and will be restored after the addon upgrade",
+        default=True
+    )
 
     def check(self, context):
         self.filename = zenuv_update_filename
@@ -139,14 +176,62 @@ class ZUV_OT_Update(Operator, ImportHelper):
         print("Zen UV: Updating by ", fullname)
 
         unregister_library()
-        bpy.ops.preferences.addon_install(
-            overwrite=True,
-            target='DEFAULT',
-            filepath=fullname,
-            filter_folder=True,
-            filter_python=True,
-            filter_glob="*.zip"
-        )
+
+        manage_library_in_temp_folder(True)
+
+        s_install_target = "DEFAULT"
+
+        paths = context.preferences.filepaths
+
+        s_root_addons = Path(ZenPolls.ADDON_DIR).parent
+
+        try:
+            for script_directory in paths.script_directories:
+                s_script_addons = os.path.join(script_directory.directory, "addons")
+                if are_paths_equal_pathlib(s_script_addons, s_root_addons):
+                    s_install_target = script_directory.name
+                    self.report({'INFO'}, f"Addon is installing to custom directory: {s_install_target}")
+                    break
+        except Exception as e:
+            Log.error("ADDON UPDATE:", e)
+
+        if ZenPolls.version_since_4_2_0 and addon_utils.check_extension(ZenPolls.ADDON_PACKAGE):
+
+            from bl_pkg import repo_paths_or_none  # type: ignore
+
+            s_repo = ""
+
+            extension_repos = context.preferences.extensions.repos
+            for repo_item in extension_repos:
+                if not repo_item.enabled:
+                    continue
+                directory, _repo_path = repo_paths_or_none(repo_item)
+                if directory is None:
+                    continue
+
+                if are_paths_equal_pathlib(directory, s_root_addons):
+                    s_repo = repo_item.module
+                    break
+
+            if s_repo:
+
+                return bpy.ops.extensions.package_install_files(
+                    'INVOKE_DEFAULT',
+                    url=fullname,
+                    repo=s_repo
+                )
+
+            else:
+                self.report({'ERROR'}, "Extension repository is disabled or missing! Update manually!")
+        else:
+            bpy.ops.preferences.addon_install(
+                overwrite=True,
+                target=s_install_target,
+                filepath=fullname,
+                filter_folder=True,
+                filter_python=True,
+                filter_glob="*.zip"
+            )
 
         return {'FINISHED'}
 
@@ -154,10 +239,13 @@ class ZUV_OT_Update(Operator, ImportHelper):
 class ZUVLibrary_OT_Unregister(Operator):
     bl_idname = "uv.zenuv_unregister_library"
     bl_label = "Unregister Zen UV Core Library"
-    bl_description = "Unregister Zen UV Core Library"
+    bl_description = "Library will be deleted from application memory, so it will be available to be deleted from disk or reinstalled"
 
     def execute(self, context):
+
         unregister_library()
+
+        # manage_library_in_temp_folder(False)
 
         for win in context.window_manager.windows:
             for area in win.screen.areas:

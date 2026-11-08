@@ -27,9 +27,10 @@ from .addon_test_utils import (
     _get_bounding_box,
     _get_selected_faces_ids
     )
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.constants import ZUV_STORED
+from ...prop.zuv_preferences import get_prefs
+from ...utils.generic import bpy_select_by_context
+from ...utils.vlog import Log
+from ...utils.constants import ZUV_STORED
 
 
 # Automatic Stack Tests
@@ -38,7 +39,7 @@ def Test_uv_zenuv_select_stack(context):
     ''' Select Stack Parts '''
     # Tested only in the SINGLES mode
     test_count = 6
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
     _set_object_mode(context)
     bpy.ops.object.select_all(action='DESELECT')
     obj = context.scene.objects["ZenUvTestCube"]
@@ -59,7 +60,7 @@ def Test_uv_zenuv_select_stacked(context):
 * (Zen Modifier Key) - Append to existing Selection '''
     test_count = 12
 
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
 
     bpy.ops.uv.zenuv_stack_similar(silent=True, selected=False)
 
@@ -108,7 +109,7 @@ def Test_uv_zenuv_copy_param(context):
 
     Log.info(f"copy/paste data cleared. Data --> {(context.scene.zen_uv[ZUV_STORED])}")
 
-    bpy.ops.mesh.select_all(action='SELECT')
+    bpy_select_by_context(context, action='SELECT')
 
     # _select_faces_by_id_active_obj(context, [*range(0, 6)])
     bpy.ops.uv.zenuv_copy_param('INVOKE_DEFAULT', st_store_mode='ISLAND', desc="Copy parameters of selected Islands/Faces and save them")
@@ -160,7 +161,7 @@ def Test_uv_zenuv_simple_stack(context):
 def Test_uv_zenuv_simple_unstack(context):
     ''' Shifting the islands in a given direction '''
 
-    bpy.ops.mesh.select_all(action='SELECT')
+    bpy_select_by_context(context, action='SELECT')
 
     bpy.ops.mesh.duplicate_move(
         MESH_OT_duplicate={"mode": 1},
@@ -178,7 +179,7 @@ def Test_uv_zenuv_simple_unstack(context):
             "alt_navigation": True, "use_automerge_and_split": False}
     )
 
-    bpy.ops.mesh.select_all(action='SELECT')
+    bpy_select_by_context(context, action='SELECT')
 
     init_bbox = _get_bounding_box(context)
 
@@ -243,12 +244,12 @@ def Test_zen_stack_list_new_item(context):
 
 def Test_uv_zenuv_assign_manual_stack(context):
     ''' Append selected Islands to the active Stack '''
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
     _select_faces_by_id_active_obj(context, [0, ])
     bpy.ops.zen_stack_list.new_item()
 
     test_count = 6
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
     bpy.ops.uv.zenuv_select_m_stack()
     count = len(_get_selected_faces_ids(context))
 
@@ -257,11 +258,11 @@ def Test_uv_zenuv_assign_manual_stack(context):
 
     # Phase 02
     test_count = 12
-    bpy.ops.mesh.select_all(action='SELECT')
+    bpy_select_by_context(context, action='SELECT')
 
     bpy.ops.uv.zenuv_assign_manual_stack()
 
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
     bpy.ops.uv.zenuv_select_m_stack()
 
     count = len(_get_selected_faces_ids(context))
@@ -306,7 +307,7 @@ def Test_uv_zenuv_analyze_stack(context):
 def Test_uv_zenuv_select_m_stack(context):
     ''' Select Islands in the Stack '''
     bpy.ops.zen_stack_list.new_item()
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
 
     bpy.ops.uv.zenuv_select_m_stack()
 

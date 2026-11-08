@@ -20,7 +20,7 @@
 
 import bpy
 
-from ZenUV.ui.combo_panel import ZUV_PT_3DV_ComboPanel, ZUV_PT_UVL_ComboPanel
+from ...ui.combo_panel import ZUV_PT_3DV_ComboPanel, ZUV_PT_UVL_ComboPanel
 
 
 def register():

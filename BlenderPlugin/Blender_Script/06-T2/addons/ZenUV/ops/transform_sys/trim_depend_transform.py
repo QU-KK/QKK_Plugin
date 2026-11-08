@@ -23,18 +23,18 @@
 import bpy
 import math
 
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.generic import resort_by_type_mesh_in_edit_mode_and_sel
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.utils.bounding_box import BoundingBox2d
-from ZenUV.utils.constants import UV_AREA_BBOX
-from ZenUV.ops.zen_unwrap.unwrap_processor import UnwrapProcessor, UnwrapProcessorProps
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
+from ...utils.register_util import RegisterUtils
+from ...ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ...utils.bounding_box import BoundingBox2d
+from ...utils.constants import UV_AREA_BBOX
+from ...ops.zen_unwrap.unwrap_processor import UnwrapProcessor, UnwrapProcessorProps
+from ...ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
 
 from .transform_utils.tr_utils import (
     TrConstants,
     TransformSysOpsProps
 )
+from ...utils.generic import ResortObjects
 from .transform_utils.tr_scale_utils import TrScaleFlipProcessor, TrScaleFlipProcessorEx
 from .transform_utils.tr_fit_utils import FitRegion, TrFitFactory, TrFitProcessorEx
 from .transform_utils.tr_move_utils import TrMoveProcessorEx
@@ -106,13 +106,13 @@ class ZuvTrMoveInTrimBase:
     # cursor_2d_as_pivot: TransformSysOpsProps.cursor_2d_as_pivot
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context: bpy.types.Context):
         """ Validate context """
         active_object = context.active_object
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
-    def draw(self, context):
-        layout = self.layout
+    def draw(self, context: bpy.types.Context):
+        layout: bpy.types.UILayout = self.layout
 
         if self.info_message:
             box = layout.box()
@@ -130,7 +130,7 @@ class ZuvTrMoveInTrimBase:
 
     def invoke(self: bpy.types.Operator, context: bpy.types.Context, event: bpy.types.Event):
         self.info_message = ''
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if len(objs) > 0:
             n_loops = transform_object_data.setup(
                 context, objs, self.influence_mode, self.op_order
@@ -143,15 +143,15 @@ class ZuvTrMoveInTrimBase:
             else:
                 return self.execute(context)
         else:
-            self.info_message = "There are no selected objects"
+            self.info_message = "No objects selected."
             self.report({'INFO'}, self.info_message)
 
         return {'CANCELLED'}
 
     def execute(self: bpy.types.Operator, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.info_message = "There are no selected objects"
+            self.info_message = "No objects selected."
             self.report({'INFO'}, self.info_message)
             return {'CANCELLED'}
 
@@ -294,9 +294,9 @@ class ZUV_OT_TrFitToTrim(bpy.types.Operator):
         return self.fit_mode not in {'TO_TRIM_E', }
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         if self.fit_mode == 'TO_TRIM_E':
@@ -446,7 +446,7 @@ class ZuvTrRotateInTrimBase():
         self.rotate_processor = None
         self.fit_processor = None
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if len(objs) > 0:
 
             FR = FitRegion()
@@ -474,14 +474,14 @@ class ZuvTrRotateInTrimBase():
 
             return self.execute(context)
         else:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
 
         return {'CANCELLED'}
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         FR = FitRegion()
@@ -660,9 +660,9 @@ class ZuvTrScaleInTrimBase:
     invoke = ZuvTrMoveInTrimBase.invoke
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.info_message = "There are no selected objects"
+            self.info_message = "No objects selected."
             self.report({'WARNING'}, self.info_message)
             return {'CANCELLED'}
 
@@ -780,9 +780,9 @@ class ZUV_OT_TrFlipInTrim(bpy.types.Operator):
         row.prop(self, 'flip_direction', expand=True)
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.info_message = "There are no selected objects."
+            self.info_message = "No objects selected."
             self.report({'INFO'}, self.info_message)
             return {'CANCELLED'}
         if self.in_trim:
@@ -880,9 +880,9 @@ class ZUV_OT_TrAlignToTrim(bpy.types.Operator):
         row.prop(self, "island_pivot")
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         s_influence_mode = self.influence_mode
@@ -922,7 +922,7 @@ class ZUV_OT_TrAlignToTrim(bpy.types.Operator):
             self.op_order,
             self.island_pivot
         )
-        if not MF.move():
+        if not MF.move(context):
             self.report(MF.message[0], MF.message[1])
             return {'CANCELLED'}
 
@@ -955,9 +955,9 @@ class ZUV_OT_TrMoveToTrim(bpy.types.Operator):
         box.prop(self, "island_pivot")
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         MP = TrMoveProps(context, is_global=False)
@@ -971,7 +971,7 @@ class ZUV_OT_TrMoveToTrim(bpy.types.Operator):
             self.op_order,
             self.island_pivot
         )
-        if not MF.move():
+        if not MF.move(context):
             self.report(MF.message[0], MF.message[1])
             return {'CANCELLED'}
 

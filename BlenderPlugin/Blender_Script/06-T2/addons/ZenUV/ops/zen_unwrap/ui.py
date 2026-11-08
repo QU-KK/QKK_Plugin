@@ -17,9 +17,10 @@
 # ##### END GPL LICENSE BLOCK #####
 
 import bpy
-from ZenUV.ui.labels import ZuvLabels
-from ZenUV.ops.zen_unwrap.props import get_zen_unwrap_addon_prefs
-# from ZenUV.prop.zuv_preferences import get_prefs
+from ...ui.labels import ZuvLabels
+from ...ops.zen_unwrap.props import get_zen_unwrap_addon_prefs
+from ...utils.blender_zen_utils import ZenPolls
+# from ...prop.zuv_preferences import get_prefs
 
 
 class ZENUNWRAP_PT_Properties(bpy.types.Panel):
@@ -56,12 +57,21 @@ class ZenUV_MT_ZenUnwrap_Popup(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
         layout.label(text=ZuvLabels.ZEN_UNWRAP_POPUP_LABEL)
-        layout.separator
+
+        layout.separator()
+
         layout.operator("uv.zenuv_unwrap", text="Continue as is").action = "CONTINUE"
         layout.operator("uv.zenuv_unwrap", text=ZuvLabels.ZEN_UNWRAP_AUTO_MODE_LABEL).action = "AUTO"
         layout.operator("uv.zenuv_auto_mark")
         layout.operator("uv.zenuv_seams_by_sharp")
         layout.operator("uv.zenuv_seams_by_uv_islands")
+
+        layout.separator()
+
+        op = layout.operator(
+            'wm.url_open',
+            text="Help", icon='INFO')
+        op.url = f'{ZenPolls.doc_url}/unwrap/#the-behavior-of-the-operator-if-nothing-is-selected'
 
 
 class ZenUV_MT_ZenUnwrap_ConfirmPopup(bpy.types.Menu):
@@ -70,9 +80,18 @@ class ZenUV_MT_ZenUnwrap_ConfirmPopup(bpy.types.Menu):
     bl_icon = "KEYTYPE_EXTREME_VEC"
 
     def draw(self, context):
-        from ZenUV.ops.zen_unwrap.ops import ZUV_OT_ProxyUnwrapAllSelected
+        from ...ops.zen_unwrap.ops import ZUV_OT_ProxyUnwrapAllSelected
         layout = self.layout
         layout.label(text="Nothing is selected. The whole object(s) will be unwrapped.")
-        layout.separator
+
+        layout.separator()
+
         layout.operator(ZUV_OT_ProxyUnwrapAllSelected.bl_idname, text="Ok").action = "DEFAULT"
         # layout.operator("uv.zenuv_unwrap", text="Ok").action = "DEFAULT"
+
+        layout.separator()
+
+        op = layout.operator(
+            'wm.url_open',
+            text="Help", icon='INFO')
+        op.url = f'{ZenPolls.doc_url}/unwrap/#the-behavior-of-the-operator-if-nothing-is-selected'

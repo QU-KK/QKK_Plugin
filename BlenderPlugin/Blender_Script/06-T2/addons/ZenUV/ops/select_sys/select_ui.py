@@ -20,35 +20,39 @@
 
 import bpy
 
-from ZenUV.utils.generic import (
+from ...utils.generic import (
     ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE,
     ZUV_SPACE_TYPE)
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.ico import icon_get
-from ZenUV.utils.blender_zen_utils import ZenPolls
-from ZenUV.prop.common import get_combo_panel_order
+from ...prop.zuv_preferences import get_prefs
+from ...ico import icon_get
+from ...utils.blender_zen_utils import ZenPolls
+from ...prop.common import get_combo_panel_order
 
 
 def draw_select(self, context: bpy.types.Context):
     ''' @Draw Select '''
+    from .select_cylinder import (
+        ZUV_OT_SelectCylinderCap, ZUV_OT_SelectCylinderFaces
+    )
+    from .select_edges import (
+        ZUV_OT_Select_UV_Borders, ZUV_OT_Select_OpenEdges,
+        ZUV_OT_Select_SplitsEdges, ZUV_OT_SelectEdgeByCondition,
+        ZUV_OT_SelectMaterialBoundaryEdges, ZUV_OT_SelectEdgesByDirection)
     from .select import (
-        ZUV_OT_SelectHalf, ZUV_OT_SelectEdgeByCondition,
-        ZUV_OT_SelectLinkedLoops, ZUV_OT_UVSyncSelect,
-        ZUV_OT_Select_OpenEdges, ZUV_OT_SelectEdgesByDirection,
-        ZUV_OT_Select_UV_Borders, ZUV_OT_SelectFacesLessOnePixel,
-        ZUV_OT_SelectByUvArea, ZUV_OT_GrabSelectedArea,
-        ZUV_OT_Select_SplitsEdges, ZUV_OT_SelectFacesByNormal)
+        ZUV_OT_SelectHalf, ZUV_OT_SelectLinkedLoops,
+        ZUV_OT_UVSyncSelect, ZUV_OT_SelectFacesLessOnePixel, ZUV_OT_SelectByUvArea,
+        ZUV_OT_GrabSelectedArea, ZUV_OT_SelectFacesByNormal)
     from .select_islands import (
         ZUV_OT_FilterIslandsByProperty, ZUV_OP_SelectHoledIslands,
         ZUV_OP_SelectIslandByDirection, ZUV_OT_Select_QuadedIslands,
         ZUV_OT_SelectInTile, ZUV_OT_Select_UV_Island)
-    from ZenUV.ops.operators import (
+    from ...ops.operators import (
         ZUV_OT_SelectSeams, ZUV_OT_SelectSharp,
         ZUV_OT_Select_Loop, ZUV_OT_SelectFlipped,
         ZUV_OT_Select_UV_Overlap, ZUV_OT_Isolate_Island,
         ZUV_OT_Isolate_Part, ZUV_OT_SelectSelfIntersecting)
-    from ZenUV.stacks.stacks import ZUV_OT_Select_Similar
-    from ZenUV.zen_checker.stretch_map import ZUV_OT_SelectStretchedFaces
+    from ...stacks.stacks import ZUV_OT_Select_Similar
+    from ...zen_checker.stretch_map import ZUV_OT_SelectStretchedFaces
 
     addon_prefs = get_prefs()
 
@@ -60,6 +64,7 @@ def draw_select(self, context: bpy.types.Context):
     def fn_create_body(p_layout: bpy.types.UILayout):
         return p_layout.column(align=True)
 
+    # Select Islands
     box: bpy.types.UILayout = addon_prefs.op_addon_props.prepare_layout_panel(
         main_col, "expand_select_sys_islands", fn_create_body=fn_create_body)
     if box:
@@ -82,6 +87,7 @@ def draw_select(self, context: bpy.types.Context):
         if b_is_uv_area:
             col.operator(ZUV_OT_FilterIslandsByProperty.bl_idname)
 
+    # Select Faces
     box: bpy.types.UILayout = addon_prefs.op_addon_props.prepare_layout_panel(
         main_col, "expand_select_sys_faces", fn_create_body=fn_create_body)
     if box:
@@ -107,6 +113,11 @@ def draw_select(self, context: bpy.types.Context):
         if b_is_uv_area:
             col.operator(ZUV_OT_SelectFacesLessOnePixel.bl_idname, text=ZUV_OT_SelectFacesLessOnePixel.bl_zen_short_name)
 
+        row = box.row(align=True)
+        row.operator(ZUV_OT_SelectCylinderFaces.bl_idname, text=ZUV_OT_SelectCylinderFaces.bl_zen_short_name)
+        row.operator(ZUV_OT_SelectCylinderCap.bl_idname, text=ZUV_OT_SelectCylinderCap.bl_zen_short_name)
+
+    # Select Edges
     box: bpy.types.UILayout = addon_prefs.op_addon_props.prepare_layout_panel(
         main_col, "expand_select_sys_edges", fn_create_body=fn_create_body)
     if box:
@@ -125,6 +136,9 @@ def draw_select(self, context: bpy.types.Context):
         if ZenPolls.version_since_3_2_0:
             col.operator(ZUV_OT_SelectEdgesByDirection.bl_idname, text=ZUV_OT_SelectEdgesByDirection.bl_zen_short_name)
 
+        col.operator(ZUV_OT_SelectMaterialBoundaryEdges.bl_idname, text=ZUV_OT_SelectMaterialBoundaryEdges.bl_zen_short_name)
+
+    # Select Loops
     box: bpy.types.UILayout = addon_prefs.op_addon_props.prepare_layout_panel(
         main_col, "expand_select_sys_loops", fn_create_body=fn_create_body)
     if box:
@@ -134,6 +148,7 @@ def draw_select(self, context: bpy.types.Context):
         if b_is_uv_area:
             col.operator(ZUV_OT_SelectLinkedLoops.bl_idname)
 
+    # Select Misc
     box: bpy.types.UILayout = addon_prefs.op_addon_props.prepare_layout_panel(
         main_col, "expand_select_sys_misc", fn_create_body=fn_create_body)
     if box:

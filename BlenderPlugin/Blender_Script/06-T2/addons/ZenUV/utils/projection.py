@@ -18,8 +18,8 @@
 
 import math
 from mathutils import Vector
-from ZenUV.utils.constants import Planes
-from ZenUV.utils.generic import MeshBuilder
+from ..utils.constants import Planes
+from ..utils.generic import MeshBuilder
 
 
 class pVector:

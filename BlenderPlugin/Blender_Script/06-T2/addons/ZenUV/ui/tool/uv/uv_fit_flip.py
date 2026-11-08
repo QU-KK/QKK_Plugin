@@ -23,10 +23,10 @@ import gpu
 from mathutils import Matrix, Quaternion
 from gpu_extras.batch import batch_for_shader
 
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.ops.event_service import get_blender_event
-from ZenUV.utils.constants import UV_AREA_BBOX
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ....ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ....ops.event_service import get_blender_event
+from ....utils.constants import UV_AREA_BBOX
+from ....utils.blender_zen_utils import ZenPolls
 
 from ..custom_gizmo_shapes import CustomShapes
 

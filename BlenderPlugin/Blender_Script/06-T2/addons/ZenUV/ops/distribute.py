@@ -19,22 +19,16 @@
 
 import bpy
 import bmesh
-from bpy.props import (
-    EnumProperty,
-    BoolProperty,
-    FloatVectorProperty,
-    FloatProperty
-)
+
+from operator import attrgetter
 from mathutils import Vector
-from ZenUV.utils.generic import (
-    resort_objects_by_selection,
-    get_mesh_data,
-    verify_uv_layer
-)
-from ZenUV.utils.bounding_box import BoundingBox2d
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.stacks.utils import Cluster
-from ZenUV.ui.labels import ZuvLabels
+
+from ..utils.generic import ResortObjects
+from ..utils.bounding_box import BoundingBox2d
+from ..utils.uv_factory import UvIslandUtils
+from ..utils.iter_utils import IterUtils
+from ..stacks.utils import Cluster
+from ..ui.labels import ZuvLabels
 
 
 class dsProps:
@@ -131,7 +125,7 @@ class ZUV_OT_Distribute_Islands(bpy.types.Operator):
     bl_description = "Distributes and sorts selected islands"
     bl_options = {'REGISTER', 'UNDO'}
 
-    axis: EnumProperty(
+    axis: bpy.props.EnumProperty(
         name="Axis",
         description="Direction Axis",
         items=[
@@ -140,14 +134,14 @@ class ZUV_OT_Distribute_Islands(bpy.types.Operator):
             ]
     )
 
-    from_where: FloatVectorProperty(
+    from_where: bpy.props.FloatVectorProperty(
         name=ZuvLabels.PROP_FROM_WHERE_LABEL,
         description=ZuvLabels.PROP_FROM_WHERE_DESC,
         size=2,
         default=(0.0, 0.0),
         subtype='XYZ'
     )
-    sort_to: EnumProperty(
+    sort_to: bpy.props.EnumProperty(
         name=ZuvLabels.PROP_SORT_TO_LABEL,
         description=ZuvLabels.PROP_SORT_TO_DESC,
         items=[
@@ -162,12 +156,12 @@ class ZUV_OT_Distribute_Islands(bpy.types.Operator):
         ],
         default="UV_POSITION"
     )
-    reverse: BoolProperty(
+    reverse: bpy.props.BoolProperty(
         name=ZuvLabels.PROP_REV_SORT_LABEL,
         description=ZuvLabels.PROP_REV_SORT_DESC,
         default=False
     )
-    margin: FloatProperty(
+    margin: bpy.props.FloatProperty(
         name=ZuvLabels.PROP_SORT_MARGIN_LABEL,
         description=ZuvLabels.PROP_SORT_MARGIN_DESC,
         min=0.0,
@@ -175,7 +169,7 @@ class ZUV_OT_Distribute_Islands(bpy.types.Operator):
         precision=3
     )
 
-    inplace: BoolProperty(
+    inplace: bpy.props.BoolProperty(
         name="In Place",
         description="Leave not active axis as is",
         default=False
@@ -195,19 +189,15 @@ class ZUV_OT_Distribute_Islands(bpy.types.Operator):
         layout.prop(self, "inplace")
 
     def execute(self, context):
-        objs = resort_objects_by_selection(context, context.objects_in_mode)
+        objs = ResortObjects.resort_objects_by_selection(context, context.objects_in_mode)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {"CANCELLED"}
         PROPS = dsProps(self.sort_to, self.inplace, self.from_where, self.margin, self.reverse, self.axis)
         chart = Chart(PROPS)
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = verify_uv_layer(bm)
-            bm.faces.ensure_lookup_table()
-            islands = self.distribute_sort_islands(island_util.get_island(context, bm, uv_layer))
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
-            for island in islands:
+            for island in self.distribute_sort_islands(UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)):
                 chart.append(dsCluster(context, obj, island, uv_layer, PROPS))
 
         chart.set_to_position()
@@ -215,11 +205,10 @@ class ZUV_OT_Distribute_Islands(bpy.types.Operator):
         return {'FINISHED'}
 
     def distribute_sort_islands(self, islands):
-        ''' Sorting distributed islands '''
-        scope = []
-        for island in islands:
-            scope.append(sorted(island, key=sort_island_faces))
-        return sorted(scope, key=sort_islands_by_i_index)
+        return sorted(
+            [sorted(island, key=attrgetter("index")) for island in islands],
+            key=lambda island: island[0].index
+        )
 
 
 uv_distribute_classes = (

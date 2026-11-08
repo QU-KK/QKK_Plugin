@@ -23,22 +23,21 @@ import bmesh
 from dataclasses import dataclass, field
 from math import radians
 from mathutils import Vector
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.generic import (
-    resort_by_type_mesh_in_edit_mode_and_sel,
-    resort_objects_by_selection,
-    verify_uv_layer
-)
-from ZenUV.utils.base_clusters.stripes import UvStripes
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.base_clusters.zen_cluster import ZenCluster
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.transform import UvTransformUtils
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
-from ZenUV.utils.get_uv_islands import LoopsFactory
-from ZenUV.utils.annotations_toolbox.math_visualizer import MathVisualizer
+from ..utils.register_util import RegisterUtils
+from ..utils.generic import (
+    ResortObjects, is_edge_select_mode_in_uv,
+    verify_uv_layer)
+from ..utils.base_clusters.stripes import UvStripes
+from ..utils.base_clusters.zen_cluster import ZenCluster
+from ..utils.iter_utils import IterUtils
+from ..utils.vlog import Log
+from ..utils.transform import UvTransformUtils
+from ..ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
+from ..utils.loops_factory import LoopsFactory
+from ..utils.annotations_toolbox.math_visualizer import MathVisualizer
+from ..utils.uv_factory import UvIslandUtils
 
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ..utils.blender_zen_utils import is_loop_domain
 
 
 class MatchAndStitchViz:
@@ -302,10 +301,10 @@ class ZUV_OT_MatchAndStitch(bpy.types.Operator):
             self.clear_seam = True
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
-        objs = resort_objects_by_selection(context, objs)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_objects_by_selection(context, objs)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         self.reset_props()
@@ -313,10 +312,8 @@ class ZUV_OT_MatchAndStitch(bpy.types.Operator):
         Matcher = TransformSwitch()
         Matcher.set_state(self)
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            uv_layer = verify_uv_layer(bm)
-            islands = island_util.get_island(context, bm, uv_layer, _sorted=True)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+            islands = UvIslandUtils.get_uv_islands(context, bm, uv_layer, b_selected_only=True, b_sorted=True)
             islands = sorted(islands, key=(lambda x: x[0].index))
 
             if len(islands) == 1:
@@ -340,7 +337,7 @@ class ZUV_OT_MatchAndStitch(bpy.types.Operator):
                 self.report({'WARNING'}, "No islands with correctly selected edge loops were found.")
                 return {'CANCELLED'}
 
-            m_clusters = [cl for cl in clusters if True in [n.pinned for n in cl.stripes.nodes]]
+            m_clusters = [cl for cl in clusters if any(n.pinned for n in cl.stripes.nodes)]
 
             # if len(m_clusters) > 1:
             #     self.report({'WARNING'}, "More than one island is pinned down. The result may not be acceptable")
@@ -517,36 +514,37 @@ class ZUV_OT_MergeUvVerts(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        from ZenUV.ops.quadrify import ZenFollowQuad
+        from ..ops.quadrify import ZenFollowQuad
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {"CANCELLED"}
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            uv_layer = verify_uv_layer(bm)
-            if context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync:
+        b_is_loop_domain = is_loop_domain(context)
+
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+
+            if b_is_loop_domain:
                 if self.unselected:
-                    p_is_no_sync = False
-                    bm_verts = (v for v in bm.verts if v.select and True not in [f.hide for f in v.link_faces])
+                    use_loop_domain = False
+                    bm_verts = (v for v in bm.verts if v.select and not any(f.hide for f in v.link_faces))
                 else:
-                    bm_verts = {loop.vert for loop in LoopsFactory._loops_by_sel_mode(context, bm.faces, uv_layer, only_uv_edges=False, per_face=False)}
-                    p_is_no_sync = True
+                    bm_verts = {loop.vert for loop in LoopsFactory.get_selected_loops_by_island(context, bm, bm.faces, uv_layer, only_uv_edges=False, per_face=False)}
+                    use_loop_domain = True
             else:
                 if self.unselected:
                     bm_verts = bm.verts
                 else:
-                    bm_verts = (v for v in bm.verts if v.select and True not in [f.hide for f in v.link_faces])
-                p_is_no_sync = False
+                    bm_verts = (v for v in bm.verts if v.select and not any(f.hide for f in v.link_faces))
+                use_loop_domain = False
 
             ZenFollowQuad.merge_uv_verts(
                 context,
                 bm_verts,
                 verify_uv_layer(bm),
                 self.threshold,
-                p_is_no_sync,
+                use_loop_domain,
                 self.use_pinned,
                 self.use_seams)
 
@@ -604,7 +602,7 @@ class UvNode:
 
     def _set_letter_size(self, uv_layer):
         if UvNode.vis_letter_size is None:
-            from ZenUV.utils.bounding_box import BoundingBox2d
+            from ..utils.bounding_box import BoundingBox2d
             p_bbox = BoundingBox2d(points=[lp.link_loop_next[uv_layer].uv for lp in self.loops])
             p_size = ((p_bbox.len_x + p_bbox.len_y) * 0.5) * 0.6
             UvNode.vis_letter_size = p_size
@@ -631,13 +629,14 @@ class UvNode:
 
 class UvSplitProcessor:
 
-    def __init__(self, context: bpy.types.Context) -> None:
+    def __init__(self, context: bpy.types.Context, uv_layer: bmesh.types.BMLayerItem) -> None:
         self.show_in_annotations: bool = False
-        self.is_not_sync: bool = context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync
-        self.is_pure_uv_edge_mode: bool = context.space_data.type == 'IMAGE_EDITOR' and self.is_not_sync and ZenPolls.version_since_3_2_0 and context.scene.tool_settings.uv_select_mode == "EDGE"
+        self.b_is_loop_domain: bool = is_loop_domain(context)
+        self.b_is_edge_select_mode_in_uv: bool = is_edge_select_mode_in_uv(context)
+        self.uv_layer = uv_layer
 
     def compound_nodes(self, uv_layer: bmesh.types.BMLayerItem, groupped_bmesh_loops: list) -> list[list, list]:
-        from ZenUV.utils.generic import Scope
+        from ..utils.generic import Scope
         from collections import defaultdict, Counter
 
         p_node_groups = []
@@ -657,11 +656,11 @@ class UvSplitProcessor:
 
         i_stats = 0
 
-        if self.is_pure_uv_edge_mode:
+        if self.b_is_loop_domain:
             for node_group in node_groups:
                 for node in node_group:
                     for loop in node.loops:
-                        if loop[uv_layer].select_edge:
+                        if self._is_loop_selected(loop.link_loop_next, select_edge=False):
                             node.neighbors_count += 1
                             i_stats += 1
         else:
@@ -682,7 +681,7 @@ class UvSplitProcessor:
                 if node.neighbors_count >= 1:
                     if node.neighbors_count == 1 and len(node.loops) > 2:
                         if is_split_ends:
-                            if self.is_not_sync:
+                            if self.b_is_loop_domain:
                                 for loop in node.loops:
                                     self._handle_simple_case(uv_layer, node, loop, distance)
                             else:
@@ -776,16 +775,22 @@ class UvSplitProcessor:
             loop[uv_layer].uv = p_new_pos
             node.result_coordinates[loop.index] = p_new_pos
 
+    def _is_loop_selected(self, loop, select_edge: bool):
+        from ..utils.loops_factory import LoopsFactory
+        return LoopsFactory.is_loop_selected(loop, self.uv_layer, select_edge)
+
     def _is_all_selected(self, loop: bmesh.types.BMLoop, uv_layer: bmesh.types.BMLayerItem):
         lp = loop
         lp_next = loop.link_loop_next
         lp_prev = loop.link_loop_prev
 
-        if self.is_pure_uv_edge_mode:
-            return lp[uv_layer].select_edge and lp_prev[uv_layer].select_edge
+        if self.b_is_edge_select_mode_in_uv:
+            return self._is_loop_selected(lp, select_edge=True) and self._is_loop_selected(lp_prev, select_edge=True)
 
-        elif self.is_not_sync:
-            return lp[uv_layer].select and lp_next[uv_layer].select and lp_prev[uv_layer].select
+        elif self.b_is_loop_domain:
+            return self._is_loop_selected(lp, select_edge=False)\
+                   and self._is_loop_selected(lp_next, select_edge=False)\
+                   and self._is_loop_selected(lp_prev, select_edge=False)
 
         else:
             return lp.vert.select and lp_next.vert.select and lp_prev.vert.select
@@ -795,11 +800,13 @@ class UvSplitProcessor:
         lp_next = loop.link_loop_next
         lp_prev = loop.link_loop_prev
 
-        if self.is_pure_uv_edge_mode:
-            return not lp[uv_layer].select_edge and not lp_prev[uv_layer].select_edge
+        if self.b_is_edge_select_mode_in_uv:
+            return not self._is_loop_selected(lp, select_edge=True) and not self._is_loop_selected(lp_prev, select_edge=True)
 
-        elif self.is_not_sync:
-            return lp[uv_layer].select and not lp_next[uv_layer].select and not lp_prev[uv_layer].select
+        elif self.b_is_loop_domain:
+            return self._is_loop_selected(lp, select_edge=False)\
+                   and not self._is_loop_selected(lp_next, select_edge=False)\
+                   and not self._is_loop_selected(lp_prev, select_edge=False)
 
         else:
             return lp.vert.select and not lp_next.vert.select and not lp_prev.vert.select
@@ -808,10 +815,10 @@ class UvSplitProcessor:
         lp = loop
         lp_prev = loop.link_loop_prev
 
-        if self.is_pure_uv_edge_mode:
-            return lp[uv_layer].select and not lp_prev[uv_layer].select_edge
-        elif self.is_not_sync:
-            return lp[uv_layer].select and not lp_prev[uv_layer].select
+        if self.b_is_edge_select_mode_in_uv:
+            return self._is_loop_selected(lp, select_edge=False) and not self._is_loop_selected(lp_prev, select_edge=True)
+        elif self.b_is_loop_domain:
+            return self._is_loop_selected(lp, select_edge=False) and not self._is_loop_selected(lp_prev, select_edge=False)
         else:
             return lp.vert.select and not lp_prev.vert.select
 
@@ -819,20 +826,20 @@ class UvSplitProcessor:
         lp = loop
         lp_next = loop.link_loop_next
 
-        if self.is_pure_uv_edge_mode:
-            return lp[uv_layer].select and lp_next[uv_layer].select_edge
-        elif self.is_not_sync:
-            return lp[uv_layer].select and not lp_next[uv_layer].select
+        if self.b_is_edge_select_mode_in_uv:
+            return self._is_loop_selected(lp, select_edge=False) and self._is_loop_selected(lp_next, select_edge=True)
+        elif self.b_is_loop_domain:
+            return self._is_loop_selected(lp, select_edge=False) and not self._is_loop_selected(lp_next, select_edge=False)
         else:
             return lp.vert.select and not lp_next.vert.select
 
     def _handle_simple_case(self, uv_layer: bmesh.types.BMLayerItem, node: UvNode, loop: bmesh.types.BMLoop, distance: float) -> Vector:
         base_pos = Vector(loop[uv_layer].uv.to_tuple())
-        if self.is_pure_uv_edge_mode:
-            if loop[uv_layer].select_edge:
+        if self.b_is_edge_select_mode_in_uv:
+            if self._is_loop_selected(loop, select_edge=True):
                 coo = base_pos + (loop.link_loop_prev[uv_layer].uv - base_pos).normalized() * distance
                 node.result_coordinates[loop.index] = coo
-            elif loop.link_loop_prev[uv_layer].select_edge:
+            elif self._is_loop_selected(loop.link_loop_prev, select_edge=True):
                 coo = base_pos + (loop.link_loop_next[uv_layer].uv - base_pos).normalized() * distance
                 node.result_coordinates[loop.index] = coo
             else:
@@ -906,14 +913,14 @@ class ZUV_OT_Split(bpy.types.Operator):
             self.report({'WARNING'}, "Zen UV: The split was not performed. Distance is zero")
             return {'FINISHED'}
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {"CANCELLED"}
 
-        objs = resort_objects_by_selection(context, objs)
+        objs = ResortObjects.resort_objects_by_selection(context, objs)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         if context.scene.zen_uv.is_show_ops_annotations:
@@ -922,13 +929,11 @@ class ZUV_OT_Split(bpy.types.Operator):
             vis.clear('point', 0)
             vis.clear('corners', 0)
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
-            p_loops = LoopsFactory.loops_by_sel_mode(context, bm, uv_layer, groupped=True)
+            p_loops = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer, groupped=True)
 
-            SP = UvSplitProcessor(context)
+            SP = UvSplitProcessor(context, uv_layer)
 
             node_groups = SP.compound_nodes(uv_layer, p_loops)
 
@@ -954,7 +959,12 @@ class ZUV_OT_Split(bpy.types.Operator):
                     for node in node_group:
                         node.show_directions(context, uv_layer)
 
-            bmesh.update_edit_mesh(obj.data)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
+
+        if IterUtils.last_errors:
+            bpy.app.timers.register(
+                lambda: IterUtils.show_iteration_errors_popup(context),
+                first_interval=0.1)
 
         return {'FINISHED'}
 

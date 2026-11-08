@@ -21,20 +21,17 @@
 import bpy
 import bmesh
 
-from ZenUV.utils.register_util import RegisterUtils
+from ...utils.register_util import RegisterUtils
 
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.generic import (
-    resort_by_type_mesh_in_edit_mode_and_sel,
-    verify_uv_layer,
-    select_by_context,
-    resort_objects_by_selection,
-    select_islands)
-from ZenUV.ops.adv_uv_maps_sys.udim_utils import UdimFactory
-from ZenUV.utils.bounding_box import BoundingBox2d, uv_area_bbox
+from ...utils.generic import (
+    ResortObjects, bpy_select_by_context, switch_to_face_sel_mode)
+from ...ops.adv_uv_maps_sys.udim_utils import UdimFactory
+from ...utils.bounding_box import BoundingBox2d, uv_area_bbox
 
-from ZenUV.utils.blender_zen_utils import ZenPolls
-from ZenUV.ui.pie import ZsPieFactory
+from ...utils.iter_utils import IterUtils
+from ...utils.uv_factory import UvIslandUtils, SelectionUtils
+
+from ...ui.pie import ZsPieFactory
 
 
 def calculate_island_dimensions(island, uv_layer):
@@ -191,21 +188,20 @@ class ZUV_OT_FilterIslandsByProperty(bpy.types.Operator):
         row.prop(self, 'threshold')
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
+
+        objs = ResortObjects.resort_objects_by_selection(context, objs)
+        if not objs:
+            self.report({'WARNING'}, "No objects selected.")
+            return {"CANCELLED"}
 
         self.ranges_count = 0
         p_group_index = self.group_index - 1
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            bm.faces.ensure_lookup_table()
-            uv_layer = verify_uv_layer(bm)
-
-            if not uv_layer:
-                continue
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
             island_data = [
                 {
@@ -214,7 +210,7 @@ class ZUV_OT_FilterIslandsByProperty(bpy.types.Operator):
                     'width': width,
                     'aspect_ratio': aspect_ratio,
                 }
-                for island in island_util.get_island(context, bm, uv_layer)
+                for island in UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
                 for height, width, aspect_ratio in [calculate_island_dimensions(island, uv_layer)]
             ]
 
@@ -241,11 +237,12 @@ class ZUV_OT_FilterIslandsByProperty(bpy.types.Operator):
             selected_range = ranges[p_group_index]
             selected_islands = [data['island'] for data in selected_range]
 
-            bpy.ops.mesh.select_all(action='DESELECT')
+            SelectionUtils.select_faces_any_context(context, bm.faces, state=False, bm=bm, uv_layer=uv_layer)
 
             for island in selected_islands:
-                for f in island:
-                    f.select = True
+                SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
+
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
             self.report({'INFO'}, f"Selected {len(selected_islands)} islands in group {self.group_index}.")
 
@@ -277,51 +274,46 @@ class ZUV_OP_SelectIslandByDirection(bpy.types.Operator):
     )
 
     def execute(self, context):
-        from ZenUV.ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
+        from ...ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
 
         def is_oriented(p_angle):
             return abs(p_angle) < 0.0087  # Half a degree
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
-        if context.area.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync:
-            context.scene.tool_settings.uv_select_mode = "FACE"
-        else:
-            bpy.ops.mesh.select_mode(type="FACE")
+        switch_to_face_sel_mode(context)
 
         if self.clear_selection:
-            from ZenUV.utils.generic import bpy_select_by_context
             bpy_select_by_context(context, action='DESELECT')
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
-            for island in island_util.get_islands(context, bm):
+            for island in UvIslandUtils.yield_uv_islands(context, bm, uv_layer, b_selected_only=False, b_include_hidden=False):
                 p_bbox = BoundingBox2d(islands=[island, ], uv_layer=uv_layer)
                 p_angle = p_bbox.get_orient_angle(ActiveUvImage(context).aspect)
                 is_island_radial = p_bbox.is_circle()
 
                 if not is_island_radial and self.orient_direction == 'HORIZONTAL':
                     if is_oriented(p_angle) and p_bbox.len_x > p_bbox.len_y:
-                        select_by_context(context, bm, [island, ], state=True)
+                        SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
 
                 elif self.orient_direction == 'VERTICAL':
                     if not is_island_radial and is_oriented(p_angle) and p_bbox.len_x < p_bbox.len_y:
-                        select_by_context(context, bm, [island, ], state=True)
+                        SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
 
                 elif self.orient_direction == 'RADIAL':
                     if is_island_radial:
-                        select_by_context(context, bm, [island, ], state=True)
+                        SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
 
                 else:
                     if not is_island_radial and not is_oriented(p_angle):
-                        select_by_context(context, bm, [island, ], state=True)
+                        SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
 
             bm.select_flush_mode()
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         return {'FINISHED'}
 
@@ -345,34 +337,30 @@ class ZUV_OP_SelectHoledIslands(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
 
         if not objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {"CANCELLED"}
 
-        from ZenUV.utils.base_clusters.zen_cluster import ZenCluster
-        from ZenUV.utils.base_clusters.stripes import UvStripes
-        from ZenUV.utils.generic import bpy_deselect_by_context, switch_to_face_sel_mode
+        from ...utils.base_clusters.zen_cluster import ZenCluster
+        from ...utils.base_clusters.stripes import UvStripes
+        from ...utils.generic import switch_to_face_sel_mode
 
         if self.clear_selection:
-            bpy_deselect_by_context(context)
+            bpy_select_by_context(context, action='DESELECT')
 
         switch_to_face_sel_mode(context)
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
-            islands = island_util.get_islands(context, bm)
-
-            for island in islands:
+            for island in UvIslandUtils.yield_uv_islands(context, bm, uv_layer, b_selected_only=False, b_include_hidden=False):
                 cl = ZenCluster(context, obj, island, bm)
                 p_uv_bound_edges = cl.get_bound_edges()
                 z_stripes = UvStripes(p_uv_bound_edges, uv_layer)
 
                 if z_stripes.is_cluster_holed():
-                    select_by_context(context, bm, [island, ])
+                    SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
 
             bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
@@ -447,16 +435,14 @@ class ZUV_OT_SelectInTile(bpy.types.Operator):
         box.prop(self, 'margin')
 
     def execute(self, context):
-        from ZenUV.utils.generic import select_by_context
         UdimFactory.reset_report()
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         if self.clear_selection:
-            from ZenUV.utils.generic import bpy_select_by_context
             bpy_select_by_context(context, action='DESELECT')
 
         if self.base == 'UV_AREA':
@@ -471,7 +457,7 @@ class ZUV_OT_SelectInTile(bpy.types.Operator):
             if p_tile is not None:
                 p_bboxes = [UdimFactory.get_bbox_of_udim(p_tile.number), ]
         elif self.base == 'ANY_UDIM':
-            p_udims = UdimFactory.get_udims_from_loops(objs)
+            p_udims = UdimFactory.get_udims_from_loops(context, objs)
             p_bboxes = [UdimFactory.get_bbox_of_udim(tile) for tile in p_udims]
         else:
             raise RuntimeError('base value not in {"UV_AREA", "UDIM_NUM", "ACTIVE_UDIM", "ANY_UDIM"}')
@@ -482,13 +468,9 @@ class ZUV_OT_SelectInTile(bpy.types.Operator):
 
         m_bbox: BoundingBox2d = None
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            uv_layer = bm.loops.layers.uv.active
-            if not uv_layer:
-                continue
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
-            for island in island_util.get_islands(context, bm):
+            for island in UvIslandUtils.yield_uv_islands(context, bm, uv_layer, b_selected_only=False, b_include_hidden=False):
                 p_bbox = BoundingBox2d(islands=[island, ], uv_layer=uv_layer)
 
                 for m_bbox in p_bboxes:
@@ -498,16 +480,16 @@ class ZUV_OT_SelectInTile(bpy.types.Operator):
 
                     if b_is_overlapped:
                         if self.location == 'INSIDE' and b_is_inside:
-                            select_by_context(context, bm, [island, ], state=True)
+                            SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
                         elif self.location == 'CROSS' and not b_is_inside:
-                            select_by_context(context, bm, [island, ], state=True)
+                            SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
                         elif self.location == 'MARGIN' and b_is_inside:
                             p_min_value = min([abs(m_bbox.rect[i] - p_bbox.rect[i]) for i in range(4)])
                             if p_min_value < self.margin:
-                                select_by_context(context, bm, [island, ], state=True)
+                                SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
                     else:
                         if self.location == 'OUTSIDE' and b_is_inside is False:
-                            select_by_context(context, bm, [island, ], state=True)
+                            SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
 
             bm.select_flush_mode()
             bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
@@ -552,37 +534,21 @@ class ZUV_OT_Select_QuadedIslands(bpy.types.Operator):
     def execute(self, context):
         from collections import Counter
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "There are no selected objects")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         if self.clear_selection and self.mode == 'SELECT':
-            from ZenUV.utils.generic import bpy_deselect_by_context
-            bpy_deselect_by_context(context)
+            bpy_select_by_context(context, action='DESELECT')
 
         p_state = self.mode == 'SELECT'
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            bm.faces.ensure_lookup_table()
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
-            for island in island_util.get_islands(context, bm):
+            for island in UvIslandUtils.yield_uv_islands(context, bm, uv_layer, b_selected_only=False, b_include_hidden=False):
                 if Counter((len(f.verts) == 4 for f in island))[False] == 0:
-                    if context.space_data and context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync:
-                        if ZenPolls.version_since_3_2_0:
-                            for f in island:
-                                for lp in f.loops:
-                                    lp[uv_layer].select = p_state
-                                    lp[uv_layer].select_edge = p_state
-                        else:
-                            for f in island:
-                                for lp in f.loops:
-                                    lp[uv_layer].select = p_state
-                    else:
-                        for f in island:
-                            f.select = p_state
+                    SelectionUtils.select_faces_any_context(context, island, state=p_state, bm=bm, uv_layer=uv_layer)
 
             bm.select_flush_mode()
             bmesh.update_edit_mesh(obj.data, loop_triangles=False)
@@ -607,13 +573,25 @@ class ZUV_OT_Select_UV_Island(bpy.types.Operator):
 
         ZsPieFactory.mark_pie_cancelled()
 
-        objs = resort_objects_by_selection(context, context.objects_in_mode)
+        objs = ResortObjects.resort_objects_by_selection(context, context.objects_in_mode)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
-        select_islands(context, objs)
-        context.tool_settings.mesh_select_mode = [False, False, True]
+        objs_without_uv = []
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=False):
+
+            if not uv_layer:
+                objs_without_uv.append(obj.name)
+                continue
+
+            for island in UvIslandUtils.yield_uv_islands(context, bm, uv_layer, b_selected_only=True, b_include_hidden=False, b_include_partially_hidden=False):
+                SelectionUtils.select_faces_any_context(context, island, state=True, bm=bm, uv_layer=uv_layer)
+
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
+
+        if objs_without_uv:
+            self.report({'WARNING'}, f"No UV map found in '{objs_without_uv}'")
 
         return {'FINISHED'}
 

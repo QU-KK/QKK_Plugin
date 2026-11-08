@@ -24,9 +24,9 @@ from bpy_extras.io_utils import ImportHelper
 import os
 import shutil
 
-from ZenUV.utils.blender_zen_utils import ZuvPresets
-from ZenUV.utils.vlog import Log
-from ZenUV.prop.common import update_addon_prop
+from ..utils.blender_zen_utils import ZuvPresets
+from ..utils.vlog import Log
+from ..prop.common import update_addon_prop
 
 
 class ZUV_UserScriptProps(bpy.types.PropertyGroup):
@@ -74,7 +74,7 @@ class ZUV_OT_UserScriptSelect(bpy.types.Operator, ImportHelper):
     filter_glob: bpy.props.StringProperty(default="*.py", options={'HIDDEN'})
 
     def invoke(self, context: bpy.types.Context, event: bpy.types.Event):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ..prop.zuv_preferences import get_prefs
 
         addon_prefs = get_prefs()
 
@@ -92,7 +92,7 @@ class ZUV_OT_UserScriptSelect(bpy.types.Operator, ImportHelper):
 
     def execute(self, context: bpy.types.Context):
         try:
-            from ZenUV.prop.zuv_preferences import get_prefs
+            from ..prop.zuv_preferences import get_prefs
 
             addon_prefs = get_prefs()
             addon_prefs.user_script.file_path = self.filepath
@@ -147,7 +147,7 @@ WARNING! File 'user_script.py' will be overreded in addon presets folder!
         return wm.invoke_props_dialog(self)
 
     def execute(self, context: bpy.types.Context):
-        from ZenUV.prop.zuv_preferences import get_prefs
+        from ..prop.zuv_preferences import get_prefs
         addon_prefs = get_prefs()
 
         try:

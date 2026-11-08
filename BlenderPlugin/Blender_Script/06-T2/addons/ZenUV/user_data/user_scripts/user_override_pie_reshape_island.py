@@ -25,7 +25,7 @@
 
 
 import bpy
-from ZenUV.ui.pie.mesh_pie import ZUV_OT_PieCallerTopRight
+from ...ui.pie.mesh_pie import ZUV_OT_PieCallerTopRight
 
 
 def register():

@@ -25,15 +25,12 @@ import bpy
 import bmesh
 
 from mathutils import Vector, Matrix
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.ui.tool.view3d_base import gizmo_texture
-from ZenUV.utils.generic import (
-    get_mesh_data,
-    resort_by_type_mesh_in_edit_mode_and_sel,
-    verify_uv_layer
-)
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.base_clusters.base_cluster import BaseCluster, ProjectCluster
+from ...utils.register_util import RegisterUtils
+from ...ui.tool.view3d_base import gizmo_texture
+from ...utils.generic import ResortObjects, verify_uv_layer
+from ...utils.uv_factory import UvIslandUtils
+from ...utils.iter_utils import IterUtils
+from ...utils.base_clusters.base_cluster import BaseCluster, ProjectCluster
 
 
 class projCluster(BaseCluster, ProjectCluster):
@@ -68,9 +65,9 @@ class ZUV_OT_ProjectByScreenCage(bpy.types.Operator):
         self.layout.prop(self, 'influence_mode')
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
         p_scene = context.scene
         b_is_screen = p_scene.zen_uv.ui.view3d_tool.get_select_mode() == 'SCREEN'
@@ -90,11 +87,13 @@ class ZUV_OT_ProjectByScreenCage(bpy.types.Operator):
             return {'CANCELLED'}
 
         base_verts = (Vector(), Vector((1.0, 0.0, 0.0)), Vector((0.0, 1.0, 0.0)))
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=False):
+
+            if not uv_layer:
+                uv_layer = verify_uv_layer(bm)
+
             if self.influence_mode == "ISLAND":
-                islands = island_util.get_island(context, bm, uv_layer)
+                islands = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
             else:
                 islands = [[f for f in bm.faces if f.select], ]
             for island in islands:
@@ -103,7 +102,7 @@ class ZUV_OT_ProjectByScreenCage(bpy.types.Operator):
                 cluster.set_transform(obj.matrix_world)
                 pplane_verts = [p_gizmo_texture.matrix_basis @ Matrix.Translation(Vector((-0.5, -0.5, 0.0))) @ v for v in base_verts]
                 cluster.project(input_plane=pplane_verts)
-            bmesh.update_edit_mesh(me)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
         return {"FINISHED"}
 
 

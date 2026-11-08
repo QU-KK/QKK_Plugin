@@ -29,11 +29,12 @@ from timeit import default_timer as timer
 
 from .trimsheet_utils import ZuvTrimsheetUtils, TrimImportUtils
 
-from ZenUV.utils.blender_zen_utils import (
+from ...utils.blender_zen_utils import (
     get_tools_region_width, get_ui_region_width,
     update_areas_in_all_screens, ZenPolls, ZenStrUtils, ZuvPresets)
-from ZenUV.utils.vlog import Log
-from ZenUV.utils.simple_geometry import Rectangle
+from ...utils.vlog import Log
+from ...utils.simple_geometry import Rectangle
+from ...utils.blender_zen_utils import is_sync_off
 
 
 class ZUV_PT_UVMathVisualizer(bpy.types.Panel):
@@ -97,7 +98,7 @@ class MathVizBase:
     )
 
     def execute(self, context: bpy.types.Context):
-        from ZenUV.utils.annotations_toolbox.math_visualizer import MathVisualizer
+        from ...utils.annotations_toolbox.math_visualizer import MathVisualizer
 
         debugger = MathVisualizer(context)
         debugger.add_vector(
@@ -485,6 +486,12 @@ class ZUV_OT_TrimDeleteAll(bpy.types.Operator):
         options={'HIDDEN', 'SKIP_SAVE'}
     )
 
+    disable_in_tool_transform: bpy.props.BoolProperty(
+        name="Disable In Tool Transform",
+        description="Operation will be cancelled if Zen UV tool transform mode (move, rotate or scale) is selected",
+        default=False
+    )
+
     def draw(self, context: bpy.types.Context):
         layout = self.layout
         col = layout.column(align=True)
@@ -503,6 +510,16 @@ class ZUV_OT_TrimDeleteAll(bpy.types.Operator):
             return self.execute(context)
 
     def execute(self, context: bpy.types.Context):
+        if self.disable_in_tool_transform:
+            from ...ui.tool.uv.uv_base import ZuvUVGizmoBase
+            from ...prop.scene_ui_props import ZUV_UVToolProps
+            if ZuvUVGizmoBase.is_workspace_tool_active(context):
+                p_scene = context.scene
+                tool_props: ZUV_UVToolProps = p_scene.zen_uv.ui.uv_tool
+                if tool_props.category == 'TRANSFORMS':
+                    self.report({'INFO'}, "Can not delete trims in Zen UV tool transform mode (move, rotate or scale)!")
+                    return {'CANCELLED'}
+
         p_data = ZuvTrimsheetUtils.getTrimsheetOwner(context)
         if p_data is not None:
             p_trimsheet = p_data.trimsheet
@@ -1178,7 +1195,7 @@ class ZUV_OT_TrimCreateFromZenSets(bpy.types.Operator):
             ZenPolls.is_zen_sets_present() and context.mode == 'EDIT_MESH' and
             (
                 context.area and context.area.type == "VIEW_3D" or
-                context.area.type == "IMAGE_EDITOR" and context.scene.tool_settings.use_uv_select_sync) and
+                not is_sync_off(context)) and
             ZuvTrimsheetUtils.isTrimsheetEditable(context)
         )
 
@@ -1325,7 +1342,7 @@ class ZUV_OT_TrimCreateFromImage(bpy.types.Operator):
 
         color_rectangles = defaultdict(list)
 
-        from ZenUV.utils.progress import ProgressBar, ProgressCancelException
+        from ...utils.progress import ProgressBar, ProgressCancelException
 
         progress = ProgressBar(context, width * height, text_only=False)
         progress.current_step = 0

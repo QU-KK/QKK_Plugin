@@ -25,7 +25,6 @@ class ZuvLabels:
     """ Zen UV Labels and text blocks """
     # ADDON
     ADDON_NAME_LABEL = "Zen UV"
-    ADDON_NAME = "ZenUV"
     ADDON_ICO = "zen-uv_32"
 
     ZEN_MODIFIER_KEY_LABEL = "Zen Modifier Key"
@@ -508,7 +507,7 @@ Automatically set the same active UV Map
 index for all selected objects"""
 
     OT_COPY_UV_LABEL = "Copy UV"
-    OT_COPY_UV_DESC = "Copy the UV coordinates of the selection"
+    OT_COPY_UV_DESC = "Copy the UV coordinates of the selection in active UV map"
 
     OT_PASTE_UV_LABEL = "Paste UV"
     OT_PASTE_UV_DESC = "Paste the UV coordinates"

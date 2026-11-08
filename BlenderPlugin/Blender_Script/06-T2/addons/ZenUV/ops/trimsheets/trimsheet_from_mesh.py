@@ -23,15 +23,15 @@ import bpy
 import bmesh
 import numpy as np
 from mathutils import Vector
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.bounding_box import BoundingBox2d
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.utils.generic import (
-    resort_by_type_mesh_in_edit_mode_and_sel,
+from ...utils.register_util import RegisterUtils
+from ...utils.bounding_box import BoundingBox2d
+from ...utils.loops_factory import LoopsFactory
+from ...utils.generic import (
+    ResortObjects,
     verify_uv_layer,
     UnitsConverter)
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import Cursor2D, TransformSysOpsProps
+from ...ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ...ops.transform_sys.transform_utils.tr_utils import Cursor2D, TransformSysOpsProps
 
 
 class ZUV_OT_NewTrim(bpy.types.Operator):
@@ -136,9 +136,9 @@ class ZUV_OT_NewTrim(bpy.types.Operator):
                 self.report({'INFO'}, f'Creation mode not available now: {s_creation_mode}')
                 return {'FINISHED'}
 
-            objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+            objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
             if not objs:
-                self.report({'INFO'}, "There are no selected objects.")
+                self.report({'INFO'}, "No objects selected.")
                 return {'CANCELLED'}
 
             bboxes = []
@@ -148,15 +148,15 @@ class ZUV_OT_NewTrim(bpy.types.Operator):
                     uv_layer = verify_uv_layer(bm)
 
                     if self.creation_mode == 'ISLAND':
-                        loops = island_util.LoopsFactory.loops_by_islands(context, bm, uv_layer)
+                        loops = LoopsFactory.get_loops_by_islands(context, bm, uv_layer)
                     elif self.creation_mode == 'SELECTION':
-                        loops = island_util.LoopsFactory.loops_by_sel_mode(context, bm, uv_layer, groupped=True)
+                        loops = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer, groupped=True)
                     elif self.creation_mode == 'VERTS':
-                        loops = island_util.LoopsFactory.loops_by_sel_mode(context, bm, uv_layer, groupped=False)
+                        loops = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer, groupped=False)
                         if len(loops):
                             loops = [loops]
                     elif self.creation_mode == 'FACES':
-                        loops = island_util.LoopsFactory.loops_by_sel_mode(context, bm, uv_layer, groupped=False, per_face=True)
+                        loops = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer, groupped=False, per_face=True)
                         if self.set_trim_normal:
                             M = obj.matrix_world
                             p_data = [(
@@ -480,9 +480,9 @@ class ZUV_OT_TrimCreateUDIM(bpy.types.Operator):
         row.label(text='Total: ' + str(self.total) + p_alert_message)
 
     def execute(self, context: bpy.types.Context):
-        from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-        from ZenUV.ops.trimsheets.trimsheet_from_mesh import Trim
-        from ZenUV.ops.adv_uv_maps_sys.udim_utils import UdimFactory
+        from ...ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+        from ...ops.trimsheets.trimsheet_from_mesh import Trim
+        from ...ops.adv_uv_maps_sys.udim_utils import UdimFactory
 
         p_data = ZuvTrimsheetUtils.getTrimsheetOwner(context)
         if p_data is not None:

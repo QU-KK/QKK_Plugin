@@ -30,14 +30,15 @@ from .addon_test_utils import (
     _ensure_facemap,
     _get_selected_faces_ids,
     _get_hided_faces_ids)
-from ZenUV.utils.vlog import Log
-from ZenUV.ops.pack_sys.pack import UVPMmanager, UVPackerManager
-from ZenUV.utils.constants import PACK_EXCLUDED_FACEMAP_NAME
-from ZenUV.utils import get_uv_islands as island_util
+from ...utils.vlog import Log
+from ...utils.generic import bpy_select_by_context
+from ...ops.pack_sys.pack import UVPMmanager, UVPackerManager
+from ...utils.constants import PACK_EXCLUDED_FACEMAP_NAME
+from ...utils.uv_factory import UvIslandUtils
 
 
 def _prepare_taged_excluded_testing(context):
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
     _select_faces_by_id_active_obj(context, [*range(0, 6)])
     bpy.ops.uv.zenuv_tag_pack_excluded()
 
@@ -48,9 +49,10 @@ def _get_tagged_excluded_islands(context):
         bm = bmesh.from_edit_mesh(obj.data).copy()
         bm.faces.ensure_lookup_table()
         bm.verts.ensure_lookup_table()
+        uv_layer = bm.loops.layers.uv.active
         finished_facemap = _ensure_facemap(bm, PACK_EXCLUDED_FACEMAP_NAME)
-        islands = island_util.get_islands(context, bm)
-        islands_finished.extend([island for island in islands if True in [f[finished_facemap] for f in island]])
+        islands = UvIslandUtils.get_all_uv_islands(context, bm, uv_layer)
+        islands_finished.extend([island for island in islands if any(f[finished_facemap] for f in island)])
         bm.free()
     return islands_finished
 
@@ -157,7 +159,7 @@ def Test_uv_zenuv_untag_pack_excluded(context):
 def Test_uv_zenuv_tag_pack_excluded(context):
     ''' Tag Islands as Excluded from Packing '''
     test_count = 1
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
     _select_faces_by_id_active_obj(context, [*range(0, 6)])
 
     bpy.ops.uv.zenuv_tag_pack_excluded()
@@ -172,7 +174,7 @@ def Test_uv_zenuv_select_pack_excluded(context):
     ''' Select Islands tagged as Excluded from Packing '''
     # Test Select
     test_count = 6
-    bpy.ops.mesh.select_all(action='DESELECT')
+    bpy_select_by_context(context, action='DESELECT')
 
     if len(_get_selected_faces_ids(context)) != 0:
         raise AddonTestError('bpy.ops DESELECT was not completed')
@@ -187,7 +189,7 @@ def Test_uv_zenuv_select_pack_excluded(context):
 
     # Test Deselect
     test_count = 0
-    bpy.ops.mesh.select_all(action='SELECT')
+    bpy_select_by_context(context, action='SELECT')
 
     if len(_get_selected_faces_ids(context)) != 6:
         raise AddonTestError('bpy.ops SELECT was not completed')

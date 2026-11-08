@@ -18,27 +18,25 @@
 
 
 import bpy
-from ZenUV.utils.generic import (
-    resort_by_type_mesh
-)
+from ...utils.generic import ResortObjects
 from .addon_test_utils import (
     _get_seam_edges_ids,
     _set_seams,
     AddonTestError,
     AddonTestManual
     )
-from ZenUV.utils.vlog import Log
+from ...utils.vlog import Log
 
 
 def _clear_seam_list(context):
-    objs = resort_by_type_mesh(context)
+    objs = ResortObjects.resort_by_type_mesh(context)
     for obj in objs:
         obj.zen_sg_list.clear()
         obj.zsg_list_index = -1
 
 
 def _get_list_count_all_objects(context):
-    return len([i for obj in resort_by_type_mesh(context) for i in obj.zen_sg_list])
+    return len([i for obj in ResortObjects.resort_by_type_mesh(context) for i in obj.zen_sg_list])
 
 
 def _get_list_count_active_object(context):

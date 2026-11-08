@@ -27,12 +27,12 @@ from gpu_extras.batch import batch_for_shader
 from .custom_gizmo_shapes import CustomShapes
 from .view3d_base import ZuvGizmoBase
 
-from ZenUV.ops.event_service import get_blender_event
-from ZenUV.utils.constants import UV_AREA_BBOX
-from ZenUV.ops.transform_sys.transform_utils.tr_utils import TrSpaceMode
-from ZenUV.utils.blender_zen_utils import ZenPolls, ZenDrawConstants
-from ZenUV.utils.simple_geometry import TextRect, Rectangle
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ...ops.event_service import get_blender_event
+from ...utils.constants import UV_AREA_BBOX
+from ...ops.transform_sys.transform_utils.tr_utils import TrSpaceMode
+from ...utils.blender_zen_utils import ZenPolls, ZenDrawConstants
+from ...utils.simple_geometry import TextRect, Rectangle
+from ...ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
 
 
 if not bpy.app.background:
@@ -542,7 +542,7 @@ class VIEW2D_GT_zenuv_trim_viewport_select(bpy.types.GizmoGroup):
             self.foo_gizmo.color = 0.0, 0.0, 0.0
             self.foo_gizmo.color_highlight = 0.8, 0.8, 0.8
 
-        from ZenUV.ui.gizmo_draw import GizmoColumnButton
+        from ...ui.gizmo_draw import GizmoColumnButton
         GizmoColumnButton.set_position(self.foo_gizmo, context, 'TRIM_SELECTOR')
 
     def setup(self, context):

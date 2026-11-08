@@ -24,8 +24,8 @@ from mathutils import Vector, Matrix
 from functools import partial
 
 from .uv_pos_sca import ZuvUVGizmoPosSca
-from ZenUV.ops.event_service import get_blender_event
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ....ops.event_service import get_blender_event
+from ....utils.blender_zen_utils import ZenPolls
 
 
 class ZUV_GGT_UVTransformScale(bpy.types.GizmoGroup, ZuvUVGizmoPosSca):
@@ -79,7 +79,8 @@ class ZUV_GGT_UVTransformScale(bpy.types.GizmoGroup, ZuvUVGizmoPosSca):
         if super()._setup_matrices_final(context):
             rgn2d = context.region.view2d
 
-            x, y, = rgn2d.view_to_region(self.uv_selection_center.x, self.uv_selection_center.y, clip=False)
+            from .uv_base import ZuvUVGizmoBase
+            x, y, = rgn2d.view_to_region(ZuvUVGizmoBase.uv_selection_center.x, ZuvUVGizmoBase.uv_selection_center.y, clip=False)
 
             mtx = Matrix.Translation(Vector((x, y, 0)))
 
@@ -115,7 +116,7 @@ class ZUV_GGT_UVTransformScale(bpy.types.GizmoGroup, ZuvUVGizmoPosSca):
 
         b_executed = False
 
-        from ZenUV.ops.transform_sys.trim_depend_transform import ZUV_OT_TrUVScaleInTrim
+        from ....ops.transform_sys.trim_depend_transform import ZUV_OT_TrUVScaleInTrim
 
         # prevent endless undo chain
         wm = bpy.context.window_manager

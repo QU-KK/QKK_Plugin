@@ -18,13 +18,16 @@
 
 """ User alternative commands and "Magic Button" module """
 import bpy
-from ZenUV.ui.labels import ZuvLabels
+
+from ..utils.blender_zen_utils import ZenPolls
 
 
-class BaseCollectionItem(bpy.types.PropertyGroup):
-    pass
+# XXX: Valery, why do we need this !?
+# class BaseCollectionItem(bpy.types.PropertyGroup):
+#     pass
 
-pie_menus: bpy.props.CollectionProperty(type=BaseCollectionItem)
+# pie_menus: bpy.props.CollectionProperty(type=BaseCollectionItem)
+
 
 MAX_STR_LEN = 1024
 
@@ -50,7 +53,7 @@ PM_ITEMS_M = tuple(
 # def prop_name(data, property, default=None):
 #     prop = data.bl_rna.properties[property]
 #     return prop.name or default or prop
-    
+
 # def btn_operator(text="", icon='NONE', icon_value=0):
 #     p = PLayout.real_operator(
 #         PME_OT_btn_hide.bl_idname, text,
@@ -67,7 +70,7 @@ def get_bl_command(op):
     if isinstance(op, str):
         try:
             eval("bpy.ops.%s" % op)
-        except:
+        except Exception:
             return None
 
     return ("bpy.ops.%s()" % op)
@@ -77,7 +80,7 @@ def get_rna_type(op):
     if isinstance(op, str):
         try:
             op = eval("bpy.ops.%s" % op)
-        except:
+        except Exception:
             return None
 
     if hasattr(op, "get_rna"):
@@ -116,10 +119,8 @@ class ZUV_OT_search_operator(bpy.types.Operator):
     sector: bpy.props.StringProperty(default="")
     item: bpy.props.EnumProperty(items=get_items)
 
-
-
     def execute(self, context):
-        addon_prefs = context.preferences.addons[ZuvLabels.ADDON_NAME].preferences
+        addon_prefs = context.preferences.addons[ZenPolls.ADDON_PACKAGE].preferences
         # print("Selected", self.item)
         # addon_prefs.operator_prop
         addon_prefs.operator = get_bl_command(self.item)

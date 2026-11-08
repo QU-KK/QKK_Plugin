@@ -23,14 +23,14 @@ import math
 import random
 
 
-from ZenUV.utils.blender_zen_utils import (
+from ...utils.blender_zen_utils import (
     ZenModeSwitcher,
     update_areas_in_all_screens)
-from ZenUV.utils.generic import (
+from ...utils.generic import (
     ZUV_PANEL_CATEGORY,
     ZUV_REGION_TYPE,
     ZUV_SPACE_TYPE)
-from ZenUV.utils.register_util import RegisterUtils
+from ...utils.register_util import RegisterUtils
 
 _rnd = random.Random()
 

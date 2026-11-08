@@ -25,6 +25,8 @@ import platform
 import datetime
 import re
 from mathutils import Color
+import tempfile
+import shutil
 
 from ..blender_zen_utils import get_zen_platform
 from ..vlog import Log
@@ -57,11 +59,26 @@ def get_zenlib_path():
     return os.path.dirname(os.path.abspath(__file__)) + os.path.sep + get_zenlib_name()
 
 
+def get_zenlib_temp_path():
+    tempdir = tempfile.gettempdir()
+    s_temp_file_name = os.path.join(tempdir, get_zenlib_name())
+    return s_temp_file_name
+
+
 def is_zenlib_present():
     return os.path.isfile(get_zenlib_path())
 
 
 def create_zenlib():
+
+    if not is_zenlib_present():
+        try:
+            s_temp_lib = get_zenlib_temp_path()
+            if os.path.exists(s_temp_lib):
+                shutil.copy2(s_temp_lib, get_zenlib_path())
+        except Exception as e:
+            Log.error("COPY ZENUV LIB FROM TEMP:", e)
+
     if is_zenlib_present():
         try:
             return ctypes.cdll.LoadLibrary(get_zenlib_path())
@@ -363,7 +380,7 @@ def getText(prefix, preposition, pos, _max):
 
 def init_progress(context, message='Prepare things...', text_only=False):
     """ Init the Progress widget and return Progress Class and Current Window Title"""
-    # from ZenUV.utils.clib.lib_init import (
+    # from ...utils.clib.lib_init import (
     #     # ZenUvOS,
     #     ZenUvProgressTheme,
     #     RGB2Color,

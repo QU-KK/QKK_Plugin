@@ -21,7 +21,7 @@
 import bpy
 import math
 from mathutils import Vector, Matrix
-from ZenUV.utils.vlog import Log
+from ....utils.vlog import Log
 
 from functools import partial
 
@@ -112,7 +112,7 @@ class ZuvUVGizmoPosSca(ZuvUVGizmoBase):
             if not self.are_gizmos_modal() and self.is_uv_selected():
                 rgn2d = context.region.view2d
 
-                x, y, = rgn2d.view_to_region(self.uv_selection_center.x, self.uv_selection_center.y, clip=False)
+                x, y, = rgn2d.view_to_region(ZuvUVGizmoBase.uv_selection_center.x, ZuvUVGizmoBase.uv_selection_center.y, clip=False)
 
                 mtx = Matrix.Translation(Vector((x, y, 0)))
 

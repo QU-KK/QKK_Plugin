@@ -22,8 +22,8 @@ import bpy
 import blf
 from mathutils import Color
 
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.utils.blender_zen_utils import ZenDrawConstants
+from ...ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ...utils.blender_zen_utils import ZenDrawConstants
 
 
 class ZUV_GGT_UVCoverage(bpy.types.GizmoGroup):

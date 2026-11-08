@@ -31,13 +31,15 @@ from .tr_utils import (
 )
 from .tr_object_data import transform_object_data
 
-from ZenUV.utils.bounding_box import BoundingBox2d, get_overall_bbox
-from ZenUV.utils import get_uv_islands as island_util
-from ZenUV.ops.transform_sys.transform_utils.transform_loops import TransformLoops
-from ZenUV.utils.constants import UV_AREA_BBOX
-from ZenUV.utils.generic import get_mesh_data, verify_uv_layer
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.ops.adv_uv_maps_sys.udim_utils import UdimFactory
+from ....utils.bounding_box import BoundingBox2d, get_overall_bbox
+from ....utils.loops_factory import LoopsFactory
+from ....ops.transform_sys.transform_utils.transform_loops import TransformLoops
+from ....utils.constants import UV_AREA_BBOX
+from ....utils.generic import verify_uv_layer
+from ....ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ....ops.adv_uv_maps_sys.udim_utils import UdimFactory
+from ....utils.mesh_factory import MeshIslandUtils
+from ....utils.iter_utils import IterUtils
 
 
 class TrMoveProps:
@@ -114,7 +116,8 @@ class MoveFactory():
             'TO_ACTIVE_TRIM',
             'TO_ACTIVE_COMPONENT',
             'ACTIVE_UDIM',
-            'TILE_NUMBER'}
+            'TILE_NUMBER',
+            'HOLD'}
         self.message = {'INFO'}, 'Done'
 
         self.context = context
@@ -134,7 +137,7 @@ class MoveFactory():
         # used for reverting cen_v and cen_h for more user convenient.
         self.opposite = False
 
-    def move(self) -> bool:
+    def move(self, context: bpy.types.Context) -> bool:
 
         if self.PROPS.move_mode == 'HOLD':
             return True
@@ -143,30 +146,28 @@ class MoveFactory():
         if self.gathering_input_data() is False:
             return False
 
-        return self.proceed_move(self.influence_mode, order, self.island_pivot)
+        return self.proceed_move(context, self.influence_mode, order, self.island_pivot)
 
-    def proceed_move(self, influence_mode, order, island_pivot) -> bool:
+    def proceed_move(self, context, influence_mode, order, island_pivot) -> bool:
 
         if order == 'OVERALL':
             overall_offset = self.get_overall_offset(self.context, island_pivot=island_pivot)
 
         b_was_moved = False
 
-        for obj in self.objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(self.objs, context, skip_obj_if_no_uv=True):
 
             if influence_mode == 'ISLAND':
-                loops = island_util.LoopsFactory.loops_by_islands(self.context, bm, uv_layer)
+                loops = LoopsFactory.get_loops_by_islands(self.context, bm, uv_layer)
             elif influence_mode == 'SELECTION':
                 from . tr_utils import BlPivotPoint
                 is_groupped = order == 'ONE_BY_ONE' or (order == 'SYSTEM_PIVOT' and BlPivotPoint.get(self.context) == 'INDIVIDUAL_ORIGINS')
                 if is_groupped:
-                    loops = island_util.LoopsFactory.loops_by_sel_mode(self.context, bm, uv_layer, groupped=True)
+                    loops = LoopsFactory.get_loops_by_sel_mode(self.context, bm, uv_layer, groupped=True)
                 else:
-                    loops = [island_util.LoopsFactory.loops_by_sel_mode(self.context, bm, uv_layer, groupped=False), ]
+                    loops = [LoopsFactory.get_loops_by_sel_mode(self.context, bm, uv_layer, groupped=False), ]
             else:  # VERTICES Align mode only
-                loops = island_util.LoopsFactory.loops_by_sel_mode(self.context, bm, uv_layer, groupped=False)
+                loops = LoopsFactory.get_loops_by_sel_mode(self.context, bm, uv_layer, groupped=False)
                 order = 'ONE_BY_ONE'
 
             if len(loops) > 0:
@@ -183,7 +184,7 @@ class MoveFactory():
                     TransformLoops.move_loops([lp for group in loops for lp in group], uv_layer, overall_offset)
 
                 b_was_moved = True
-                bmesh.update_edit_mesh(me, loop_triangles=False)
+                bmesh.update_edit_mesh(obj.data, loop_triangles=False)
 
         if not b_was_moved:
             self.message = {'INFO'}, 'Nothing selected'
@@ -238,15 +239,12 @@ class MoveFactory():
                 if self.PROPS.is_global_settings:
                     self.PROPS.increment = scene_props.tr_move_inc
             elif move_mode == 'TO_ACTIVE_COMPONENT':
-                if self.context.area.type == 'IMAGE_EDITOR' and not self.context.scene.tool_settings.use_uv_select_sync:
-                    self.message = {'WARNING'}, "Active Component mode is not allowed in the UV Sync Selection is Off."
-                    return False
                 obj = self.context.object
                 if obj.type == 'MESH':
                     bm = bmesh.from_edit_mesh(obj.data)
                     uv_layer = verify_uv_layer(bm)
                     if self.is_transform_islands:
-                        active_island, _ = island_util.get_active_component(self.context, bm)
+                        active_island, _ = MeshIslandUtils.get_active_component(self.context, bm, uv_layer)
                         if active_island is not None:
                             self.PROPS.destination_pos = BoundingBox2d(
                                 islands=active_island,
@@ -255,7 +253,7 @@ class MoveFactory():
                             self.message = {'WARNING'}, "There is no Active Island."
                             return False
                     else:
-                        active_component, comp_type = island_util.get_active_component(self.context, bm, component_type='SELECTION')
+                        active_component, comp_type = MeshIslandUtils.get_active_component(self.context, bm, uv_layer, component_type='SELECTION')
                         if comp_type == 'VERTEX':
                             self.PROPS.destination_pos = BoundingBox2d(
                                 points=[lp[uv_layer].uv for lp in active_component.link_loops]).get_as_dict()[self.PROPS.align_direction]
@@ -371,7 +369,6 @@ class TrMoveProcessorEx:
         i_out_trim_element_count = 0
 
         for obj, info in transform_object_data.object_storage.items():
-            me = info.me
             uv_layer = info.uv_layer
             loops = info.loops
 
@@ -390,7 +387,7 @@ class TrMoveProcessorEx:
                 else:
                     TransformLoops.move_loops(cluster, uv_layer, offset)
 
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         if False in TransformLimitsManager.results:
             return 'Limit reached'
@@ -413,14 +410,12 @@ class TrMoveProcessor:
     ) -> str:
         message = 'Finished'
         TransformLimitsManager.results.clear()
-        for obj in objs:
-            me, bm = get_mesh_data(obj)
-            uv_layer = verify_uv_layer(bm)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
             if influence_mode == 'ISLAND':
-                loops = island_util.LoopsFactory.loops_by_islands(context, bm, uv_layer)
+                loops = LoopsFactory.get_loops_by_islands(context, bm, uv_layer)
             else:
-                loops = island_util.LoopsFactory.loops_by_sel_mode(context, bm, uv_layer, groupped=True)
+                loops = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer, groupped=True)
 
             if order == 'OVERALL':
                 loops = [[lp for group in loops for lp in group], ]
@@ -439,7 +434,7 @@ class TrMoveProcessor:
                 else:
                     TransformLoops.move_loops(cluster, uv_layer, offset)
 
-            bmesh.update_edit_mesh(me, loop_triangles=False)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False)
 
         if False in TransformLimitsManager.results:
             return 'Limit reached'

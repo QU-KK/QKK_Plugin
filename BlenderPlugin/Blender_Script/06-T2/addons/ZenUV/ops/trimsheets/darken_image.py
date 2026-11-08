@@ -20,7 +20,7 @@
 
 import bpy
 
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ...ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
 
 
 class ZUV_PT_ImageUIOverlay(bpy.types.Panel):

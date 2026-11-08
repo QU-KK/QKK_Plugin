@@ -25,20 +25,20 @@ from pathlib import Path
 import os
 import re
 
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.generic import (
+from ...utils.register_util import RegisterUtils
+from ...utils.generic import (
     ZUV_SPACE_TYPE,
     ZUV_REGION_TYPE,
     ZUV_PANEL_CATEGORY,
     ZUV_CONTEXT)
-from ZenUV.utils.blender_zen_utils import ZenPolls
-from ZenUV.utils.blender_zen_utils import ZuvPresets, update_areas_in_all_screens
-from ZenUV.utils.adv_generic_ui_list import ZenAddPresetBase
+from ...utils.blender_zen_utils import ZenPolls
+from ...utils.blender_zen_utils import ZuvPresets, update_areas_in_all_screens
+from ...utils.adv_generic_ui_list import ZenAddPresetBase
 
 from ..transform_sys.transform_utils.tr_utils import TransformSysOpsProps
-from ZenUV.utils.adv_generic_ui_list import zenuv_draw_ui_list
-from ZenUV.prop.zuv_preferences import get_prefs
-from ZenUV.prop.world_size_props import ZuvWorldSizeUtils
+from ...utils.adv_generic_ui_list import zenuv_draw_ui_list
+from ...prop.zuv_preferences import get_prefs
+from ...prop.world_size_props import ZuvWorldSizeUtils
 
 
 UV_WORLD_SIZE_PRESET_SUBDIR = "uv_world_size_presets"
@@ -166,8 +166,8 @@ class ZUV_PT_3DV_SubWorldSize(bpy.types.Panel):
                 layout,
                 context,
                 class_name="ZUV_UL_WorldSizeList",
-                list_path="preferences.addons['ZenUV'].preferences.uv_world_size.world_size_items",
-                active_index_path="preferences.addons['ZenUV'].preferences.uv_world_size.world_size_items_index",
+                list_path=f"preferences.addons['{ZenPolls.ADDON_PACKAGE}'].preferences.uv_world_size.world_size_items",
+                active_index_path=f"preferences.addons['{ZenPolls.ADDON_PACKAGE}'].preferences.uv_world_size.world_size_items_index",
                 unique_id="name",
                 new_name_attr="name",
                 new_name_val="Item"
@@ -295,18 +295,18 @@ class ZuvSetWorldSizeBase:
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        from ZenUV.utils.generic import resort_by_type_mesh_in_edit_mode_and_sel, resort_objects_by_selection
-        from ZenUV.ops.texel_density.td_utils import TdContext, TexelDensityProcessor, TexelDensityFactory
+        from ...utils.generic import ResortObjects
+        from ...ops.texel_density.td_utils import TdContext, TexelDensityProcessor, TexelDensityFactory
         from mathutils import Matrix, Vector
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "Zen UV: There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
-        objs = resort_objects_by_selection(context, objs)
+        objs = ResortObjects.resort_objects_by_selection(context, objs)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         td_inputs = TdContext(context)
@@ -316,7 +316,7 @@ class ZuvSetWorldSizeBase:
         if p_image is not None:
             p_ref_size = p_image.zen_uv.world_size.size
 
-            from ZenUV.utils.generic import UnitsConverter
+            from ...utils.generic import UnitsConverter
 
             p_ref_image_size = p_image.size[:]
 
@@ -415,18 +415,18 @@ class ZUV_OT_GetWorldSize(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        from ZenUV.utils.generic import resort_by_type_mesh_in_edit_mode_and_sel, resort_objects_by_selection
-        from ZenUV.ops.texel_density.td_utils import TdContext, TexelDensityFactory
+        from ...utils.generic import ResortObjects
+        from ...ops.texel_density.td_utils import TdContext, TexelDensityFactory
         from mathutils import Matrix, Vector
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "Zen UV: There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
-        objs = resort_objects_by_selection(context, objs)
+        objs = ResortObjects.resort_objects_by_selection(context, objs)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: Select something.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         td_inputs = TdContext(context)
@@ -439,7 +439,7 @@ class ZUV_OT_GetWorldSize(bpy.types.Operator):
                 self.report({'WARNING'}, "Zen UV: It looks like selected texture isn't loaded into the scene.")
                 return {'CANCELLED'}
 
-            from ZenUV.utils.generic import UnitsConverter
+            from ...utils.generic import UnitsConverter
 
             p_ref_image_size = p_image.size[:]
             td_inputs.image_size = p_ref_image_size
@@ -461,7 +461,7 @@ class ZUV_OT_GetWorldSize(bpy.types.Operator):
             p_image.zen_uv.world_size.size = self.size
             p_image.zen_uv.world_size.units = self.units
 
-        from ZenUV.ops.trimsheets.trimsheet import ZuvTrimsheetUtils
+        from ...ops.trimsheets.trimsheet import ZuvTrimsheetUtils
         ZuvTrimsheetUtils.fix_undo()
 
         self.report({'INFO'}, f"Image: {p_image.name} - Size: {round(self.size, 2)} {self.units}")
@@ -493,7 +493,7 @@ class ZUV_OT_WorldSizeByTrim(ZuvSetWorldSizeByMode, bpy.types.Operator):
             if p_image is None:
                 raise RuntimeError('Active image is not defined!')
 
-            from ZenUV.ops.trimsheets.trimsheet import ZuvTrimsheetUtils
+            from ...ops.trimsheets.trimsheet import ZuvTrimsheetUtils
             p_trimsheet = p_image.zen_uv.trimsheet
             idx = ZuvTrimsheetUtils.indexOfTrimByUuid(p_trimsheet, self.trim_uuid)
             if idx == -1:
@@ -573,6 +573,9 @@ class ZUV_OT_WorldSizeExecutePreset(bpy.types.Operator):
 
     def execute(self, context):
         # Use this method because if it is inherited, can not change Blender theme !
+
+        ZuvPresets.preset_file_patch(self.filepath)
+
         res = ExecutePreset.execute(self, context)
 
         update_areas_in_all_screens(context)
@@ -605,7 +608,7 @@ class ZUV_OT_WorldSizeAddPreset(ZenAddPresetBase, bpy.types.Operator):
 
     # Common variable used for all preset values
     preset_defines = [
-        'prefs = bpy.context.preferences.addons["ZenUV"].preferences.uv_world_size'
+        'prefs = bpy.context.window_manager.zen_uv.get_addon_prefs().uv_world_size'
     ]
 
     # Properties to store in the preset

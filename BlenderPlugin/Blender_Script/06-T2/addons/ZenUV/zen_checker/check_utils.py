@@ -25,10 +25,17 @@ import bmesh
 from dataclasses import dataclass
 
 from .panel import ZUV_PT_3DV_TextureCheckerSetup
-from ZenUV.utils.generic import ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE, ZUV_SPACE_TYPE
-from ZenUV.utils.generic import resort_by_type_mesh_in_edit_mode_and_sel, get_mesh_data
-from ZenUV.utils.messages import zen_message
-from ZenUV.utils.register_util import RegisterUtils
+from ..utils.generic import ZUV_PANEL_CATEGORY, ZUV_REGION_TYPE, ZUV_SPACE_TYPE
+from ..utils.generic import (
+    ResortObjects, switch_to_edge_sel_mode,
+    switch_to_face_sel_mode, switch_to_vert_sel_mode,
+    bpy_select_by_context)
+from ..utils.messages import zen_message
+from ..utils.register_util import RegisterUtils
+from ..utils.uv_factory import UvIslandUtils
+from ..utils.loops_factory import LoopsFactory
+from ..utils.iter_utils import IterUtils, IterUtils2
+from ..utils.blender_zen_utils import is_loop_domain, is_sync_off
 
 
 class ZUV_OT_SetViewportDisplayMode(bpy.types.Operator):
@@ -80,7 +87,7 @@ class ZUV_OT_SetViewportDisplayMode(bpy.types.Operator):
             ]
 
         if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         obj: bpy.types.Object = None
@@ -116,14 +123,13 @@ class ZUV_OT_ClearMeshAttributes(bpy.types.Operator):
         return wm.invoke_props_dialog(self)
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
-        from ZenUV.ops.pack_sys.pack_exclusion import PackExcludedFactory as PF
-        from ZenUV.utils.constants import PACK_EXCLUDED_FACEMAP_NAME
-        from ZenUV.ops.zen_unwrap.finishing import FINISHED_FACEMAP_NAME
+        from ..utils.constants import PACK_EXCLUDED_FACEMAP_NAME
+        from ..ops.zen_unwrap.finishing import FINISHED_FACEMAP_NAME
 
         p_layer_names = []
         if self.clear_finished:
@@ -132,20 +138,19 @@ class ZUV_OT_ClearMeshAttributes(bpy.types.Operator):
             p_layer_names.append(PACK_EXCLUDED_FACEMAP_NAME)
 
         if self.clear_td_vc:
-            from ZenUV.utils import vc_processor as vc
+            from ..utils import vc_processor as vc
             for obj in objs:
                 vc.disable_zen_vc_map(obj, vc.Z_TD_PRESETS_V_MAP_NAME)
                 vc.disable_zen_vc_map(obj, vc.Z_TD_BALANCED_V_MAP_NAME)
 
-        for obj in objs:
-            me, bm, _ = PF._get_obj_bm_data(obj)
+        for obj, bm in IterUtils2.iter_objs_with_bmesh(objs):
 
             for p_name in p_layer_names:
                 p_fmap = bm.faces.layers.int.get(p_name, None)
                 if p_fmap is None:
                     continue
                 bm.faces.layers.int.remove(p_fmap)
-                bmesh.update_edit_mesh(me)
+                bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
 
         bpy.ops.ed.undo_push(message='Clear Attributes')
 
@@ -192,26 +197,22 @@ class ZUV_OT_IslandCounter(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        from ZenUV.utils import get_uv_islands as island_util
-
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {"CANCELLED"}
         print('\nZen UV Island Counter:')
         storage = list()
-        for obj in objs:
-            _, bm = get_mesh_data(obj)
-            uv_active = bm.loops.layers.uv.active
-            i_count_total = len(island_util.get_islands(context, bm, is_include_hidden=True))
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+            i_count_total = len(UvIslandUtils.get_all_uv_islands(context, bm, uv_layer, include_hidden=True))
             storage.append(iCounterUnit(
                 obj_name=obj.name,
-                total=len(island_util.get_islands(context, bm, is_include_hidden=True)),
-                hidden=i_count_total - len(island_util.get_islands(context, bm, is_include_hidden=False))
+                total=i_count_total,
+                hidden=i_count_total - len(UvIslandUtils.get_all_uv_islands(context, bm, uv_layer, include_hidden=False))
                 ))
             storage[-1].upd_visible()
-            if uv_active is not None:
-                storage[-1].selected = len(island_util.get_island(context, bm, uv_active))
+            if uv_layer is not None:
+                storage[-1].selected = len(UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer))
 
         print(''.join([f'\n{o.obj_name}\t\ttotal {o.total}\tvisible {o.visible}\tselected {o.selected}\thidden {o.hidden}' for o in storage]) + '\n')
 
@@ -244,17 +245,14 @@ class ZUV_OT_ShowIslandArea(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        from ZenUV.utils import get_uv_islands as island_util
-        from ZenUV.utils.messages import zen_message
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        from ..utils.messages import zen_message
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'WARNING'}, "Zen UV: There are no selected objects.")
+            self.report({'WARNING'}, "No objects selected.")
             return {"CANCELLED"}
 
-        for obj in objs:
-            _, bm = get_mesh_data(obj)
-            uv_layer = bm.loops.layers.uv.active
-            p_islands = island_util.get_island(context, bm, uv_layer)
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
+            p_islands = UvIslandUtils.get_selected_uv_islands(context, bm, uv_layer)
             for i, island in enumerate(p_islands):
                 p_island_area = round(sum([f.calc_area() for f in island]), 4)
                 if len(p_islands) == 1:
@@ -332,17 +330,16 @@ class ZUV_OT_SelectEdgesByIndex(bpy.types.Operator):
 
     @classmethod
     def description(cls, context, properties):
-        if context.scene.tool_settings.use_uv_select_sync:
-            return cls.bl_description
-        else:
+        if is_sync_off(context):
             return f'{cls.bl_description}. Only in UV Sync Selection mode'
+        else:
+            return cls.bl_description
 
     @classmethod
     def poll(cls, context):
         """ Validate context """
         active_object = context.active_object
-        is_not_sync = context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync
-        return not is_not_sync and active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
+        return not is_sync_off(context) and active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
         indices = [int(idx) for idx in ''.join(self.indices.split()).split(',') if idx.isdigit()]
@@ -355,21 +352,21 @@ class ZUV_OT_SelectEdgesByIndex(bpy.types.Operator):
         if obj.type != 'MESH':
             self.report({'WARNING'}, 'Active object type is not a Mesh')
             return {'CANCELLED'}
-        bpy.ops.mesh.select_all(action='DESELECT')
+        bpy_select_by_context(context, action='DESELECT')
 
         bm = bmesh.from_edit_mesh(obj.data)
         if self.selection_type == "VERTEX":
-            bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
+            switch_to_vert_sel_mode(context)
             bm.verts.ensure_lookup_table()
             for i in {k.index for k in bm.verts}.intersection(set(indices)):
                 bm.verts[i].select = True
         elif self.selection_type == "EDGE":
-            bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
+            switch_to_edge_sel_mode(context)
             bm.edges.ensure_lookup_table()
             for i in {k.index for k in bm.edges}.intersection(set(indices)):
                 bm.edges[i].select = True
         elif self.selection_type == "FACE":
-            bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='FACE')
+            switch_to_face_sel_mode(context)
             bm.faces.ensure_lookup_table()
             for i in {k.index for k in bm.faces}.intersection(set(indices)):
                 bm.faces[i].select = True
@@ -390,32 +387,30 @@ class ZUV_OT_SelectEdgesWithoutFaces(bpy.types.Operator):
 
     @classmethod
     def description(cls, context, properties):
-        if context.scene.tool_settings.use_uv_select_sync:
-            return cls.bl_description
-        else:
+        if is_sync_off(context):
             return f'{cls.bl_description}. Only in UV Sync Selection mode'
+        else:
+            return cls.bl_description
 
     @classmethod
     def poll(cls, context):
         """ Validate context """
         active_object = context.active_object
-        is_not_sync = context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync
-        return not is_not_sync and active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
+        return not is_sync_off(context) and active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
-        bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
+        bpy_select_by_context(context, action='DESELECT')
+        switch_to_edge_sel_mode(context)
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
+        for obj, bm in IterUtils2.iter_objs_with_bmesh(objs):
             edges = [e for e in bm.edges if not e.link_faces]
             for e in edges:
                 e.select = True
-            bmesh.update_edit_mesh(obj.data)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
         e_count = len(edges)
         if e_count:
             self.report({'WARNING'}, f'There are {e_count} edges without faces.')
@@ -432,32 +427,30 @@ class ZUV_OT_SelectEdgesWithMultipleLoops(bpy.types.Operator):
 
     @classmethod
     def description(cls, context, properties):
-        if context.scene.tool_settings.use_uv_select_sync:
-            return cls.bl_description
-        else:
+        if is_sync_off(context):
             return f'{cls.bl_description}. Only in UV Sync Selection mode'
+        else:
+            return cls.bl_description
 
     @classmethod
     def poll(cls, context):
         """ Validate context """
         active_object = context.active_object
-        is_not_sync = context.space_data.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync
-        return not is_not_sync and active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
+        return not is_sync_off(context) and active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
-        bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='EDGE')
+        bpy_select_by_context(context, action='DESELECT')
+        switch_to_edge_sel_mode(context)
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
+        for obj, bm in IterUtils2.iter_objs_with_bmesh(objs):
             edge_idxs = [edge.index for edge in bm.edges if len(edge.link_loops) > 2]
             for i in edge_idxs:
                 bm.edges[i].select = True
-            bmesh.update_edit_mesh(obj.data)
+            bmesh.update_edit_mesh(obj.data, loop_triangles=False, destructive=False)
         e_count = len(edge_idxs)
         if e_count:
             self.report({'WARNING'}, f'There are {e_count} edges with Multiple Loops.')
@@ -479,16 +472,16 @@ class ZUV_OT_CalcUvEdgesLengths(bpy.types.Operator):
         return active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        from ZenUV.ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
+        from ..ops.transform_sys.transform_utils.tr_utils import ActiveUvImage
         from math import isclose
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
 
         round_value = 5
-        is_no_sync = context.area.type == 'IMAGE_EDITOR' and not context.scene.tool_settings.use_uv_select_sync
+        b_is_loop_domain = is_loop_domain(context)
 
         p_active_image = ActiveUvImage(context)
         if p_active_image.image is not None:
@@ -499,19 +492,12 @@ class ZUV_OT_CalcUvEdgesLengths(bpy.types.Operator):
         p_total_len = 0
         scope = dict()
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            uv_layer = bm.loops.layers.uv.active
-
-            if uv_layer is None:
-                continue
+        for obj, bm, uv_layer in IterUtils.iter_objs_with_bmesh_uv(objs, context, skip_obj_if_no_uv=True):
 
             scope.update({obj.name: []})
 
-            if is_no_sync:
-                p_edges = [e.index for e in bm.edges if any(lp[uv_layer].select_edge for lp in e.link_loops)]
-            else:
-                p_edges = [e.index for e in bm.edges if e.select]
+            looplist = LoopsFactory.get_loops_by_sel_mode(context, bm, uv_layer, only_uv_edges=True)
+            p_edges = {lp.edge.index for lp in looplist}
 
             if not p_edges:
                 zen_message(context, message='Select one or more edges')
@@ -524,8 +510,8 @@ class ZUV_OT_CalcUvEdgesLengths(bpy.types.Operator):
                     scope[obj.name].append([edge.index, None])
                     continue
 
-                if is_no_sync:
-                    p_loops = [loop for loop in edge.link_loops if loop[uv_layer].select_edge and loop.face.select]
+                if b_is_loop_domain:
+                    p_loops = [loop for loop in edge.link_loops if LoopsFactory.is_loop_selected(loop, uv_layer, select_edge=True)]
                 else:
                     p_loops = [loop for loop in edge.link_loops]
 
@@ -543,9 +529,9 @@ class ZUV_OT_CalcUvEdgesLengths(bpy.types.Operator):
                     p_len = (v_01 - v_02).magnitude
                     scope[obj.name].append([edge.index, p_len])
                 else:
-                    if is_no_sync:
+                    if b_is_loop_domain:
                         p_len = (v_01 - v_02).magnitude
-                        if loop.link_loop_radial_next[uv_layer].select_edge:
+                        if LoopsFactory.is_loop_selected(loop.link_loop_radial_next, uv_layer, select_edge=True):
                             p_len += (v_03 - v_04).magnitude
                     else:
                         p_len = (v_01 - v_02).magnitude + (v_03 - v_04).magnitude
@@ -615,25 +601,24 @@ class ZUV_OT_SelectDoubledVertices(bpy.types.Operator):
         return not is_uv_editor and active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
-        bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
+        bpy_select_by_context(context, action='DESELECT')
+        switch_to_vert_sel_mode(context)
 
         p_total_doubles: int = 0
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            p_verts: list = []
+        for obj, bm in IterUtils2.iter_objs_with_bmesh(objs):
+            p_verts: set = set()
             doubles: list = []
 
             for v in bm.verts:
                 v_co = v.co.to_tuple(4)
                 if v_co in p_verts:
                     doubles.append(v.index)
-                p_verts.append(v_co)
+                p_verts.add(v_co)
 
             for i in doubles:
                 bm.verts[i].select = True
@@ -673,18 +658,16 @@ class ZUV_OT_SelectFreeVertices(bpy.types.Operator):
         return not is_uv_editor and active_object is not None and active_object.type == 'MESH' and context.mode == 'EDIT_MESH'
 
     def execute(self, context):
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if not objs:
-            self.report({'INFO'}, "There are no selected objects.")
+            self.report({'INFO'}, "No objects selected.")
             return {'CANCELLED'}
-        bpy.ops.mesh.select_all(action='DESELECT')
-        bpy.ops.mesh.select_mode(use_extend=False, use_expand=False, type='VERT')
+        bpy_select_by_context(context, action='DESELECT')
+        switch_to_vert_sel_mode(context)
 
         p_total_count: int = 0
 
-        for obj in objs:
-            bm = bmesh.from_edit_mesh(obj.data)
-            bm.verts.ensure_lookup_table()
+        for obj, bm in IterUtils2.iter_objs_with_bmesh(objs):
             free_verts: list = []
 
             if self.detection_method == 'EDGES':
@@ -788,7 +771,7 @@ class ZUV_OT_CalculateUVPixelSize(bpy.types.Operator):
             col.prop(self, "custom_width")
             col.prop(self, "custom_height")
         else:
-            from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+            from ..ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
             p_image = ZuvTrimsheetUtils.getActiveImage(context)
             if p_image:
                 col = box.column(align=True)
@@ -820,7 +803,7 @@ class ZUV_OT_CalculateUVPixelSize(bpy.types.Operator):
 
     def execute(self, context):
         if self.image_source == 'ACTIVE_UV':
-            from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+            from ..ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
             p_image = ZuvTrimsheetUtils.getSpaceDataImage(context)
             if p_image is None:
                 self.report({'ERROR'}, "No image selected in the UV Editor.")
@@ -903,7 +886,7 @@ class ZUV_OT_CalculateRecommendedMargin(bpy.types.Operator):
             col.prop(self, "custom_width")
             col.prop(self, "custom_height")
         else:
-            from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+            from ..ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
             p_image = ZuvTrimsheetUtils.getActiveImage(context)
             if p_image:
                 col = box.column(align=True)
@@ -931,7 +914,7 @@ class ZUV_OT_CalculateRecommendedMargin(bpy.types.Operator):
 
     def execute(self, context):
         if self.image_source == 'ACTIVE_UV':
-            from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+            from ..ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
             p_image = ZuvTrimsheetUtils.getSpaceDataImage(context)
             if p_image is None:
                 self.report({'ERROR'}, "No image selected in the UV Editor.")
@@ -971,7 +954,7 @@ class ZUV_OT_CalculateRecommendedMargin(bpy.types.Operator):
 
 def draw_check_operators(context: bpy.types.Context, layout: bpy.types.UILayout):
     ''' @Draw Check Sys operators '''
-    from ZenUV.ops.operators import ZUV_OT_CorrectSelfIntersecting
+    from ..ops.operators import ZUV_OT_CorrectSelfIntersecting
 
     col = layout.column(align=True)
     col.label(text="Select:")
@@ -1046,7 +1029,8 @@ t_draw_modes = {
     'SELF_INTERSECTING': DisplayItem({'EDIT_MESH'}, {'UV'}, 'uv.zenuv_select_self_intersecting'),
     'UV_BORDERS': DisplayItem({'EDIT_MESH'}, {'UV', '3D'}, 'uv.zenuv_select_uv_borders'),
     'UV_NO_SYNC': DisplayItem({'EDIT_MESH'}, {'3D'}, ''),
-    'SEAMS': DisplayItem({'EDIT_MESH'}, {'UV'}, ''),
+    'SEAMS': DisplayItem({'EDIT_MESH'}, {'UV'}, 'mesh.zenuv_select_seams'),
+    'SHARPS': DisplayItem({'EDIT_MESH'}, {'UV'}, 'mesh.zenuv_select_sharp'),
     'TEXEL_DENSITY': DisplayItem({'EDIT_MESH'}, {'UV', '3D'}, ''),
     'UV_OBJECT': DisplayItem({'OBJECT'}, {'UV'}, ''),
     'TRIM_COLORS': DisplayItem({'EDIT_MESH'}, {'3D'}, ''),
@@ -1235,8 +1219,8 @@ class ZUV_PT_UVL_CheckDisplayPanel(bpy.types.Panel):
     def draw(self, context: bpy.types.Context):
         layout = self.layout
 
-        from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-        from ZenUV.ops.trimsheets.darken_image import ZUV_OT_DarkenImage
+        from ..ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+        from ..ops.trimsheets.darken_image import ZUV_OT_DarkenImage
 
         p_image = ZuvTrimsheetUtils.getActiveImage(context)
         row = layout.row(align=True)

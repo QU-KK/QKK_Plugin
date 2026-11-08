@@ -24,8 +24,8 @@ import gpu
 from gpu_extras.batch import batch_for_shader
 
 from mathutils import Vector
-from ZenUV.ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
-from ZenUV.utils.blender_zen_utils import ZenPolls
+from ...ops.trimsheets.trimsheet_utils import ZuvTrimsheetUtils
+from ...utils.blender_zen_utils import ZenPolls
 
 
 if not bpy.app.background:

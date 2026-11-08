@@ -1,5 +1,5 @@
 import bpy
-prefs = bpy.context.preferences.addons["ZenUV"].preferences.favourite_props_UV
+prefs = bpy.context.window_manager.zen_uv.get_addon_prefs().favourite_props_UV
 
 prefs.favourites.clear()
 
@@ -199,7 +199,7 @@ item_sub_1 = prefs.favourites.add()
 item_sub_1.name = 'Stack'
 item_sub_1.category = 'Stack'
 item_sub_1.display_text = False
-item_sub_1.command = 'from ZenUV.stacks.stacks_ui import draw_stack_in_favourites; draw_stack_in_favourites(op_row)'
+item_sub_1.command = 'from ....stacks.stacks_ui import draw_stack_in_favourites; draw_stack_in_favourites(op_row)'
 item_sub_1.mode = 'SCRIPT'
 item_sub_1.layout = 'AUTO'
 item_sub_1.layout_group = 'NONE'

@@ -25,14 +25,14 @@ from json import dumps
 
 from .get_prefs import get_prefs, DEF_OVERRIDE_IMAGE_NAME
 
-from ZenUV.ico import icon_get
-from ZenUV.zen_checker.zen_checker_labels import ZCheckerLabels as label
-from ZenUV.utils.generic import switch_shading_style, get_current_shading_style
-from ZenUV.zen_checker.files import load_checker_image, update_files_info
-from ZenUV.utils.messages import zen_message
-from ZenUV.utils.blender_zen_utils import ZenPolls
-from ZenUV.utils.register_util import RegisterUtils
-from ZenUV.utils.vlog import Log
+from ..ico import icon_get
+from ..zen_checker.zen_checker_labels import ZCheckerLabels as label
+from ..utils.generic import switch_shading_style, get_current_shading_style
+from ..zen_checker.files import load_checker_image, update_files_info
+from ..utils.messages import zen_message
+from ..utils.blender_zen_utils import ZenPolls
+from ..utils.register_util import RegisterUtils
+from ..utils.vlog import Log
 
 
 ZEN_IMAGE_NODE_NAME = "ZenUV_Texture_node"
@@ -592,16 +592,16 @@ class ZUVChecker_OT_CheckerToggle(bpy.types.Operator):
         return context.area.type in {'VIEW_3D', 'IMAGE_EDITOR'}
 
     def execute(self, context):
-        from ZenUV.ui.pie import ZsPieFactory
-        from ZenUV.utils.generic import resort_by_type_mesh_in_edit_mode_and_sel
+        from ..ui.pie import ZsPieFactory
+        from ..utils.generic import ResortObjects
 
         ZsPieFactory.mark_pie_cancelled()
         CheckerMessenger.clear()
 
-        objs = resort_by_type_mesh_in_edit_mode_and_sel(context)
+        objs = ResortObjects.resort_by_type_mesh_in_edit_mode_and_sel(context)
         if len(objs) == 0:
-            zen_message(context, "There are no selected objects")
-            self.report({'WARNING'}, "There are no selected objects")
+            zen_message(context, "No objects selected.")
+            self.report({'WARNING'}, "No objects selected.")
             return {'CANCELLED'}
 
         for obj in objs:
