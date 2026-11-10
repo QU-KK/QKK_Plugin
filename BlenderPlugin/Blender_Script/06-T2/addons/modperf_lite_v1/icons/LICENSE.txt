@@ -1,0 +1,8 @@
+The icons in this folder (blender_icons.bin / blender_icons.json) are Blender's
+own user-interface icons, taken from the Blender 5.2.2 source code
+(release/datafiles/icons_svg, https://projects.blender.org/blender/blender)
+and rasterised for use by this add-on.
+
+They are part of Blender, Copyright (C) Blender Authors, and are distributed
+under the same license as Blender: GNU General Public License v2 or later
+(GPL-2.0-or-later), which is compatible with this extension's GPL-3.0-or-later.

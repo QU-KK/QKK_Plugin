@@ -1,0 +1,28 @@
+schema_version = "1.0.0"
+
+id = "modperf_lite"
+version = "1.0.0"
+name = "ModPerf Lite"
+tagline = "Modifier panel that opens at your cursor in the 3D Viewport"
+maintainer = "Supra3D <ghostarereal3d@gmail.com>"
+type = "add-on"
+
+tags = ["3D View", "Modeling", "User Interface"]
+
+blender_version_min = "5.2.0"
+
+license = [
+  "SPDX:GPL-3.0-or-later",
+]
+copyright = [
+  "2026 Supra3D",
+  "2026 Blender Authors (modifier panel layouts and icons ported from Blender)",
+  "2020 The Poppins Project Authors (Poppins font, SIL Open Font License 1.1)",
+]
+
+[build]
+paths_exclude_pattern = [
+  "__pycache__/",
+  "/.git/",
+  "/*.zip",
+]

@@ -1,0 +1,1394 @@
+{
+"width": 910,
+"height": 840,
+"px_per_unit": 4,
+"source": "Blender v5.2.2 release/datafiles/icons_svg",
+"icons": {
+"add": {
+"x": 1,
+"y": 1,
+"w": 44,
+"h": 44,
+"wu": 11.0,
+"hu": 11.0,
+"cat": ""
+},
+"armature_data": {
+"x": 71,
+"y": 1,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object_data"
+},
+"arrow_leftright": {
+"x": 141,
+"y": 1,
+"w": 64,
+"h": 36,
+"wu": 16.0,
+"hu": 9.0,
+"cat": ""
+},
+"automerge_off": {
+"x": 211,
+"y": 1,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": ""
+},
+"bone_data": {
+"x": 281,
+"y": 1,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object_data"
+},
+"checkbox_dehlt": {
+"x": 351,
+"y": 1,
+"w": 48,
+"h": 48,
+"wu": 12.0,
+"hu": 12.0,
+"cat": ""
+},
+"checkbox_hlt": {
+"x": 421,
+"y": 1,
+"w": 48,
+"h": 48,
+"wu": 12.0,
+"hu": 12.0,
+"cat": ""
+},
+"collection_new": {
+"x": 491,
+"y": 1,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": ""
+},
+"color": {
+"x": 561,
+"y": 1,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": ""
+},
+"constraint": {
+"x": 631,
+"y": 1,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"copydown": {
+"x": 701,
+"y": 1,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": ""
+},
+"disclosure_tri_down": {
+"x": 771,
+"y": 1,
+"w": 28,
+"h": 32,
+"wu": 7.0,
+"hu": 8.0,
+"cat": ""
+},
+"disclosure_tri_right": {
+"x": 841,
+"y": 1,
+"w": 32,
+"h": 28,
+"wu": 8.0,
+"hu": 7.0,
+"cat": ""
+},
+"downarrow_hlt": {
+"x": 1,
+"y": 71,
+"w": 44,
+"h": 28,
+"wu": 11.0,
+"hu": 7.0,
+"cat": ""
+},
+"duplicate": {
+"x": 71,
+"y": 71,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": ""
+},
+"editmode_hlt": {
+"x": 141,
+"y": 71,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": ""
+},
+"error": {
+"x": 211,
+"y": 71,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": ""
+},
+"file_folder": {
+"x": 281,
+"y": 71,
+"w": 64,
+"h": 60,
+"wu": 16.0,
+"hu": 15.0,
+"cat": "folder"
+},
+"geometry_nodes": {
+"x": 351,
+"y": 71,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"gp_multiframe_editing": {
+"x": 421,
+"y": 71,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": ""
+},
+"grip": {
+"x": 491,
+"y": 71,
+"w": 48,
+"h": 24,
+"wu": 12.0,
+"hu": 6.0,
+"cat": ""
+},
+"group_uvs": {
+"x": 561,
+"y": 71,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": ""
+},
+"group_vertex": {
+"x": 631,
+"y": 71,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": ""
+},
+"hide_off": {
+"x": 701,
+"y": 71,
+"w": 60,
+"h": 44,
+"wu": 15.0,
+"hu": 11.0,
+"cat": ""
+},
+"hide_on": {
+"x": 771,
+"y": 71,
+"w": 60,
+"h": 44,
+"wu": 15.0,
+"hu": 11.0,
+"cat": ""
+},
+"holdout_off": {
+"x": 841,
+"y": 71,
+"w": 48,
+"h": 48,
+"wu": 12.0,
+"hu": 12.0,
+"cat": ""
+},
+"holdout_on": {
+"x": 1,
+"y": 141,
+"w": 64,
+"h": 48,
+"wu": 16.0,
+"hu": 12.0,
+"cat": ""
+},
+"hook": {
+"x": 71,
+"y": 141,
+"w": 44,
+"h": 64,
+"wu": 11.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"indirect_only_off": {
+"x": 141,
+"y": 141,
+"w": 56,
+"h": 52,
+"wu": 14.0,
+"hu": 13.0,
+"cat": ""
+},
+"indirect_only_on": {
+"x": 211,
+"y": 141,
+"w": 60,
+"h": 60,
+"wu": 15.0,
+"hu": 15.0,
+"cat": ""
+},
+"info": {
+"x": 281,
+"y": 141,
+"w": 64,
+"h": 68,
+"wu": 16.0,
+"hu": 17.0,
+"cat": ""
+},
+"locked": {
+"x": 351,
+"y": 141,
+"w": 44,
+"h": 60,
+"wu": 11.0,
+"hu": 15.0,
+"cat": ""
+},
+"material": {
+"x": 421,
+"y": 141,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "shading"
+},
+"material_data": {
+"x": 491,
+"y": 141,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "shading"
+},
+"mesh_data": {
+"x": 561,
+"y": 141,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object_data"
+},
+"mod_armature": {
+"x": 631,
+"y": 141,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_array": {
+"x": 701,
+"y": 141,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_bevel": {
+"x": 771,
+"y": 141,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_boolean": {
+"x": 841,
+"y": 141,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_build": {
+"x": 1,
+"y": 211,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_cast": {
+"x": 71,
+"y": 211,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_cloth": {
+"x": 141,
+"y": 211,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_curve": {
+"x": 211,
+"y": 211,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_dash": {
+"x": 281,
+"y": 211,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_data_transfer": {
+"x": 351,
+"y": 211,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_decim": {
+"x": 421,
+"y": 211,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_displace": {
+"x": 491,
+"y": 211,
+"w": 56,
+"h": 64,
+"wu": 14.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_dynamicpaint": {
+"x": 561,
+"y": 211,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_edgesplit": {
+"x": 631,
+"y": 211,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_envelope": {
+"x": 701,
+"y": 211,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_explode": {
+"x": 771,
+"y": 211,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_fluidsim": {
+"x": 841,
+"y": 211,
+"w": 48,
+"h": 64,
+"wu": 12.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_hue_saturation": {
+"x": 1,
+"y": 281,
+"w": 64,
+"h": 60,
+"wu": 16.0,
+"hu": 15.0,
+"cat": "modifier"
+},
+"mod_lattice": {
+"x": 71,
+"y": 281,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_length": {
+"x": 141,
+"y": 281,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_lineart": {
+"x": 211,
+"y": 281,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_mask": {
+"x": 281,
+"y": 281,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_meshdeform": {
+"x": 351,
+"y": 281,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_mirror": {
+"x": 421,
+"y": 281,
+"w": 68,
+"h": 64,
+"wu": 17.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_multires": {
+"x": 491,
+"y": 281,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_noise": {
+"x": 561,
+"y": 281,
+"w": 60,
+"h": 60,
+"wu": 15.0,
+"hu": 15.0,
+"cat": "modifier"
+},
+"mod_normaledit": {
+"x": 631,
+"y": 281,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_ocean": {
+"x": 701,
+"y": 281,
+"w": 64,
+"h": 60,
+"wu": 16.0,
+"hu": 15.0,
+"cat": "modifier"
+},
+"mod_offset": {
+"x": 771,
+"y": 281,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_opacity": {
+"x": 841,
+"y": 281,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_outline": {
+"x": 1,
+"y": 351,
+"w": 68,
+"h": 68,
+"wu": 17.0,
+"hu": 17.0,
+"cat": "modifier"
+},
+"mod_particle_instance": {
+"x": 71,
+"y": 351,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_particles": {
+"x": 141,
+"y": 351,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_physics": {
+"x": 211,
+"y": 351,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_remesh": {
+"x": 281,
+"y": 351,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_screw": {
+"x": 351,
+"y": 351,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_shrinkwrap": {
+"x": 421,
+"y": 351,
+"w": 68,
+"h": 64,
+"wu": 17.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_simpledeform": {
+"x": 491,
+"y": 351,
+"w": 52,
+"h": 64,
+"wu": 13.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_simplify": {
+"x": 561,
+"y": 351,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_skin": {
+"x": 631,
+"y": 351,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_smooth": {
+"x": 701,
+"y": 351,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_soft": {
+"x": 771,
+"y": 351,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_solidify": {
+"x": 841,
+"y": 351,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_subsurf": {
+"x": 1,
+"y": 421,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_thickness": {
+"x": 71,
+"y": 421,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_time": {
+"x": 141,
+"y": 421,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_tint": {
+"x": 211,
+"y": 421,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_triangulate": {
+"x": 281,
+"y": 421,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_uvproject": {
+"x": 351,
+"y": 421,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_vertex_weight": {
+"x": 421,
+"y": 421,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_warp": {
+"x": 491,
+"y": 421,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_wave": {
+"x": 561,
+"y": 421,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"mod_wireframe": {
+"x": 631,
+"y": 421,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"modifier": {
+"x": 701,
+"y": 421,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"modifier_data": {
+"x": 771,
+"y": 421,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"nodetree": {
+"x": 841,
+"y": 421,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": ""
+},
+"object_data": {
+"x": 1,
+"y": 491,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object"
+},
+"object_datamode": {
+"x": 71,
+"y": 491,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": ""
+},
+"orientation_global": {
+"x": 141,
+"y": 491,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": ""
+},
+"outliner_collection": {
+"x": 211,
+"y": 491,
+"w": 68,
+"h": 64,
+"wu": 17.0,
+"hu": 16.0,
+"cat": "color"
+},
+"outliner_collection__dark": {
+"x": 281,
+"y": 491,
+"w": 68,
+"h": 64,
+"wu": 17.0,
+"hu": 16.0,
+"cat": "color"
+},
+"outliner_data_armature": {
+"x": 351,
+"y": 491,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object_data"
+},
+"outliner_data_camera": {
+"x": 421,
+"y": 491,
+"w": 68,
+"h": 68,
+"wu": 17.0,
+"hu": 17.0,
+"cat": "object_data"
+},
+"outliner_data_curve": {
+"x": 491,
+"y": 491,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object_data"
+},
+"outliner_data_curves": {
+"x": 561,
+"y": 491,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object_data"
+},
+"outliner_data_empty": {
+"x": 631,
+"y": 491,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object_data"
+},
+"outliner_data_font": {
+"x": 701,
+"y": 491,
+"w": 60,
+"h": 64,
+"wu": 15.0,
+"hu": 16.0,
+"cat": "object_data"
+},
+"outliner_data_greasepencil": {
+"x": 771,
+"y": 491,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object_data"
+},
+"outliner_data_lattice": {
+"x": 841,
+"y": 491,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object_data"
+},
+"outliner_data_light": {
+"x": 1,
+"y": 561,
+"w": 56,
+"h": 68,
+"wu": 14.0,
+"hu": 17.0,
+"cat": "object_data"
+},
+"outliner_data_lightprobe": {
+"x": 71,
+"y": 561,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object_data"
+},
+"outliner_data_mesh": {
+"x": 141,
+"y": 561,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object_data"
+},
+"outliner_data_meta": {
+"x": 211,
+"y": 561,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object_data"
+},
+"outliner_data_pointcloud": {
+"x": 281,
+"y": 561,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object_data"
+},
+"outliner_data_speaker": {
+"x": 351,
+"y": 561,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object_data"
+},
+"outliner_data_surface": {
+"x": 421,
+"y": 561,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object_data"
+},
+"outliner_data_volume": {
+"x": 491,
+"y": 561,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object_data"
+},
+"outliner_ob_armature": {
+"x": 561,
+"y": 561,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object"
+},
+"outliner_ob_camera": {
+"x": 631,
+"y": 561,
+"w": 68,
+"h": 68,
+"wu": 17.0,
+"hu": 17.0,
+"cat": "object"
+},
+"outliner_ob_curve": {
+"x": 701,
+"y": 561,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object"
+},
+"outliner_ob_curves": {
+"x": 771,
+"y": 561,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object"
+},
+"outliner_ob_empty": {
+"x": 841,
+"y": 561,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object"
+},
+"outliner_ob_font": {
+"x": 1,
+"y": 631,
+"w": 60,
+"h": 64,
+"wu": 15.0,
+"hu": 16.0,
+"cat": "object"
+},
+"outliner_ob_force_field": {
+"x": 71,
+"y": 631,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object"
+},
+"outliner_ob_greasepencil": {
+"x": 141,
+"y": 631,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object"
+},
+"outliner_ob_group_instance": {
+"x": 211,
+"y": 631,
+"w": 64,
+"h": 60,
+"wu": 16.0,
+"hu": 15.0,
+"cat": "object"
+},
+"outliner_ob_image": {
+"x": 281,
+"y": 631,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object"
+},
+"outliner_ob_lattice": {
+"x": 351,
+"y": 631,
+"w": 64,
+"h": 60,
+"wu": 16.0,
+"hu": 15.0,
+"cat": "object"
+},
+"outliner_ob_light": {
+"x": 421,
+"y": 631,
+"w": 56,
+"h": 68,
+"wu": 14.0,
+"hu": 17.0,
+"cat": "object"
+},
+"outliner_ob_lightprobe": {
+"x": 491,
+"y": 631,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object"
+},
+"outliner_ob_mesh": {
+"x": 561,
+"y": 631,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object"
+},
+"outliner_ob_meta": {
+"x": 631,
+"y": 631,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object"
+},
+"outliner_ob_pointcloud": {
+"x": 701,
+"y": 631,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object"
+},
+"outliner_ob_speaker": {
+"x": 771,
+"y": 631,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object"
+},
+"outliner_ob_surface": {
+"x": 841,
+"y": 631,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object"
+},
+"outliner_ob_volume": {
+"x": 1,
+"y": 701,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object"
+},
+"panel_close": {
+"x": 71,
+"y": 701,
+"w": 40,
+"h": 40,
+"wu": 10.0,
+"hu": 10.0,
+"cat": ""
+},
+"particle_data": {
+"x": 141,
+"y": 701,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object_data"
+},
+"particles": {
+"x": 211,
+"y": 701,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"pastedown": {
+"x": 281,
+"y": 701,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": ""
+},
+"physics": {
+"x": 351,
+"y": 701,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "modifier"
+},
+"preferences": {
+"x": 421,
+"y": 701,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": ""
+},
+"restrict_render_off": {
+"x": 491,
+"y": 701,
+"w": 60,
+"h": 52,
+"wu": 15.0,
+"hu": 13.0,
+"cat": ""
+},
+"restrict_render_on": {
+"x": 561,
+"y": 701,
+"w": 60,
+"h": 52,
+"wu": 15.0,
+"hu": 13.0,
+"cat": ""
+},
+"restrict_select_off": {
+"x": 631,
+"y": 701,
+"w": 52,
+"h": 56,
+"wu": 13.0,
+"hu": 14.0,
+"cat": ""
+},
+"restrict_select_on": {
+"x": 701,
+"y": 701,
+"w": 52,
+"h": 56,
+"wu": 13.0,
+"hu": 14.0,
+"cat": ""
+},
+"restrict_view_off": {
+"x": 771,
+"y": 701,
+"w": 60,
+"h": 56,
+"wu": 15.0,
+"hu": 14.0,
+"cat": ""
+},
+"restrict_view_on": {
+"x": 841,
+"y": 701,
+"w": 60,
+"h": 56,
+"wu": 15.0,
+"hu": 14.0,
+"cat": ""
+},
+"rightarrow": {
+"x": 1,
+"y": 771,
+"w": 28,
+"h": 44,
+"wu": 7.0,
+"hu": 11.0,
+"cat": ""
+},
+"scene_data": {
+"x": 71,
+"y": 771,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "scene"
+},
+"shapekey_data": {
+"x": 141,
+"y": 771,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object_data"
+},
+"smoothcurve": {
+"x": 211,
+"y": 771,
+"w": 64,
+"h": 56,
+"wu": 16.0,
+"hu": 14.0,
+"cat": ""
+},
+"texture": {
+"x": 281,
+"y": 771,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "shading"
+},
+"tria_down": {
+"x": 351,
+"y": 771,
+"w": 40,
+"h": 32,
+"wu": 10.0,
+"hu": 8.0,
+"cat": ""
+},
+"tria_right": {
+"x": 421,
+"y": 771,
+"w": 32,
+"h": 40,
+"wu": 8.0,
+"hu": 10.0,
+"cat": ""
+},
+"tria_up": {
+"x": 491,
+"y": 771,
+"w": 40,
+"h": 32,
+"wu": 10.0,
+"hu": 8.0,
+"cat": ""
+},
+"unlocked": {
+"x": 561,
+"y": 771,
+"w": 44,
+"h": 60,
+"wu": 11.0,
+"hu": 15.0,
+"cat": ""
+},
+"volume_data": {
+"x": 631,
+"y": 771,
+"w": 64,
+"h": 64,
+"wu": 16.0,
+"hu": 16.0,
+"cat": "object_data"
+},
+"x": {
+"x": 701,
+"y": 771,
+"w": 40,
+"h": 40,
+"wu": 10.0,
+"hu": 10.0,
+"cat": ""
+}
+}
+}
