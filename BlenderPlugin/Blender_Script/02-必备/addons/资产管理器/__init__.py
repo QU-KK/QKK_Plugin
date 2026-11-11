@@ -67,7 +67,7 @@ def get_id_preview_id(data):
     return 0
 
 
-def sna_add_to_assetbrowser_pt_metadata_85850(self, context):
+def sna_add_to_assetbrowser_pt_metadata_BCC03(self, context):
     if not (False):
         layout = self.layout
         if property_exists("bpy.context.id.id_type", globals(), locals()):
@@ -79,7 +79,7 @@ def sna_add_to_assetbrowser_pt_metadata_85850(self, context):
                 sna_material_configuration_3E316(layout_function, )
 
 
-def sna_add_to_assetbrowser_mt_editor_menus_0D928(self, context):
+def sna_add_to_assetbrowser_mt_editor_menus_F6839(self, context):
     if not (False):
         layout = self.layout
         op = layout.operator('sna.operation_asset_fb945', text=('更新资产' if (bpy.context.preferences.view.language == 'zh_HANS') else 'Update'), icon_value=string_to_icon('PHYSICS'), emboss=True, depress=False)
@@ -122,7 +122,7 @@ def sna_refresh_preview_4E81B(layout_function, ):
     layout_function.separator(factor=1.0)
 
 
-def sna_add_to_assetbrowser_mt_context_menu_FEED2(self, context):
+def sna_add_to_assetbrowser_mt_context_menu_C4FC0(self, context):
     if not (False):
         layout = self.layout
         layout_function = layout
@@ -255,16 +255,16 @@ class SNA_OT_Rename_Mat_2148F(bpy.types.Operator):
         return not False
 
     def execute(self, context):
-        bpy.ops.wm.call_panel(name="SNA_PT_RENAME_PANEL_MAT_2D4F8", keep_open=True)
+        bpy.ops.wm.call_panel(name="SNA_PT_RENAME_PANEL_MAT_C3623", keep_open=True)
         return {"FINISHED"}
 
     def invoke(self, context, event):
         return self.execute(context)
 
 
-class SNA_PT_RENAME_PANEL_MAT_2D4F8(bpy.types.Panel):
+class SNA_PT_RENAME_PANEL_MAT_C3623(bpy.types.Panel):
     bl_label = 'Rename_Panel_Mat'
-    bl_idname = 'SNA_PT_RENAME_PANEL_MAT_2D4F8'
+    bl_idname = 'SNA_PT_RENAME_PANEL_MAT_C3623'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
     bl_context = ''
@@ -296,16 +296,16 @@ class SNA_OT_Rename_Img_A8C64(bpy.types.Operator):
         return not False
 
     def execute(self, context):
-        bpy.ops.wm.call_panel(name="SNA_PT_RENAME_PANEL_IMG_51A71", keep_open=True)
+        bpy.ops.wm.call_panel(name="SNA_PT_RENAME_PANEL_IMG_FD5A0", keep_open=True)
         return {"FINISHED"}
 
     def invoke(self, context, event):
         return self.execute(context)
 
 
-class SNA_PT_RENAME_PANEL_IMG_51A71(bpy.types.Panel):
+class SNA_PT_RENAME_PANEL_IMG_FD5A0(bpy.types.Panel):
     bl_label = 'Rename_Panel_Img'
-    bl_idname = 'SNA_PT_RENAME_PANEL_IMG_51A71'
+    bl_idname = 'SNA_PT_RENAME_PANEL_IMG_FD5A0'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'WINDOW'
     bl_context = ''
@@ -688,7 +688,7 @@ class SNA_OT_Operation_Asset_Fb945(bpy.types.Operator):
         return self.execute(context)
 
 
-def sna_add_to_view3d_pt_tools_active_6D39F(self, context):
+def sna_add_to_view3d_pt_tools_active_8BE23(self, context):
     if not (False):
         layout = self.layout
         col_22C4C = layout.column(heading='', align=True)
@@ -731,8 +731,8 @@ class SNA_OT_Divide_The_Area_76314(bpy.types.Operator):
 
             def reference():
                 area.spaces.active.params.asset_library_reference = 'LOCAL'    
-                area.spaces[0].show_region_toolbar = False
-                area.spaces[0].show_region_tool_props = True    
+                area.spaces[0].show_region_toolbar = True
+                area.spaces[0].show_region_tool_props = True
             bpy.app.timers.register(reference, first_interval=0.1)
         # 关闭区域
 
@@ -770,7 +770,7 @@ class SNA_OT_Divide_The_Area_76314(bpy.types.Operator):
         return self.execute(context)
 
 
-def sna_add_to_assetbrowser_mt_editor_menus_E5BD5(self, context):
+def sna_add_to_assetbrowser_mt_editor_menus_B6B32(self, context):
     if not (False):
         layout = self.layout
         op = layout.operator('sna.divide_the_area_76314', text='', icon_value=string_to_icon('QUIT'), emboss=True, depress=False)
@@ -1113,6 +1113,7 @@ class SNA_OT_Citation_Relationship_07564(bpy.types.Operator):
 
 
 _20C05_running = False
+_20C05_handle = None
 class SNA_OT_Modal_Operator_20C05(bpy.types.Operator):
     bl_idname = "sna.modal_operator_20c05"
     bl_label = "Modal_Operator"
@@ -1137,6 +1138,10 @@ class SNA_OT_Modal_Operator_20C05(bpy.types.Operator):
         for option in event_options: self._event[option] = getattr(event, option)
 
     def draw_callback_px(self, context):
+        try:
+            _ = self.bl_idname
+        except ReferenceError:
+            return
         event = self._event
         if event.keys():
             event = dotdict(event)
@@ -1147,7 +1152,9 @@ class SNA_OT_Modal_Operator_20C05(bpy.types.Operator):
 
     def execute(self, context):
         global _20C05_running
+        global _20C05_handle
         _20C05_running = False
+        _20C05_handle = None
         context.window.cursor_set("DEFAULT")
         for area in context.screen.areas:
             area.tag_redraw()
@@ -1292,6 +1299,8 @@ class SNA_OT_Modal_Operator_20C05(bpy.types.Operator):
             }
             functions[func_name]()
             context.window_manager.modal_handler_add(self)
+            global _20C05_handle
+            _20C05_handle = self._handle
             _20C05_running = True
             return {'RUNNING_MODAL'}
 
@@ -1319,18 +1328,18 @@ def sna_func_5B71E(layout_function, ):
 def register():
     global _icons
     _icons = bpy.utils.previews.new()
-    bpy.types.ASSETBROWSER_PT_metadata.prepend(sna_add_to_assetbrowser_pt_metadata_85850)
-    bpy.types.ASSETBROWSER_MT_editor_menus.append(sna_add_to_assetbrowser_mt_editor_menus_0D928)
-    bpy.types.ASSETBROWSER_MT_context_menu.prepend(sna_add_to_assetbrowser_mt_context_menu_FEED2)
+    bpy.types.ASSETBROWSER_PT_metadata.prepend(sna_add_to_assetbrowser_pt_metadata_BCC03)
+    bpy.types.ASSETBROWSER_MT_editor_menus.append(sna_add_to_assetbrowser_mt_editor_menus_F6839)
+    bpy.types.ASSETBROWSER_MT_context_menu.prepend(sna_add_to_assetbrowser_mt_context_menu_C4FC0)
     bpy.utils.register_class(SNA_OT_Rename_Mat_2148F)
-    bpy.utils.register_class(SNA_PT_RENAME_PANEL_MAT_2D4F8)
+    bpy.utils.register_class(SNA_PT_RENAME_PANEL_MAT_C3623)
     bpy.utils.register_class(SNA_OT_Rename_Img_A8C64)
-    bpy.utils.register_class(SNA_PT_RENAME_PANEL_IMG_51A71)
+    bpy.utils.register_class(SNA_PT_RENAME_PANEL_IMG_FD5A0)
     bpy.utils.register_class(SNA_OT_Process_Img_23Ad1)
     bpy.utils.register_class(SNA_OT_Operation_Asset_Fb945)
-    bpy.types.VIEW3D_PT_tools_active.append(sna_add_to_view3d_pt_tools_active_6D39F)
+    bpy.types.VIEW3D_PT_tools_active.append(sna_add_to_view3d_pt_tools_active_8BE23)
     bpy.utils.register_class(SNA_OT_Divide_The_Area_76314)
-    bpy.types.ASSETBROWSER_MT_editor_menus.prepend(sna_add_to_assetbrowser_mt_editor_menus_E5BD5)
+    bpy.types.ASSETBROWSER_MT_editor_menus.prepend(sna_add_to_assetbrowser_mt_editor_menus_B6B32)
     bpy.utils.register_class(SNA_OT_Material_Process_F7D34)
     bpy.utils.register_class(SNA_OT_Citation_Relationship_07564)
     bpy.utils.register_class(SNA_OT_Modal_Operator_20C05)
@@ -1356,18 +1365,27 @@ def unregister():
     for km, kmi in addon_keymaps.values():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
-    bpy.types.ASSETBROWSER_PT_metadata.remove(sna_add_to_assetbrowser_pt_metadata_85850)
-    bpy.types.ASSETBROWSER_MT_editor_menus.remove(sna_add_to_assetbrowser_mt_editor_menus_0D928)
-    bpy.types.ASSETBROWSER_MT_context_menu.remove(sna_add_to_assetbrowser_mt_context_menu_FEED2)
+    bpy.types.ASSETBROWSER_PT_metadata.remove(sna_add_to_assetbrowser_pt_metadata_BCC03)
+    bpy.types.ASSETBROWSER_MT_editor_menus.remove(sna_add_to_assetbrowser_mt_editor_menus_F6839)
+    bpy.types.ASSETBROWSER_MT_context_menu.remove(sna_add_to_assetbrowser_mt_context_menu_C4FC0)
     bpy.utils.unregister_class(SNA_OT_Rename_Mat_2148F)
-    bpy.utils.unregister_class(SNA_PT_RENAME_PANEL_MAT_2D4F8)
+    bpy.utils.unregister_class(SNA_PT_RENAME_PANEL_MAT_C3623)
     bpy.utils.unregister_class(SNA_OT_Rename_Img_A8C64)
-    bpy.utils.unregister_class(SNA_PT_RENAME_PANEL_IMG_51A71)
+    bpy.utils.unregister_class(SNA_PT_RENAME_PANEL_IMG_FD5A0)
     bpy.utils.unregister_class(SNA_OT_Process_Img_23Ad1)
     bpy.utils.unregister_class(SNA_OT_Operation_Asset_Fb945)
-    bpy.types.VIEW3D_PT_tools_active.remove(sna_add_to_view3d_pt_tools_active_6D39F)
+    bpy.types.VIEW3D_PT_tools_active.remove(sna_add_to_view3d_pt_tools_active_8BE23)
     bpy.utils.unregister_class(SNA_OT_Divide_The_Area_76314)
-    bpy.types.ASSETBROWSER_MT_editor_menus.remove(sna_add_to_assetbrowser_mt_editor_menus_E5BD5)
+    bpy.types.ASSETBROWSER_MT_editor_menus.remove(sna_add_to_assetbrowser_mt_editor_menus_B6B32)
     bpy.utils.unregister_class(SNA_OT_Material_Process_F7D34)
     bpy.utils.unregister_class(SNA_OT_Citation_Relationship_07564)
+    global _20C05_running
+    _20C05_running = False
+    global _20C05_handle
+    if _20C05_handle:
+        try:
+            bpy.types.SpaceNodeEditor.draw_handler_remove(_20C05_handle, 'WINDOW')
+        except:
+            pass
+        _20C05_handle = None
     bpy.utils.unregister_class(SNA_OT_Modal_Operator_20C05)
