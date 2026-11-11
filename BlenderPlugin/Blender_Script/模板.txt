@@ -1,0 +1,6 @@
+bl_info = {
+    "name" : "插件名称",
+    "blender" : (5, 2, 0),
+    "version" : (1, 0, 0),
+    "category" : "类别" 
+}

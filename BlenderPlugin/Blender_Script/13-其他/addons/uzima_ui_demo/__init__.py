@@ -27,7 +27,12 @@ Files:
     demo_pages.py  one function per sidebar page
     uzima/         the library (copy this folder into your own add-on)
 """
-
+bl_info = {
+    "name" : "UI_Demo",
+    "blender" : (5, 2, 0),
+    "version" : (1, 0, 0),
+    "category" : "UI" 
+}
 import bpy
 from bpy.app.handlers import persistent
 from bpy.props import PointerProperty

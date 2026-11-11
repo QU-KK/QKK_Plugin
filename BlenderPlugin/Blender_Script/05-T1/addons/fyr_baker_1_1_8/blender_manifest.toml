@@ -1,0 +1,25 @@
+schema_version = "1.0.0"
+
+id = "fyr_baker"
+version = "1.1.8"
+name = "Fyr Baker"
+tagline = "Native-style baking workflow with a bundled backend"
+maintainer = "Fyr Plugins - Marcus 'Glow' Rasmussen"
+
+type = "add-on"
+blender_version_min = "5.1.0"
+
+license = ["SPDX:GPL-3.0-or-later"]
+tags = ["Bake", "Pipeline", "Render"]
+
+[permissions]
+network = "Check for Fyr Baker updates when you enable update checks"
+files = "Write baked textures, and manage the on-disk bake cache"
+
+[build]
+paths_exclude_pattern = [
+    "__pycache__/",
+    "*.pyc",
+    "*.psd",
+    "icons/reference/",
+]

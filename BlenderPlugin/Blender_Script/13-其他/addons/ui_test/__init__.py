@@ -1,4 +1,13 @@
 # Unity_Fbx/__init__.py  —  generated with Uzima UI Generator (by Raisy Clutch)
+
+bl_info = {
+    "name" : "UI_Test",
+    "blender" : (5, 2, 0),
+    "version" : (1, 0, 0),
+    "category" : "UI" 
+}
+
+
 import bpy
 from . import uzima as ui
 

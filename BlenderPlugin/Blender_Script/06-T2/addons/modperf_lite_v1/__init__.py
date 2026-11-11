@@ -30,6 +30,16 @@ interaction                    clicks, drags and text editing
 keymap, preferences            shortcut and preferences
 """
 
+
+bl_info = {
+    "name" : "modperf_lite_v1",
+    "blender" : (5, 2, 0),
+    "version" : (1, 0, 0),
+    "category" : "修改器工具" 
+}
+
+
+
 import bpy
 from bpy.app.handlers import persistent
 
