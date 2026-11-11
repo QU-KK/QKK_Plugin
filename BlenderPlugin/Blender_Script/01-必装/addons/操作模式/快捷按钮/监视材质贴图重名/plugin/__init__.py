@@ -57,7 +57,7 @@ def property_exists(prop_path, glob, loc):
         return False
 
 
-def sna_add_to_topbar_mt_editor_menus_57D84(self, context):
+def sna_add_to_topbar_mt_editor_menus_81339(self, context):
     if not (False):
         layout = self.layout
         row_75797 = layout.row(heading='', align=True)
@@ -103,7 +103,7 @@ def sna_add_to_topbar_mt_editor_menus_57D84(self, context):
         col_F13CE.scale_y = 1.0
         col_F13CE.alignment = 'Expand'.upper()
         col_F13CE.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
-        op = col_F13CE.operator('sna.my_generic_operator_4b25b', text='', icon_value=string_to_icon('NODE_INSERT_OFF'), emboss=True, depress=False)
+        op = col_F13CE.operator('sna.shader_5d38c', text='', icon_value=string_to_icon('NODE_INSERT_OFF'), emboss=True, depress=False)
 
 
 class SNA_OT_My_Generic_Operator_0F4A7(bpy.types.Operator):
@@ -236,14 +236,53 @@ def save_post_handler_0FCF4(dummy):
     bpy.ops.sna.my_generic_operator_68d09('INVOKE_DEFAULT', )
 
 
+class SNA_OT_Shader_5D38C(bpy.types.Operator):
+    bl_idname = "sna.shader_5d38c"
+    bl_label = "更新_Shader"
+    bl_description = "Shader出现重复，更新Shader"
+    bl_options = {"REGISTER", "UNDO"}
+
+    @classmethod
+    def poll(cls, context):
+        if bpy.app.version >= (3, 0, 0) and True:
+            cls.poll_message_set('')
+        return not False
+
+    def execute(self, context):
+        import os
+        # 改名
+        NodeTree = bpy.data.node_groups.get('ZMD_Lit_Two')
+        if NodeTree:
+            NodeTree.name = 'ZMD_Lit_Two.old'
+        # 追加外部材质并修正节点组引用
+        Shader_Name = 'ZMD_Lit_Two'
+        Dir_path = os.path.dirname(os.path.abspath(__file__))
+        Blender_Path = Dir_path.split('Blender_Script')[0]+'Blender_Shader\\ZMD_Lit_Two.blend\\NodeTree\\' 
+        bpy.ops.wm.append(directory=Blender_Path, filename=Shader_Name, link=False)
+        # 获取最新节点组
+        NodeTree = bpy.data.node_groups['ZMD_Lit_Two']
+        # 更新Shader
+        for mat in bpy.data.materials:
+            Node = mat.node_tree.nodes.get('Shader')
+            if Node:
+                Node.node_tree = NodeTree
+        bpy.ops.outliner.orphans_purge()
+        print("Shader更新完成！")
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return self.execute(context)
+
+
 def register():
     global _icons
     _icons = bpy.utils.previews.new()
-    bpy.types.TOPBAR_MT_editor_menus.append(sna_add_to_topbar_mt_editor_menus_57D84)
+    bpy.types.TOPBAR_MT_editor_menus.append(sna_add_to_topbar_mt_editor_menus_81339)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_0F4A7)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_4B25B)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_68D09)
     bpy.app.handlers.save_post.append(save_post_handler_0FCF4)
+    bpy.utils.register_class(SNA_OT_Shader_5D38C)
 
 
 def unregister():
@@ -254,8 +293,9 @@ def unregister():
     for km, kmi in addon_keymaps.values():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
-    bpy.types.TOPBAR_MT_editor_menus.remove(sna_add_to_topbar_mt_editor_menus_57D84)
+    bpy.types.TOPBAR_MT_editor_menus.remove(sna_add_to_topbar_mt_editor_menus_81339)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_0F4A7)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_4B25B)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_68D09)
     bpy.app.handlers.save_post.remove(save_post_handler_0FCF4)
+    bpy.utils.unregister_class(SNA_OT_Shader_5D38C)

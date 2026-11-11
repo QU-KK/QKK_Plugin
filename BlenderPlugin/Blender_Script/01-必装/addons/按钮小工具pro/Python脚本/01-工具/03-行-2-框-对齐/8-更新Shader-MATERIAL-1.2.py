@@ -1,7 +1,9 @@
 import bpy
+import os
 # 改名
-NodeTree = bpy.data.node_groups['ZMD_Lit_Two']
-NodeTree.name = 'ZMD_Lit_Two.old'
+NodeTree = bpy.data.node_groups.get('ZMD_Lit_Two')
+if NodeTree:
+    NodeTree.name = 'ZMD_Lit_Two.old'
 
 # 追加外部材质并修正节点组引用
 Shader_Name = 'ZMD_Lit_Two'
@@ -18,5 +20,6 @@ for mat in bpy.data.materials:
     if Node:
         Node.node_tree = NodeTree
 
+bpy.ops.outliner.orphans_purge()
 
 print("Shader更新完成！")
