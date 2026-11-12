@@ -57,7 +57,7 @@ def property_exists(prop_path, glob, loc):
         return False
 
 
-def sna_add_to_topbar_mt_editor_menus_81339(self, context):
+def sna_add_to_topbar_mt_editor_menus_0712D(self, context):
     if not (False):
         layout = self.layout
         row_75797 = layout.row(heading='', align=True)
@@ -271,13 +271,13 @@ class SNA_OT_Shader_5D38C(bpy.types.Operator):
         return {"FINISHED"}
 
     def invoke(self, context, event):
-        return self.execute(context)
+        return context.window_manager.invoke_confirm(self, event)
 
 
 def register():
     global _icons
     _icons = bpy.utils.previews.new()
-    bpy.types.TOPBAR_MT_editor_menus.append(sna_add_to_topbar_mt_editor_menus_81339)
+    bpy.types.TOPBAR_MT_editor_menus.append(sna_add_to_topbar_mt_editor_menus_0712D)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_0F4A7)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_4B25B)
     bpy.utils.register_class(SNA_OT_My_Generic_Operator_68D09)
@@ -293,7 +293,7 @@ def unregister():
     for km, kmi in addon_keymaps.values():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
-    bpy.types.TOPBAR_MT_editor_menus.remove(sna_add_to_topbar_mt_editor_menus_81339)
+    bpy.types.TOPBAR_MT_editor_menus.remove(sna_add_to_topbar_mt_editor_menus_0712D)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_0F4A7)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_4B25B)
     bpy.utils.unregister_class(SNA_OT_My_Generic_Operator_68D09)
