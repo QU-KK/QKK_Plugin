@@ -1,23 +1,11 @@
 bl_info = {
     "name" : "操作模式",
-    "author" : "渠奎奎", 
-    "description" : "",
     "blender" : (5, 2, 0),
     "version" : (1, 0, 0),
-    "location" : "",
-    "warning" : "",
-    "doc_url": "", 
-    "tracker_url": "", 
-    "category" : "操作模式" 
+    "category" : "个人偏好" 
 }
 
 import bpy
-
-#print('加载QKK插件')
-
-#第三方关联插件加载
-#from.第三方关联插件加载.__init__ import register as 第三方关联插件加载_register
-#from.第三方关联插件加载.__init__ import unregister as 第三方关联插件加载_unregister
 
 #饼菜单
 from.饼菜单.__init__ import register as 饼菜单_register
@@ -27,37 +15,25 @@ from.饼菜单.__init__ import unregister as 饼菜单_unregister
 from.饼菜单.调用.__init__ import register as 饼菜单调用_register
 from.饼菜单.调用.__init__ import unregister as 饼菜单调用_unregister
 
-#快捷按钮
-from.快捷按钮.__init__ import register as 快捷按钮_register
-from.快捷按钮.__init__ import unregister as 快捷按钮_unregister
-
-#扩展
-from.扩展.__init__ import register as 扩展_register
-from.扩展.__init__ import unregister as 扩展_unregister
-
 #快捷键
 from.快捷键.__init__ import register as 快捷键_register
 from.快捷键.__init__ import unregister as 快捷键_unregister
 
-
+#快捷键映射
+from.快捷键映射.__init__ import register as 快捷键映射_register
+from.快捷键映射.__init__ import unregister as 快捷键映射_unregister
 
 
 def register():
-    #第三方关联插件加载_register()
     饼菜单_register()
     饼菜单调用_register()
-    扩展_register()
-    快捷按钮_register()
     快捷键_register()
-
+    快捷键映射_register
 
 def unregister(): 
-    #第三方关联插件加载_unregister()
     饼菜单_unregister()
     饼菜单调用_unregister()
-    扩展_unregister()
-    快捷按钮_unregister()
     快捷键_unregister()
+    快捷键映射_unregister
 
-
-print('QKK操作模式插件加载成功')
+print('操作模式加载成功')
