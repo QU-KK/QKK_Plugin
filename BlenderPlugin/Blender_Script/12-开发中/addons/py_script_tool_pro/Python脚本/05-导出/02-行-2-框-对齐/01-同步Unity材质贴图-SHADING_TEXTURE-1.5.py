@@ -1,0 +1,1 @@
+from flow_rm42.ext.blender.scripts.unity_material_sync.sync_run import run;run()

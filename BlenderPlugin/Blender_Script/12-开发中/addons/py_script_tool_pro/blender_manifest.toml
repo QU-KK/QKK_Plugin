@@ -1,0 +1,19 @@
+schema_version = "1.0.0"
+id = "py_script_tool_pro"
+version = "1.0.0"
+name = "Py脚本工具 Pro (Uzima)"
+tagline = "用 Uzima UI 重建的 Py 脚本启动面板"
+maintainer = "qkk"
+type = "add-on"
+blender_version_min = "4.2.0"
+license = ["SPDX:GPL-3.0-or-later"]
+copyright = [
+  "2026 qkk",
+  "2016-2024 The Inter Project Authors (Inter font, OFL-1.1)",
+]
+
+[permissions]
+files = "Run the user's Python scripts and open their folder"
+
+[build]
+paths_exclude_pattern = ["__pycache__/", "*.zip", "*.blend1"]

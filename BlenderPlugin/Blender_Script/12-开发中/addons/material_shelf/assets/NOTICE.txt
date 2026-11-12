@@ -1,0 +1,2 @@
+Folder icon geometry from Blender release/datafiles/icons_svg/file_folder.svg. Blender Authors. Distributed under GPL-3.0-or-later with this extension.
+Material protection icons use Blender fake_user_on.svg and fake_user_off.svg from official Blender sources, rasterized to 64x64 for display. Blender Authors.
