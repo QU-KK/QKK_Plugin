@@ -41,9 +41,9 @@ def property_exists(prop_path, glob, loc):
         return False
 
 
-class SNA_PT_reference_view_B761B(bpy.types.Panel):
+class SNA_PT_reference_view_15ED7(bpy.types.Panel):
     bl_label = '关系树'
-    bl_idname = 'SNA_PT_reference_view_B761B'
+    bl_idname = 'SNA_PT_reference_view_15ED7'
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
     bl_context = ''
@@ -94,7 +94,7 @@ class SNA_PT_reference_view_B761B(bpy.types.Panel):
         col_5FE9C.operator_context = "INVOKE_DEFAULT" if True else "EXEC_DEFAULT"
         if (bpy.context.scene.sna_tree_global == '指定集合'):
             col_5FE9C.prop(bpy.context.scene, 'sna_tree_collection', text='', icon_value=0, emboss=True)
-        if property_exists("bpy.context.scene.sna_tree_collection.all_objects", globals(), locals()):
+        if (property_exists("bpy.context.scene.sna_tree_collection.all_objects", globals(), locals()) if (bpy.context.scene.sna_tree_global == '指定集合') else True):
             for i_33D7F in range(len((bpy.context.scene.sna_tree_collection.all_objects if (bpy.context.scene.sna_tree_global == '指定集合') else (bpy.context.scene.objects if (bpy.context.scene.sna_tree_global == '全局') else bpy.context.view_layer.objects.selected)))):
                 box_BDFE0 = col_5FE9C.box()
                 box_BDFE0.alert = False
@@ -260,7 +260,7 @@ def register():
     bpy.types.Scene.sna_tree_img_switch = bpy.props.BoolProperty(name='tree_img_switch', description='', default=False)
     bpy.types.Scene.sna_tree_global = bpy.props.EnumProperty(name='tree_global', description='', items=[('选择项', '选择项', '', 0, 0), ('全局', '全局', '', 0, 1), ('指定集合', '指定集合', '', 0, 2)])
     bpy.types.Scene.sna_tree_collection = bpy.props.PointerProperty(name='tree_collection', description='', type=bpy.types.Collection)
-    bpy.utils.register_class(SNA_PT_reference_view_B761B)
+    bpy.utils.register_class(SNA_PT_reference_view_15ED7)
     bpy.utils.register_class(SNA_OT_Select_Object_90730)
 
 
@@ -276,5 +276,5 @@ def unregister():
     del bpy.types.Scene.sna_tree_global
     del bpy.types.Scene.sna_tree_img_switch
     del bpy.types.Scene.sna_tree_mat_switch
-    bpy.utils.unregister_class(SNA_PT_reference_view_B761B)
+    bpy.utils.unregister_class(SNA_PT_reference_view_15ED7)
     bpy.utils.unregister_class(SNA_OT_Select_Object_90730)
