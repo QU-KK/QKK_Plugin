@@ -1,8 +1,8 @@
 import bpy
 
 # 变量
-Check_Item_Name = '面上限'
-Description = '面上限'
+Check_Item_Name = 'Lod面上限'
+Description = 'Lod面上限'
 Check_Data = [Check_Item_Name]
 
 # 储存物体名称
