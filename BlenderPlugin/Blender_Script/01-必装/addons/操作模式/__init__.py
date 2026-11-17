@@ -28,12 +28,12 @@ def register():
     饼菜单_register()
     饼菜单调用_register()
     快捷键_register()
-    快捷键映射_register
+    快捷键映射_register()
 
 def unregister(): 
     饼菜单_unregister()
     饼菜单调用_unregister()
     快捷键_unregister()
-    快捷键映射_unregister
+    快捷键映射_unregister()
 
 print('操作模式加载成功')
