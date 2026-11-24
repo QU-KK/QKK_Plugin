@@ -118,9 +118,9 @@ def sna_key_interface_89B70(layout_function, attribute, name):
         row_704A5.prop(attribute, 'oskey_ui', text='Win', icon_value=0, emboss=True, toggle=True)
 
 
-class SNA_PT_D_AAD35(bpy.types.Panel):
+class SNA_PT_D_7FB88(bpy.types.Panel):
     bl_label = '3D操作模型快捷键'
-    bl_idname = 'SNA_PT_D_AAD35'
+    bl_idname = 'SNA_PT_D_7FB88'
     bl_space_type = 'PREFERENCES'
     bl_region_type = 'WINDOW'
     bl_context = ''
@@ -140,7 +140,7 @@ class SNA_PT_D_AAD35(bpy.types.Panel):
         layout = self.layout
         for i_B9916 in range(len(bpy.context.window_manager.keyconfigs.addon.keymaps)):
             for i_5B276 in range(len(bpy.context.window_manager.keyconfigs.addon.keymaps[i_B9916].keymap_items)):
-                if '(Qkk_3DMode)' in bpy.context.window_manager.keyconfigs.addon.keymaps[i_B9916].keymap_items[i_5B276].name:
+                if ('(Qkk_3DMode)' in bpy.context.window_manager.keyconfigs.addon.keymaps[i_B9916].keymap_items[i_5B276].name or 'QKK_' in bpy.context.window_manager.keyconfigs.addon.keymaps[i_B9916].keymap_items[i_5B276].name):
                     box_D8CEB = layout.box()
                     box_D8CEB.alert = False
                     box_D8CEB.enabled = True
@@ -207,7 +207,7 @@ class SNA_PT_D_AAD35(bpy.types.Panel):
 def register():
     global _icons
     _icons = bpy.utils.previews.new()
-    bpy.utils.register_class(SNA_PT_D_AAD35)
+    bpy.utils.register_class(SNA_PT_D_7FB88)
 
 
 def unregister():
@@ -218,4 +218,4 @@ def unregister():
     for km, kmi in addon_keymaps.values():
         km.keymap_items.remove(kmi)
     addon_keymaps.clear()
-    bpy.utils.unregister_class(SNA_PT_D_AAD35)
+    bpy.utils.unregister_class(SNA_PT_D_7FB88)
