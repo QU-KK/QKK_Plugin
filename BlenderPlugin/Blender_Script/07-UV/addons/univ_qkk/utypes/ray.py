@@ -1,6 +1,9 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2024 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+if 'bpy' in locals():
+    from .. import reload
+    reload.reload(globals())
 
 import typing
 
@@ -16,7 +19,7 @@ from mathutils.bvhtree import BVHTree
 from itertools import chain
 from bpy_extras import view3d_utils
 
-from . import AdvIsland, Islands, MeshIsland, UnionIslands, LoopGroups
+from . import Islands, FaceIsland, AdvIslands, AdvIsland, MeshIsland, UnionIslands, LoopGroups
 from . import umesh as _umesh  # noqa: F401 # pylint:disable=unused-import
 from .umesh import UMesh, UMeshes
 from .. import utils
@@ -61,9 +64,9 @@ class KDData:
 
 
 class KDMesh:
-    def __init__(self, umesh, islands: Islands | None = None, loop_groups=None):
+    def __init__(self, umesh, islands: Islands | AdvIslands | None = None, loop_groups=None):
         self.umesh: UMesh = umesh
-        self.islands: Islands | list | None = islands
+        self.islands: Islands | AdvIslands | None = islands
         self.loop_groups: LoopGroups | None = loop_groups
         self.corners_vert: list[BMLoop] = []
         self.corners_center: list[BMLoop] = []
@@ -253,7 +256,7 @@ class KDMeshes:
     def calc_island_rmeshes(cls, umeshes: UMeshes, extended=False):
         rmeshes = []
         for umesh in umeshes:
-            islands = Islands.calc_extended_or_visible_without_ms(umesh, extended=extended)
+            islands = Islands.calc_extended_or_visible(umesh, extended=extended)
             if islands:
                 kdmesh = KDMesh(umesh, islands)
                 kdmesh.calc_all_trees()
@@ -333,13 +336,13 @@ class TrimKDTree:
 
 class IslandHit:
     def __init__(self, pt, min_dist=1e200):
-        self.island: AdvIsland | UnionIslands | None = None
+        self.island: AdvIsland | FaceIsland | UnionIslands | None = None
         self.point = pt
         self.min_dist = min_dist
         self.crn = None
         self.face = None
 
-    def find_nearest_island(self, island: AdvIsland | UnionIslands):
+    def find_nearest_island(self, island: AdvIsland | FaceIsland | UnionIslands):
         if not isinstance(island, UnionIslands):
             island = (island, )
         pt = self.point
@@ -382,7 +385,7 @@ class IslandHit:
             return True
         return False
 
-    def find_nearest_island_with_face(self, island: AdvIsland | UnionIslands):
+    def find_nearest_island_with_face(self, island: AdvIsland | FaceIsland | UnionIslands):
         if not isinstance(island, UnionIslands):
             island = (island, )
         pt = self.point
@@ -549,60 +552,6 @@ class CrnEdgeHit:
                     self.min_dist = nextafter(min_dist, -inf)
                 else:
                     self.min_dist = nextafter(min_dist, inf)
-
-            self.umesh = umesh
-            return True
-        return False
-
-    def find_nearest_vert_by_visible_faces(self, umesh, use_faces_from_umesh_seq=False):
-        from .. import utils
-        from math import nextafter, inf
-
-        pt = self.point
-        min_dist = self.min_dist
-        min_crn = None
-
-        uv = umesh.uv
-
-        if use_faces_from_umesh_seq:
-            visible_faces = umesh.sequence
-        else:
-            visible_faces = utils.calc_visible_uv_faces_iter(umesh)
-
-        for f in visible_faces:
-            for crn in f.loops:
-                dist = (crn[uv].uv - pt).length
-                if dist < min_dist:
-                    # If the point is inside the face, we add it immediately,
-                    # otherwise, we do nextafter and check again for nearest.
-                    if point_inside_face(pt, f, uv):
-                        min_crn = crn
-                        min_dist = dist
-                    else:
-                        # Adding dist after nextafter is necessary for the next for_each loop
-                        # to “hook” another edge (thus avoiding float point errors).
-                        dist = nextafter(dist, inf)
-                        if dist < min_dist:
-                            min_crn = crn
-                            min_dist = dist
-
-
-        if min_crn:
-            self.crn = min_crn#.link_loop_prev
-            self.min_dist = min_dist
-
-            # radial_prev = self.crn.link_loop_radial_prev
-            # if (utils.is_pair_with_flip(self.crn, radial_prev, umesh.uv) and
-            #         utils.is_visible_func(umesh.sync)(radial_prev.face)):
-            #     if point_inside_face(pt, radial_prev.face, uv):
-            #         self.crn = radial_prev
-            # else:
-            #     # Prioritize boundary edges where the point is inside the face,
-            #     # otherwise lower the priority to find other boundary edges with the point inside the face.
-            #     if point_inside_face(pt, self.crn.face, uv):
-            #         self.min_dist = nextafter(min_dist, -inf)
-            #     else:
-            #         self.min_dist = nextafter(min_dist, inf)
 
             self.umesh = umesh
             return True

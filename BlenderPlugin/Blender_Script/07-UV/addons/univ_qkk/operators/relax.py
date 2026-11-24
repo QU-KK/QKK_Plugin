@@ -1,6 +1,9 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2024 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+if 'bpy' in locals():
+    from .. import reload
+    reload.reload(globals())
 
 import bpy
 import bmesh
@@ -8,7 +11,7 @@ import bmesh
 from . import unwrap
 from .. import utypes
 from .. import utils
-from ..utypes import Islands
+from ..utypes import AdvIslands
 from ..preferences import univ_settings
 
 
@@ -125,7 +128,7 @@ class UNIV_OT_Relax(unwrap.UNIV_OT_Unwrap):
                 selected_elem = utils.calc_selected_3d_edges(umesh)
 
             uv = umesh.uv
-            islands = Islands.calc_visible_without_ms(umesh)
+            islands = AdvIslands.calc_visible(umesh)
             for isl in islands:
                 isl.mark_seam()
 
@@ -228,7 +231,7 @@ class UNIV_OT_Relax(unwrap.UNIV_OT_Unwrap):
         relax_data: list[RelaxData] = []
         for umesh in self.umeshes:
             uv = umesh.uv
-            islands = Islands.calc_extended_without_ms(umesh)
+            islands = AdvIslands.calc_extended(umesh)
 
             for isl in islands:
                 isl.mark_seam()
@@ -317,7 +320,7 @@ class UNIV_OT_Relax(unwrap.UNIV_OT_Unwrap):
             is_vert_select = vert_select_get_func(umesh)
             is_visible = is_visible_func(umesh.sync)
             uv = umesh.uv
-            islands = Islands.calc_extended_any_elem_without_ms(umesh)
+            islands = AdvIslands.calc_extended_any_elem(umesh)
 
             for isl in islands:
                 isl.mark_seam()

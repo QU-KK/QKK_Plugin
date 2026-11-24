@@ -1,6 +1,9 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2024 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+if 'bpy' in locals():
+    from .. import reload
+    reload.reload(globals())
 
 import bpy
 import math
@@ -674,7 +677,7 @@ class UNIV_OT_Check_Overlap(Operator):
         if check_mode == 'INEXACT':
             all_islands = []
             for umesh in umeshes:
-                adv_islands = utypes.Islands.calc_extended(umesh)
+                adv_islands = utypes.AdvIslands.calc_extended_with_mark_seam(umesh)
                 # The following subdivision is needed to ignore the exact self overlaps
                 # that are created from the flipped face
                 for isl in reversed(adv_islands):

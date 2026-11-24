@@ -1,6 +1,9 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2024 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+if 'bpy' in locals():
+    from .. import reload
+    reload.reload(globals())
 
 import bpy
 from mathutils import Vector
@@ -9,6 +12,7 @@ from bmesh.types import BMLoop
 from .. import utypes
 from .. import utils
 from ..preferences import prefs, univ_settings
+from ..utils import linked_crn_uv_by_island_index_unordered_included
 
 
 class UnwrapData:
@@ -96,12 +100,16 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                     self.unwrap_sync_verts_or_edges()
             else:
                 self.unwrap_non_sync()
+
+            # for umesh in self.umeshes:
+            #     if not umesh.sync_valid:
+            #         umesh.bm.select_flush_mode()
             return self.umeshes.update()
 
     def pick_unwrap(self, **unwrap_kwargs):
         hit = utypes.IslandHit(self.mouse_pos, self.max_distance)
         for umesh in self.umeshes:
-            for isl in utypes.Islands.calc_visible(umesh):
+            for isl in utypes.AdvIslands.calc_visible_with_mark_seam(umesh):
                 hit.find_nearest_island(isl)
 
         if not hit or (self.max_distance < hit.min_dist):
@@ -145,7 +153,7 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
         if self.mark_seam_inner_island:
             isl.mark_seam(additional=True)
         else:
-            islands = utypes.Islands([isl], isl.umesh)
+            islands = utypes.AdvIslands([isl], isl.umesh)
             islands.indexing()
             isl.mark_seam_by_index(additional=True)
 
@@ -237,9 +245,8 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
             umesh.value = umesh.check_uniform_scale(report=self.report)
             umesh.aspect = utils.get_aspect_ratio() if self.use_correct_aspect else 1.0
             # TODO: Full select unselected verts (with pins) of island for avoid incorrect behavior for relax OT
-            islands = utypes.Islands.calc_extended_any_elem(umesh)
-            if self.mark_seam_inner_island:
-                islands.indexing()
+            islands = utypes.AdvIslands.calc_extended_any_elem_with_mark_seam(umesh)
+            islands.indexing()
 
             for isl in islands:
                 unique_number_for_multiply += hash(isl[0])  # multiplayer
@@ -254,14 +261,12 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
 
             # Extend selection
 
-            for isl in islands:
+            for idx, isl in enumerate(islands):
+                isl.tag = False  # tagged = native unwrap
+
                 # Constraints system
                 ##################################################
-                if (found_univ_pro and self.bl_label == 'Unwrap' and
-                        self.constraints_weight and isl.has_constraints_edge(selected=True)):
-                    isl.tag = False  # Non-native unwrap.
-                    to_lock_constraints_islands.append(isl)
-
+                if found_univ_pro and self.bl_label == 'Unwrap' and self.constraints_weight and isl.has_constraints_edge(selected=True):
                     if utils.USE_GENERIC_UV_SYNC and umesh.sync_valid:
                         for f in isl:
                             if face_select_get(f):
@@ -290,8 +295,8 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                                     else:
                                         crn.tag = not self.is_accidentally_selected_crn(crn)
 
-                    is_static = self.is_static_island_for_non_native_unwrap_by_tag(isl)
-                    isl.apply_aspect_ratio()
+                    is_static = self.is_static_island(isl)
+
                     with utils.uv_parametrizer.unwrap_time_report(self.report):
                         failed_total += utils.uv_parametrizer.unwrap_isl_by_tag(isl,
                                                                             unwrap_along=self.unwrap_along,  # noqa
@@ -300,13 +305,15 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                                                                             blend_factor=self.blend_factor,
                                                                             fill_holes=self.fill_holes,
                                                                             constraints_factor=self.constraints_weight * 100)
+                    to_lock_constraints_islands.append(isl)
                     isl.reset_aspect_ratio()
+
                     if not is_static:
                         utils.set_global_texel(isl)
 
                 ##################################################
                 else:
-                    isl.tag = True  # Native Unwrap.
+                    isl.tag = True
                     if has_full_selected_uv_faces:
                         continue
 
@@ -329,9 +336,7 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
 
                                     if self.is_accidentally_selected_crn(crn):
                                         # If only the unlinked face is selected, then pin it.
-                                        linked = utils.linked_crn_to_vert_pair_with_seam(crn, uv, True)
-                                        linked.append(crn)
-                                        for l_crn in linked:
+                                        for l_crn in linked_crn_uv_by_island_index_unordered_included(crn, uv, idx):
                                             crn_uv = l_crn[uv]
                                             if not crn_uv.pin_uv:
                                                 crn_uv.pin_uv = True
@@ -444,23 +449,8 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
             save_transform_islands = []
             for isl in islands:
                 if isl.tag:
-                    has_non_static_elem = False
-                    if umesh.elem_mode == 'VERT':
-                        get_vert_select = utils.vert_select_get_func(umesh)
-                        for crn in isl.corners_iter():
-                            if get_vert_select(crn):
-                                if not crn[uv].pin_uv:
-                                    has_non_static_elem = True
-                                    break
-                    else:
-                        get_edge_select = utils.edge_select_get_func(umesh)
-                        for crn in isl.corners_iter():
-                            if get_edge_select(crn):
-                                if not crn[uv].pin_uv or not crn.link_loop_next[uv].pin_uv:
-                                    has_non_static_elem = True
-                                    break
-
-                    if has_non_static_elem:
+                    has_non_static_face = any(not all(c[uv].pin_uv for c in f.loops) for f in isl if f.select)
+                    if has_non_static_face:
                         isl.apply_aspect_ratio()
                         save_t = isl.save_transform(flip_if_needed=True)
                         save_t.save_coords(self.blend_factor)
@@ -507,6 +497,9 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                         for v_or_e in to_restore:
                             v_or_e.select = True
 
+        for isl in to_lock_constraints_islands:
+            isl.reset_aspect_ratio()
+
         for pins in all_pins:
             for pin in pins:
                 pin.pin_uv = False
@@ -517,7 +510,7 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
 
 
     @staticmethod
-    def extend_select_and_set_pins_for_sync_face_mode(isl):
+    def unwrap_sync_faces_extend_select_and_set_pins(isl):
         to_select = []
         unpinned = []
         uv = isl.umesh.uv
@@ -571,10 +564,8 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
         for umesh in reversed(self.umeshes):
             umesh.value = umesh.check_uniform_scale(report=self.report)
             umesh.aspect = utils.get_aspect_ratio() if self.use_correct_aspect else 1.0
-
-            islands_extended = utypes.Islands.calc_extended(umesh)
-            if not self.mark_seam_inner_island:
-                islands_extended.indexing()
+            islands_extended = utypes.AdvIslands.calc_extended_with_mark_seam(umesh)
+            islands_extended.indexing()
 
             for isl in islands_extended:
                 unique_number_for_multiply += hash(isl[0])  # multiplayer
@@ -587,8 +578,7 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
 
                 # Constraints system
                 ##################################################
-                if (found_univ_pro and self.bl_label == 'Unwrap' and
-                        self.constraints_weight and isl.has_constraints_edge()):
+                if found_univ_pro and self.bl_label == 'Unwrap' and self.constraints_weight and isl.has_constraints_edge():
                     uv = isl.umesh.uv
                     sync = isl.umesh.sync
                     for f in isl:
@@ -603,7 +593,7 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                                     linked = utils.linked_crn_to_vert_pair_with_seam(crn, uv, sync)
                                     crn.tag =  any(cc.face.select for cc in linked)
 
-                    is_static = self.is_static_island_for_non_native_unwrap_by_tag(isl)
+                    is_static = self.is_static_island(isl)
                     with utils.uv_parametrizer.unwrap_time_report(self.report):
                         failed_total += utils.uv_parametrizer.unwrap_isl_by_tag(isl,
                                                                             unwrap_along=self.unwrap_along,  # noqa
@@ -617,12 +607,14 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
 
                     if not is_static:
                         utils.set_global_texel(isl)
-                else:
-                    self.extend_select_and_set_pins_for_sync_face_mode(isl)
+                    continue
+                ##################################################
 
-                    save_t = isl.save_transform(flip_if_needed=True)
-                    save_t.save_coords(self.blend_factor)
-                    all_transform_islands.append(save_t)
+                self.unwrap_sync_faces_extend_select_and_set_pins(isl)
+
+                save_t = isl.save_transform(flip_if_needed=True)
+                save_t.save_coords(self.blend_factor)
+                all_transform_islands.append(save_t)
 
         self.multiply_relax(unique_number_for_multiply, unwrap_kwargs)
 
@@ -677,9 +669,9 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
 
             umesh.value = umesh.check_uniform_scale(report=self.report)
             umesh.aspect = utils.get_aspect_ratio() if self.use_correct_aspect else 1.0
-            islands = utypes.Islands.calc_extended_any_elem(umesh)
+            islands = utypes.AdvIslands.calc_extended_any_elem_with_mark_seam(umesh)
 
-            if not self.mark_seam_inner_island:
+            if not self.mark_seam_inner_island or umesh.bm.edges.layers.int.get('univ_constraints'):
                 islands.indexing()
 
             for isl in islands:
@@ -694,8 +686,7 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
 
                 # Constraints system
                 ##################################################
-                if (found_univ_pro and self.bl_label == 'Unwrap' and
-                        self.constraints_weight and isl.has_constraints_edge()):
+                if found_univ_pro and self.bl_label == 'Unwrap' and self.constraints_weight and isl.has_constraints_edge():
                     uv = isl.umesh.uv
                     sync = isl.umesh.sync
                     for f in isl:
@@ -710,7 +701,7 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                                     linked = utils.linked_crn_to_vert_pair_with_seam(crn, uv, sync)
                                     crn.tag = any(crn_select_get(cc) for cc in linked)
 
-                    is_static = self.is_static_island_for_non_native_unwrap_by_tag(isl)
+                    is_static = self.is_static_island(isl)
 
                     with utils.uv_parametrizer.unwrap_time_report(self.report):
                         failed_total += utils.uv_parametrizer.unwrap_isl_by_tag(isl,
@@ -725,6 +716,7 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
 
                     if not is_static:
                         utils.set_global_texel(isl)
+                    continue
                 ##################################################
                 else:
                     # Extend selection for avoid unlink unwrap
@@ -818,7 +810,7 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                 UNIQUE_NUMBER_FOR_MULTIPLY = unique_number_for_multiply
 
     @staticmethod
-    def is_static_island_for_non_native_unwrap_by_tag(isl):
+    def is_static_island(isl):
         uv = isl.umesh.uv
         it = isl.corners_iter()
         for crn_a in it:

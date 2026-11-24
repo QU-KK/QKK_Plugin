@@ -1,6 +1,9 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2024 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+if 'bpy' in locals():
+    from .. import reload
+    reload.reload(globals())
 
 import bpy
 from math import isclose, sqrt
@@ -13,8 +16,7 @@ from bmesh.types import BMLoopUV
 from .. import utils
 from collections import deque
 from ..preferences import prefs
-from .. import utypes
-from ..utypes import AdvIsland, LoopGroup, LoopGroups, Segment, AdvCorner
+from ..utypes import UMeshes, IslandsBase, AdvIslands, AdvIsland, LoopGroup, LoopGroups, Segment, AdvCorner
 
 
 class RectIsl:
@@ -127,7 +129,7 @@ class RectifyBase:
         super().__init__(*args, **kwargs)
         self.aspect: float = 1.0
         self.bound_priority_factor = 0.95
-        self.umeshes: utypes.UMeshes | None = None
+        self.umeshes: UMeshes | None = None
         # Exclude islands, so that you don't accidentally unwrap
         self.pinned_crn_from_excluded_isl: list[list[BMLoopUV]] = []
         self.rect_lg_groups_with_isl_of_mesh: list[list[RectIsl]] = []
@@ -518,7 +520,7 @@ class UNIV_OT_Rectify(bpy.types.Operator, RectifyFour, RectifyRing):
             self.report({'WARNING'}, 'Active area must be UV')  # need for unwrap  # TODO: Add unwrap.poll
             return {'CANCELLED'}
 
-        self.umeshes = utypes.UMeshes(report=self.report)
+        self.umeshes = UMeshes(report=self.report)
         self.umeshes.fix_context()
         # NOTE: Aspect is not saved in umesh.aspect to avoid problems with individual_scale
         self.aspect = utils.get_aspect_ratio() if self.use_aspect else 1.0
@@ -611,14 +613,14 @@ class UNIV_OT_Rectify(bpy.types.Operator, RectifyFour, RectifyRing):
 
     def prepare(self):
         for umesh in self.umeshes:
-            islands = utypes.Islands.calc_visible(umesh)
+            islands = AdvIslands.calc_visible_with_mark_seam(umesh)
             if islands:
                 rect_islands: list[RectIsl] = []
                 umesh.set_corners_tag(False)
 
                 islands.indexing()
                 for isl in islands:
-                    if not utypes.IslandsBase.island_filter_is_any_vert_selected(isl.faces, umesh):
+                    if not IslandsBase.island_filter_is_any_vert_selected(isl.faces, umesh):
                         # Pin and skip
                         if self.umeshes.sync:
                             pinned_corners = isl.set_pins(True, with_pinned=True)

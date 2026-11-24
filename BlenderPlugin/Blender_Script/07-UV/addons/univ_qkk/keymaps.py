@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2024 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import bpy
@@ -86,9 +86,6 @@ def add_keymaps():
     kmi.properties.select = False
     keys.append((km, kmi))
 
-    kmi = km.keymap_items.new("mesh.univ_local_invert_selection", "I", "PRESS", ctrl=True, shift=True)
-    keys.append((km, kmi))
-
     add_mesh_keymaps(km, univ_pro)
 
     # Window
@@ -174,7 +171,6 @@ def add_keymaps():
     kmi = km.keymap_items.new('uv.univ_flip', 'F', 'PRESS')
     keys.append((km, kmi))
 
-    # Select
     kmi = km.keymap_items.new('uv.univ_select_mode', 'ONE', 'PRESS')
     kmi.properties.type = 'VERTEX'
     keys.append((km, kmi))
@@ -189,9 +185,6 @@ def add_keymaps():
 
     kmi = km.keymap_items.new('uv.univ_select_mode', 'FOUR', 'PRESS')
     kmi.properties.type = 'ISLAND'
-    keys.append((km, kmi))
-
-    kmi = km.keymap_items.new("uv.univ_local_invert_selection", "I", "PRESS", ctrl=True, shift=True)
     keys.append((km, kmi))
 
     # Rotate
@@ -236,8 +229,8 @@ def add_keymaps():
         kmi.properties.unwrap_along = 'UV'
     keys.append((km, kmi))
 
-    # Pin
-    kmi = km.keymap_items.new('uv.univ_pin', 'P', 'PRESS')
+    # Pack
+    kmi = km.keymap_items.new('uv.univ_pack', 'P', 'PRESS')
     keys.append((km, kmi))
 
     # Quadrify
@@ -266,14 +259,9 @@ def add_keymaps():
     kmi.properties.quick_start = False
     keys.append((km, kmi))
 
-
+    # Drag
     if univ_pro:
-        # Drag
         kmi = km.keymap_items.new('uv.univ_drag', 'LEFTMOUSE', 'ANY', alt=True)
-        keys.append((km, kmi))
-
-        # Isolate
-        kmi = km.keymap_items.new('uv.univ_isolate', 'I', "PRESS")
         keys.append((km, kmi))
 
     # Cut

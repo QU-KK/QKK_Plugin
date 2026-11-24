@@ -1,6 +1,9 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2024 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+if 'bpy' in locals():
+    from .. import reload
+    reload.reload(globals())
 
 import bpy
 import math
@@ -12,7 +15,7 @@ from collections.abc import Callable
 from bmesh.types import BMEdge, BMFace
 
 from .. import utils
-from ..utypes import AdvIsland, Islands, MeshIslands, UMeshes
+from ..utypes import FaceIsland, Islands, MeshIslands, UMeshes, AdvIslands
 from ..operators import select
 
 
@@ -85,9 +88,9 @@ class UNIV_OT_Select_Flat(Operator):
         for umesh in self.umeshes:
             is_boundary = utils.is_boundary_func(umesh, with_seam=self.clamp_by_seams)
             if self.clamp_by_seams:
-                islands = Islands.calc_partial_selected(umesh)
+                islands = Islands.calc_partial_selected_with_mark_seam(umesh)
             else:
-                islands = Islands.calc_partial_selected_without_ms(umesh)
+                islands = Islands.calc_partial_selected(umesh)
 
             for isl in islands:
                 isl.tag_selected_faces()
@@ -146,7 +149,7 @@ class UNIV_OT_Select_Flat(Operator):
 
                     if self.need_sync_validation_check:
                         umesh.sync_from_mesh_if_needed()
-                    AdvIsland(stack, umesh).select = True
+                    FaceIsland(stack, umesh).select = True
                     for f in temp:
                         f.tag = True
                     stack = temp
@@ -176,7 +179,7 @@ class UNIV_OT_Select_Flat(Operator):
             if selected_faces:
                 if self.need_sync_validation_check:
                     umesh.sync_from_mesh_if_needed()
-                AdvIsland(selected_faces, umesh).select = True
+                FaceIsland(selected_faces, umesh).select = True
                 umesh.update_tag = True
 
 
@@ -210,9 +213,9 @@ class UNIV_OT_Select_Flat_VIEW3D(UNIV_OT_Select_Flat):
                 # and sort them by the smallest growth angles.
 
                 # Then, for each grown face, iterate over neighboring selected and already grown faces and take the smallest vectors from them.
-                islands = MeshIslands.calc_partial_selected(umesh)
+                islands = MeshIslands.calc_partial_selected_with_mark_seam(umesh)
             else:
-                islands = MeshIslands.calc_partial_selected_without_ms(umesh)
+                islands = MeshIslands.calc_partial_selected(umesh)
 
             for isl in islands:
                 isl.tag_selected_faces()
@@ -275,7 +278,7 @@ class UNIV_OT_Select_Flat_VIEW3D(UNIV_OT_Select_Flat):
 
                     umesh.sync_valid = False
                     isl.umesh.update_tag = True
-                    AdvIsland(stack, umesh).select = True
+                    FaceIsland(stack, umesh).select = True
                     for f in temp:
                         f.tag = True
                     stack = temp
@@ -302,7 +305,7 @@ class UNIV_OT_Select_Flat_VIEW3D(UNIV_OT_Select_Flat):
                     temp = []
 
             if selected_faces:
-                AdvIsland(selected_faces, umesh).select = True
+                FaceIsland(selected_faces, umesh).select = True
                 umesh.sync_valid = False
                 umesh.update_tag = True
 
@@ -613,7 +616,7 @@ class UNIV_OT_Select_Loop_VIEW2D(select.UNIV_OT_Select_Edge_Grow_Base):
             # TODO: Implement loop select by face by 'edge apex'
             return bpy.ops.uv.univ_select_linked(deselect=False)  # noqa
 
-        self.calc_islands = Islands.calc_extended_any_edge if self.clamp_on_seam else Islands.calc_extended_any_edge_without_ms
+        self.calc_islands = Islands.calc_extended_any_edge_with_markseam if self.clamp_on_seam else Islands.calc_extended_any_edge
         self.umeshes.filter_by_partial_selected_uv_edges()
 
         self.loop_select()
@@ -1283,8 +1286,8 @@ class UNIV_OT_SelectSimilar_VIEW3D(Operator):
         self.targets: list[stack.StackIsland] = []
         self.transfer: list[stack.StackIsland] = []
         self.counter: int = 0
-        self.island_calc_type: Callable = Islands.calc_selected_without_ms
-        self.calc_non_selected: Callable = Islands.calc_non_selected_without_ms
+        self.island_calc_type: Callable = AdvIslands.calc_selected
+        self.calc_non_selected: Callable = AdvIslands.calc_non_selected
         self.walk_direct = True
         self.walk_symmetry = True
         self.need_sync_validation_check = False
@@ -1349,7 +1352,7 @@ class UNIV_OT_SelectSimilar_VIEW3D(Operator):
         return sort_stack_islands_groups
 
     def get_island_calc_types(self):
-        type_class = Islands if self.island_mode == 'UV' else MeshIslands
+        type_class = AdvIslands if self.island_mode == 'UV' else MeshIslands
         suffix = '' if self.ignore_mark_seam else '_with_mark_seam'
         mode = 'selected' if self.by_selected else 'visible'
 
@@ -1377,7 +1380,7 @@ class UNIV_OT_SelectSimilar_VIEW3D(Operator):
             elif not non_selected:
                 proxi = selected
             else:
-                proxi = Islands(non_selected.islands + selected.islands, umesh)
+                proxi = AdvIslands(non_selected.islands + selected.islands, umesh)
 
             proxi.indexing()
 

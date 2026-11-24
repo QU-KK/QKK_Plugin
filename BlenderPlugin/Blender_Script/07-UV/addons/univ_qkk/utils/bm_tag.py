@@ -1,7 +1,11 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2024 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+if 'bpy' in locals():
+    from .. import reload
+    reload.reload(globals())
 
+import bpy  # noqa
 import typing
 
 from bmesh.types import BMesh, BMFace, BMLoop, BMLayerItem
@@ -172,21 +176,3 @@ def is_invisible_func(sync: bool):
         return BMFace.hide.__get__
     else:
         return lambda f: not f.select
-
-
-def linked_hide_faces_for_3d(faces):
-    for f in faces:
-        f.hide_set(True)
-
-    # Hide linked verts/edges.
-    for f in faces:
-        for e in f.edges:
-            if any(ff.select for ff in e.link_faces):  # Preserve edge     selection.
-                e.select = True
-        for v in f.verts:
-            if any(ff.select for ff in v.link_faces):  # Preserve vertex selection.
-                v.select = True
-
-def unhide_faces_for_3d(faces):
-    for f in faces:
-        f.hide_set(False)

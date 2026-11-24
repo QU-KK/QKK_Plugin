@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2026 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-
 import bpy
 import gpu
 import blf
@@ -19,7 +18,6 @@ from .. import operators
 from .. import utils
 from ..utypes import UMask
 from ..preferences import prefs
-
 
 def replace_image_everywhere(old_img, new_img):
     for mtl in bpy.data.materials:

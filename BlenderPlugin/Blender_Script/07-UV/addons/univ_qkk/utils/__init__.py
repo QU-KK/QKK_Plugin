@@ -1,7 +1,13 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2024 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+if 'bpy' in locals():
+    from .. import reload
+    reload.reload(globals())
 
+import bpy  # noqa
+import sys
+import subprocess
 import typing  # noqa
 
 import numpy as np  # noqa
@@ -9,7 +15,6 @@ from math import pi
 
 from .bench import timer, profile
 from .draw import *
-from .gn import *
 from .other import *
 from .shapes import *
 from .ubm import *
@@ -28,41 +33,6 @@ resolutions = (('128', '128', ''), ('256', '256', ''), ('512', '512', ''), ('102
                ('2048', '2048', ''), ('4096', '4096', ''), ('8192', '8192', ''))
 resolution_name_to_value = {'128': 128, '256': 256, '512': 512, '1K': 1024, '2K': 2048, '4K': 4096, '8K': 8192}
 resolution_value_to_name = {128: '128', 256: '256', 512: '512', 1024: '1K', 2048: '2K', 4096: '4K', 8192: '8K'}
-
-univ_root_path = __package__.rsplit(".", 1)[0]
-
-if bpy.app.version >= (4, 2, 0):
-    extension_path_user = bpy.utils.extension_path_user
-else:
-    def extension_path_user(package, *, path="", create=False):
-        import os
-        import _bpy  # noqa
-        from addon_utils import _extension_module_name_decompose  # noqa
-
-        # Handles own errors.
-        repo_module, pkg_idname = _extension_module_name_decompose(package)
-
-        target_path = _bpy.user_resource("DATAFILES")
-        # Should always be true.
-        if target_path:
-            if path:
-                target_path = os.path.join(target_path, ".user", repo_module, pkg_idname, path)
-            else:
-                target_path = os.path.join(target_path, ".user", repo_module, pkg_idname)
-            if create:
-                # create path if not existing.
-                if not os.path.exists(target_path):
-                    try:
-                        os.makedirs(target_path)
-                    except Exception:  # noqa
-                        import traceback
-                        traceback.print_exc()
-                        target_path = ""
-                elif not os.path.isdir(target_path):
-                    print("Path {!r} found but isn't a directory!".format(target_path))
-                    target_path = ""
-
-        return target_path
 
 
 def glob_resolutions_to_name():
@@ -89,6 +59,90 @@ class NoInit:
 
     def __len__(self):
         raise AttributeError(f'Object not initialized')
+
+
+class Pip:
+    """
+    The code was taken and modified from: https://github.com/s-leger/blender-pip/blob/master/blender_pip.py
+    Necessary to convert svg to png, used during addon development.
+    """
+
+    def __init__(self):
+        self._ensure_user_site_package()
+        self._ensure_pip()
+
+    @staticmethod
+    def _ensure_user_site_package():
+        import os
+        import site
+        site_package = site.getusersitepackages()
+        if not os.path.exists(site_package):
+            site_package = bpy.utils.user_resource('SCRIPTS', path="site_package", create=True)
+            site.addsitedir(site_package)
+        if site_package not in sys.path:
+            sys.path.append(site_package)
+
+    def _cmd(self, action, options, module):
+        if options is not None and "--user" in options:
+            self._ensure_user_site_package()
+
+        cmd = [sys.executable, "-m", "pip", action]
+
+        if options is not None:
+            cmd.extend(options.split(" "))
+
+        cmd.append(module)
+        return self._run(cmd)
+
+    @staticmethod
+    def _popen(cmd):
+        popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
+        for stdout_line in iter(popen.stdout.readline, ""):
+            yield stdout_line
+        popen.stdout.close()
+        popen.wait()
+
+    def _run(self, cmd):
+        res = False
+        status = ""
+        for line in self._popen(cmd):
+            if "ERROR:" in line:
+                status = line.strip()
+            if "Error:" in line:
+                status = line.strip()
+            if "Successfully" in line:
+                status = line.strip()
+                res = True
+        return res, status
+
+    def _ensure_pip(self):
+        pip_not_found = False
+        try:
+            import pip
+        except ImportError:
+            pip_not_found = True
+            pass
+        if pip_not_found:
+            self._run([sys.executable, "-m", "ensurepip", "--default-pip"])
+
+    @staticmethod
+    def upgrade_pip():
+        return Pip()._cmd("install", "--upgrade", "pip")
+
+    @staticmethod
+    def upgrade(module):
+        return Pip()._cmd("install", "--upgrade", module)
+
+    @staticmethod
+    def uninstall(module, options=None):
+        if options is None or options.strip() == "":
+            # force confirm
+            options = "-y"
+        return Pip()._cmd("uninstall", options, module)
+
+    @staticmethod
+    def install(module):
+        return Pip()._cmd('install', '-U', module)
 
 
 # noinspection PyTypeHints
@@ -201,7 +255,7 @@ class ViewBoxSyncBlock:
             islands.islands = [isl for isl in islands if self.isect_island(isl)]
 
     @staticmethod
-    def _isl_has_inner_elem(island: 'utypes.AdvIsland'):
+    def _isl_has_inner_elem(island: 'utypes.FaceIsland | utypes.AdvIsland'):
         uv = island.umesh.uv
 
         if island.umesh.elem_mode == 'VERT':
@@ -234,7 +288,7 @@ class ViewBoxSyncBlock:
     def isect_island(self, island):
         """ NOTE: For the intersection check (isect) to work correctly,
         all islands must be sorted by their intersection data first, before applying any transformations."""
-        from ..utypes import BBox, AdvIsland
+        from ..utypes import BBox, FaceIsland, AdvIsland
         if self.skip:
             return True
 
@@ -255,6 +309,9 @@ class ViewBoxSyncBlock:
             return True
         if view.isect_y(isl_bbox.ymin) and view.isect_y(isl_bbox.ymax):
             return True
+
+        if type(island) == FaceIsland:
+            island = AdvIsland(island.faces, island.umesh)
 
         if not island.flat_coords:
             island.calc_tris_simple()
@@ -806,29 +863,6 @@ def calc_any_unique_obj() -> list[bpy.types.Object]:
             objects.append(objs[0])
         return objects
 
-def get_hv_constraints(corners, attr) -> tuple[list[BMLoop], list[BMLoop]]:
-    h_corners = []
-    v_corners = []
-
-    for crn in corners:
-        crn_e = crn.edge
-        edge_bits: int = crn_e[attr]
-
-        if edge_bits:
-            for i, crn_l in enumerate(crn_e.link_loops):
-                if crn == crn_l:
-                    if i == 16:
-                        break
-
-                    shift = i * 2
-                    bits = (edge_bits >> shift) & 3
-                    if bits == 2:  # vertical
-                        v_corners.append(crn)
-                    elif bits == 3:  # horizontal
-                        h_corners.append(crn)
-                    break
-
-    return h_corners, v_corners
 
 def get_selected_object_with_instances() -> list[tuple[bpy.types.Object, list[bpy.types.Object]]]:
     """ Get unique selected meshes with/without uv and get selected/visible/hidden instances (non-included) """
@@ -897,8 +931,8 @@ def has_visible_active_trim(report=None):
             report({'WARNING'}, 'Trims preset is empty')
         return False
 
-    idx = trim_slot.active_trim_index
-    if len(trim_preset) >= idx + 1:
+    idx = trim_slot.active_trim_index + 1
+    if len(trim_preset) >= idx:
         if trim_preset[idx].visible:
             return True
         if report:

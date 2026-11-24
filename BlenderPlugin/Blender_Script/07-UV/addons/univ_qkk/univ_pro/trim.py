@@ -1,6 +1,9 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2024 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+if 'bpy' in locals():
+    from .. import reload
+    reload.reload(globals())
 
 import bpy
 import math
@@ -60,7 +63,7 @@ def get_active_empty_slot_or_create_new():
 
     active_idx = prefs().active_trim_slot_index
     active_slot = slots[active_idx]
-    if len(active_slot.trims_preset) == 0:
+    if not active_slot.trims_preset:
         return active_slot
     else:
         if len(slots) >= MAX_SLOT_SIZE:
@@ -611,25 +614,21 @@ class UNIV_OT_TrimPresetSave(Operator, ExportHelper):
 
 
 
-# noinspection PyTypeHints
+
 class UNIV_OT_TrimFromMesh(Operator, utils.PaddingHelper):
     bl_idname = "uv.univ_trim_from_mesh"
     bl_label = "Trim From Mesh"
     bl_description = "Trim from mesh or uv"
     bl_options = {'REGISTER', 'UNDO'}
-
+    # noinspection PyTypeHints
     mode: EnumProperty(name='Mode', default='UV', items=utils.ENUM(('UV', 'UV'), 'MESH'))
+    # noinspection PyTypeHints
     keep_extend: BoolProperty(name='Keep Extend', default=True, description="No Padding for extended (1.0 length) trims")
-    padding_multiplayer: bpy.props.FloatProperty(name='Padding Multiplayer', default=0, min=-32, soft_min=0, soft_max=4, max=32)
 
     def draw(self, context):
         self.layout.prop(self, 'keep_extend')
         self.draw_padding()
         self.layout.row(align=True).prop(self, 'mode', expand=True)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.empty_slot_is_added = False
 
     def execute(self, context):
         import bmesh
@@ -686,16 +685,7 @@ class UNIV_OT_TrimFromMesh(Operator, utils.PaddingHelper):
 
         TrimDrawer.unregister()
 
-        # NOTE: Changes made in the Redo panel keep adding a new slot every time, avoid this.
-        if not self.empty_slot_is_added:
-            _ = get_active_empty_slot_or_create_new()
-            self.empty_slot_is_added = True
-        else:
-            # NOTE: New trim blocks are also being created additively. They need to be cleared as well.
-            active_slot = prefs().get_active_trim_slot()
-            active_slot.trims_preset.clear()
-            active_slot.active_trim_index = 0
-
+        _ = get_active_empty_slot_or_create_new()
         prefs().use_trims = False
 
         bboxes = []

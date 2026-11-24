@@ -1,8 +1,11 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2024 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
-
-
 import bpy
+
+if 'np' in locals():
+    from .. import reload
+    reload.reload(globals())
+
 import numpy as np
 from mathutils import Vector, Matrix
 from ... import utypes

@@ -1,6 +1,9 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2024 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+if 'bpy' in locals():
+    from .. import reload
+    reload.reload(globals())
 
 import bpy  # noqa
 import typing
@@ -14,6 +17,7 @@ from .. import utypes
 from collections import deque
 
 from bmesh.types import BMFace, BMLoop
+
 
 
 class StackIsland(stack.StackIsland):
@@ -191,7 +195,7 @@ class UNIV_OT_Stack_VIEW3D(stack.UNIV_OT_Stack_VIEW3D):
         return {'FINISHED'}
 
     def get_island_calc_types(self):
-        type_class = utypes.Islands if self.island_mode == 'UV' else utypes.MeshIslands
+        type_class = utypes.AdvIslands if self.island_mode == 'UV' else utypes.MeshIslands
         suffix = '' if self.ignore_mark_seam else '_with_mark_seam'
 
         self.calc_selected = getattr(type_class, f"calc_selected{suffix}")

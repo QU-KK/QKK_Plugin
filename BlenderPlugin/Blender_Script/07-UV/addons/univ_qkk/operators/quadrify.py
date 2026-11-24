@@ -1,7 +1,11 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2025 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # The code was taken and modified from the UvSquares addon: https://github.com/Radivarig/UvSquares/blob/master/uv_squares.py
+
+if 'bpy' in locals():
+    from .. import reload
+    reload.reload(globals())
 
 import bpy
 import typing
@@ -15,9 +19,8 @@ from collections.abc import Callable
 from .. import utils
 from .. import utypes
 from ..preferences import univ_settings
-from ..utypes import Islands, AdvIsland
+from ..utypes import AdvIslands, AdvIsland, UMeshes
 from ..utils import linked_crn_uv_by_face_tag_unordered_included
-
 
 QUAD_SIZE = 4
 
@@ -29,7 +32,9 @@ class UNIV_OT_Quadrify(bpy.types.Operator):
     bl_description = "Align selected UV to rectangular distribution"
     bl_options = {'REGISTER', 'UNDO'}
 
+    mark_seam: bpy.props.BoolProperty(name='Mark Seam', default=True)
     unlink: bpy.props.BoolProperty(name='Unlink', default=False)
+    shear: bpy.props.BoolProperty(name='Shear', default=False, description='Reduce shear within islands')
     xy_scale: bpy.props.BoolProperty(name='Scale Independently', default=True,
                                      description='Scale U and V independently')
     use_aspect: bpy.props.BoolProperty(name='Correct Aspect', default=True)
@@ -51,19 +56,20 @@ class UNIV_OT_Quadrify(bpy.types.Operator):
 
     def draw(self, context):
         layout = self.layout
+        layout.prop(self, 'mark_seam')
         layout.prop(self, 'unlink')
-        if self.xy_scale:
+        if self.shear or self.xy_scale:
             layout.prop(self, 'use_aspect')
+        layout.prop(self, 'shear')
         layout.prop(self, 'xy_scale')
 
         layout.prop(univ_settings(), 'use_texel')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.shear = False
         self.has_selected = True
         self.islands_calc_type: Callable = Callable
-        self.umeshes: utypes.UMeshes | None = None
+        self.umeshes: UMeshes | None = None
         self.mouse_pos: Vector | None = None
         self.max_distance: float | None = None
 
@@ -72,7 +78,7 @@ class UNIV_OT_Quadrify(bpy.types.Operator):
             self.report({'WARNING'}, 'Active area must be UV')
             return {'CANCELLED'}
 
-        self.umeshes = utypes.UMeshes(report=self.report)
+        self.umeshes = UMeshes(report=self.report)
 
         selected_umeshes, unselected_umeshes = self.umeshes.filtered_by_selected_and_visible_uv_faces()
         if selected_umeshes:
@@ -90,7 +96,7 @@ class UNIV_OT_Quadrify(bpy.types.Operator):
         selected_non_quads_counter = 0
         for umesh in self.umeshes:
             umesh.update_tag = False
-            dirt_islands = Islands.calc_extended(umesh)
+            dirt_islands = AdvIslands.calc_extended_with_mark_seam(umesh)
             if dirt_islands:
                 uv = umesh.uv
                 is_boundary = utils.is_boundary_func(umesh)
@@ -113,7 +119,7 @@ class UNIV_OT_Quadrify(bpy.types.Operator):
                         counter += 1
                         umesh.update_tag = True
 
-                    if self.xy_scale:
+                    if self.shear or self.xy_scale:
                         self.quad_normalize(quad_islands, umesh)
 
                     for isl in quad_islands:
@@ -125,9 +131,10 @@ class UNIV_OT_Quadrify(bpy.types.Operator):
                             min_dist_quad_crn = min(quad_corners, key=lambda q_crn: (q_crn[uv].uv - static_co).length)
                             static_co[:] = min_dist_quad_crn[uv].uv
 
-                    # Set seams.
-                    for crn in d_island.corners_iter():
-                        crn.edge.seam = is_boundary(crn)
+                    if self.mark_seam:
+                        for crn in d_island.corners_iter():
+                            crn.edge.seam = is_boundary(crn)
+
 
 
         if selected_non_quads_counter:
@@ -149,7 +156,7 @@ class UNIV_OT_Quadrify(bpy.types.Operator):
         return [None] * umesh.total_corners
 
     @staticmethod
-    def init_edge_sequence_from_island(island: utypes.AdvIsland) -> list[None | float]:
+    def init_edge_sequence_from_island(island: utypes.FaceIsland) -> list[None | float]:
         idx = 0
         for f in island:
             for crn in f.loops:
@@ -160,7 +167,7 @@ class UNIV_OT_Quadrify(bpy.types.Operator):
 
     def quad_normalize(self, quad_islands, umesh):
         # adjust and normalize
-        quad_islands = Islands(quad_islands, umesh)
+        quad_islands = AdvIslands(quad_islands, umesh)
         quad_islands.calc_tris_simple()
         quad_islands.calc_flat_uv_coords(save_triplet=True)
         quad_islands.calc_flat_unique_uv_coords()
@@ -182,7 +189,7 @@ class UNIV_OT_Quadrify(bpy.types.Operator):
         hit = utypes.IslandHit(self.mouse_pos, self.max_distance)
 
         for umesh in self.umeshes:
-            dirt_islands = Islands.calc_visible(umesh)
+            dirt_islands = AdvIslands.calc_visible_with_mark_seam(umesh)
             if dirt_islands:
                 for d_island in dirt_islands:
                     hit.find_nearest_island_by_crn(d_island)
@@ -210,19 +217,13 @@ class UNIV_OT_Quadrify(bpy.types.Operator):
         for isl in quad_islands:
             utils.set_global_texel(isl)
 
-        if self.xy_scale:
+        if self.shear or self.xy_scale:
             self.quad_normalize(quad_islands, umesh)
 
         for static_crn, quad_corners in links_static_with_quads:
             static_co = static_crn[uv].uv
             min_dist_quad_crn = min(quad_corners, key=lambda q_crn: (q_crn[uv].uv - static_co).length)
             static_co[:] = min_dist_quad_crn[uv].uv
-
-        # Set seams.
-        is_boundary = utils.is_boundary_func(umesh)
-        for isl in quad_islands:
-            for crn in isl.corners_iter():
-                crn.edge.seam = is_boundary(crn)
 
         hit.island.umesh.update()
         if static_faces:
@@ -255,7 +256,7 @@ class UNIV_OT_Quadrify(bpy.types.Operator):
         links_static_with_quads = self.store_links_static_with_quads(chain(static_faces, selected_non_quads), uv)
         fake_umesh = umesh.fake_umesh(quad_faces)
         # Calc sub-islands
-        islands = [AdvIsland(i, umesh) for i in Islands.calc_iter_without_ms_ex(fake_umesh)]
+        islands = [AdvIslands.island_type(i, umesh) for i in AdvIslands.calc_iter_ex(fake_umesh)]
         return links_static_with_quads, static_faces, selected_non_quads, islands
 
     def split_by_static_faces_and_quad_islands_pick(self, island) -> tuple[list[tuple[BMLoop, list[BMLoop]]], list[BMFace], list[AdvIsland]]:
@@ -278,7 +279,7 @@ class UNIV_OT_Quadrify(bpy.types.Operator):
         utils.set_faces_tag(quad_faces)
         links_static_with_quads = self.store_links_static_with_quads(static_faces, uv)
         fake_umesh = umesh.fake_umesh(quad_faces)
-        islands = [AdvIsland(i, umesh) for i in Islands.calc_iter_without_ms_ex(fake_umesh)]
+        islands = [AdvIslands.island_type(i, umesh) for i in AdvIslands.calc_iter_ex(fake_umesh)]
         return links_static_with_quads, static_faces, islands
 
     @staticmethod

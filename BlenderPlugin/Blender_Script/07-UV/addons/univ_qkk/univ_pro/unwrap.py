@@ -1,12 +1,16 @@
 # SPDX-FileCopyrightText: 2026 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+if 'bpy' in locals():
+    from .. import reload
+    reload.reload(globals())
 
 import bpy
 from .. import utypes
 from .. import utils
 from ..operators import unwrap
 from ..preferences import prefs, univ_settings
+
 
 
 class UNIV_OT_Unwrap(unwrap.UNIV_OT_Unwrap):
@@ -86,7 +90,7 @@ class UNIV_OT_Unwrap(unwrap.UNIV_OT_Unwrap):
                     safety = True
 
             if safety or self.umeshes.elem_mode in ('FACE', 'ISLAND'):
-                for isl in utypes.Islands.calc_extended(umesh):
+                for isl in utypes.AdvIslands.calc_extended_with_mark_seam(umesh):
                     if isl.is_full_face_selected():
                         # Tag for unwrap
                         uv = isl.umesh.uv
@@ -121,7 +125,7 @@ class UNIV_OT_Unwrap(unwrap.UNIV_OT_Unwrap):
             else:
                 get_vert_select = utils.vert_select_get_func(umesh)
                 get_edge_select = utils.edge_select_get_func(umesh)
-                for isl in utypes.Islands.calc_extended_by_context(umesh):
+                for isl in utypes.AdvIslands.calc_extended_by_context_with_mark_seam(umesh):
                     if isl.is_full_face_selected():
                         # Tag for unwrap
                         uv = isl.umesh.uv
@@ -161,7 +165,7 @@ class UNIV_OT_Unwrap(unwrap.UNIV_OT_Unwrap):
     def pick_unwrap_along(self):
         hit = utypes.IslandHit(self.mouse_pos, self.max_distance)
         for umesh in self.umeshes:
-            for isl in utypes.Islands.calc_visible(umesh):
+            for isl in utypes.AdvIslands.calc_visible_with_mark_seam(umesh):
                 hit.find_nearest_island(isl)
 
         if not hit or (self.max_distance < hit.min_dist):
@@ -201,7 +205,7 @@ class UNIV_OT_Unwrap(unwrap.UNIV_OT_Unwrap):
 
     def pick_unwrap_by_constraints(self, isl):
         isl.apply_aspect_ratio()
-        islands = utypes.Islands([isl], isl.umesh)
+        islands = utypes.AdvIslands([isl], isl.umesh)
         islands.indexing()
 
         if self.mark_seam_inner_island:

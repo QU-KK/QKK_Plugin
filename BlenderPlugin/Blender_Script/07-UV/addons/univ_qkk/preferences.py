@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2024 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import bpy
@@ -144,9 +144,9 @@ def _update_uv_layers_active_idx(self, context):
             area = bpy.context.area
             if area:
                 if area.type == 'VIEW_3D':
-                    bpy.ops.mesh.univ_seam_border_simple()  # noqa
+                    bpy.ops.mesh.univ_seam_border(selected=False, mtl=False, by_sharps=False)  # noqa
                 else:
-                    bpy.ops.uv.univ_seam_border_simple()  # noqa
+                    bpy.ops.uv.univ_seam_border(selected=False, mtl=False, by_sharps=False)  # noqa
 
         from .operators.misc import UNIV_OT_UV_Layers_Manager
         UNIV_OT_UV_Layers_Manager.update_uv_layers_props()
@@ -189,11 +189,6 @@ def _set_transform_preset_texel_unit(self, new_val, curr_val, _is_set):
         old_unit,
     )
     return new_val
-
-def _update_color_mode(_self, _context):
-    from .icons import icons
-    icons.register_icons_()
-    icons.register_ws_icons_()
 
 checker_generated_types = [
     ('UV_GRID', 'Grid', ''),
@@ -324,6 +319,9 @@ class UNIV_AddonPreferences(bpy.types.AddonPreferences):
     size_y: EnumProperty(name='Y', default='2048', items=utils.resolutions, update=_update_size_y)
     lock_size: BoolProperty(name='Lock Size', default=True, update=_update_lock_size)
 
+    invert_toggle_logic: BoolProperty(name='Invert Toggle Logic', default=False,
+        description="When the selected elements contain both marked/unmarked or pinned/unpinned elements, "
+                    "enabling this option will set the boolean value to False.")
 
     # Checker Texture
     checker_toggle: EnumProperty(name='Toggle', default='TOGGLE', items=ENUM('TOGGLE', 'OVERWRITE'),
@@ -410,8 +408,7 @@ Some operators, can interact with trims:
     copy_to_layers_to: EnumProperty(name='To', default='0', items=copy_to_layers_uv_channels_items_to)
 
     # Pack Settings
-    if "NOT_BL_EXT":
-        use_uvpm: BoolProperty(name='Use UVPackmaster', default=False)
+    use_uvpm: BoolProperty(name='Use UVPackmaster', default=False)
     shape_method: EnumProperty(name='Shape Method', default='CONCAVE',
                                items=(('CONCAVE', 'Exact', 'Uses exact geometry'),
                                       ('AABB', 'Fast', 'Uses bounding boxes'))
@@ -499,18 +496,17 @@ Some operators, can interact with trims:
                        ),
                        default='EXTENDED')
 
-    if "NOT_BL_EXT":
-        use_fastapi: BoolProperty(
-            default=True,
-            name="Use FastAPI",
-            update=_update_fastapi,
-            description="The FastAPI library is written in a low-level programming language and is typically 50–100 times faster.\n"
-            "It is well-suited for draw systems, as well as for UV parameterization in solvers and other CPU-bound functions.\n\n"
-            "After enabling the library, it is strongly recommended to test it to avoid crashes.\n"
-            "The library uses low-level access to data, whose structures may change.\n"
-            "It is also not recommended to enable FastAPI for alpha or beta versions.\n\n"
-            "For the library to work, place univ_fastapi.dll / libuniv_fastapi.so in the add-on folder"
-            )
+    use_fastapi: BoolProperty(
+        default=True,
+        name="Use FastAPI",
+        update=_update_fastapi,
+        description="The FastAPI library is written in a low-level programming language and is typically 50–100 times faster.\n"
+        "It is well-suited for draw systems, as well as for UV parameterization in solvers and other CPU-bound functions.\n\n"
+        "After enabling the library, it is strongly recommended to test it to avoid crashes.\n"
+        "The library uses low-level access to data, whose structures may change.\n"
+        "It is also not recommended to enable FastAPI for alpha or beta versions.\n\n"
+        "For the library to work, place univ_fastapi.dll / libuniv_fastapi.so in the add-on folder"
+        )
 
     use_csa_mods: bpy.props.BoolProperty(default=True,
                                          name="Use Modifier Keys",
@@ -529,7 +525,7 @@ Some operators, can interact with trims:
     color_mode: EnumProperty(name='Color Mode',
                              items=(('COLOR', 'Color', ''), ('MONO', 'Monochrome', '')),
                              default='COLOR',
-                             update=_update_color_mode)
+                             update=lambda self, _: __import__(__package__.replace('preferences', '')+'.icons', fromlist=['icons']).icons.register_icons_())
 
     icon_scale: FloatProperty(name='Icon Scale', default=1.0, min=1.0, soft_max=1.25, max=2.0)
 
@@ -539,9 +535,6 @@ Some operators, can interact with trims:
     icon_antialiasing: EnumProperty(name='Anti-Aliasing',
                                     items=(('1', 'x1', ''), ('2', 'x2', ''), ('4', 'x4', ''), ('8', 'x8', '')),
                                     default='4')
-
-    # NOTE: The prefixes "icon + [mono | colored | common]" must be used to specify whether,
-    #  a default value should be included when generating icons.
     # Mono
     icon_mono_green: FloatVectorProperty(name='Green',
                                          # 8bc6a1
@@ -568,10 +561,10 @@ Some operators, can interact with trims:
                                            # ff87a9
                                            subtype="COLOR", size=4, min=0.0, max=1.0, default=(1, 0.24228, 0.396755, 1))
     # Common
-    icon_common_white: FloatVectorProperty(name='White Color',
+    icon_white_color: FloatVectorProperty(name='White Color',
                                           subtype="COLOR", size=4, min=0.0, max=1.0, default=(1, 1, 1, 1))  # ffffff
 
-    icon_common_select_arrow: FloatVectorProperty(name='Select Arrow Color',
+    icon_select_arrow_color: FloatVectorProperty(name='Select Arrow Color',
                                                  # ececec
                                                  subtype="COLOR", size=4, min=0.0, max=1.0, default=(0.83879, 0.83879, 0.83879, 1))
 
@@ -589,14 +582,6 @@ Some operators, can interact with trims:
                                            default='UniV', update=update_panel)
     # enable_uv_name_controller: BoolProperty(name='Enable UV name controller', default=False)
     enable_uv_layers_sync_borders_seam: BoolProperty(name='Enable sync Border Seam', default=True)
-    seams_to_sharps: BoolProperty(name='Seams to Sharps', default=False)  # For Angle and Border operator.
-
-    invert_toggle_logic: BoolProperty(name='Invert Toggle Logic', default=False,
-        description="When the selected elements contain both marked/unmarked or pinned/unpinned elements, "
-                    "enabling this option will set the boolean value to False.")
-    isolate_hide_full_unsel_first: BoolProperty(name='Hide Full Unselected Mesh First', default=True,
-            description="Isolation runs in two passes. Fully deselected meshes are hidden first. "
-                        "Running it again also hides deselected islands in meshes with selected faces.")
 
     max_pick_distance: IntProperty(name='Max Pick Distance', default=75, min=15, soft_max=100, subtype='PIXEL',
                                    description='Pick Distance for Pick Select, Quick Snap operators'
@@ -614,7 +599,7 @@ Some operators, can interact with trims:
     def texel_density(self, td):
         self.texel = utils.unit_conversion(td, self.texel_unit, 'm')
 
-    def draw(self, context):
+    def draw(self, _context):
         layout = self.layout
         row = layout.row()
         row.prop(self, "tab", expand=True)
@@ -623,29 +608,22 @@ Some operators, can interact with trims:
             layout.prop(self, 'debug')
             layout.prop(self, 'mode')
 
-            if "NOT_BL_EXT":
-                import platform
-                if platform.system() in ('Windows', 'Linux'):
+            import platform
+            if platform.system() in ('Windows', 'Linux'):
 
-                    from .fastapi import clib
-                    failed_ver = clib.FastAPI.failed_version
-                    if failed_ver != -1:
-                        if failed_ver > clib.EXPECTED_FASTAPI_VERSION:
-                            text="You installed an OLD version of the library"
-                        else:
-                            text = "You installed a version of the library that is too NEW"
-                        layout.label(text=f"{text} - {failed_ver}, expected - {clib.EXPECTED_FASTAPI_VERSION}.", icon='ERROR')
+                from .fastapi import clib
+                failed_ver = clib.FastAPI.failed_version
+                if failed_ver != -1:
+                    if failed_ver > clib.EXPECTED_FASTAPI_VERSION:
+                        text="You installed an OLD version of the library"
+                    else:
+                        text = "You installed a version of the library that is too NEW"
+                    layout.label(text=f"{text} - {failed_ver}, expected - {clib.EXPECTED_FASTAPI_VERSION}.", icon='ERROR')
 
-                    split = layout.split(factor=0.33)
-                    split.prop(self, 'use_fastapi')
-
-                    split_sub = split.split(factor=0.5)
-                    row = split_sub.row()
-                    row.enabled = getattr(bpy.app, 'online_access', True)
-                    row.operator("wm.url_open", text="Open Download Link...").url = r"https://github.com/Oxicid/UniV/releases"
-
-                    row = split_sub.row()
-                    row.operator('wm.univ_check_lib')
+                row = layout.row()
+                row.prop(self, 'use_fastapi')
+                row.operator("wm.url_open", text="Open Download Link...").url = r"https://github.com/Oxicid/UniV/releases"
+                row.operator('wm.univ_check_lib')
             # TODO: Add link
 
             # layout.separator(factor=0.5)
@@ -690,8 +668,8 @@ Some operators, can interact with trims:
                 col.prop(self, "icon_colored_purple", text="")
                 col.prop(self, "icon_colored_pink", text="")
 
-            col.prop(self, "icon_common_white", text="")
-            col.prop(self, "icon_common_select_arrow", text="")
+            col.prop(self, "icon_white_color", text="")
+            col.prop(self, "icon_select_arrow_color", text="")
 
 
             box_split = box.split(factor=0.25)
@@ -721,12 +699,11 @@ Some operators, can interact with trims:
             ui.UNIV_PT_GlobalSettings.draw_ui_settings(layout)
         elif self.tab == 'KEYMAPS':
             from .ui import draw_panel
-            if "NOT_BL_EXT":
-                row = layout.row()
-                row.operator('wm.univ_keymaps_config', text='Restore').mode = 'RESTORE'
-                row.operator('wm.univ_keymaps_config', text='Off/On').mode = 'TOGGLE'
-                row.operator('wm.univ_keymaps_config', text='Delete User').mode = 'DELETE_USER'
-                row.operator('wm.univ_keymaps_config', text='Resolve Conflicts').mode = 'RESOLVE_ALL'
+            row = layout.row()
+            row.operator('wm.univ_keymaps_config', text='Restore').mode = 'RESTORE'
+            row.operator('wm.univ_keymaps_config', text='Off/On').mode = 'TOGGLE'
+            row.operator('wm.univ_keymaps_config', text='Delete User').mode = 'DELETE_USER'
+            row.operator('wm.univ_keymaps_config', text='Resolve Conflicts').mode = 'RESOLVE_ALL'
 
             col = layout.column(align=True)
 
@@ -828,93 +805,61 @@ Some operators, can interact with trims:
                 enable = bpy.app.online_access
             row = layout.row(align=True)
             row.enabled = enable
+            row.operator("wm.url_open", text="YouTube").url = r"https://www.youtube.com/@oxicid6058"
+            row.operator("wm.url_open", text="Discord").url = r"https://discord.gg/SAvEbGTkjR"
             row.operator("wm.url_open", text="GitHub").url = r"https://github.com/Oxicid/UniV"
+            row.operator("wm.url_open", text="Blender Market").url = r"https://blendermarket.com/products/univ?search_id=32308413"
 
-            if "NOT_BL_EXT":
-                row.operator("wm.url_open", text="YouTube").url = r"https://www.youtube.com/@oxicid6058"
-                row.operator("wm.url_open", text="Discord").url = r"https://discord.gg/SAvEbGTkjR"
-                row.operator("wm.url_open", text="Blender Market").url = r"https://blendermarket.com/products/univ?search_id=32308413"
+            from .icons import icons
 
-                from .icons import icons
-                if univ_pro:
-                    layout.label(text="You are using the Pro version", icon='FAKE_USER_ON')
-                else:
-                    layout.label(text="You are using the Lite version", icon='FAKE_USER_OFF')
-
-                layout.label(text="UniV Pro includes such advanced operators and features as:")
-                row = layout.row(align=True)
-                row.label(text='', icon_value=icons.horizontal_c)
-                row.label(text="Constraints System - straightening along supporting edge loops.", icon_value=icons.vertical_b)
-
-                row = layout.row(align=True)
-                row.label(text='', icon_value=icons.x)
-                row.label(text="Unwrap Along Axis.", icon_value=icons.y)
-                layout.label(text="Trim System.", icon='MOD_MULTIRES')
-                layout.label(text="More Checker Textures like: Gravity, Atlux, Simple.", icon_value=icons.checker)
-                layout.label(text="Real-time seam display.", icon_value=icons.cut)
-                layout.label(text="Real-time display of selected geometry in non-sync mode.", icon_value=icons.arrow)
-                layout.label(text="Rectify - straightens the island by selected 4 boundary vertices, works also with triangles and N-Gon too.",
-                             icon_value=icons.rectify)
-                layout.separator(factor=0.35)
-                layout.label(text="Transfer - interactively transfers a UV layer from one object to another.",
-                             icon_value=icons.transfer)
-                layout.separator(factor=0.35)
-                layout.label(text="Select by Flat [2D and 3D] - select linked flat faces by angle", icon_value=icons.flat)
-                layout.separator(factor=0.35)
-                layout.label(text="Loop Select [2D and 3D] [Ctrl+Alt+WheelUp] - edge loop select, works also with triangles and N-Gon too.",
-                             icon_value=icons.loop_select)
-                layout.separator(factor=0.35)
-                layout.label(text="Drag [Alt + Drag LMB] - this operator is similar to the QuickSnap operator, but has fundamental differences:",
-                             icon_value=icons.fill)
-                layout.label(text="     1) It works only with islands")
-                layout.label(text="     2) Moves only one island")
-                layout.label(text="     3) Unselects all other elements and selects the picked island.")
+            if not univ_pro:
                 layout.label(
-                    text="     4) Faster manipulation, LMB + Alt + Drag moves the islands, if you release LMB - the operator ends.")
-                layout.label(text="     5) Can pull out overlapped flipped islands.")
-                layout.label(text="     6) Snapping is not a key and intrusive feature.")
-                layout.separator(factor=0.35)
-                layout.label(text="Stack - has more advanced options such as working with symmetrical UV islands as well as working with Mesh islands ",
-                             icon_value=icons.stack)
-                layout.label(
-                    text="Select Similar - Selects similar islands, useful in combination with the Stack operator ", icon_value=icons.arrow)
-                layout.label(
-                    text="Box Projection Pro- Has an Orient 3D option, which tightly projects cube-shaped elements ", icon_value=icons.box)
+                    text="You have the free version of the addon installed, which does not have some advanced operators and options", icon='INFO')
+                layout.label(text="which does not have some advanced operators and options")
+            else:
+                layout.label(text="You are using the Pro version", icon='FAKE_USER_ON')
 
-            import textwrap
-            light_docs_info = textwrap.dedent("""
-            Many operators support the Pick system. 
-            This means that when an operation is triggered via a keymap with no mesh elements selected, it is applied to the nearest vert & edge & island. This greatly improves convenience, letting you avoid the effects Sync (select) mode has on shared edges and vertices.
-            
-            There is much more to UniV operators than you might think at first glance. Many operators are context-dependent, for example, on Sync state, selection mode (Verts, Edge, Face and Islands), as well as on pressed Ctrl, Shift, Alt (CSA) keys and combinations thereof.
-            
-            That is, before pressing the LMB button press CSA, then other modes of the operator are called. And these modifications are subject to a certain logic, which in most cases works:
-            
-            Ctrl - To Cursor for transform or Deselect for select
-            Alt - Alternative operation that is fundamentally different from the default.
-            Shift - Individual, Inplace for transform or Extend for select
-            
-            But you don't have to use the CSA keys, because a panel appears in the lower left corner where you can change the properties
-            
-            
-            Also, the addon doesn't impose its hotkeys on you, but you can easily enable them in Edit->Preferences->Extensions->UniV->Keymaps. But some operators due to their specificity can be called only through keymaps (QuickSnap, SplitUVToggle, SyncUVToggle).
-            """)
+            layout.label(text="UniV Pro includes such advanced operators and features as:")
+            row = layout.row(align=True)
+            row.label(text='', icon_value=icons.horizontal_c)
+            row.label(text="Constraints System - straightening along supporting edge loops.", icon_value=icons.vertical_b)
 
-            width = 80
-            for r in context.area.regions:
-                if r.type == "WINDOW":
-                    width = r.width // 6
-                    break
-            width = width * (1 / context.preferences.view.ui_scale) - 2
-
-            box = layout.box()
-            for paragraph in light_docs_info.strip().splitlines():
-                if paragraph.strip():
-                    for line in textwrap.fill(paragraph, width=width).splitlines():
-                        box.label(text=line)
-                else:
-                    box.separator()
-
+            row = layout.row(align=True)
+            row.label(text='', icon_value=icons.x)
+            row.label(text="Unwrap Along Axis.", icon_value=icons.y)
+            layout.label(text="Trim System.", icon='MOD_MULTIRES')
+            layout.label(text="More Checker Textures like: Gravity, Atlux, Simple.", icon_value=icons.checker)
+            layout.label(text="Real-time seam display.", icon_value=icons.cut)
+            layout.label(text="Real-time display of selected geometry in non-sync mode.", icon_value=icons.arrow)
+            layout.label(text="Rectify - straightens the island by selected 4 boundary vertices, works also with triangles and N-Gon too.",
+                         icon_value=icons.rectify)
+            layout.separator(factor=0.35)
+            layout.label(text="Transfer - interactively transfers a UV layer from one object to another.",
+                         icon_value=icons.transfer)
+            layout.separator(factor=0.35)
+            layout.label(text="Select by Flat [2D and 3D] - select linked flat faces by angle", icon_value=icons.flat)
+            layout.separator(factor=0.35)
+            layout.label(text="Loop Select [2D and 3D] [Ctrl+Alt+WheelUp] - edge loop select, works also with triangles and N-Gon too.",
+                         icon_value=icons.loop_select)
+            layout.separator(factor=0.35)
+            layout.label(text="Drag [Alt + Drag LMB] - this operator is similar to the QuickSnap operator, but has fundamental differences:",
+                         icon_value=icons.fill)
+            layout.label(text="     1) It works only with islands")
+            layout.label(text="     2) Moves only one island")
+            layout.label(text="     3) Unselects all other elements and selects the picked island.")
+            layout.label(
+                text="     4) Faster manipulation, LMB + Alt + Drag moves the islands, if you release LMB - the operator ends.")
+            layout.label(text="     5) Can pull out overlapped flipped islands.")
+            layout.label(text="     6) Snapping is not a key and intrusive feature.")
+            layout.separator(factor=0.35)
+            layout.label(text="Stack - has more advanced options such as working with symmetrical UV islands as well as working with Mesh islands ",
+                         icon_value=icons.stack)
+            layout.label(
+                text="Select Similar - Selects similar islands, useful in combination with the Stack operator ", icon_value=icons.arrow)
+            layout.label(
+                text="Box Projection Pro- Has an Orient 3D option, which tightly projects cube-shaped elements ", icon_value=icons.box)
+            if not univ_pro:
+                layout.label(text="You can get the Pro version for free in the Discord channel.", icon='INFO')
 
     @staticmethod
     def draw_conflict_keymaps(box, config_filtered, kc):

@@ -1,5 +1,9 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2024 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
+
+if 'bpy' in locals():
+    from .. import reload
+    reload.reload(globals())
 
 import bpy
 import math
@@ -10,7 +14,7 @@ from bpy.props import *
 
 from .. import utils
 from .. import utypes
-from ..utypes import UMeshes, Islands
+from ..utypes import UMeshes, AdvIslands
 from ..preferences import prefs, univ_settings
 
 
@@ -177,19 +181,6 @@ class UNIV_OT_Pin(Operator):
         if context.mode == 'EDIT_MESH':
             self.layout.prop(prefs(), 'invert_toggle_logic')
 
-    def invoke(self, context, event):
-        if context.area.type == 'IMAGE_EDITOR' and context.area.ui_type == 'UV':
-            if event.value == 'PRESS':
-                self.max_distance = utils.get_max_distance_from_px(prefs().max_pick_distance, context.region.view2d)
-                self.mouse_pos = Vector(context.region.view2d.region_to_view(event.mouse_region_x, event.mouse_region_y))
-                return self.execute(context)
-        return self.execute(context)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.max_distance: float = 0.0
-        self.mouse_pos: Vector | None = None
-
     def execute(self, context):
         if context.mode != 'EDIT_MESH':
             import numpy as np
@@ -234,28 +225,6 @@ class UNIV_OT_Pin(Operator):
         else:
             for umesh in umeshes:
                 umesh.sequence = utils.calc_visible_uv_corners(umesh)
-
-            # Pick pinning.
-            if self.mouse_pos:
-                hit = utypes.CrnEdgeHit(self.mouse_pos, self.max_distance)
-                for umesh in umeshes:
-                    hit.find_nearest_vert_by_visible_faces(umesh)
-
-                if not hit:
-                    self.report({'WARNING'}, 'Vertex not found within a given radius')
-                    return {'CANCELLED'}
-                else:
-                    uv = hit.umesh.uv
-                    linked = utils.linked_crn_to_vert_pair_with_seam_included(hit.crn, uv, hit.umesh.sync)
-                    if all(crn[uv].pin_uv for crn in linked):
-                        for crn in linked:
-                            crn[uv].pin_uv = False
-                    else:
-                        for crn in linked:
-                            crn[uv].pin_uv = True
-                    hit.umesh.update_tag = True
-                    hit.umesh.update()
-                    return {'FINISHED'}
 
         if not prefs().invert_toggle_logic:
             all_pinned = True
@@ -401,7 +370,7 @@ class UNIV_OT_Cut_VIEW2D(Operator):
         for umesh in self.umeshes:
             umesh.value = umesh.check_uniform_scale(report=self.report)
             umesh.aspect = utils.get_aspect_ratio() if self.use_correct_aspect else 1.0
-            islands = Islands.calc_selected(umesh)
+            islands = AdvIslands.calc_selected_with_mark_seam(umesh)
             for isl in islands:
                 isl.apply_aspect_ratio()
                 save_transform_islands.append(isl.save_transform(flip_if_needed=True))
@@ -436,7 +405,7 @@ class UNIV_OT_Cut_VIEW2D(Operator):
                 draw.LinesDrawSimple.draw_register(coords, draw.DrawCallSeams2D.get_color())
                 if coords:
                     bpy.context.area.tag_redraw()
-            return {'FINISHED'}
+            return {'FINISHED'} if had_seam else {'FINISHED'}
 
 
 # noinspection PyTypeHints
@@ -590,7 +559,8 @@ class UNIV_OT_Angle(Operator):
     mtl: BoolProperty(name='Mtl', default=True)
     by_weight: BoolProperty(name='By Weight', default=True)
     by_sharps: BoolProperty(name='By Sharps', default=True)
-    obj_smooth: BoolProperty(name='Angle from Auto Smooth', default=True)
+    seams_to_sharps: BoolProperty(name='Seams to Sharps', default=True)
+    obj_smooth: BoolProperty(name='Auto Smooth', default=True)
     angle: FloatProperty(name='Smooth Angle', default=math.radians(66.0), subtype='ANGLE', min=math.radians(5.0), max=math.radians(180.0))
 
     @classmethod
@@ -607,7 +577,7 @@ class UNIV_OT_Angle(Operator):
         layout.prop(self, 'mtl')
         layout.prop(self, 'by_weight')
         layout.prop(self, 'by_sharps')
-        layout.prop(prefs(), 'seams_to_sharps')
+        layout.prop(self, 'seams_to_sharps')
         layout.prop(self, 'obj_smooth')
         layout.prop(self, 'angle', slider=True)
 
@@ -652,7 +622,6 @@ class UNIV_OT_Angle(Operator):
             else:  # visible
                 faces = (_f for _f in umesh.bm.faces if not _f.hide)
 
-            seams_to_sharps = prefs().seams_to_sharps
             for f in faces:
                 for crn in f.loops:
                     crn_edge = crn.edge
@@ -663,7 +632,7 @@ class UNIV_OT_Angle(Operator):
                             crn_edge.seam = False
                     elif crn_edge.calc_face_angle() >= angle:  # Skip by angle
                         crn_edge.seam = True
-                        if seams_to_sharps:
+                        if self.seams_to_sharps:
                             crn_edge.smooth = False
                     elif self.borders and crn.link_loop_radial_prev.face.hide:
                         crn_edge.seam = True
@@ -708,10 +677,6 @@ class UNIV_OT_SeamBorder_VIEW3D(Operator):
         layout.prop(self, 'selected')
         layout.prop(self, 'mtl')
         layout.prop(self, 'by_sharps')
-
-        col = layout.column()
-        col.active = not self.all_channels
-        col.prop(prefs(), 'seams_to_sharps')
 
     def invoke(self, context, event):
         if event.value == 'PRESS':
@@ -767,34 +732,21 @@ class UNIV_OT_SeamBorder_VIEW3D(Operator):
                         has_update = True
 
             else:
-                seams_to_sharps = prefs().seams_to_sharps
                 is_boundary = utils.is_boundary_func(umesh, with_seam=self.addition)
-
                 for f in faces:
                     for crn in f.loops:
                         crn_edge = crn.edge
-                        if is_boundary(crn):
-                            if not crn_edge.seam:
-                                has_update = True
-                                crn_edge.seam = True
-                                if seams_to_sharps:
-                                    crn_edge.smooth = False
-                        elif self.by_sharps and not crn_edge.smooth:
+                        if (is_boundary(crn) or
+                                (self.by_sharps and not crn_edge.smooth) or
+                                (self.mtl and f.material_index != crn.link_loop_radial_prev.face.material_index)):
                             if not crn_edge.seam:
                                 crn_edge.seam = True
                                 has_update = True
-                        elif self.mtl and f.material_index != crn.link_loop_radial_prev.face.material_index:
-                            if not crn_edge.seam:
-                                has_update = True
-                                crn_edge.seam = True
-                                if seams_to_sharps:
-                                    crn_edge.smooth = False
 
-                        elif crn_edge.seam:  # Remove Seams and sharps non boundary (non-addition).
-                            crn_edge.seam = False
-                            if seams_to_sharps:
-                                crn_edge.smooth = False
-                            has_update = True
+                        else:
+                            if crn_edge.seam:
+                                crn_edge.seam = False
+                                has_update = True
             umesh.update_tag = has_update
 
         if self.bl_idname.startswith('UV'):
@@ -810,57 +762,3 @@ class UNIV_OT_SeamBorder_VIEW3D(Operator):
 
 class UNIV_OT_SeamBorder(UNIV_OT_SeamBorder_VIEW3D):
     bl_idname = "uv.univ_seam_border"
-
-# TODO: After running this operator from the UI, adjusting the properties of the next operator
-#  resets the UV Map Layout indices. Find a way to fix this.
-# NOTE: That duplicate need for avoid properties like seams_to_sharps, mtl and other.
-class UNIV_OT_SeamBorderSimple_VIEW3D(Operator):
-    bl_idname = "mesh.univ_seam_border_simple"
-    bl_label = "Border"
-    bl_description = "Seams by borders for UV Maps layout"
-    bl_options = {'REGISTER', 'UNDO'}
-
-
-    @classmethod
-    def poll(cls, context):
-        return context.mode == 'EDIT_MESH'
-
-
-    def execute(self, context) -> set[str]:
-        umeshes = UMeshes()
-
-        if not self.bl_idname.startswith('UV'):
-            umeshes.set_sync()
-            umeshes.sync_invalidate()
-
-        for umesh in umeshes:
-            has_update = False
-            is_boundary = utils.is_boundary_func(umesh, with_seam=False)
-
-            for f in utils.calc_visible_uv_faces_iter(umesh):
-                for crn in f.loops:
-                    crn_edge = crn.edge
-                    if is_boundary(crn):
-                        if not crn_edge.seam:
-                            has_update = True
-                            crn_edge.seam = True
-                    else:
-                        # Remove Seam for non boundary.
-                        if crn_edge.seam:
-                            has_update = True
-                            crn_edge.seam = False
-
-            umesh.update_tag = has_update
-
-        if self.bl_idname.startswith('UV'):
-            # Flush System
-            from .. import draw
-            if not draw.DrawCallSeams2D.is_enable():
-                coords = draw.mesh_extract.extract_seams_umeshes(umeshes)
-                draw.LinesDrawSimple.draw_register(coords, draw.DrawCallSeams2D.get_color())
-
-        umeshes.silent_update()
-        return {'FINISHED'}
-
-class UNIV_OT_SeamBorderSimple_VIEW2D(UNIV_OT_SeamBorderSimple_VIEW3D):
-    bl_idname = "uv.univ_seam_border_simple"

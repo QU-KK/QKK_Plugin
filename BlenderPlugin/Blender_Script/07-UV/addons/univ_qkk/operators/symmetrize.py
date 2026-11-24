@@ -1,6 +1,9 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2025 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+if 'bpy' in locals():
+    from .. import reload
+    reload.reload(globals())
 
 import bpy
 import math
@@ -74,7 +77,7 @@ class UNIV_OT_Symmetrize(bpy.types.Operator):
             tree.balance()
 
             # Islands are sorted by their bounding box to determine which one is the source and which is the destination.
-            islands = utypes.Islands.calc_selected(umesh)
+            islands = utypes.AdvIslands.calc_selected_with_mark_seam(umesh)
             if self.axis_uv == '-X to +X':
                 islands.islands.sort(key=lambda isl_: isl_.bbox.center.x % 1, reverse=self.axis_uv_flip)
             else:

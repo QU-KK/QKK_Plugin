@@ -1,6 +1,9 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2024 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+if 'bpy' in locals():
+    from .. import reload
+    reload.reload(globals())
 
 import bpy
 import gpu
@@ -16,8 +19,7 @@ from bmesh.types import BMFace, BMLoop
 from .. import utils
 from ..draw import shaders
 from ..preferences import debug, prefs
-from .. import utypes
-from ..utypes import KDMesh, KDMeshes, Islands, UnionIslands, AdvIsland, LoopGroup, UnionLoopGroup
+from ..utypes import KDMesh, KDData, TrimKDTree, KDMeshes, Islands, UnionIslands, FaceIsland, View2D, LoopGroup, UnionLoopGroup, UMeshes
 
 
 class eSnapPointMode(enum.IntFlag):
@@ -81,7 +83,7 @@ class QuickSnap_KDMeshes:
         self.sync = True
         self.umeshes = None
         self.kdmeshes: KDMeshes | None = None
-        self.trim_kdtree: utypes.TrimKDTree | None = None
+        self.trim_kdtree: TrimKDTree | None = None
         self.visible = None
         self.radius = None
         self.mouse_position = None
@@ -109,7 +111,7 @@ class QuickSnap_KDMeshes:
         for umesh in self.umeshes:
             faces = utils.calc_visible_uv_faces(umesh)
             if faces:
-                f_isl = AdvIsland(faces, umesh)
+                f_isl = FaceIsland(faces, umesh)
                 isl = Islands([f_isl], umesh)
                 kdmesh = KDMesh(umesh, isl)
                 kdmesh.calc_all_trees()
@@ -124,7 +126,7 @@ class QuickSnap_KDMeshes:
         for umesh in self.umeshes:
             faces = utils.calc_selected_uv_faces(umesh)
             if faces:
-                f_isl = AdvIsland(faces, umesh)
+                f_isl = FaceIsland(faces, umesh)
                 isl = Islands([f_isl], umesh)
                 kdmesh = KDMesh(umesh, isl)
                 kdmesh.calc_all_trees()
@@ -139,7 +141,7 @@ class QuickSnap_KDMeshes:
         for umesh in self.umeshes:
             faces = utils.calc_unselected_uv_faces(umesh)
             if faces:
-                f_isl = AdvIsland(faces, umesh)
+                f_isl = FaceIsland(faces, umesh)
                 isl = Islands([f_isl], umesh)
                 kdmesh = KDMesh(umesh, isl)
                 kdmesh.calc_all_trees()
@@ -161,7 +163,7 @@ class QuickSnap_KDMeshes:
     def calc_island_kdmeshes(self, extended=False):
         kdmeshes = []
         for umesh in self.umeshes:
-            islands = Islands.calc_extended_or_visible_without_ms(umesh, extended=extended)
+            islands = Islands.calc_extended_or_visible(umesh, extended=extended)
             if islands:
                 kdmesh = KDMesh(umesh, islands)
                 kdmesh.calc_all_trees()
@@ -171,7 +173,7 @@ class QuickSnap_KDMeshes:
     def recalc_island_kd_meshes(self):
         kdmeshes = []
         for umesh in self.umeshes:
-            islands = Islands.calc_non_selected_extended_without_ms(umesh)
+            islands = Islands.calc_non_selected_extended(umesh)
             if islands:
                 kdmesh = KDMesh(umesh, islands)
                 kdmesh.calc_all_trees()
@@ -220,7 +222,7 @@ class QuickSnap_KDMeshes:
                         elem = kdmesh.faces[find_idx]
                         r_kdmesh = kdmesh
 
-        return utypes.KDData((min_pt, min_idx, min_dist), elem, r_kdmesh)
+        return KDData((min_pt, min_idx, min_dist), elem, r_kdmesh)
 
     def find_nearest_target_pt(self):
         kd_data = self.find()
@@ -228,7 +230,7 @@ class QuickSnap_KDMeshes:
         m_pos = self.mouse_position.to_2d()
 
         if GlobalSnapFlags.grid_snap:
-            zoom = utypes.View2D.get_zoom(self.view)
+            zoom = View2D.get_zoom(self.view)
             divider = 1/8 if zoom <= 1600 else 1 / 64
             divider = divider if zoom <= 12800 else 1 / 64 / 8
             pos = Vector(utils.round_threshold(v, divider) for v in m_pos)
@@ -309,9 +311,9 @@ class UNIV_OT_QuickSnap(bpy.types.Operator, SnapMode, QuickSnap_KDMeshes):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.umeshes: utypes.UMeshes | None = None
+        self.umeshes: UMeshes | None = None
         # KDTree Trim automatically calcs by snap_points_mode (by default set None)
-        self.trim_kdtree: utypes.TrimKDTree | None = None
+        self.trim_kdtree: TrimKDTree | None = None
         self.kdmeshes: KDMeshes | None = None
 
         self.area: bpy.types.Area | None = None
@@ -335,7 +337,7 @@ class UNIV_OT_QuickSnap(bpy.types.Operator, SnapMode, QuickSnap_KDMeshes):
 
         self._cancel: bool = False
 
-        self.move_object: UnionIslands | UnionLoopGroup | AdvIsland | LoopGroup | None = None
+        self.move_object: UnionIslands | UnionLoopGroup | FaceIsland | None = None
 
     def invoke(self, context, event):
         self.area = context.area
@@ -353,9 +355,9 @@ class UNIV_OT_QuickSnap(bpy.types.Operator, SnapMode, QuickSnap_KDMeshes):
 
         # Trim Init
         if utils.is_pro_version_support():
-            self.trim_kdtree = utypes.TrimKDTree()
+            self.trim_kdtree = TrimKDTree()
 
-        self.umeshes = utypes.UMeshes()
+        self.umeshes = UMeshes()
         self.preprocessing()
 
         wm = context.window_manager
@@ -539,7 +541,7 @@ class UNIV_OT_QuickSnap(bpy.types.Operator, SnapMode, QuickSnap_KDMeshes):
                 else:
                     self.calc_crn_edge_selected_kdmeshes()
 
-    def pick_drag_object(self, kd_data: utypes.KDData):
+    def pick_drag_object(self, kd_data: KDData):
         assert not self.island_mode
         _kdmesh: KDMesh = kd_data.kdmesh
         if self.sync:
@@ -548,7 +550,7 @@ class UNIV_OT_QuickSnap(bpy.types.Operator, SnapMode, QuickSnap_KDMeshes):
                     # Extract only one face without linked corners, and recalculate the snap
                     # points at the current KDMesh
                     _face = kd_data.elem if isinstance(kd_data.elem, BMFace) else kd_data.elem.face
-                    self.move_object = AdvIsland([_face], _kdmesh.umesh)
+                    self.move_object = FaceIsland([_face], _kdmesh.umesh)
                     islands = _kdmesh.islands
                     assert (len(islands) == 1)
 
@@ -861,7 +863,7 @@ class UNIV_OT_QuickSnap(bpy.types.Operator, SnapMode, QuickSnap_KDMeshes):
         return {'FINISHED'}
 
     def calc_update_meshes(self):
-        if isinstance(self.move_object, AdvIsland):
+        if isinstance(self.move_object, FaceIsland):
             self.umeshes.umeshes = [self.move_object.umesh]
 
         elif isinstance(self.move_object, UnionIslands):

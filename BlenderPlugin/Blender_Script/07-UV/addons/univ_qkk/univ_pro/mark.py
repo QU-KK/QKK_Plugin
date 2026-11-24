@@ -1,18 +1,18 @@
 # SPDX-FileCopyrightText: 2026 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+if 'bpy' in locals():
+    from .. import reload
+    reload.reload(globals())
 
 import bpy
 
 from math import radians as to_rad
 from math import degrees as to_deg
 
-from bmesh.types import BMLoop
-
 from .. import utypes
 from .. import utils
 # from ..preferences import prefs, univ_settings
-
 
 
 class UNIV_OT_Constraint(bpy.types.Operator):
@@ -64,14 +64,40 @@ NOTE: When applying destructive modifiers, collapse, split, and similar operatio
 
 
         for umesh in umeshes:
+            constraints_attr = umesh.bm.edges.layers.int.get('univ_constraints')
+            if not constraints_attr:
+                constraints_attr = umesh.bm.edges.layers.int.new('univ_constraints')
+                umesh.update_tag = True
+
             if umesh.elem_mode in ('FACE', 'ISLAND'):
                 corners = utils.calc_selected_uv_edges_from_linked_selected_face(umesh)
             else:
                 corners = utils.calc_selected_uv_edge(umesh)
             umesh.sequence = corners
 
-            out_local, update_tag = self.set_constraints(umesh, corners, self.vertical)
-            out += out_local
+            update_tag = False
+            for crn in corners:
+                e = crn.edge
+                for i, crn_l in enumerate(e.link_loops):
+                    if crn == crn_l:
+                        if i >= 16:
+                            out += 1
+                            break
+
+                        val: int = e[constraints_attr]
+                        shift = i * 2  # Shift to right.
+
+                        old_bits = (val >> shift) & 3  # Isolate two right bits.
+                        if old_bits == new_bits:
+                            break
+
+                        val &= ~(3 << shift)  # Clear old bits.
+                        val |= new_bits << shift  # Set new bits.
+
+                        e[constraints_attr] = val
+                        update_tag = True
+                        break
+
             umesh.update_tag |= update_tag
 
         if not umeshes.update_tag:
@@ -114,42 +140,6 @@ NOTE: When applying destructive modifiers, collapse, split, and similar operatio
                                   f"(possibly caused by geometry changes or manual modification of the attribute.)")
 
         return umeshes.update()
-
-    @staticmethod
-    def set_constraints(umesh: utypes.UMesh, corners: list[BMLoop], is_vertical) -> tuple[int, bool]:
-        out = 0
-        vertical = 2  # (10)
-        horizontal = 3  # (11)
-        new_bits = vertical if is_vertical else horizontal
-
-        constraints_attr = umesh.bm.edges.layers.int.get('univ_constraints')
-        if not constraints_attr:
-            constraints_attr = umesh.bm.edges.layers.int.new('univ_constraints')
-            umesh.update_tag = True
-
-        update_tag = False
-        for crn in corners:
-            e = crn.edge
-            for i, crn_l in enumerate(e.link_loops):
-                if crn == crn_l:
-                    if i >= 16:
-                        out += 1
-                        break
-
-                    val: int = e[constraints_attr]
-                    shift = i * 2  # Shift to right.
-
-                    old_bits = (val >> shift) & 3  # Isolate two right bits.
-                    if old_bits == new_bits:
-                        break
-
-                    val &= ~(3 << shift)  # Clear old bits.
-                    val |= new_bits << shift  # Set new bits.
-
-                    e[constraints_attr] = val
-                    update_tag = True
-                    break
-        return out, update_tag
 
     @staticmethod
     def sanitize_constr(umesh, constraints_attr) -> tuple[int, int]:
@@ -231,9 +221,31 @@ class UNIV_OT_ConstraintByAngle(bpy.types.Operator):
                         constraints_attr = umesh.bm.edges.layers.int.new('univ_constraints')
                         umesh.update_tag = True
 
+                    def get_corners(segments_):
+                        for seg in segments_:
+                            if seg.is_end_lock:
+                                seg.lengths_seq.pop()
+                            if not seg.lengths_seq:
+                                continue
+
+
+                            if seg.is_start_lock:
+                                del seg.lengths_seq[0]
+                            if not seg.lengths_seq:
+                                continue
+
+
+                            for adv_crn in seg:
+                                if adv_crn.invert:
+                                    yield adv_crn.crn.link_loop_prev
+                                else:
+                                    yield adv_crn.crn
+
+                                if adv_crn.is_pair:
+                                    yield adv_crn.crn.link_loop_radial_prev
 
                     update_tag = False
-                    for crn in self.get_corners_from_segment_with_pair_with_length_check(segments):
+                    for crn in get_corners(segments):
                         e = crn.edge
                         for i, crn_l in enumerate(e.link_loops):
                             if crn == crn_l:
@@ -278,25 +290,3 @@ class UNIV_OT_ConstraintByAngle(bpy.types.Operator):
         #                           f"(possibly caused by geometry changes or manual modification of the attribute.)")
         umeshes.silent_update()
         return {'FINISHED'}
-
-    @staticmethod
-    def get_corners_from_segment_with_pair_with_length_check(segments):
-        for seg in segments:
-            if seg.is_end_lock:
-                seg.lengths_seq.pop()
-            if not seg.lengths_seq:
-                continue
-
-            if seg.is_start_lock:
-                del seg.lengths_seq[0]
-            if not seg.lengths_seq:
-                continue
-
-            for adv_crn in seg:
-                if adv_crn.invert:
-                    yield adv_crn.crn.link_loop_prev
-                else:
-                    yield adv_crn.crn
-
-                if adv_crn.is_pair:
-                    yield adv_crn.crn.link_loop_radial_prev

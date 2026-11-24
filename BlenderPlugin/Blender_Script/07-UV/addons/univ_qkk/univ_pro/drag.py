@@ -1,6 +1,9 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2024 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+if 'bpy' in locals():
+    from .. import reload
+    reload.reload(globals())
 
 import bpy
 import gpu
@@ -247,7 +250,7 @@ class UNIV_OT_Drag(bpy.types.Operator, quick_snap.SnapMode, quick_snap.QuickSnap
 
         # Add help info
         info = ('UniV: [Ctrl]-Snap. [G]-Grid Snap.  [1-4]-Snap to elem. [X,Y]-Lock or Trim Wrap by Axis.  '
-                '[Shift]-Crop by Trim.  [C]-Crop.  [F]-Fill.  [P]-Trim Padding.  [Esc, RMB]-Cancel.')
+                '[Shift]-Crop by Trim.  [C]-Crop.  [F]-Fill.  [P]-Trim Padding.  [Esc]-Cancel.')
         context.area.header_text_set(info)
         self.register_draw()
 
@@ -272,7 +275,7 @@ class UNIV_OT_Drag(bpy.types.Operator, quick_snap.SnapMode, quick_snap.QuickSnap
         elif event.type == 'INBETWEEN_MOUSEMOVE':  # fix over move
             return {'RUNNING_MODAL'}
 
-        elif event.type == 'ESC' or (event.type == "RIGHTMOUSE" and event.value == 'PRESS'):
+        elif event.type == 'ESC':
             self._cancel = True
             return self.exit()
 
@@ -543,7 +546,7 @@ class UNIV_OT_Drag(bpy.types.Operator, quick_snap.SnapMode, quick_snap.QuickSnap
                     u.sequence = []
                     continue
                 u.sequence = [f for f in u.sequence if f not in exclude_faces]
-            isl = utypes.AdvIsland(u.sequence, u)
+            isl = utypes.FaceIsland(u.sequence, u)
             u.sequence = []
             islands = utypes.Islands([isl], u)
             kdmesh = KDMesh(u, islands)

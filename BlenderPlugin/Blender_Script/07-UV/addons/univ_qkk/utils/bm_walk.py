@@ -1,5 +1,9 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2024 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
+
+if 'bpy' in locals():
+    from .. import reload
+    reload.reload(globals())
 
 import bpy  # noqa
 
@@ -182,11 +186,6 @@ def linked_crn_to_vert_pair_with_seam(crn: BMLoop, uv, sync: bool):
         bm_iter = pair_ccw
         linked.append(bm_iter)
     # assert len(linked) == len(set(linked))
-    return linked
-
-def linked_crn_to_vert_pair_with_seam_included(crn: BMLoop, uv, sync: bool) -> list[BMLoop]:
-    linked = linked_crn_to_vert_pair_with_seam(crn, uv, sync)
-    linked.insert(0, crn)
     return linked
 
 def linked_crn_to_vert_without_coord_check_with_seam_for_sync_unwrap(crn: BMLoop):

@@ -1,13 +1,11 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2024 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
-
 
 import bpy
 
 from .. import utypes
 from .. import utils
 from ..preferences import prefs, checker_generated_types
-
 
 # Patterns for future
 # _ARS-10.5  # Arrow Scale

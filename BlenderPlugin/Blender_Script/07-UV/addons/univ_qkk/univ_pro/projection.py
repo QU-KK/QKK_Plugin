@@ -1,8 +1,12 @@
-# SPDX-FileCopyrightText: 2026 Oxicid
+# SPDX-FileCopyrightText: 2024 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 # The OrientedBounds code was taken and modified from https://github.com/mikedh/trimesh
 
+if 'bpy' in locals():
+    from .. import reload
+    reload.reload(globals())
 
+import bpy  # noqa: F401
 import bmesh
 import typing  # noqa: F401
 import mathutils
@@ -18,7 +22,6 @@ from ..utypes import MeshIslands
 from bpy.props import *
 from ..operators import project
 from ..preferences import prefs
-
 
 TOL_ZERO = np.float32(1e-8)
 _IDENTITY = np.eye(4)
