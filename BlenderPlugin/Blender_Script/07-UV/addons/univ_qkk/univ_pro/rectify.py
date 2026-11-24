@@ -3,115 +3,311 @@
 
 
 import bpy
+from math import isclose, sqrt
+import itertools
+
+from mathutils import Vector, Matrix
+from mathutils.geometry import area_tri
+from bmesh.types import BMLoopUV
 
 from .. import utils
+from collections import deque
 from ..preferences import prefs
 from .. import utypes
-from ..utypes import AdvIsland, Segment, Segments
+from ..utypes import AdvIsland, LoopGroup, LoopGroups, Segment, AdvCorner
 
-class RectifyType:
-    Four = 1
-    Two = 2
-    Single = 3
-    HalfSelected = 5
-    FullSelected = 6
+
+class RectIsl:
+    def __init__(self, isl: AdvIsland, groups: LoopGroups):
+        self.isl: AdvIsland = isl
+        self.lgs: LoopGroups = groups
+        self.prev_pos: Vector | utils.NoInit = utils.NoInit()
+        self._is_unpinned_exist: bool | None = None
+        self.is_flipped_to_preserve_flip = False
+
+    def has_unpinned(self):
+        if self._is_unpinned_exist is None:
+            assert len(self.lgs) == 4
+            self._is_unpinned_exist = any(lg.has_unpinned for lg in self.lgs)
+        return self._is_unpinned_exist
+
+    def prepare_island_for_scale_reset(self):
+        self.prev_pos = self.get_curr_pos()
+        self.isl.value = self.prev_pos
+
+        self.isl.calc_tris_simple()
+        self.isl.calc_flat_uv_coords(save_triplet_=True)
+        self.isl.calc_flat_unique_uv_coords()
+        self.isl.calc_flat_3d_coords(save_triplet=True)
+        self.isl.calc_area_3d(areas_to_weight=True)
+
+    def get_curr_pos(self):
+        return self.lgs[0][0][self.isl.umesh.uv].uv.copy()
+
+    def individual_scale(self):
+        from .. import operators
+        operators.texel.UNIV_OT_ResetScale.individual_scale(self.isl, 'XY', shear=False, threshold=1e-07)
+
+    def individual_scale_final(self):
+        threshold = 1e-7
+        uv_coords_and_3d_vectors_and_3d_areas = []
+        for flat, (va, vb, vc), w, tris in zip(self.isl.flat_coords, self.isl.flat_3d_coords, self.isl.weights, self.isl.tris):
+            if tris[0].face.tag:
+                vectors_ac_bc = (va - vc, vb - vc)
+                uv_coords_and_3d_vectors_and_3d_areas.append((flat, vectors_ac_bc, w))
+
+        for j in range(5):
+            scale_cou = 0.0
+            scale_cov = 0.0
+
+            for (uv_a, uv_b, uv_c), (vec_ac, vec_bc), weight in uv_coords_and_3d_vectors_and_3d_areas:
+                if isclose(area_tri(uv_a, uv_b, uv_c), 0, abs_tol=threshold):
+                    continue
+                m = Matrix((uv_a - uv_c, uv_b - uv_c))
+                try:
+                    m.invert()
+                except ValueError:
+                    continue
+
+                cou = m[0][0] * vec_ac + m[0][1] * vec_bc
+                cov = m[1][0] * vec_ac + m[1][1] * vec_bc
+
+                scale_cou += cou.length * weight
+                scale_cov += cov.length * weight
+
+            if scale_cou * scale_cov < 1e-10:
+                break
+
+            scale_factor_u = sqrt(scale_cou / scale_cov)
+            if isclose(scale_factor_u, 1.0, abs_tol=1e-5):  # Trade accuracy for performance.
+                break
+
+            scale = Vector((scale_factor_u, 1.0 / scale_factor_u))
+            for uv_coord in self.isl.flat_unique_uv_coords:
+                uv_coord *= scale
+
+    def tag_inner_rect_face(self):
+        uv = self.isl.umesh.uv
+        for f in self.isl:
+            f.tag = False
+        f_index = self.isl[0].index
+
+        for lg in self.lgs:
+            if lg.has_unpinned():
+                continue
+            for crn in lg:
+
+                face = crn.face
+                if face.tag:
+                    continue
+                face.tag = True
+
+                parts_of_island = [face]
+                temp = []
+
+                while parts_of_island:
+                    for f in parts_of_island:
+                        for crn_ in f.loops:
+                            if crn_[uv].pin_uv and crn_.link_loop_next[uv].pin_uv:
+                                continue
+                            shared_crn = crn_.link_loop_radial_prev
+                            ff = shared_crn.face
+                            if ff.tag or ff.index != f_index:
+                                continue
+                            temp.append(ff)
+                            ff.tag = True
+
+                    parts_of_island = temp
+                    temp = []
+
 
 # TODO: Add only short path mode, without boundary correction (bugs on cube with subdiv)
 class RectifyBase:
-    # @staticmethod
-    # def rect_lgs_to_distribute(groups: LoopGroups):
-    #     # TODO: Add Only 4 points pin.
-    #
-    #     # TODO: Add distribute by mask and get intervals from short path if unpinned exist
-    #     #  or validate short path by angle  (bugs on cube with subdiv)
-    #     uv = groups.umesh.uv
-    #
-    #     first_lg = groups[0]
-    #     card_vec = utils.vec_to_cardinal(first_lg.get_vector())
-    #     start = first_lg.src[uv].uv
-    #     end = start + (card_vec * first_lg.length_uv)
-    #     first_lg.distribute(start, end)
-    #
-    #     prev_lg = groups[-1]
-    #     next_lg = groups[1]
-    #     inter_avg_length = (prev_lg.length_uv + next_lg.length_uv) / 2
-    #
-    #     end = prev_lg.dst[uv].uv
-    #     start = end + (inter_avg_length * card_vec.orthogonal())
-    #     prev_lg.distribute(start, end)
-    #
-    #     start = next_lg.src[uv].uv
-    #     end = start + (inter_avg_length * card_vec.orthogonal())
-    #     next_lg.distribute(start, end)
-    #
-    #     last_lg = groups[2]
-    #     last_lg.distribute(last_lg.src[uv].uv, last_lg.dst[uv].uv)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.aspect: float = 1.0
+        self.bound_priority_factor = 0.95
+        self.umeshes: utypes.UMeshes | None = None
+        # Exclude islands, so that you don't accidentally unwrap
+        self.pinned_crn_from_excluded_isl: list[list[BMLoopUV]] = []
+        self.rect_lg_groups_with_isl_of_mesh: list[list[RectIsl]] = []
 
     @staticmethod
-    def total_selected_crn(seg: Segment):
-        vert_select_get = utils.vert_select_get_func(seg.umesh)
-        return sum(
-            (
-                vert_select_get(adv_crn.crn.link_loop_next)
-                if adv_crn.invert
-                else vert_select_get(adv_crn.crn)
-            )
-            for adv_crn in seg
-        )
+    def rect_lgs_to_distribute(groups: LoopGroups):
+        # TODO: Add distribute by mask and get intervals from short path if unpinned exist
+        #  or validate short path by angle  (bugs on cube with subdiv)
+        uv = groups.umesh.uv
+
+        first_lg = groups[0]
+        card_vec = utils.vec_to_cardinal(first_lg.get_vector())
+        start = first_lg.src[uv].uv
+        end = start + (card_vec * first_lg.length_uv)
+        first_lg.distribute(start, end)
+
+        prev_lg = groups[-1]
+        next_lg = groups[1]
+        inter_avg_length = (prev_lg.length_uv + next_lg.length_uv) / 2
+
+        end = prev_lg.dst[uv].uv
+        start = end + (inter_avg_length * card_vec.orthogonal())
+        prev_lg.distribute(start, end)
+
+        start = next_lg.src[uv].uv
+        end = start + (inter_avg_length * card_vec.orthogonal())
+        next_lg.distribute(start, end)
+
+        last_lg = groups[2]
+        last_lg.distribute(last_lg.src[uv].uv, last_lg.dst[uv].uv)
 
     @staticmethod
-    def selected_to_first(seg: Segment):
-        get_vert_select = utils.vert_select_get_func(seg.umesh)
-        for idx, adv_crn in enumerate(seg):
-            crn = adv_crn.crn.link_loop_next if adv_crn.invert else adv_crn.crn
-            if get_vert_select(crn):
+    def has_four_selected_crn(lg):
+        vert_select_get = utils.vert_select_get_func(lg.umesh)
+        return sum(vert_select_get(crn) for crn in lg) == 4
+
+    @staticmethod
+    def total_selected_crn(lg):
+        vert_select_get = utils.vert_select_get_func(lg.umesh)
+        return sum(vert_select_get(crn) for crn in lg)
+
+    @staticmethod
+    def selected_to_first(lg):
+        vert_select_get = utils.vert_select_get_func(lg.umesh)
+        for idx, crn, in enumerate(lg):
+            if vert_select_get(crn):
                 if idx == 0:
                     return
-                seg.seg = seg.seg[idx:] + seg.seg[:idx]
+                lg.corners = lg.corners[idx:] + lg.corners[:idx]
                 return
-        raise ValueError("Selected vertices not found")
+        raise ValueError('Selected vertices not found')
 
     @staticmethod
-    def target_to_first(lg: Segment, target_crn):
-        for (idx, adv_crn) in enumerate(lg):
-            if adv_crn.orig_crn == target_crn:
+    def target_to_first(lg, target_crn):
+        for idx, crn, in enumerate(lg):
+            if crn == target_crn:
                 if idx == 0:
                     return
-                lg.corners = lg.seg[idx:] + lg.seg[:idx]
+                lg.corners = lg.corners[idx:] + lg.corners[:idx]
                 return
-        raise ValueError("Selected vertices not found")
+        raise ValueError('Selected vertices not found')
 
     @classmethod
-    def split_to_four_groups(cls, border_seg: Segment) -> utypes.Segments:
-        assert border_seg.is_circular
-        cls.selected_to_first(border_seg)
-        umesh = border_seg.umesh
+    def split_to_four_groups(cls, border_lg: LoopGroup) -> deque[LoopGroup] | None:
+        cls.selected_to_first(border_lg)
 
-        get_vert_select = utils.vert_select_get_func(umesh)
-        groups = []
+        vert_select_get = utils.vert_select_get_func(border_lg.umesh)
+        groups = deque()
         start_idx = 0
 
-        it = iter(border_seg.seg)
+        it = iter(border_lg.corners)
         next(it)
-        for idx, adv_crn in enumerate(it, start=1):
-            if get_vert_select(adv_crn.orig_crn):
-                groups.append(Segment(border_seg.seg[start_idx:idx], umesh))
+        for idx, crn in enumerate(it, start=1):
+            if vert_select_get(crn):
+                lg = LoopGroup(border_lg.umesh)
+                lg.corners = border_lg.corners[start_idx:idx]
+                groups.append(lg)
                 start_idx = idx
-
                 if len(groups) == 3:
-                    groups.append(Segment(border_seg.seg[start_idx:], umesh))
-                    return utypes.Segments(groups, umesh)
-        # TODO: Raise ???
-        return utypes.Segments(groups, umesh)
+                    lg = LoopGroup(border_lg.umesh)
+                    lg.corners = border_lg.corners[start_idx:]
+                    groups.append(lg)
+                    return groups
+        return groups
+
+    def apply_aspect_ratio(self, isl):
+        scale = Vector((self.aspect, 1))
+        isl.scale_simple(scale)
+
+    def reset_aspect_ratio(self, isl):
+        scale = Vector((1 / self.aspect, 1))
+        isl.scale_simple(scale)
+
+
+class RectifyFour(RectifyBase):
+
+    @classmethod
+    def four_pt_border_lg_to_rect(cls, border_lg: LoopGroup, isl: AdvIsland, bound_priority_factor: float):
+        assert border_lg.value == 4
+        four_groups = cls.split_to_four_groups(border_lg)
+        assert len(four_groups) == 4
+
+        for lg in four_groups:
+            lg.length_uv  # noqa
+            lg.calc_chain_linked_corners()
+
+        prioritize_corners = set()
+        for crn_chain in border_lg.chain_linked_corners:
+            prioritize_corners.update(crn_chain)
+
+        for idx, lg in enumerate(four_groups):
+            exclude_corners_group = [four_groups[idx-1], four_groups[idx-2], four_groups[idx-3]]
+            short_path = utils.ShortPath.calc_path_uv_vert(isl, lg.src, lg.dst,
+                                                           exclude_corners_group,
+                                                           prioritize_corners,
+                                                           bound_priority_factor)
+            # Get pin mask
+            lg.calc_chain_linked_corners_mask_from_short_path(short_path)
+            if not all(lg.chain_linked_corners_mask):  # is unpinned exist
+                # The lengths by short path are more correct, we take them to avoid large stretches
+                length_3d, length_uv = utils.ShortPath.calc_length_3d_and_uv_from_path(short_path, lg.umesh)
+                lg.length_3d = length_3d
+                lg.length_uv = length_uv
+            else:
+                lg.calc_length_uv()
+
+        max_length_lg = max(four_groups, key=lambda lg_m: lg_m.length_3d)
+        four_groups.rotate(-four_groups.index(max_length_lg))
+
+        groups = LoopGroups(list(four_groups), border_lg.umesh)
+        cls.rect_lgs_to_distribute(groups)
+
+        return groups
 
 
 class RectifyRing(RectifyBase):
+    @classmethod
+    def two_pt_ring_lg_to_rect(cls, border_lgs: LoopGroups, isl: AdvIsland, bound_priority_factor: float):
+        four_groups: LoopGroups = cls.two_pt_ring_lg_to_rect_ex(border_lgs, isl)
+
+        for idx, lg in enumerate(four_groups):
+            lg.length_uv  # noqa
+            if idx in (0, 2):
+                for crn in lg:
+                    crn.edge.seam = True
+                continue
+            lg.calc_chain_linked_corners()
+
+        prioritize_corners = set()
+        for border_lg in border_lgs:
+            prioritize_corners.update(border_lg.corners)
+
+        for idx, lg in enumerate(four_groups):
+            if idx in (0, 2):
+                lg.calc_length_uv()
+                continue
+            exclude_corners_group = [four_groups[idx - 1], four_groups[idx - 2], four_groups[idx - 3]]
+            short_path = utils.ShortPath.calc_path_uv_vert(isl, lg.src, lg.dst,
+                                                           exclude_corners_group,
+                                                           prioritize_corners,
+                                                           bound_priority_factor)
+            lg.calc_chain_linked_corners_mask_from_short_path(short_path)
+            if not all(lg.chain_linked_corners_mask):  # is unpinned exist
+                # The lengths by short path are more correct, we take them to avoid large stretches
+                length_3d, length_uv = utils.ShortPath.calc_length_3d_and_uv_from_path(short_path, lg.umesh)
+                lg.length_3d = length_3d
+                lg.length_uv = length_uv
+            else:
+                lg.calc_length_uv()
+
+        cls.rect_lgs_to_distribute(four_groups)
+
+        return four_groups
 
     @classmethod
-    def two_pt_ring_lg_to_rect(cls, boundary_loop_groups: Segments, isl: AdvIsland):  # fmt: skip
+    def two_pt_ring_lg_to_rect_ex(cls, boundary_loop_groups: LoopGroups, isl: AdvIsland):
         assert len(boundary_loop_groups) == 2
 
         umesh = isl.umesh
+        uv = umesh.uv
 
         for border_lg in boundary_loop_groups:
             cls.selected_to_first(border_lg)
@@ -129,227 +325,175 @@ class RectifyRing(RectifyBase):
         lg_a = boundary_loop_groups[0]
         lg_b = boundary_loop_groups[1]
 
-        include_corners = set(isl.corners_iter())
-        segment = utils.ShortPath.calc_path_uv_vert(lg_a.start_orig_crn, lg_b.start_orig_crn, umesh,
-                                                    include_corners, set(), prioritize_corners, 0.5
-                                                    )
+        segment = cls.find_one_edge_short_path(umesh, lg_a.src, lg_b.src)
+        if segment is None:
+            short_path = utils.ShortPath.calc_path_uv_vert(isl, lg_a.src, lg_b.src,
+                                                           (),
+                                                           prioritize_corners,
+                                                           0.5)
 
-        segment = cls.get_clipped_start_end_segment_by_pair(segment, lg_a, lg_b)
-        segment.mark_seam(rewrite_pair_status=False)
+            segment = cls.short_path_to_segment(umesh, short_path)
 
-        corners = []
-        for adv_crn in segment:
-            crn = adv_crn.orig_crn
-            corners.append(crn)
-            corners.append(crn.link_loop_radial_prev)
+        cls.clip_start_end_segment_by_pair(segment)
 
-        segments = Segments.from_corners(corners, umesh)
-        assert len(segments) == 2
-        assert boundary_loop_groups[0]
-        assert boundary_loop_groups[1]
+        loop_groups = cls.split_to_ring_segments(segment, lg_a, lg_b)
 
-        first_bound = boundary_loop_groups[0]
-        second_bound = boundary_loop_groups[1]
-        first_inner = segments[0]
-        second_inner = segments[1]
+        for linked in loop_groups[0].chain_linked_corners:
+            for crn in linked:
+                crn[uv].uv += Vector((1e-5, 1e-5))
 
-        new_first_border = Segments.from_corners(first_bound.to_corners(), umesh)
+        # Clear prioritize borders
+        for border_lg in boundary_loop_groups:
+            border_lg.chain_linked_corners = []
 
-        assert len(new_first_border) == 1, f"Expected `1` segment, {len(new_first_border)!r} given."
-        first_bound = new_first_border[0]
+        return loop_groups
 
-        new_second_border = Segments.from_corners(second_bound.to_corners(), umesh)
-        assert len(new_second_border) == 1, f"Expected `1` segment, {len(new_second_border)!r} given."
-        second_bound = new_second_border[0]
-
-        segments = Segments([first_bound, second_inner, second_bound, first_inner, ], umesh)
-        return segments
+    @staticmethod
+    def clip_start_end_segment_by_pair(seg):
+        """[0,0,1,1,1,0,1] -> [1,1,1]"""
+        it = itertools.dropwhile(lambda adv_crn: not adv_crn.is_pair, seg)
+        seg.seg = list(itertools.takewhile(lambda adv_crn: adv_crn.is_pair, it))
+        assert seg.seg
 
     @classmethod
-    def one_pt_ring_lg_to_rect(cls, boundary_segments: Segments, isl: AdvIsland):  # fmt: skip
-        umesh = isl.umesh
-        boundary_segments.segments.sort(key=lambda s: s.value, reverse=True)
-        selected_seg = boundary_segments[0]
-        cls.selected_to_first(selected_seg)
+    def split_to_ring_segments(cls, seg_a: Segment, border_a, border_b):
+        """LoopGroups = inner_a -> border_b -> inner_b -> border_a"""
+        uv = seg_a.umesh.uv
 
-        first_co = selected_seg.start_co
+        seg_b = seg_a.deepcopy()
+        seg_b.reverse()
 
-        unselected_borders = boundary_segments.segments[1:]
-        unselected_borders.sort(key=lambda s: s.length_uv, reverse=True)
+        for adv_crn in seg_a:
+            adv_crn.is_pair = False
+            adv_crn.edge.seam = True
 
-        max_length = -float("inf")
-        min_dist_idx = 0
-        min_dist = float("inf")
-        min_dist_seg = None
-        for seg in unselected_borders:
-            # The longest segment might not be cyclic (probably),
-            # so we'll check everything possible, instead first sorted.
-            if seg.is_circular:
-                if seg.length_uv > max_length:
-                    max_length = seg.length_uv
-                    for i, adv_crn in enumerate(seg):
-                        new_dist = (adv_crn.curr_pt - first_co).length
-                        if new_dist < min_dist:
-                            min_dist = new_dist
-                            min_dist_idx = i
-                            min_dist_seg = seg
+        for adv_crn in seg_b:
+            adv_crn.is_pair = False
 
-        if not min_dist_seg:
-            return None
-        utils.list_rotate(min_dist_seg.seg, -min_dist_idx)
+        # Inner A
+        chain_a = []
+        for adv_crn in seg_a:
+            crn = adv_crn.crn
+            chain = utils.linked_crn_to_vert_pair_by_idx_with_seam(crn, uv)
+            chain.append(crn)
+            chain_a.append(chain)
 
-        prioritize_corners = set()
+        crn = seg_a[-1].crn.link_loop_next
+        chain = utils.linked_crn_to_vert_pair_by_idx_with_seam(crn, uv)
+        chain.insert(0, crn)
+        chain_a.append(chain)
 
-        # TODO: Implement ShortPath with weak cost for non-longer, other borders.
-        # Prioritize the longest other border.
-        min_dist_seg.calc_chain_linked_corners()
-        for linked in min_dist_seg.chain_linked_corners:
-            prioritize_corners.update(linked)
+        inner_a = LoopGroup(seg_a.umesh)
+        inner_a.corners = [adv_crn.crn for adv_crn in seg_a]
+        inner_a.chain_linked_corners = chain_a
+        inner_a.chain_linked_corners_mask = [True] * len(chain_a)
+        inner_a.is_unpinned_exist_ = False
 
-        short_path = utils.ShortPath.calc_path_uv_vert(
-            selected_seg.start_orig_crn,
-            min_dist_seg.start_orig_crn,
-            umesh,
-            set(isl.corners_iter()),
-            set(),
-            prioritize_corners,
-            0.1,
-        )
+        # TODO: Improve that
+        # TODO: In a normal situation, if the short path runs orthogonal to the border,
+        #  everything is fine - the last corner is always valid.
+        #  But when the short path runs diagonally, you need to iterate through all linked corners.
+        for border_crn_b in reversed(chain_a[-1]):
+            try:
+                cls.target_to_first(border_b, border_crn_b)
+                break
+            except ValueError:
+                continue
+        else:
+            raise ValueError('Failed to move border edges to the beginning')
 
-        segment = cls.get_clipped_start_end_segment_pair_and_unpair(short_path, selected_seg, min_dist_seg)
-        segment.mark_seam(rewrite_pair_status=False)
+        # Inner B
+        chain_b = []
+        for adv_crn in seg_b:
+            crn = adv_crn.crn
+            chain = utils.linked_crn_to_vert_pair_by_idx_with_seam(crn, uv)
+            chain.append(crn)
+            chain_b.append(chain)
 
-        left, right = segment.split_left_and_right()
-        right.reverse()
-        # Segments([left, right], umesh).draw()
-        if prefs().debug == "ENABLED":
-            corners = []
-            for adv_crn in segment:
-                crn = adv_crn.orig_crn
-                corners.append(crn)
-                corners.append(crn.link_loop_radial_prev)
+        inner_b = LoopGroup(seg_b.umesh)
+        inner_b.corners = [adv_crn.crn for adv_crn in seg_b]
+        inner_b.chain_linked_corners = chain_b
+        inner_b.chain_linked_corners_mask = [True] * len(chain_b)
+        inner_b.is_unpinned_exist_ = False
 
-            segments = Segments.from_corners(corners, umesh)
-            assert len(segments) >= 2
-            assert selected_seg
-            assert min_dist_seg
+        crn = seg_b[-1].crn.link_loop_next
+        chain = utils.linked_crn_to_vert_pair_by_idx_with_seam(crn, uv)
+        chain.insert(0, crn)
+        chain_b.append(chain)
 
-        first_bound = selected_seg
-        second_bound = min_dist_seg
-        first_inner = left
-        second_inner = right
+        for border_crn_a in reversed(chain_b[-1]):
+            try:
+                cls.target_to_first(border_a, border_crn_a)
+                break
+            except ValueError:
+                continue
+        else:
+            raise ValueError('Failed to move border edges to the beginning')
 
-        # first_inner = right
-        # second_inner = left
-
-        new_first_border = Segments.from_corners(first_bound.to_corners(), umesh)
-
-        assert len(new_first_border) == 1, f"Expected `1` segment, {len(new_first_border)!r} given."
-        first_bound = new_first_border[0]
-
-        new_second_border = Segments.from_corners(second_bound.to_corners(), umesh)
-        assert len(new_second_border) == 1, f"Expected `1` segment, {len(new_second_border)!r} given."
-        second_bound = new_second_border[0]
-
-        segments = Segments([first_bound, second_inner, second_bound, first_inner, ], umesh)
-        # segments.draw()
-        return segments
+        return LoopGroups([inner_a, border_b, inner_b, border_a], seg_a.umesh)
 
     @staticmethod
-    def get_clipped_start_end_segment_by_pair(short_path, border_seg_a, border_seg_b):
-        """An inner segment can cross border segments, potentially splitting an island into two parts.
-        When recalculating the border segments, this can cause them to be split into two parts as well."""
-        if not border_seg_a.chain_linked_corners:
-            border_seg_a.calc_chain_linked_corners()
-        if not border_seg_b.chain_linked_corners:
-            border_seg_b.calc_chain_linked_corners()
+    def find_one_edge_short_path(umesh, first_crn, next_crn):
+        """Quickly finds dst crn in the range of one step"""
+        from ..utypes import AdvCorner
+        uv = umesh.uv
+        segment = []
 
-        all_border_corners_a = set()
-        all_border_corners_b = set()
-        for linked in border_seg_a.chain_linked_corners:
-            all_border_corners_a.update(linked)
-        for linked in border_seg_b.chain_linked_corners:
-            all_border_corners_b.update(linked)
-
-        groups = utils.groups_by_mask(short_path, (adv_crn.is_pair for adv_crn in short_path))
-        for s in groups:
-            s = Segment(s, short_path.umesh)
-            in_a = s.start_orig_crn in all_border_corners_a
-            if in_a:
-                assert s.start_orig_crn not in all_border_corners_b, "Both border segments are merged into a single segment."
-
-            s.calc_chain_linked_corners()
-            start = 0
-            for i, linked in enumerate(s.chain_linked_corners[1:]):
-                l_crn = linked[0]
-                if in_a:
-                    if l_crn in all_border_corners_a:
-                        start = i
-                        in_a = not in_a
-                    if l_crn in all_border_corners_b:
-                        return Segment(s[start:i+1], s.umesh)
-                else:
-                    if l_crn in all_border_corners_b:
-                        start = i
-                        in_a = not in_a
-                    if l_crn in all_border_corners_a:
-                        return Segment(s[start:i+1], s.umesh)
-
-        raise IndexError("Not found subsegment.")
+        next_vert = next_crn.vert
+        for l_crn in utils.linked_crn_uv_by_idx_unordered_included(first_crn, uv):
+            if next_vert == l_crn.link_loop_next.vert:
+                if next_crn in utils.linked_crn_uv_by_idx_unordered_included(l_crn.link_loop_next, uv):
+                    segment.append(AdvCorner(l_crn, uv))
+                    return Segment(segment, umesh)
+        return None
 
     @staticmethod
-    def get_clipped_start_end_segment_pair_and_unpair(short_path: Segment, border_seg_a, border_seg_b):
-        """For single select and multy ather borders"""
-        if not border_seg_a.chain_linked_corners:
-            border_seg_a.calc_chain_linked_corners()
-        if not border_seg_b.chain_linked_corners:
-            border_seg_b.calc_chain_linked_corners()
+    def short_path_to_segment(umesh, short_path):
+        uv = umesh.uv
+        segment = []
+        for next_idx, crn in enumerate(short_path[:-1], start=1):
+            next_crn = short_path[next_idx]
+            next_vert = next_crn.vert
+            linked = utils.linked_crn_uv_by_idx_unordered_included(crn, uv)
 
-        all_border_corners_a = set()
-        all_border_corners_b = set()
-        for linked in border_seg_a.chain_linked_corners:
-            all_border_corners_a.update(linked)
-        for linked in border_seg_b.chain_linked_corners:
-            all_border_corners_b.update(linked)
+            continue_ = False
+            for l_crn in linked:
+                if next_vert == l_crn.link_loop_next.vert:
+                    if next_crn in utils.linked_crn_uv_by_idx_unordered_included(l_crn.link_loop_next, uv):
+                        segment.append(AdvCorner(l_crn, uv))
+                        continue_ = True
+                        break
+            if continue_:
+                continue
 
-        trimmed_seg = utils.strip_by(short_path.seg, key=lambda a: a.is_pair)
-        trimmed_seg = Segment(trimmed_seg, short_path.umesh)
-
-        in_a = trimmed_seg.start_orig_crn in all_border_corners_a
-        assert in_a
-        if in_a:
-            assert trimmed_seg.start_orig_crn not in all_border_corners_b, "Both border segments are merged into a single segment."
-
-        trimmed_seg.calc_chain_linked_corners()
-        start = 0
-        for i, linked in enumerate(trimmed_seg.chain_linked_corners[1:]):
-            l_crn = linked[0]
-
-            if l_crn in all_border_corners_a:
-                start = i
-            if l_crn in all_border_corners_b:
-                return Segment(trimmed_seg[start:i+1], trimmed_seg.umesh)
-
-        raise IndexError("Not found subsegment.")
+            for l_crn in linked:
+                if next_vert == l_crn.link_loop_prev.vert:
+                    if next_crn in utils.linked_crn_uv_by_idx_unordered_included(l_crn.link_loop_prev, uv):
+                        segment.append(AdvCorner(l_crn, uv, invert=True))
+                        break
+        return Segment(segment, umesh)
 
 
 # noinspection PyTypeHints
-class UNIV_OT_Rectify(bpy.types.Operator, RectifyRing):
+class UNIV_OT_Rectify(bpy.types.Operator, RectifyFour, RectifyRing):
     """
-    1) Calc segments by boundary corners.
-    2) Filtering to Ring or Four Point Rect
-    3) Get 4 segments
-    4) Set Constraints
-    5) Unwrap
+    1)
+    2) Calc Loop Groups by tagged borders
+    3) Filtering to Ring or Four Point Rect
+    4) Get 4 Loop Groups -> Distribute -> Set pins by mask (mask got from short path)
+    5) Mark Seam -> Select -> Unwrap
+    6) Final -
     """
-
-    bl_idname = "uv.univ_rectify"
-    bl_label = "Rectify"
+    bl_idname = 'uv.univ_rectify'
+    bl_label = 'Rectify'
     bl_description = "Align selected UV 4 or 2 point to rectangular distribution"
-    bl_options = {"REGISTER", "UNDO"}
+    bl_options = {'REGISTER', 'UNDO'}
 
-    border_priority: bpy.props.FloatProperty(name="Boundary Priority Factor", default=0.05, min=0, soft_max=0.3, max=0.5)  # fmt: skip
-    use_aspect: bpy.props.BoolProperty(name="Correct Aspect", default=True)
+    xy_scale: bpy.props.BoolProperty(name='Scale Independently', default=True,
+                                     description='Scale U and V independently')
+    user_boundary_priority_factor: bpy.props.FloatProperty(name='Boundary priority factor', default=0.05, min=0,
+                                                           soft_max=0.3, max=0.5)
+    use_aspect: bpy.props.BoolProperty(name='Correct Aspect', default=True)
 
     @classmethod
     def poll(cls, context):
@@ -358,193 +502,253 @@ class UNIV_OT_Rectify(bpy.types.Operator, RectifyRing):
             if tool_settings.mesh_select_mode[:] != (True, False, False):
                 return False
         else:
-            if tool_settings.uv_select_mode != "VERTEX":
+            if tool_settings.uv_select_mode != 'VERTEX':
                 return False
-        return context.mode == "EDIT_MESH"
+        return context.mode == 'EDIT_MESH'
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(self, "border_priority", slider=True)
-        layout.prop(prefs(), "use_texel")
-        layout.prop(self, "use_aspect")
+        layout.prop(self, 'user_boundary_priority_factor', slider=True)
+        layout.prop(self, 'xy_scale')
+        layout.prop(prefs(), 'use_texel')
+        layout.prop(self, 'use_aspect')
 
     def execute(self, context):
-        umeshes = utypes.UMeshes(report=self.report)
-        umeshes.update_tag = False
-        umeshes.fix_context()
-        if self.use_aspect:
-            umeshes.calc_aspect_ratio(from_mesh=False)
-        umeshes.filter_by_selected_uv_verts()
+        if context.area.ui_type != 'UV':
+            self.report({'WARNING'}, 'Active area must be UV')  # need for unwrap  # TODO: Add unwrap.poll
+            return {'CANCELLED'}
 
-        rect_islands = self.get_rect_lg_with_isl_of_mesh(umeshes)
-        for isl, four_seg in rect_islands:
-            isl.umesh.update_tag = True
-            isl.mark_seam(additional=True)
+        self.umeshes = utypes.UMeshes(report=self.report)
+        self.umeshes.fix_context()
+        # NOTE: Aspect is not saved in umesh.aspect to avoid problems with individual_scale
+        self.aspect = utils.get_aspect_ratio() if self.use_aspect else 1.0
+        self.bound_priority_factor = 1 - self.user_boundary_priority_factor
+        self.umeshes.filter_by_selected_uv_verts()
+        self.pinned_crn_from_excluded_isl: list[list[BMLoopUV]] = []
+        # Separating by mesh is important to avoid a lot of tagging
+        self.rect_lg_groups_with_isl_of_mesh: list[list[RectIsl]] = []
 
-            v_corners = []
-            h_corners = []
-            four_seg.rotate_longest_to_first()
+        self.rectify()
 
-            start = four_seg[0].is_horizontal_by_bbox(aspect_y=1.2)
-            for i, lg in enumerate(four_seg, start=int(start)):
-                if (i % 2) == 0:
-                    v_corners.extend([a.orig_crn for a in lg])
-                else:
-                    h_corners.extend([a.orig_crn for a in lg])
+        return self.umeshes.update()
 
-            isl.set_corners_tag(True)
-            utils.uv_parametrizer.unwrap_isl_by_tag_v2(
-                isl,
-                unwrap_along="UV",
-                use_abf=True,
-                topology_from_uvs=True,
-                constraints_factor=20.0,
-                constr_correction_weight=4.0,
-                constr_edge_weight=0.1,
-                constraints=(h_corners, v_corners, []),
-            )
+    def rectify(self):
+        self.prepare()
 
-            self.finished_rect(isl, four_seg)
+        if not self.rect_lg_groups_with_isl_of_mesh:
+            self.restore_pins_and_selection()
+            self.report({'WARNING'}, 'Did not find 4 selected boundary points or 2 boundary points on the ring.')
+            return
 
-            if prefs().use_texel:
-                utils.set_global_texel(isl, isl.calc_bbox())
+        for rect_lg_groups_with_isl in self.rect_lg_groups_with_isl_of_mesh:
+            for rect_isl in rect_lg_groups_with_isl:
+                rect_isl.isl.set_pins(False)
+                rect_isl.isl.select = True
+                rect_isl.isl.mark_seam()
+                if self.xy_scale:
+                    rect_isl.prepare_island_for_scale_reset()
 
-        return umeshes.update(info="Did not find 4 selected boundary points or 2 boundary points on the ring.")
+                rect_isl.lgs.set_pins_by_mask()  # Set pin
+                rect_isl.has_unpinned()
 
-    def get_rect_lg_with_isl_of_mesh(self, umeshes):
-        for umesh in umeshes:
-            for isl in utypes.Islands.calc_visible(umesh):
-                if utypes.IslandsBase.island_filter_is_any_vert_selected(isl.faces, umesh):  # fmt: skip
-                    with isl.temp_aspect():
-                        rect_isl = self.to_rect_isl(isl)
-                        if rect_isl:
-                            yield rect_isl  # TODO: Add test for avoid issues with face tags.
+        bpy.ops.uv.unwrap(method='ANGLE_BASED', fill_holes=True, correct_aspect=False, use_subsurf_data=False, margin=0)
+
+        # Reset Scale
+        if self.xy_scale:
+            for rect_lg_groups_with_isl in self.rect_lg_groups_with_isl_of_mesh:
+                for rect_isl in rect_lg_groups_with_isl:
+                    rect_isl.individual_scale()
+
+        # Reset Scale again
+        self.finished_rect()
+
+        # Reset Scale again
+        if self.xy_scale:
+            for rect_lg_groups_with_isl in self.rect_lg_groups_with_isl_of_mesh:
+                for rect_isl in rect_lg_groups_with_isl:
+                    rect_isl.individual_scale()
+                    rect_isl.isl.set_position(rect_isl.prev_pos, rect_isl.get_curr_pos())
+
+        if prefs().use_texel:
+            texel = prefs().texel_density
+            texture_size = (int(prefs().size_x) + int(prefs().size_y)) / 2
+
+            for rect_lg_groups_with_isl in self.rect_lg_groups_with_isl_of_mesh:
+                for rect_isl in rect_lg_groups_with_isl:
+                    isl = rect_isl.isl
+                    if isl.area_3d == -1 or isl.umesh.check_uniform_scale() is not None:
+                        isl.calc_area_3d(isl.umesh.check_uniform_scale())
+                    if isl.area_uv == -1:
+                        isl.calc_area_uv()
+                    isl.set_texel(texel, texture_size)
+
+        bpy.ops.uv.select_all(action='DESELECT')
+
+        self.restore_pins_and_selection()
+
+    def restore_pins_and_selection(self):
+        if utils.USE_GENERIC_UV_SYNC:
+            umeshes = {r_isl.isl.umesh for rect_groups in self.rect_lg_groups_with_isl_of_mesh for r_isl in rect_groups}
+            for u in umeshes:
+                utils.fast_deselect(u)
+
+        for rect_lg_groups_with_isl in self.rect_lg_groups_with_isl_of_mesh:
+            for rect_isl in rect_lg_groups_with_isl:
+                if rect_isl.is_flipped_to_preserve_flip:
+                    rect_isl.isl.scale_simple(Vector((-1.0, 1.0)))
+                self.reset_aspect_ratio(rect_isl.isl)
+                rect_isl.lgs.set_pins(False)
+
+                umesh = rect_isl.isl.umesh
+                select_vert = utils.vert_select_func(umesh)
+                for g in rect_isl.lgs:
+                    for crn in g.chain_linked_corners[0]:
+                        select_vert(crn)
+
+        for pinned_crn in self.pinned_crn_from_excluded_isl:
+            for crn_uv in pinned_crn:
+                crn_uv.pin_uv = False
+
+    def prepare(self):
+        for umesh in self.umeshes:
+            islands = utypes.Islands.calc_visible(umesh)
+            if islands:
+                rect_islands: list[RectIsl] = []
+                umesh.set_corners_tag(False)
+
+                islands.indexing()
+                for isl in islands:
+                    if not utypes.IslandsBase.island_filter_is_any_vert_selected(isl.faces, umesh):
+                        # Pin and skip
+                        if self.umeshes.sync:
+                            pinned_corners = isl.set_pins(True, with_pinned=True)
+                            self.pinned_crn_from_excluded_isl.append(pinned_corners)
+                        continue
+
+                    isl.set_boundary_tag(match_idx=True)
+                    rect_isl = self.to_rect_isl(isl)
+                    if rect_isl:
+                        rect_islands.append(rect_isl)
+                        isl.set_corners_tag(False)
+                        continue
+
+                    isl.set_corners_tag(False)
+
+                    # Pin or unselect - not matched, to avoid unwrap
+                    if isl.umesh.sync:
+                        pinned_corners = isl.set_pins(True, with_pinned=True)
+                        self.pinned_crn_from_excluded_isl.append(pinned_corners)
+                    else:
+                        isl.select = False
+
+                if rect_islands:
+                    self.rect_lg_groups_with_isl_of_mesh.append(rect_islands)
 
     def to_rect_isl(self, isl: AdvIsland):
-
-        is_boundary = utils.is_boundary_func(isl.umesh)
-
-        # TODO: Add faces selected.
-        boundary_corners = [crn for crn in isl.corners_iter() if is_boundary(crn)]
-        boundary_segments = utypes.Segments.from_corners(boundary_corners, isl.umesh)
-
-        if not boundary_segments:
+        # NOTE: value == total selected corners
+        boundary_loop_groups = LoopGroups.calc_by_boundary_crn_tags(isl)
+        if not boundary_loop_groups:
             return None
 
-        # if isl.is_full_face_selected():
-        #     # Cace with more than 4 breaks on border loops.
-        #     # Cace with mno breaks (get by bbox).
-        #
-        #     boundary_segments.rotate_longest_to_first()
-        #     long_seg = boundary_segments[0]
-        #
-        #
-        #
-        #     return None
-
-        # NOTE: value == total selected corners
-        for border_seg in boundary_segments:
-            border_seg.value = self.total_selected_crn(border_seg)
-
-        # Check 4 point Rect (4 selected points in one border loop)
-        if any(b_seg.value == 4 for b_seg in boundary_segments):
-            for border_seg in boundary_segments:
-                if border_seg.value == 4:
-                    four_groups = self.split_to_four_groups(border_seg)
-                    assert len(four_groups) == 4
-                    four_groups.rotate_longest_to_first()
-                    return isl, four_groups
+        for b_lg in boundary_loop_groups:
+            b_lg.value = self.total_selected_crn(b_lg)
 
         # Check Ring (two border loops and 2 selected points)
-        elif (
-            len(boundary_segments) == 2
-            and boundary_segments[0].value == 1
-            and boundary_segments[1].value == 1
-        ):
+        if (len(boundary_loop_groups) == 2 and
+                boundary_loop_groups[0].value == 1 and
+                boundary_loop_groups[1].value == 1):
             try:
-                return isl, self.two_pt_ring_lg_to_rect(boundary_segments, isl)
+                self.apply_aspect_ratio(isl)
+                flipped = isl.should_flip_after_unwrap()
+                if flipped:
+                    isl.scale_simple(Vector((-1.0, 1.0)))
+                groups = self.two_pt_ring_lg_to_rect(boundary_loop_groups, isl, self.bound_priority_factor)
+
+                rect_isl = RectIsl(isl, groups)
+                rect_isl.is_flipped_to_preserve_flip = flipped
+                return rect_isl
 
             except Exception as e:
-                import traceback
                 from .. import info
-                self.report({"ERROR"}, f"{info.bugreport_info}: \n {e}")
+                self.report({'ERROR'}, f'{info.bugreport_info}: \n {e}')
+                import traceback
                 traceback.print_exc()
                 return None
 
-        # Single pointer case.
-        elif (not (isl.umesh.sync and not utils.USE_GENERIC_UV_SYNC)  # Skip for legacy sync (or make ViewBox filter).
-              and isl.umesh.elem_mode in ("VERT", "EDGE")
-              and (len(boundary_segments) >= 2 and sum(seg.value for seg in boundary_segments) == 1)):
-            four_groups = self.one_pt_ring_lg_to_rect(boundary_segments, isl)
-            if four_groups:
-                return isl, four_groups
+        # Check 4 point Rect (4 selected points in one border loop)
+        elif any(b_lg.value == 4 for b_lg in boundary_loop_groups):
+            for b_lg in boundary_loop_groups:
+                if b_lg.value == 4:
+                    self.apply_aspect_ratio(isl)
+                    flipped = isl.should_flip_after_unwrap()
+                    if flipped:
+                        isl.scale_simple(Vector((-1.0, 1.0)))
+                    groups = self.four_pt_border_lg_to_rect(b_lg, isl, self.bound_priority_factor)
 
-        # elif utypes.IslandsBase.island_filter_is_partial_face_selected(isl.faces, isl.umesh)
-            #
-        # elif utypes.IslandsBase.island_filter_is_partial_vert_selected(isl.faces, isl.umesh):
-            # 4 pt
-            # 1 pt
-
-        # if isl.select():
-        #     pass
+                    rect_isl = RectIsl(isl, groups)
+                    rect_isl.is_flipped_to_preserve_flip = flipped
+                    return rect_isl
         return None
 
-    def finished_rect(self, isl: AdvIsland, four_seg: Segments):
-        for seg in four_seg:
-            if not seg.chain_linked_corners:
-                seg.calc_chain_linked_corners()
-
-        short_paths: list[Segment] = []
-        include_corners = set(isl.corners_iter())
-
-        for idx, seg in enumerate(four_seg):
-            if seg.has_intervals:
-                short_paths.append(seg)
-                continue
-            prioritize_corners = set()
-            for crn_chain in seg.chain_linked_corners:
-                prioritize_corners.update(crn_chain)
-
-            #  Add to exclude other 3 corners, to avoid collisions
-            exclude_corners = set()
-            for exclude_seg in [four_seg[idx - 1], four_seg[idx - 2], four_seg[idx - 3]]:
-                for linked in exclude_seg.chain_linked_corners:
-                    exclude_corners.update(linked)
-
-            short_path = utils.ShortPath.calc_path_uv_vert(
-                seg.start_orig_crn,
-                seg.end_orig_crn,
-                isl.umesh,
-                include_corners,
-                exclude_corners,
-                prioritize_corners,
-                1.0 - self.border_priority,
-            )
-            assert len(short_path), f"Not found short path {idx!r}."
-            short_paths.append(short_path)
-
-        segments = Segments(short_paths, isl.umesh)
-        segments.rotate_longest_to_first()
-
-        v_corners = []
-        h_corners = []
-        start = segments[0].is_horizontal_by_bbox(aspect_y=1.2) # TODO: Orient by inner short path.
-        for i, lg in enumerate(segments, start=int(start)):
-            if (i % 2) == 0:
-                v_corners.extend([a.orig_crn for a in lg])
+    @staticmethod
+    def has_unpinned(rect_sequence: list[list[RectIsl]] | list[RectIsl]):
+        for seq in rect_sequence:
+            if isinstance(seq, list):
+                for rect_isl in seq:
+                    if rect_isl.has_unpinned():
+                        return True
             else:
-                h_corners.extend([a.orig_crn for a in lg])
+                if seq.has_unpinned():  # noqa
+                    return True
+        return False
 
-        assert v_corners
-        assert h_corners
-        isl.set_corners_tag(True)
-        utils.uv_parametrizer.unwrap_isl_by_tag_v2(
-            isl,
-            unwrap_along="UV",
-            use_abf=True,
-            topology_from_uvs=True,
-            constraints_factor=100.0,
-            constr_correction_weight=4.0,
-            constr_edge_weight=0.1,
-            constraints=(h_corners, v_corners, []),
-        )
+    def finished_rect(self):
+        if not self.has_unpinned(self.rect_lg_groups_with_isl_of_mesh):
+            return
+
+        loop_groups_from_path = []
+        for rect_lg_groups_with_isl in self.rect_lg_groups_with_isl_of_mesh:
+            if not self.has_unpinned(rect_lg_groups_with_isl):
+                continue
+
+            umesh = rect_lg_groups_with_isl[0].isl.umesh
+            umesh.set_corners_tag(False)
+            uv = umesh.uv
+            for rect_isl in rect_lg_groups_with_isl:
+                if not rect_isl.has_unpinned():
+                    continue
+                # Restore indexes after unwrap (check resetting)
+                # NOTE: The previous index is not saved, a potential conflict is possible.
+                isl_idx = rect_isl.isl[0].index
+                for f in rect_isl.isl:
+                    f.index = isl_idx
+
+                for idx, lg in enumerate(rect_isl.lgs):
+                    if lg.has_unpinned():
+                        prioritize_corners = set()
+                        for crn_chain in lg.chain_linked_corners:
+                            prioritize_corners.update(crn_chain)
+
+                        # Add to exclude other 3 corners, to avoid collisions
+                        exclude_corners_group = [rect_isl.lgs[idx-1], rect_isl.lgs[idx-2], rect_isl.lgs[idx-3]]
+                        short_path = utils.ShortPath.calc_path_uv_vert(rect_isl.isl, lg.src, lg.dst,
+                                                                       exclude_corners_group,
+                                                                       prioritize_corners,
+                                                                       self.bound_priority_factor)
+
+                        lg_from_path = utils.ShortPath.path_to_loop_group_for_rect(short_path, umesh)
+                        lg_from_path.set_pins()
+                        lg_from_path.distribute(lg.src[uv].uv, lg.dst[uv].uv)
+                        loop_groups_from_path.append(lg_from_path)
+
+                    if self.xy_scale:
+                        # Reset scale for inner faces
+                        rect_isl.tag_inner_rect_face()
+                        rect_isl.individual_scale_final()
+
+                rect_isl.isl.set_corners_tag(False)
+
+        bpy.ops.uv.unwrap(method='ANGLE_BASED', fill_holes=True, correct_aspect=False, use_subsurf_data=False, margin=0)
+
+        for lg in loop_groups_from_path:
+            lg.set_pins(False)

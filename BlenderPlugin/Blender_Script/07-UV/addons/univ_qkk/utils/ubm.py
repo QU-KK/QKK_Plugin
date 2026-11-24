@@ -10,11 +10,6 @@ from mathutils import Vector
 from mathutils.geometry import area_tri, intersect_point_tri_2d
 
 
-def poly_to_tri_count(poly_count: int, corner_count: int) -> int:
-    assert (not poly_count or corner_count > poly_count * 2)
-    return corner_count - (poly_count * 2)
-
-
 def face_centroid_uv(f: BMFace, uv: BMLayerItem):
     value = Vector((0, 0))
     loops = f.loops
@@ -43,23 +38,6 @@ def calc_face_area_3d(f, scale) -> float:
         v_prev = v_curr
     return n.length
 
-def calc_face_area_from_coords_3d_squared(coords) -> float:
-    """newell cross"""
-    n = Vector()
-    co_prev = coords[-1]
-    for co_curr in coords:
-        # inplace optimization ~20%: n += (co_prev.yzx - co_curr.yzx) * (co_prev.zxy + co_curr.zxy)
-        co_prev_yzx = co_prev.yzx
-        co_prev_zxy = co_prev.zxy
-
-        co_prev_yzx -= co_curr.yzx
-        co_prev_zxy += co_curr.zxy
-
-        co_prev_yzx *= co_prev_zxy
-        n += co_prev_yzx
-
-        co_prev = co_curr
-    return n.length
 
 def calc_face_area_uv(f, uv) -> float:
     corners = f.loops
@@ -83,17 +61,6 @@ def calc_face_area_uv(f, uv) -> float:
             first_crn_co = next_crn_co
         return abs(area) * 0.5
 
-def calc_vert_centroid_from_faces(faces: list[BMFace]):
-    visited_verts = set()
-    total = 0
-    sum_pos = Vector()
-    for f in faces:
-        for v in f.verts:
-            if v not in visited_verts:
-                sum_pos += v.co
-                total += 1
-                visited_verts.add(v)
-    return sum_pos / total
 
 def calc_signed_face_area_uv(f, uv) -> float:
     area = 0.0
@@ -104,7 +71,6 @@ def calc_signed_face_area_uv(f, uv) -> float:
         area += first_crn_co.cross(next_crn_co)
         first_crn_co = next_crn_co
     return area * 0.5
-
 
 def calc_signed_face_area_uv_exact_unnormalized(f, uv) -> float:
     corners = f.loops
@@ -118,9 +84,14 @@ def calc_signed_face_area_uv_exact_unnormalized(f, uv) -> float:
         c = l2[uv].uv
         d = l3[uv].uv
 
-        return a.cross(b) + b.cross(c) + c.cross(d) + d.cross(a)
+        return (
+                a.cross(b) +
+                b.cross(c) +
+                c.cross(d) +
+                d.cross(a)
+        )
 
-    elif n == 3:
+    elif n== 3:
         a = corners[0][uv].uv
         b = corners[1][uv].uv
         c = corners[2][uv].uv
@@ -139,7 +110,7 @@ def calc_signed_face_area_uv_exact_unnormalized(f, uv) -> float:
         res = bmesh.ops.triangulate(bm, faces=bm.faces)  # beauty by default
 
         total_area = 0.0
-        for f in res["faces"]:
+        for f in res['faces']:
             verts = f.verts
 
             a = verts[0].co.xy
@@ -155,15 +126,16 @@ def calc_signed_face_area_uv_exact_unnormalized(f, uv) -> float:
         return total_area
 
 
+
 def calc_total_area_uv(faces, uv):
     return sum(calc_face_area_uv(f, uv) for f in faces)
 
 
-def calc_total_area_3d(faces, scale=None):
+def calc_total_area_3d(faces, scale):
     if scale:
-        avg_scale = sum(abs(s_) for s_ in scale) / 3
+        avg_scale = (sum(abs(s_) for s_ in scale) / 3)
         if all(isclose(abs(s_), avg_scale, abs_tol=0.01) for s_ in scale):
-            return sum(f.calc_area() for f in faces) * avg_scale**2
+            return sum(f.calc_area() for f in faces) * avg_scale ** 2
         # newell_cross
         area = 0.0
         for f in faces:
@@ -204,7 +176,6 @@ def calc_max_length_uv_crn_for_save_transform(corners, uv) -> BMLoop:
         prev_co = curr_co
     return max_crn.link_loop_prev
 
-
 def calc_max_length_uv_crn_with_dist(corners, uv):
     max_length = -1.0
     v1 = Vector()
@@ -222,8 +193,39 @@ def calc_max_length_uv_crn_with_dist(corners, uv):
     return max_length, v1.copy(), v2.copy()
 
 
+def weld_crn_edge_by_idx(crn: BMLoop, crn_pair, idx, uv: BMLayerItem):
+    """For Weld OT"""
+    coords_sum_a = Vector((0.0, 0.0))
+
+    corners = []
+    corners_append = corners.append
+
+    first_co = crn[uv].uv
+    for crn_a in crn.vert.link_loops:
+        if crn_a.face.index == idx:
+            crn_a_uv = crn_a[uv]
+            crn_a_co = crn_a_uv.uv
+            if crn_a_co == first_co:
+                coords_sum_a += crn_a_co
+                corners_append(crn_a_uv)
+
+    second_co = crn_pair[uv].uv
+    for crn_b in crn_pair.vert.link_loops:
+        if crn_b.face.index == idx:
+            crn_b_uv = crn_b[uv]
+            crn_b_co = crn_b_uv.uv
+            if crn_b_co == second_co:
+                coords_sum_a += crn_b_co
+                corners_append(crn_b_uv)
+
+    avg_co_a = coords_sum_a / len(corners)
+
+    for crn_ in corners:
+        crn_.uv = avg_co_a
+
+
 def is_flipped_uv(f, uv) -> bool:
-    """NOTE: The algorithm is resistant to very small faces."""
+    """ NOTE: The algorithm is resistant to very small faces."""
     area = 0.0
     corners = f.loops
     prev = corners[-1][uv].uv
@@ -264,7 +266,7 @@ def polyfill_beautify(coords) -> list[list[int]]:
     bm.normal_update()  # TODO: Test uv_parametrization with zero normal (if bad set normal to 0, 0, 1)
 
     res = bmesh.ops.triangulate(bm, faces=bm.faces)  # beauty by default
-    tris = [[v.index for v in f.verts] for f in res["faces"]]
+    tris = [[v.index for v in f.verts] for f in res['faces']]
 
     bm.free()
     return tris

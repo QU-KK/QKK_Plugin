@@ -4,384 +4,484 @@
 import bpy
 from collections import defaultdict
 
-from importlib.util import find_spec
-
-univ_pro_exist = find_spec(f"{__package__}.univ_pro") is not None
-del find_spec
-
-backup_keys: "dict[bpy.types.KeyMap, list[bpy.types.KeyMapItem]]" = {}
-backup_keys_restored: "dict[bpy.types.KeyMap, list[bpy.types.KeyMapItem]]" = {}
-keys_areas = ["UV Editor", "Window", "Object Mode", "Mesh"]  # TODO: Rename to spaces
-keys_areas_workspace = ["3D View Tool: Object, UniV", "3D View Tool: Edit Mesh, UniV"]
-other_conflict_areas = ["Frames"]  # NOTE: not actual after delete keymaps for align?
-
-KMI_INACTIVE = 1 << 0
-SKIP_KEYMAPS_INACTIVATING = False
+keys = []
+keys_ws = []
+keys_areas = ['UV Editor', 'Window', 'Object Mode', 'Mesh']  # TODO: Rename to spaces
+keys_areas_workspace = ['3D View Tool: Object, UniV', '3D View Tool: Edit Mesh, UniV']
+other_conflict_areas = ['Frames']  # NOTE: not actual after delete keymaps for align?
 
 
-class UKeymap:
-    class UKeymapPropertyController:
-        def __init__(self, keymap):
-            object.__setattr__(self, "_ZGenerator", keymap)
+def add_mesh_keymaps(km, univ_pro):
+    # Grow
+    kmi = km.keymap_items.new('mesh.univ_select_grow', 'WHEELUPMOUSE', 'PRESS', ctrl=True)
+    kmi.properties.grow = True
+    keys.append((km, kmi))
 
-        def __setattr__(self, name, value):
-            if name.startswith("_ZGenerator"):
-                object.__setattr__(self, name, value)
-                return
-            kmi = self._ZGenerator.items[self._ZGenerator.km][-1]  # noqa
-            setattr(kmi.properties, name, value)
+    kmi = km.keymap_items.new('mesh.univ_select_grow', 'WHEELDOWNMOUSE', 'PRESS', ctrl=True)
+    kmi.properties.grow = False
+    keys.append((km, kmi))
 
-    def __init__(self):
-        self.km = None
-        self.items = {}
-        self.prop = self.UKeymapPropertyController(self)
+    # Edge grow
+    kmi = km.keymap_items.new('mesh.univ_select_edge_grow', 'WHEELUPMOUSE', 'PRESS', ctrl=True, alt=True)
+    kmi.properties.grow = True
+    keys.append((km, kmi))
 
-    def new(self, idname: str, type: str, value: str = "PRESS", **kw):  # noqa
-        expected = {
-            "any",
-            "shift",
-            "ctrl",
-            "alt",
-            "oskey" "key_modifier",
-            "direction",
-            "repeat",
-            "head",
-        }
-        for key in kw:
-            if key not in expected:
-                raise ValueError(f"Expected {expected!r} keywords, given {key!r}")
+    kmi = km.keymap_items.new('mesh.univ_select_edge_grow', 'WHEELDOWNMOUSE', 'PRESS', ctrl=True, alt=True)
+    kmi.properties.grow = False
+    keys.append((km, kmi))
 
-        backup_kmi = self.km.keymap_items.new(idname, type, value, **kw)
+    if univ_pro:
+        # Select loop
+        kmi = km.keymap_items.new('mesh.univ_select_loop', 'WHEELUPMOUSE', 'PRESS', alt=True)
+        keys.append((km, kmi))
 
-        # Disable key items by default.
-        from . import btypes
+        kmi = km.keymap_items.new('mesh.univ_select_loop_pick', 'LEFTMOUSE', 'DOUBLE_CLICK')
+        keys.append((km, kmi))
 
-        c_kmi = btypes.wmKeyMapItem(backup_kmi)
-
-        global SKIP_KEYMAPS_INACTIVATING
-        if not SKIP_KEYMAPS_INACTIVATING:
-            # Inactivate across ctypes, for avoid `KMI_USER_MODIFIED`
-            if c_kmi.id == backup_kmi.id:  # Preserve for struct changes
-                if backup_kmi.active:
-                    if (c_kmi.flag & KMI_INACTIVE) != 0:  # noqa # pycharm moment
-                        c_kmi.flag &= KMI_INACTIVE
-                else:
-                    SKIP_KEYMAPS_INACTIVATING = True
-                    print("UniV: Keymaps: Inactive by default is set for:", backup_kmi.idname)
-            else:
-                SKIP_KEYMAPS_INACTIVATING = True
-                print("UniV: Keymaps: diff data")
-
-        # Force disable, for skip inactivating case. When deactivation succeeds, KMI_USER_MODIFIED is not set.
-        backup_kmi.active = False
-
-        self.items.setdefault(self.km, []).append(backup_kmi)
-        return self
-
-    def new_keymaps(self, kc, name):
-        self.km = kc.keymaps.new(name=name)
-
-    @classmethod
-    def add_keymaps(cls):
-        kc = bpy.context.window_manager.keyconfigs.addon
-        if not kc:
-            return  # Can be None in background mode.
-
-        km = cls()
-
-        ##################################################
-        # Object Mode
-        ##################################################
-        km.new_keymaps(kc, "Object Mode")
-        km.new("object.univ_join", "J", ctrl=True)
-        if univ_pro_exist:
-            km.new("object.univ_isolate", "NUMPAD_SLASH")
-            km.new("object.univ_isolate", "SLASH")
-        # Pie Menu
-        km.new("wm.call_menu_pie", "ACCENT_GRAVE").prop.name = "VIEW3D_MT_PIE_univ_obj"
-
-        ##################################################
-        # Mesh
-        ##################################################
-        km.new_keymaps(kc, name="Mesh")
-
-        # Pie Menu
-        km.new("wm.call_menu_pie", "ACCENT_GRAVE").prop.name = "VIEW3D_MT_PIE_univ_edit"
-
-        if univ_pro_exist:
-            km.new("object.univ_isolate", "NUMPAD_SLASH")
-            km.new("object.univ_isolate", "SLASH")
-
-        ## Selection
-        # Select Linked
-        km.new("mesh.univ_select_linked_pick", "WHEELUPMOUSE", shift=True)
-        km.new("mesh.univ_deselect_linked_pick", "WHEELDOWNMOUSE", shift=True)
-        km.new("mesh.univ_select_linked", "WHEELUPMOUSE", ctrl=True, shift=True).prop.select = True
-        km.new("mesh.univ_select_linked", "WHEELDOWNMOUSE", ctrl=True, shift=True).prop.select = (
-            False
-        )
-
-        km.new("mesh.univ_local_invert_selection", "I", ctrl=True, shift=True)
-
-        cls._add_mesh_keymaps(km)
-
-        ##################################################
-        # Window
-        ##################################################
-        km.new_keymaps(kc, name="Window")
-        km.new("wm.univ_split_uv_toggle", "T", shift=True).prop.mode = "SPLIT"
-        km.new("wm.univ_toggle_panels_by_cursor", "T", alt=True)
-        km.new("wm.univ_set_cursor_3d", "MIDDLEMOUSE", ctrl=True, shift=True)
-
-        ##################################################
-        # UV Editor
-        ##################################################
-        km.new_keymaps(kc, name="UV Editor")
-
-        # Pie Menus
-        km.new("wm.call_menu_pie", "F1").prop.name = "IMAGE_MT_PIE_univ_inspect"
-        km.new("wm.call_menu_pie", "ACCENT_GRAVE").prop.name = "IMAGE_MT_PIE_univ_edit"
-        km.new("wm.call_menu_pie", "X").prop.name = "IMAGE_MT_PIE_univ_align"
-        km.new("wm.call_menu_pie", "D").prop.name = "IMAGE_MT_PIE_univ_misc"
-        if univ_pro_exist:
-            km.new("wm.call_menu_pie", "D", shift=True).prop.name = "IMAGE_MT_PIE_constraints"
-        km.new("wm.call_menu_pie", "Q").prop.name = "IMAGE_MT_PIE_univ_favorites_edit"
-        km.new("wm.call_menu_pie", "T").prop.name = "IMAGE_MT_PIE_univ_transform"
-        km.new("wm.call_menu_pie", "A", shift=True).prop.name = "IMAGE_MT_PIE_univ_texel"
-
-        # Select
-        km.new("uv.univ_select_linked", "WHEELUPMOUSE", ctrl=True, shift=True).prop.deselect = False
-        km.new("uv.univ_select_linked", "WHEELDOWNMOUSE", ctrl=True, shift=True).prop.deselect = (
-            True
-        )
-        km.new("uv.univ_select_pick", "WHEELUPMOUSE", shift=True).prop.select = True
-        km.new("uv.univ_select_pick", "WHEELDOWNMOUSE", shift=True).prop.select = False
-        km.new("uv.univ_select_grow", "WHEELUPMOUSE", ctrl=True).prop.grow = True
-        km.new("uv.univ_select_grow", "WHEELDOWNMOUSE", ctrl=True).prop.grow = False
-
-        # Edge Grow (Conflict)
-        km.new("uv.univ_select_edge_grow", "WHEELUPMOUSE", ctrl=True, alt=True).prop.grow = True
-        km.new("uv.univ_select_edge_grow", "WHEELDOWNMOUSE", ctrl=True, alt=True).prop.grow = False
-
-        if univ_pro_exist:
-            km.new("uv.univ_select_loop", "WHEELUPMOUSE", alt=True)
-            km.new("uv.univ_select_loop_pick", "LEFTMOUSE", "DOUBLE_CLICK")
-            km.new("uv.univ_select_loop_pick", "LEFTMOUSE", "DOUBLE_CLICK", shift=True)
-            km.new("uv.univ_select_similar", "G", shift=True)
-
-        # Select Mode.
-        km.new("uv.univ_select_mode", "ONE").prop.type = "VERTEX"
-        km.new("uv.univ_select_mode", "TWO").prop.type = "EDGE"
-        km.new("uv.univ_select_mode", "THREE").prop.type = "FACE"
-        km.new("uv.univ_select_mode", "FOUR").prop.type = "ISLAND"
-
-        km.new("uv.univ_local_invert_selection", "I", ctrl=True, shift=True)
-
-        # Transform.
-        km.new("uv.univ_orient", "O").prop.edge_dir = "BOTH"
-        if univ_pro_exist:
-            km.new("uv.univ_drag", "F")
-        else:
-            km.new("uv.univ_flip", "F")
-        km.new("uv.univ_home", "G", alt=True)
-
-        kmi = km.new("uv.univ_rotate", "FIVE")
-        kmi.prop.rot_dir = "CW"
-        kmi.prop.mode = "DEFAULT"
-
-        kmi = km.new("uv.univ_rotate", "FIVE", alt=True)
-        kmi.prop.rot_dir = "CCW"
-        kmi.prop.mode = "DEFAULT"
-
-        kmi = km.new("uv.univ_rotate", "FIVE", shift=True)
-        kmi.prop.rot_dir = "CW"
-        kmi.prop.mode = "INDIVIDUAL"
-
-        kmi = km.new("uv.univ_rotate", "FIVE", shift=True, alt=True)
-        kmi.prop.rot_dir = "CCW"
-        kmi.prop.mode = "INDIVIDUAL"
-
-        # Unfold
-        km.new("uv.univ_quadrify", "E")
-        km.new("uv.univ_straight", "E", shift=True)
-        km.new("uv.univ_relax", "R", alt=True)
-        km.new("uv.univ_unwrap", "U")
-        if univ_pro_exist:
-            kmi.prop.unwrap_along = "UV"
-
-        # Misc
-        km.new("uv.univ_weld", "W").prop.use_by_distance = False
-        kmi = km.new("uv.univ_stitch", "W", shift=True)
-        kmi.prop.between = False
-        km.new("uv.univ_stack", "S", alt=True)
-        km.new("uv.univ_symmetrize", "X", alt=True)
-
-        # Quick Snap
-        km.new("uv.univ_quick_snap", "V").prop.quick_start = True
-        km.new("uv.univ_quick_snap", "V", alt=True).prop.quick_start = False
-        if univ_pro_exist:
-            # Drag
-            km.new("uv.univ_drag", "LEFTMOUSE", "ANY", alt=True)
-            # Isolate
-            km.new("uv.univ_isolate", "NUMPAD_SLASH")
-            km.new("uv.univ_isolate", "SLASH")
-
-        # Mark
-        km.new("uv.univ_cut", "C").prop.addition = False
-        km.new("uv.univ_cut", "C", shift=True).prop.addition = True
-        km.new("uv.univ_pin", "P")
-
-        # Stretch Toggle
-        km.new("uv.univ_stretch_uv_toggle", "Z", "DOUBLE_CLICK").prop.swap = True
-        km.new("uv.univ_stretch_uv_toggle", "Z", "CLICK").prop.swap = False
-        km.new("uv.univ_show_modified_uv_edges_toggle", "Z", alt=True)
-
-        # Other Misc.
-        km.new("uv.univ_hide", "H").prop.unselected = False
-        km.new("uv.univ_hide", "H", shift=True).prop.unselected = True
-        km.new("uv.univ_set_cursor_2d", "MIDDLEMOUSE", ctrl=True, shift=True)
-        km.new("uv.univ_focus", "NUMPAD_PERIOD")
-
-        global backup_keys
-        backup_keys = km.items
-
-    @staticmethod
-    def _add_mesh_keymaps(km):
-        # Grow
-        km.new("mesh.univ_select_grow", "WHEELUPMOUSE", ctrl=True).prop.grow = True
-        km.new("mesh.univ_select_grow", "WHEELDOWNMOUSE", ctrl=True).prop.grow = False
-        # Edge grow
-        km.new("mesh.univ_select_edge_grow", "WHEELUPMOUSE", ctrl=True, alt=True).prop.grow = True
-        km.new("mesh.univ_select_edge_grow", "WHEELDOWNMOUSE", ctrl=True, alt=True).prop.grow = (
-            False
-        )
-
-        if univ_pro_exist:
-            # Select loop
-            km.new("mesh.univ_select_loop", "WHEELUPMOUSE", alt=True)
-            km.new("mesh.univ_select_loop_pick", "LEFTMOUSE", "DOUBLE_CLICK")
-            km.new("mesh.univ_select_loop_pick", "LEFTMOUSE", "DOUBLE_CLICK", shift=True)
-
-    @staticmethod
-    def remove_keymaps():
-        global backup_keys
-        import traceback
-
-        for km, kmi_items in backup_keys.items():
-            for kmi in reversed(kmi_items):
-                try:
-                    km.keymap_items.remove(kmi)
-                except (RuntimeError, UnicodeDecodeError):
-                    traceback.print_exc()
-        backup_keys.clear()
-        backup_keys_restored.clear()
+        kmi = km.keymap_items.new('mesh.univ_select_loop_pick', 'LEFTMOUSE', 'DOUBLE_CLICK', shift=True)
+        keys.append((km, kmi))
 
 
-class WSKeymapGenerator:
-    class WSKeymapPropertyController:
-        def __init__(self, ws_keymap):
-            object.__setattr__(self, "_ZGenerator", ws_keymap)
+def add_keymaps():
+    global keys
 
-        def __setattr__(self, key, value):
-            if key.startswith("_ZGenerator"):
-                object.__setattr__(self, key, value)
-                return
+    kc = bpy.context.window_manager.keyconfigs.addon
+    if not kc:
+        return  # Can be None in background mode.
 
-            last_kmi = self._ZGenerator.items[-1]  # noqa
-            misc_attr: dict = last_kmi[2]
-            misc_attr.setdefault("properties", []).append((key, value))
+    try:
+        from . import univ_pro
+    except ImportError:
+        univ_pro = None
 
-    def __init__(self):
-        self.items = []
-        self.prop = self.WSKeymapPropertyController(self)
+    # Object Mode
+    km = kc.keymaps.new(name='Object Mode')
+    kmi = km.keymap_items.new('object.univ_join', 'J', 'PRESS', ctrl=True)
+    keys.append((km, kmi))
 
-    def new(self, idname: str, type: str, value: str = "PRESS", **kw):  # noqa
-        expected = {
-            "any",
-            "shift",
-            "ctrl",
-            "alt",
-            "oskey" "key_modifier",
-            "direction",
-            "repeat",
-            "head",
-        }
-        for key in kw:
-            if key not in expected:
-                raise ValueError(f"Expected {expected!r} keywords, given {key!r}")
+    # Pie Menu
+    kmi = km.keymap_items.new("wm.call_menu_pie", 'ACCENT_GRAVE', 'PRESS')
+    kmi.properties.name = "VIEW3D_MT_PIE_univ_obj"
+    keys.append((km, kmi))
 
-        self.items.append([idname, {"type": type, "value": value, **kw}, dict()])
-        return self
+    # Mesh
+    km = kc.keymaps.new(name='Mesh')
 
-    def to_tuple_ws(self):
-        return tuple(tuple(kmi) for kmi in self.items)
+    # Pie Menu
+    kmi = km.keymap_items.new("wm.call_menu_pie", 'ACCENT_GRAVE', 'PRESS')
+    kmi.properties.name = "VIEW3D_MT_PIE_univ_edit"
+    keys.append((km, kmi))
 
-    @classmethod
-    def add_keymaps_ws_edit(cls):
+    kmi = km.keymap_items.new('mesh.univ_select_linked_pick', 'WHEELUPMOUSE', 'PRESS', shift=True)
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new('mesh.univ_deselect_linked_pick', 'WHEELDOWNMOUSE', 'PRESS', shift=True)
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new('mesh.univ_select_linked', 'WHEELUPMOUSE', 'PRESS', ctrl=True, shift=True)
+    kmi.properties.select = True
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new('mesh.univ_select_linked', 'WHEELDOWNMOUSE', 'PRESS', ctrl=True, shift=True)
+    kmi.properties.select = False
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new("mesh.univ_local_invert_selection", "I", "PRESS", ctrl=True, shift=True)
+    keys.append((km, kmi))
+
+    add_mesh_keymaps(km, univ_pro)
+
+    # Window
+    km = kc.keymaps.new(name='Window')
+
+    kmi = km.keymap_items.new('wm.univ_split_uv_toggle', 'T', 'PRESS', shift=True)
+    kmi.properties.mode = 'SPLIT'
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new('wm.univ_toggle_panels_by_cursor', 'T', 'PRESS', alt=True)
+    keys.append((km, kmi))
+
+    # UV Editor
+    km = kc.keymaps.new(name='UV Editor')
+
+    # Pie Menus
+    kmi = km.keymap_items.new("wm.call_menu_pie", 'F1', 'PRESS')
+    kmi.properties.name = "IMAGE_MT_PIE_univ_inspect"
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new("wm.call_menu_pie", 'ACCENT_GRAVE', 'PRESS')
+    kmi.properties.name = "IMAGE_MT_PIE_univ_edit"
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new("wm.call_menu_pie", 'X', 'PRESS')
+    kmi.properties.name = "IMAGE_MT_PIE_univ_align"
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new("wm.call_menu_pie", 'D', 'PRESS')
+    kmi.properties.name = "IMAGE_MT_PIE_univ_misc"
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new("wm.call_menu_pie", 'Q', 'PRESS')
+    kmi.properties.name = "IMAGE_MT_PIE_univ_favorites_edit"
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new("wm.call_menu_pie", 'T', 'PRESS')
+    kmi.properties.name = "IMAGE_MT_PIE_univ_transform"
+    keys.append((km, kmi))
+
+    # Select
+    kmi = km.keymap_items.new('uv.univ_select_linked', 'WHEELUPMOUSE', 'PRESS', ctrl=True, shift=True)
+    kmi.properties.deselect = False
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new('uv.univ_select_linked', 'WHEELDOWNMOUSE', 'PRESS', ctrl=True, shift=True)
+    kmi.properties.deselect = True
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new('uv.univ_select_pick', 'WHEELUPMOUSE', 'PRESS', shift=True)
+    kmi.properties.select = True
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new('uv.univ_select_pick', 'WHEELDOWNMOUSE', 'PRESS', shift=True)
+    kmi.properties.select = False
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new('uv.univ_select_grow', 'WHEELUPMOUSE', 'PRESS', ctrl=True)
+    kmi.properties.grow = True
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new('uv.univ_select_grow', 'WHEELDOWNMOUSE', 'PRESS', ctrl=True)
+    kmi.properties.grow = False
+    keys.append((km, kmi))
+
+    # Edge Grow (Conflict)
+    kmi = km.keymap_items.new('uv.univ_select_edge_grow', 'WHEELUPMOUSE', 'PRESS', ctrl=True, alt=True)
+    kmi.properties.grow = True
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new('uv.univ_select_edge_grow', 'WHEELDOWNMOUSE', 'PRESS', ctrl=True, alt=True)
+    kmi.properties.grow = False
+    keys.append((km, kmi))
+
+    if univ_pro:
+        kmi = km.keymap_items.new('uv.univ_select_loop', 'WHEELUPMOUSE', 'PRESS', alt=True)
+        keys.append((km, kmi))
+
+        kmi = km.keymap_items.new('uv.univ_select_similar', 'G', 'PRESS', shift=True)
+        keys.append((km, kmi))
+
+    # Flip
+    kmi = km.keymap_items.new('uv.univ_flip', 'F', 'PRESS')
+    keys.append((km, kmi))
+
+    # Select
+    kmi = km.keymap_items.new('uv.univ_select_mode', 'ONE', 'PRESS')
+    kmi.properties.type = 'VERTEX'
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new('uv.univ_select_mode', 'TWO', 'PRESS')
+    kmi.properties.type = 'EDGE'
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new('uv.univ_select_mode', 'THREE', 'PRESS')
+    kmi.properties.type = 'FACE'
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new('uv.univ_select_mode', 'FOUR', 'PRESS')
+    kmi.properties.type = 'ISLAND'
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new("uv.univ_local_invert_selection", "I", "PRESS", ctrl=True, shift=True)
+    keys.append((km, kmi))
+
+    # Rotate
+    # Default. CW.
+    kmi = km.keymap_items.new('uv.univ_rotate', 'FIVE', 'PRESS')
+    kmi.properties.rot_dir = 'CW'
+    kmi.properties.mode = 'DEFAULT'
+    keys.append((km, kmi))
+
+    # Default. CCW.
+    kmi = km.keymap_items.new('uv.univ_rotate', 'FIVE', 'PRESS', alt=True)
+    kmi.properties.rot_dir = 'CCW'
+    kmi.properties.mode = 'DEFAULT'
+    keys.append((km, kmi))
+
+    # Default. CW. Individual.
+    kmi = km.keymap_items.new('uv.univ_rotate', 'FIVE', 'PRESS', shift=True)
+    kmi.properties.rot_dir = 'CW'
+    kmi.properties.mode = 'INDIVIDUAL'
+    keys.append((km, kmi))
+
+    # Default. CCW. Individual.
+    kmi = km.keymap_items.new('uv.univ_rotate', 'FIVE', 'PRESS', shift=True, alt=True)
+    kmi.properties.rot_dir = 'CCW'
+    kmi.properties.mode = 'INDIVIDUAL'
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new("wm.call_menu_pie", 'A', 'PRESS', shift=True)
+    kmi.properties.name = "IMAGE_MT_PIE_univ_texel"
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new('uv.univ_home', 'G', 'PRESS', alt=True)
+    keys.append((km, kmi))
+
+    # Relax
+    kmi = km.keymap_items.new('uv.univ_relax', 'R', 'PRESS', alt=True)
+    keys.append((km, kmi))
+
+    # Unwrap
+    kmi = km.keymap_items.new('uv.univ_unwrap', 'U', 'PRESS')
+    if univ_pro:
+        kmi.properties.unwrap_along = 'UV'
+    keys.append((km, kmi))
+
+    # Pin
+    kmi = km.keymap_items.new('uv.univ_pin', 'P', 'PRESS')
+    keys.append((km, kmi))
+
+    # Quadrify
+    kmi = km.keymap_items.new('uv.univ_quadrify', 'E', 'PRESS')
+    keys.append((km, kmi))
+
+    # Straight
+    kmi = km.keymap_items.new('uv.univ_straight', 'E', 'PRESS', shift=True)
+    keys.append((km, kmi))
+
+    # Weld
+    kmi = km.keymap_items.new('uv.univ_weld', 'W', 'PRESS')
+    kmi.properties.use_by_distance = False
+    keys.append((km, kmi))
+
+    # Stitch
+    kmi = km.keymap_items.new('uv.univ_stitch', 'W', 'PRESS', shift=True)
+    keys.append((km, kmi))
+
+    # Quick Snap
+    kmi = km.keymap_items.new('uv.univ_quick_snap', 'V', 'PRESS')
+    kmi.properties.quick_start = True
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new('uv.univ_quick_snap', 'V', 'PRESS', alt=True)
+    kmi.properties.quick_start = False
+    keys.append((km, kmi))
+
+
+    if univ_pro:
+        # Drag
+        kmi = km.keymap_items.new('uv.univ_drag', 'LEFTMOUSE', 'ANY', alt=True)
+        keys.append((km, kmi))
+
+        # Isolate
+        kmi = km.keymap_items.new('uv.univ_isolate', 'I', "PRESS")
+        keys.append((km, kmi))
+
+    # Cut
+    kmi = km.keymap_items.new('uv.univ_cut', 'C', 'PRESS')
+    kmi.properties.addition = False
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new('uv.univ_cut', 'C', 'PRESS', shift=True)
+    kmi.properties.addition = True
+    keys.append((km, kmi))
+
+    # Stack
+    kmi = km.keymap_items.new('uv.univ_stack', 'S', 'PRESS', alt=True)
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new('uv.univ_symmetrize', 'X', 'PRESS', alt=True)
+    keys.append((km, kmi))
+
+    # Orient
+    kmi = km.keymap_items.new('uv.univ_orient', 'O', 'PRESS')
+    kmi.properties.edge_dir = 'BOTH'
+    keys.append((km, kmi))
+
+    # Stretch Toggle
+    kmi = km.keymap_items.new('uv.univ_stretch_uv_toggle', 'Z', 'DOUBLE_CLICK')
+    kmi.properties.swap = True
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new('uv.univ_stretch_uv_toggle', 'Z', 'CLICK')
+    kmi.properties.swap = False
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new('uv.univ_show_modified_uv_edges_toggle', 'Z', 'PRESS', alt=True)
+    keys.append((km, kmi))
+
+    # Hide
+    kmi = km.keymap_items.new('uv.univ_hide', 'H', 'PRESS')
+    kmi.properties.unselected = False
+    keys.append((km, kmi))
+
+    kmi = km.keymap_items.new('uv.univ_hide', 'H', 'PRESS', shift=True)
+    kmi.properties.unselected = True
+    keys.append((km, kmi))
+
+    # Set Cursor 2D
+    kmi = km.keymap_items.new('uv.univ_set_cursor_2d', 'MIDDLEMOUSE', 'PRESS', ctrl=True, shift=True)
+    keys.append((km, kmi))
+
+    # Focus
+    kmi = km.keymap_items.new('uv.univ_focus', 'NUMPAD_PERIOD', 'PRESS')
+    keys.append((km, kmi))
+
+    for _, kmi in keys:
+        kmi.active = False
+
+
+def add_keymaps_ws():
+    global keys_ws
+    kc = bpy.context.window_manager.keyconfigs.addon
+    if not kc:
+        return  # Can be None in background mode.
+
+    try:
+        from . import univ_pro
+    except ImportError:
+        univ_pro = None
+
+    # Workspace keymaps
+    def workspace_duplicates(km_ws):
+        kmi_ws = km_ws.keymap_items.new("mesh.univ_gravity", 'O', 'PRESS')
+        keys_ws.append((km_ws, kmi_ws))
+
+        kmi_ws = km_ws.keymap_items.new("wm.call_menu_pie", 'A', 'PRESS', shift=True)
+        kmi_ws.properties.name = "VIEW3D_MT_PIE_univ_texel"
+        keys_ws.append((km_ws, kmi_ws))
+
+        kmi_ws = km_ws.keymap_items.new("wm.call_menu_pie", 'Q', 'PRESS', shift=True)
+        kmi_ws.properties.name = "VIEW3D_MT_PIE_univ_projection"
+        keys_ws.append((km_ws, kmi_ws))
+
+    # Edit Mode
+    km = kc.keymaps.new(name='3D View Tool: Edit Mesh, UniV', space_type='VIEW_3D', tool=True)
+
+    ## Rotate
+    kmi = km.keymap_items.new('mesh.univ_rotate', 'FIVE', 'PRESS')
+    kmi.properties.rot_dir = 'CW'
+    kmi.properties.mode = 'DEFAULT'
+    keys_ws.append((km, kmi))
+
+    # Default. CW. Individual.
+    kmi = km.keymap_items.new('mesh.univ_rotate', 'FIVE', 'PRESS', shift=True)
+    kmi.properties.rot_dir = 'CW'
+    kmi.properties.mode = 'INDIVIDUAL'
+    keys_ws.append((km, kmi))
+
+    # kmi = km.keymap_items.new('uv.univ_flip', 'F', 'PRESS')
+    # keys_ws.append((km, kmi))
+
+    kmi = km.keymap_items.new("wm.call_menu_pie", 'D', 'PRESS')
+    kmi.properties.name = "VIEW3D_MT_PIE_univ_misc"
+    keys_ws.append((km, kmi))
+
+    kmi = km.keymap_items.new("wm.call_menu_pie", 'Q', 'PRESS')
+    kmi.properties.name = "VIEW3D_MT_PIE_univ_favorites_edit"
+    keys_ws.append((km, kmi))
+
+    kmi = km.keymap_items.new("view3d.select_box", 'LEFTMOUSE', 'CLICK_DRAG')
+    keys_ws.append((km, kmi))
+
+    kmi = km.keymap_items.new("view3d.select_box", 'LEFTMOUSE', 'CLICK_DRAG', shift=True)
+    kmi.properties.mode = 'ADD'
+    keys_ws.append((km, kmi))
+
+    kmi = km.keymap_items.new("view3d.select_box", 'LEFTMOUSE', 'CLICK_DRAG', ctrl=True)
+    kmi.properties.mode = 'SUB'
+    keys_ws.append((km, kmi))
+
+    kmi = km.keymap_items.new("mesh.univ_cut", 'C', 'PRESS')
+    kmi.properties.addition = False
+    keys_ws.append((km, kmi))
+
+    kmi = km.keymap_items.new("mesh.univ_cut", 'C', 'PRESS', shift=True)
+    kmi.properties.addition = True
+    keys_ws.append((km, kmi))
+
+    kmi = km.keymap_items.new("mesh.univ_weld", 'W', 'PRESS')
+    kmi.properties.use_by_distance = False
+    keys_ws.append((km, kmi))
+
+    kmi = km.keymap_items.new("mesh.univ_stitch", 'W', 'PRESS', shift=True)
+    keys_ws.append((km, kmi))
+
+    kmi = km.keymap_items.new("mesh.univ_relax", 'R', 'PRESS', alt=True)
+    keys_ws.append((km, kmi))
+
+    kmi = km.keymap_items.new("mesh.univ_unwrap", 'U', 'PRESS')
+    # if univ_pro:
+    #     kmi.properties.unwrap_along = 'UV'
+    keys_ws.append((km, kmi))
+
+    kmi = km.keymap_items.new("mesh.univ_stack", 'S', 'PRESS', alt=True)
+    keys_ws.append((km, kmi))
+
+    kmi = km.keymap_items.new("mesh.univ_seam_border", 'B', 'PRESS', alt=True)
+    keys_ws.append((km, kmi))
+
+    kmi = km.keymap_items.new("mesh.univ_angle", 'A', 'PRESS', ctrl=True)
+    keys_ws.append((km, kmi))
+
+    if univ_pro:
+        kmi = km.keymap_items.new('mesh.univ_select_similar', 'G', 'PRESS', shift=True)
+        keys.append((km, kmi))
+
+        # Select loop
+        kmi = km.keymap_items.new('mesh.univ_select_loop', 'WHEELUPMOUSE', 'PRESS', alt=True)
+        keys.append((km, kmi))
+
+        kmi = km.keymap_items.new('mesh.univ_select_loop_pick', 'LEFTMOUSE', 'DOUBLE_CLICK')
+        keys.append((km, kmi))
+
+        kmi = km.keymap_items.new('mesh.univ_select_loop_pick', 'LEFTMOUSE', 'DOUBLE_CLICK', shift=True)
+        keys.append((km, kmi))
+
+    workspace_duplicates(km)
+
+    # Object Mode
+    km = kc.keymaps.new(name='3D View Tool: Object, UniV', space_type='VIEW_3D', tool=True)
+
+    kmi = km.keymap_items.new("view3d.select_box", 'LEFTMOUSE', 'CLICK_DRAG')
+    keys_ws.append((km, kmi))
+
+    kmi = km.keymap_items.new("view3d.select_box", 'LEFTMOUSE', 'CLICK_DRAG', shift=True)
+    kmi.properties.mode = 'ADD'
+    keys_ws.append((km, kmi))
+
+    kmi = km.keymap_items.new("view3d.select_box", 'LEFTMOUSE', 'CLICK_DRAG', ctrl=True)
+    kmi.properties.mode = 'SUB'
+    keys_ws.append((km, kmi))
+
+    workspace_duplicates(km)
+
+
+def remove_keymaps():
+    global keys
+    import traceback
+    from .preferences import debug
+
+    for km, kmi in keys:
         try:
-            from . import univ_pro
-        except ImportError:
-            univ_pro = None
+            km.keymap_items.remove(kmi)
+        except RuntimeError:
+            if debug():
+                traceback.print_exc()
+    keys.clear()
 
-        # Edit Mode
-        km = WSKeymapGenerator()
 
-        ## Rotate
-        kmi = km.new("mesh.univ_rotate", "FIVE")
-        kmi.prop.rot_dir = "CW"
-        kmi.prop.mode = "DEFAULT"
+def remove_keymaps_ws():
+    global keys_ws
+    import traceback
+    from .preferences import debug
 
-        # Default. CW. Individual.
-        kmi = km.new("mesh.univ_rotate", "FIVE", shift=True)
-        kmi.prop.rot_dir = "CW"
-        kmi.prop.mode = "INDIVIDUAL"
-
-        # kmi = km.new('uv.univ_flip', 'F')
-        # keys_ws.append((km, kmi))
-
-        km.new("wm.call_menu_pie", "D").prop.name = "VIEW3D_MT_PIE_univ_misc"
-        km.new("wm.call_menu_pie", "Q").prop.name = "VIEW3D_MT_PIE_univ_favorites_edit"
-
-        km.new("mesh.univ_cut", "C").prop.addition = False
-        km.new("mesh.univ_cut", "C", shift=True).prop.addition = True
-
-        # Unfold
-        km.new("mesh.univ_relax", "R", alt=True)
-        km.new("mesh.univ_unwrap", "U")
-        # Misc
-        km.new("mesh.univ_weld", "W").prop.use_by_distance = False
-        km.new("mesh.univ_stitch", "W", shift=True)
-        km.new("mesh.univ_stack", "S", alt=True)
-        # Mark
-        km.new("mesh.univ_seam_border", "B", alt=True)
-        km.new("mesh.univ_angle", "A", ctrl=True)
-
-        if univ_pro:
-            km.new("mesh.univ_select_similar", "G", shift=True)
-            # Select loop
-            km.new("mesh.univ_select_loop", "WHEELUPMOUSE", alt=True)
-            km.new("mesh.univ_select_loop_pick", "LEFTMOUSE", "DOUBLE_CLICK")
-            km.new("mesh.univ_select_loop_pick", "LEFTMOUSE", "DOUBLE_CLICK", shift=True)
-
-        cls._workspace_duplicates(km)
-        return km.to_tuple_ws()
-
-    @classmethod
-    def add_keymaps_ws_object(cls):
-        # Object Mode
-        km = WSKeymapGenerator()
-        cls._workspace_duplicates(km)
-        return km.to_tuple_ws()
-
-    @staticmethod
-    def _workspace_duplicates(km: "WSKeymapGenerator"):
-        km.new("view3d.select_box", "LEFTMOUSE", "CLICK_DRAG")
-        km.new("view3d.select_box", "LEFTMOUSE", "CLICK_DRAG", shift=True).prop.mode = "ADD"
-        km.new("view3d.select_box", "LEFTMOUSE", "CLICK_DRAG", ctrl=True).prop.mode = "SUB"
-
-        km.new("mesh.univ_gravity", "O")
-        km.new("wm.call_menu_pie", "A", shift=True).prop.name = "VIEW3D_MT_PIE_univ_texel"
-        km.new("wm.call_menu_pie", "Q", shift=True).prop.name = "VIEW3D_MT_PIE_univ_projection"
+    for km, kmi in keys_ws:
+        try:
+            km.keymap_items.remove(kmi)
+        except RuntimeError:
+            if debug():
+                traceback.print_exc()
+    keys_ws.clear()
 
 
 _EVENT_TYPES = set()
@@ -389,162 +489,158 @@ _EVENT_TYPE_MAP = {}
 _EVENT_TYPE_MAP_EXTRA = {}
 
 
-class KeymapFilter:
+class ConflictFilter:
     def __init__(self):
-        self.univ_keys: "list[bpy.types.KeyMapItem]" = []
-        self.conflict_keys = []
+        self.univ_keys = []
+        self.default_keys = []
+        self.user_defined = []
 
     def __str__(self):
-        key_name = self.univ_keys[0].to_string()  # noqa
-        return f"{key_name: <30}: UniV - {len(self.univ_keys)}, Blender - {len(self.conflict_keys)}"
+        key_name = self.univ_keys[0].to_string()
+        return f'{key_name: <30}: UniV - {len(self.univ_keys)}, Blender - {len(self.default_keys)}, User - {len(self.user_defined)}'
 
-    @property
-    def kmi(self) -> "bpy.types.KeyMapItem":
-        return self.univ_keys[0]
-
-    @classmethod
-    def get_sorted(cls, km, keyconfigs, show_only_error, ws_ignore_kmi=""):
-        individual_keys: list[KeymapFilter] = []
-
-        for conf_filter in keyconfigs.values():
-            if len(conf_filter.univ_keys) == 1:
-                individual_keys.append(conf_filter)
-            else:
-                for keys_ in conf_filter.univ_keys:
-                    new_conf_filter = cls()
-                    new_conf_filter.univ_keys = [keys_]
-                    new_conf_filter.conflict_keys = conf_filter.conflict_keys.copy()
-                    new_conf_filter.conflict_keys.extend(
-                        (km, keys_sub)
-                        for keys_sub in conf_filter.univ_keys
-                        if keys_sub is not keys_
-                    )
-                    individual_keys.append(new_conf_filter)
-
-        if show_only_error:
-            only_conflict_keys = []
-            for filtered in individual_keys:
-                univ_kmi = filtered.univ_keys[0]
-                if univ_kmi.active:
-                    if univ_kmi.idname != ws_ignore_kmi:
-                        if any(kmi.active for kmi in filtered.conflict_keys):
-                            only_conflict_keys.append(filtered)
-            individual_keys = only_conflict_keys
-
-        individual_keys.sort(key=lambda cf: cf.univ_keys[0].name)
-        return individual_keys
-
-    @classmethod
-    def get_conflict_filtered_keymaps(cls, keys_areas_, *, use_filter=True, is_ws=False):
-        if is_ws:
-
-            def is_univ_keymap_item():
-                return True
-
-        else:
-
-            def is_univ_keymap_item():
-                return ".univ_" in kmi.idname or (
-                    kmi.idname == "wm.call_menu_pie" and kmi.name == "UniV Pie"
-                )
-
+    @staticmethod
+    def get_conflict_filtered_keymaps(keys_areas_):
         kc = bpy.context.window_manager.keyconfigs.user
-        is_unmatch_kmi = cls.is_unmatched_kmi_for_filter_fn(use_filter)
 
         for area in keys_areas_:
             km = kc.keymaps[area]
-            addon_kmi = defaultdict(KeymapFilter)
 
-            # Collect UniV keymap items.
+            conflict_filter = defaultdict(ConflictFilter)
             for kmi in km.keymap_items:
-                if not is_univ_keymap_item():
+                if ('.univ_' in kmi.idname or
+                        'wm.call_menu_pie' == kmi.idname and kmi.name == 'UniV Pie'):
+                    keymap_name = kmi.to_string()
+                    conflict_filter[keymap_name].univ_keys.append(kmi)
+
+            if not conflict_filter:
+                continue
+
+            if area == 'Window':
+                areas_ = (area, *other_conflict_areas, '3D View')
+            else:
+                areas_ = (area, *other_conflict_areas)
+            for area1 in areas_:
+                km = kc.keymaps[area1]
+                for kmi in km.keymap_items:
+                    keymap_name = kmi.to_string()
+                    if keymap_name in conflict_filter and '.univ_' not in kmi.idname and kmi.name != 'UniV Pie':
+                        if kmi.is_user_defined:
+                            conflict_filter[keymap_name].user_defined.append((km, kmi))
+                        else:
+                            conflict_filter[keymap_name].default_keys.append((km, kmi))
+            yield area, kc, km, conflict_filter
+
+    @classmethod
+    def get_conflict_filtered_keymaps_with_exclude(cls, keys_areas_):
+        from .preferences import prefs
+        keymap_name_filter = prefs().keymap_name_filter.strip().lower()
+        filter_name_fn = cls.filter_by_name
+
+        keymap_key_filter = prefs().keymap_key_filter.strip().lower()
+        if keymap_key_filter:
+            filter_key_fn = cls.filter_by_key(keymap_key_filter)
+        else:
+            def filter_key_fn(a): return a  # pycharm warning
+
+        kc = bpy.context.window_manager.keyconfigs.user
+
+        for area in keys_areas_:
+            km = kc.keymaps[area]
+
+            conflict_filter = defaultdict(ConflictFilter)
+            for kmi in km.keymap_items:
+                if ('.univ_' in kmi.idname or
+                        'wm.call_menu_pie' == kmi.idname and kmi.name == 'UniV Pie'):
+                    # Filter by name and by key
+                    if keymap_name_filter and not filter_name_fn(kmi, keymap_name_filter):
+                        continue
+                    if keymap_key_filter and not filter_key_fn(kmi):
+                        continue
+
+                    keymap_name = kmi.to_string()
+                    conflict_filter[keymap_name].univ_keys.append(kmi)
+
+            if not conflict_filter:
+                continue
+
+            # Check for potential keymap conflicts with addon in other spaces
+            if area == 'Window':
+                areas_ = (area, *other_conflict_areas, '3D View')
+            else:
+                areas_ = (area, *other_conflict_areas)
+            for area1 in areas_:
+                km = kc.keymaps[area1]
+                for kmi in km.keymap_items:
+                    keymap_name = kmi.to_string()
+                    if keymap_name in conflict_filter and '.univ_' not in kmi.idname and kmi.name != 'UniV Pie':
+                        # Filter by name and by key
+                        if keymap_name_filter and not filter_name_fn(kmi, keymap_name_filter):
+                            continue
+                        if keymap_key_filter and not filter_key_fn(kmi):
+                            continue
+
+                        if kmi.is_user_defined:
+                            conflict_filter[keymap_name].user_defined.append((km, kmi))
+                        else:
+                            conflict_filter[keymap_name].default_keys.append((km, kmi))
+            yield area, kc, km, conflict_filter
+
+    @classmethod
+    def get_conflict_filtered_keymaps_with_exclude_ws(cls, keys_areas_):
+        from .preferences import prefs
+        keymap_name_filter = prefs().keymap_name_filter.strip().lower()
+        filter_name_fn = cls.filter_by_name
+
+        keymap_key_filter = prefs().keymap_key_filter.strip().lower()
+        if keymap_key_filter:
+            filter_key_fn = cls.filter_by_key(keymap_key_filter)
+        else:
+            def filter_key_fn(a): return a  # pycharm warning
+
+        kc = bpy.context.window_manager.keyconfigs.user
+
+        for area in keys_areas_:
+            km = kc.keymaps[area]
+
+            conflict_filter = defaultdict(ConflictFilter)
+            for kmi in km.keymap_items:
+                # Filter by name and by key
+                if keymap_name_filter and not filter_name_fn(kmi, keymap_name_filter):
                     continue
-                if is_unmatch_kmi(kmi):
+                if keymap_key_filter and not filter_key_fn(kmi):
                     continue
 
                 keymap_name = kmi.to_string()
-                addon_kmi[keymap_name].univ_keys.append(kmi)
+                conflict_filter[keymap_name].univ_keys.append(kmi)
 
-            addon_kmi_and_conflict_kmi = addon_kmi
-
-            if addon_kmi_and_conflict_kmi:
-                # Check for potential keymap conflicts with the addon in other spaces.
-                if area == "Window":
-                    all_areas_with_potential_conflicts = (area, *other_conflict_areas, "3D View")
-                else:
-                    all_areas_with_potential_conflicts = (area, *other_conflict_areas)
-
-                for area_with_potential_conflicts in all_areas_with_potential_conflicts:
-                    km_with_potential_conflicts = kc.keymaps[area_with_potential_conflicts]
-
-                    for kmi in km_with_potential_conflicts.keymap_items:
-                        keymap_name = kmi.to_string()
-
-                        if keymap_name in addon_kmi_and_conflict_kmi:
-                            if is_univ_keymap_item():
-                                continue
-
-                            if is_unmatch_kmi(kmi):
-                                continue
-
-                            addon_kmi_and_conflict_kmi[keymap_name].conflict_keys.append(
-                                (km_with_potential_conflicts, kmi)
-                            )
-
-            yield area, kc, km, addon_kmi_and_conflict_kmi
-
-    @classmethod
-    def is_unmatched_kmi_for_filter_fn(cls, use_filter):
-
-        def catcher(name_filter, key_filter, filter_key_fn):
-            if name_filter and key_filter:
-
-                def filtered(kmi):
-                    if (
-                        name_filter in kmi.idname.lower() or name_filter in kmi.name.lower()
-                    ) and filter_key_fn(kmi):
-                        return False
-                    return True
-
-            elif name_filter:
-
-                def filtered(kmi):
-                    if name_filter in kmi.idname.lower() or name_filter in kmi.name.lower():
-                        return False
-                    return True
-
-            elif key_filter:
-
-                def filtered(kmi):
-                    if filter_key_fn(kmi):
-                        return False
-                    return True
-
+            if not conflict_filter:
+                continue
+            if area == 'Window':
+                areas_ = (area, *other_conflict_areas, '3D View')
             else:
+                areas_ = (area, *other_conflict_areas)
+            for area1 in areas_:
+                km = kc.keymaps[area1]
+                for kmi in km.keymap_items:
+                    keymap_name = kmi.to_string()
+                    if keymap_name in conflict_filter and '.univ_' not in kmi.idname and kmi.name != 'UniV Pie':
+                        # Filter by name and by key
+                        if keymap_name_filter and not filter_name_fn(kmi, keymap_name_filter):
+                            continue
+                        if keymap_key_filter and not filter_key_fn(kmi):
+                            continue
 
-                def filtered(_):
-                    return False
+                        if kmi.is_user_defined:
+                            conflict_filter[keymap_name].user_defined.append((km, kmi))
+                        else:
+                            conflict_filter[keymap_name].default_keys.append((km, kmi))
+            yield area, kc, km, conflict_filter
 
-            return filtered
-
-        km_name_filter = ""
-        km_key_filter = ""
-
-        if use_filter:
-            from .preferences import prefs
-
-            pref = prefs()
-            km_name_filter = pref.km_name_filter.strip().lower()
-            km_key_filter = pref.km_key_filter.strip().lower()
-
-        if km_key_filter:
-            filter_key_fn_ = cls.filter_by_key(km_key_filter)
-        else:
-
-            def filter_key_fn_(a):
-                return a  # pycharm warning
-
-        return catcher(km_name_filter, km_key_filter, filter_key_fn_)
+    @staticmethod
+    def filter_by_name(kmi, filter_text):
+        return (filter_text in kmi.idname.lower() or
+                filter_text in kmi.name.lower())
 
     # rna_keymap_ui.py
     @staticmethod
@@ -552,25 +648,22 @@ class KeymapFilter:
         if not _EVENT_TYPES:
             enum = bpy.types.Event.bl_rna.properties["type"].enum_items
             _EVENT_TYPES.update(enum.keys())
-            _EVENT_TYPE_MAP.update(
-                {item.name.replace(" ", "_").upper(): key for key, item in enum.items()}
-            )
+            _EVENT_TYPE_MAP.update({item.name.replace(" ", "_").upper(): key
+                                    for key, item in enum.items()})
 
             del enum
-            _EVENT_TYPE_MAP_EXTRA.update(
-                {
-                    "`": "ACCENT_GRAVE",
-                    "*": "NUMPAD_ASTERIX",
-                    "/": "NUMPAD_SLASH",
-                    "+": "NUMPAD_PLUS",
-                    "-": "NUMPAD_MINUS",
-                    ".": "NUMPAD_PERIOD",
-                    "'": "QUOTE",
-                    "RMB": "RIGHTMOUSE",
-                    "LMB": "LEFTMOUSE",
-                    "MMB": "MIDDLEMOUSE",
-                }
-            )
+            _EVENT_TYPE_MAP_EXTRA.update({
+                "`": 'ACCENT_GRAVE',
+                "*": 'NUMPAD_ASTERIX',
+                "/": 'NUMPAD_SLASH',
+                '+': 'NUMPAD_PLUS',
+                "-": 'NUMPAD_MINUS',
+                ".": 'NUMPAD_PERIOD',
+                "'": 'QUOTE',
+                "RMB": 'RIGHTMOUSE',
+                "LMB": 'LEFTMOUSE',
+                "MMB": 'MIDDLEMOUSE',
+            })
             _EVENT_TYPE_MAP_EXTRA.update({f"{i}": f"NUMPAD_{i}" for i in range(10)})
         # done with once off init
 
@@ -644,202 +737,137 @@ class KeymapFilter:
             # special handling of 'type'
             for ki in kmi_test_type:
                 val = kmi.type
-                if val == "NONE" or val not in ki:
+                if val == 'NONE' or val not in ki:
                     # exception for 'type'
                     # also inspect 'key_modifier' as a fallback
                     val = kmi.key_modifier
-                    if not (val == "NONE" or val not in ki):
+                    if not (val == 'NONE' or val not in ki):
                         continue
                     return False
 
             return True
-
         return filter_func
 
 
 class UNIV_RestoreKeymaps(bpy.types.Operator):
-    bl_idname = "wm.univ_keymaps_config"
-    bl_label = "Keymaps Config"
-    bl_description = (
-        "Keymaps Config\n\n"
-        "Restore - Resets properties, assigned keys and restore deleted\n"
-        "Off/On - Enable/disable keymaps\n"
-        "Delete User - Remove manually installed UniV keymaps\n"
-        "Resolve Conflicts - Resolve all conflicts with UniV keymaps (except in cases where the UniV keymap is disabled and between addon keymaps)"
-    )
+    bl_idname = 'wm.univ_keymaps_config'
+    bl_label = 'Keymaps Config'
+    bl_description = 'Keymaps Config\n\n' \
+                     'Restore - Resets properties and assigned keys, enable keymaps (doesn`t restore deleted keymaps)\n' \
+                     'Off/On - Enable/disable keymaps\n' \
+                     'Delete User - Remove manually installed UniV keymaps\n' \
+                     'Resolve Conflicts - Resolve all conflicts with UniV keymaps (except in cases where the UniV keymap is disabled)'
 
     # noinspection PyTypeHints
-    mode: bpy.props.EnumProperty(
-        name="Mode",
-        default="RESTORE",
-        items=(
-            ("RESTORE", "Restore", ""),
-            ("TOGGLE", "Off/On", ""),
-            ("DELETE_USER", "Delete User", ""),
-            ("RESOLVE_ALL", "Resolve Conflicts", ""),
-        ),
-    )
+    mode: bpy.props.EnumProperty(name='Mode', default='RESTORE',
+                                 items=(
+                                     ('RESTORE', 'Restore', ''),
+                                     ('TOGGLE', 'Off/On', ''),
+                                     ('DELETE_USER', 'Delete User', ''),
+                                     ('RESOLVE_ALL', 'Resolve Conflicts', '')
+
+                                 ))
 
     def execute(self, context):
+        kc = context.window_manager.keyconfigs.user
         counter = 0
 
-        if self.mode == "RESOLVE_ALL":
-            for area, kc, km, filtered_keymaps in KeymapFilter.get_conflict_filtered_keymaps(
-                keys_areas + keys_areas_workspace, use_filter=False
-            ):
+        def keymap_items():
+            for _area in keys_areas + keys_areas_workspace:
+                _km = kc.keymaps[_area]
+                for _kmi in _km.keymap_items:
+                    if '.univ_' in _kmi.idname:
+                        yield _km, _kmi
+                    elif 'wm.call_menu_pie' == _kmi.idname and _kmi.name == 'UniV Pie':
+                        yield _km, _kmi
+
+        if self.mode == 'DEFAULT':
+            for km, kmi in keymap_items():
+                if not kmi.is_user_defined:
+                    activ_before = kmi.active
+                    to_str_before = kmi.to_string()
+                    properties_before = [getattr(kmi.properties, str_props)
+                                         for str_props in dir(kmi.properties) if not str_props.startswith('__')]
+
+                    km.restore_item_to_default(kmi)
+
+                    if not activ_before:
+                        kmi.active = True
+                        counter += 1
+                        continue
+                    else:
+                        kmi.active = True
+
+                    if to_str_before != kmi.to_string():
+                        counter += 1
+                        continue
+                    if properties_before != [getattr(kmi.properties, str_props) for str_props in dir(kmi.properties) if not str_props.startswith('__')]:
+                        counter += 1
+
+            message = f'Reset to default {counter} addon keymaps' if counter else 'All addon keymaps is default'
+        elif self.mode == 'RESOLVE_ALL':
+
+            for area, kc, km, filtered_keymaps in ConflictFilter.get_conflict_filtered_keymaps(
+                    keys_areas + keys_areas_workspace):
                 for config_filtered in filtered_keymaps.values():
                     if not any(univ_kmi.active for univ_kmi in config_filtered.univ_keys):
                         continue
-                    for _, kmi_ in config_filtered.conflict_keys:
+                    for (_, kmi_) in config_filtered.default_keys:
                         if kmi_.active:
                             counter += 1
                             kmi_.active = False
-            message = (
-                f"Disabled {counter} keymaps" if counter else "Not found keymaps with conflicts"
-            )
+                    for (_, kmi_) in config_filtered.user_defined:
+                        if kmi_.active:
+                            counter += 1
+                            kmi_.active = False
+            message = f'Disabled {counter} keymaps' if counter else 'Not found keymaps with conflicts'
 
-        elif self.mode == "RESTORE":
-            message = self.restore()
+        # elif self.mode == 'RESTORE':
+        #     pass
+            # for km, kmi in keymap_items():
+            #     if not kmi.is_user_defined:
+            #         km.keymap_items.remove(kmi)
 
-        elif self.mode == "DELETE_USER":
-            for _, _, km, filtered_keymaps in KeymapFilter.get_conflict_filtered_keymaps(
-                keys_areas + keys_areas_workspace, use_filter=False
-            ):
-                sorted_keymaps = KeymapFilter.get_sorted(km, filtered_keymaps, False)
-                for fk in sorted_keymaps:
-                    if fk.kmi.is_user_defined:
-                        km.keymap_items.remove(fk.kmi)
-                        counter += 1
+            # global keys
+            # kc = bpy.context.window_manager.keyconfigs.addon
+            # new_keys = []
+            # for addon_km, addon_kmi in keys:
+            #     user_km = kc.keymaps[addon_km.name]
+            #     key = user_km, user_km.keymap_items.new_from_item(addon_kmi)
+            #     new_keys.append(key)
+            #     print(key[1])
+            # remove_keymaps()
+            # keys.extend(new_keys)
+            # remove_keymaps()
+            # add_keymaps()
 
-            message = f"Deleted {counter} user keymaps" if counter else "Not found user keymaps"
-        else:  # TOGGLE
+        elif self.mode == 'DELETE_USER':
+            for km, kmi in keymap_items():
+                if kmi.is_user_defined:
+                    counter += 1
+                    km.keymap_items.remove(kmi)
+            message = f'Deleted {counter} user keymaps' if counter else 'Not found user keymaps'
+        else:
             active_states = set()
-            for _, _, km, filtered_keymaps in KeymapFilter.get_conflict_filtered_keymaps(
-                keys_areas + keys_areas_workspace, use_filter=False
-            ):
-                sorted_keymaps = KeymapFilter.get_sorted(km, filtered_keymaps, False)
-                for fk in sorted_keymaps:
-                    active_states.add(fk.kmi.active)
+            for _, kmi in keymap_items():
+                active_states.add(kmi.active)
 
             state = False if (len(active_states) == 2) else (False in active_states)
 
-            for _, _, km, filtered_keymaps in KeymapFilter.get_conflict_filtered_keymaps(
-                keys_areas + keys_areas_workspace, use_filter=False
-            ):
-                sorted_keymaps = KeymapFilter.get_sorted(km, filtered_keymaps, False)
-                for fk in sorted_keymaps:
-                    if fk.kmi.active != state:
-                        fk.kmi.active = state
+            if state:
+                for _, kmi in keymap_items():
+                    if not kmi.active:
+                        kmi.active = True
+                        counter += 1
+                message = f'Enabled {counter} keymaps' if counter else 'Not found keymaps'
+            else:
+                for _, kmi in keymap_items():
+                    if kmi.active:
+                        kmi.active = False
                         counter += 1
 
-            message = "Not found keymaps"
-            if counter:
-                message = f"Enabled {counter} keymaps" if state else f"Disable {counter} keymaps"
+                message = f'Disable {counter} keymaps' if counter else 'Not found keymaps'
 
         bpy.context.preferences.is_dirty = True
-        self.report({"INFO"}, message)
-        return {"FINISHED"}
-
-    @staticmethod
-    def restore():
-        counter = 0
-        total_changed = 0
-        backup_keys_temp = {km.name: kmi_items for km, kmi_items in backup_keys.items()}
-        for area, _, km, filtered_keymaps in KeymapFilter.get_conflict_filtered_keymaps(
-            keys_areas, use_filter=False
-        ):
-            backup_kmi_items = backup_keys_temp[area]
-
-            buckup_ids_with_kmi = {}
-
-            for backup_kmi in backup_kmi_items:
-                assert not backup_kmi.is_user_defined
-                assert not backup_kmi.is_user_modified
-                kmi_unique_data = (
-                    backup_kmi.name,
-                    backup_kmi.idname,
-                    backup_kmi.to_string(),
-                    properties_to_string(backup_kmi.properties),
-                )
-                assert kmi_unique_data not in buckup_ids_with_kmi
-                buckup_ids_with_kmi[kmi_unique_data] = backup_kmi
-
-            sorted_keymaps = KeymapFilter.get_sorted(km, filtered_keymaps, False)
-            for fk in sorted_keymaps:
-                if fk.kmi.is_user_defined:
-                    continue
-                if fk.kmi.is_user_modified:
-                    total_changed += 1
-                    km.restore_item_to_default(fk.kmi)
-
-                kmi_unique_data = (
-                    fk.kmi.name,
-                    fk.kmi.idname,
-                    fk.kmi.to_string(),
-                    properties_to_string(fk.kmi.properties),
-                )
-                buckup_ids_with_kmi.pop(kmi_unique_data, None)
-
-            for backup_kmi in buckup_ids_with_kmi.values():
-
-                # get_km_addon_from_kmi = (addon_km for addon_km, backup_kmi_items in backup_keys.items() for b_kmi in backup_kmi_items if b_kmi is backup_kmi)
-                # for addon_km in get_km_addon_from_kmi:
-                new_kmi = km.keymap_items.new_from_item(backup_kmi)
-                # new_kmi = addon_km.keymap_items.new_from_item(backup_kmi)
-
-                if new_kmi:
-                    # backup_keys_restored.setdefault(addon_km, []).append(new_kmi) # Store for possible incref ???
-                    # double_new_kmi = km.keymap_items.new_from_item(backup_kmi)
-                    counter += 1
-                    if not SKIP_KEYMAPS_INACTIVATING:
-                        from . import btypes
-
-                        c_kmi = btypes.wmKeyMapItem(new_kmi)
-                        c_kmi.flag |= KMI_INACTIVE
-
-                        # if double_new_kmi:
-                        #     c_kmi = utypes.wmKeyMapItem(double_new_kmi)
-                        #     c_kmi.flag |= KMI_INACTIVE
-
-                    new_kmi.active = False
-                    # if double_new_kmi:
-                    #     backup_keys_restored.setdefault(addon_km, []).append(new_kmi)
-                    #     double_new_kmi.active = False
-                    # else:
-                    #     print(f"UniV: Keymaps: Can't restore for save {backup_kmi.name}")
-                    break
-                else:
-                    print(f"UniV: Keymaps: Can't restore the {new_kmi.name} key")
-
-        kc = bpy.context.window_manager.keyconfigs.user
-        for a in keys_areas_workspace:
-            kc.keymaps[a].restore_to_default()
-
-        message = ""
-        if counter:
-            message = f"Restored {counter!r} removed keymaps. "
-
-        if total_changed:
-            message += f"Total changes {total_changed!r} (properties, binding keys and other). "
-
-        if not message:
-            message = "Not found enabled keymaps for restore."
-        return message
-
-
-def properties_to_string(properties):
-    pretty_props = {}
-    if hasattr(properties.bl_rna, "properties"):
-        for prop in properties.bl_rna.properties:
-            if prop.identifier != "rna_type":
-                val = getattr(properties, prop.identifier)
-                if not isinstance(val, bpy.types.bpy_struct):
-                    pretty_props[prop.identifier] = getattr(properties, prop.identifier)
-                else:
-                    if hasattr(val, "bl_rna"):
-                        pretty_props[prop.identifier] = properties_to_string(val)
-                    else:
-                        print(f"UniV: Keymaps: Properties to String: Unresolved type {val}")
-    else:
-        print(f"UniV: Keymaps: Not found properties in {properties}, skipped.")
-    return str(sorted(pretty_props.items()))
+        self.report({'INFO'}, message)
+        return {'FINISHED'}

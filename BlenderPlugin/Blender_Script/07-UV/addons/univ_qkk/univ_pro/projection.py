@@ -3,7 +3,6 @@
 # The OrientedBounds code was taken and modified from https://github.com/mikedh/trimesh
 
 
-import bpy
 import bmesh
 import typing  # noqa: F401
 import mathutils
@@ -15,11 +14,11 @@ from bmesh.types import BMVert
 from math import atan2, pi
 from .. import draw
 from .. import utils
-from .. import utypes
 from ..utypes import MeshIslands
 from bpy.props import *
 from ..operators import project
 from ..preferences import prefs
+
 
 TOL_ZERO = np.float32(1e-8)
 _IDENTITY = np.eye(4)
@@ -37,26 +36,20 @@ class OrientBoundConvexData:
         self.face_normals: np.ndarray = face_normals
 
     @classmethod
-    def from_points(cls, points) -> "typing.Self":
+    def from_points(cls, points) -> 'typing.Self':
         bm: bmesh.types.BMesh = bmesh.new()
 
         try:
             for co in points:
                 bm.verts.new(co)
 
-            convex_ret = bmesh.ops.convex_hull(
-                bm, input=bm.verts, use_existing_faces=False
-            )
+            convex_ret = bmesh.ops.convex_hull(bm, input=bm.verts, use_existing_faces=False)
 
             inner_faces = [f for f in bm.faces if not f.select]
-            bmesh.ops.delete(bm, geom=inner_faces, context="FACES")
+            bmesh.ops.delete(bm, geom=inner_faces, context='FACES')
 
-            inner_verts = [
-                v
-                for v in convex_ret["geom_interior"]
-                if isinstance(v, BMVert) and v.is_valid
-            ]
-            bmesh.ops.delete(bm, geom=inner_verts, context="VERTS")
+            inner_verts = [v for v in convex_ret['geom_interior'] if isinstance(v, BMVert) and v.is_valid]
+            bmesh.ops.delete(bm, geom=inner_verts, context='VERTS')
 
             bm.faces.ensure_lookup_table()
             bm.verts.ensure_lookup_table()
@@ -67,9 +60,7 @@ class OrientBoundConvexData:
             bm.edges.index_update()
 
             coords = np.array([v.co.to_tuple() for v in bm.verts], dtype=np.float32)
-            normals = np.array(
-                [f.normal.to_tuple() for f in bm.faces], dtype=np.float32
-            )
+            normals = np.array([f.normal.to_tuple() for f in bm.faces], dtype=np.float32)
 
             face_adj = []
             face_adj_edges = []
@@ -91,30 +82,27 @@ class OrientBoundConvexData:
 
 class UNIV_OT_BoxProject(project.UNIV_OT_BoxProject):
     # noinspection PyTypeHints
-    orient: BoolProperty(
-        name="Orient 3D",
-        default=True,
-        description="This option is useful for cube-shaped elements that have different rotations.",
-    )
+    orient: BoolProperty(name='Orient 3D', default=True,
+                         description='This option is useful for cube-shaped elements that have different rotations.')
 
     def draw(self, context):
         if not self.orient:
-            self.layout.prop(self, "scale", slider=True)
+            self.layout.prop(self, 'scale', slider=True)
         col = self.layout.column(align=True)
         if not self.orient:
-            col.prop(self, "scale_individual", expand=True, slider=True)
-            col.prop(self, "rotation", expand=True, slider=True)
-            col.prop(self, "move", expand=True)
-        col.prop(self, "avoid_flip")
-        col.prop(self, "orient")
+            col.prop(self, 'scale_individual', expand=True, slider=True)
+            col.prop(self, 'rotation', expand=True, slider=True)
+            col.prop(self, 'move', expand=True)
+        col.prop(self, 'avoid_flip')
+        col.prop(self, 'orient')
         col.separator()
-        col.prop(prefs(), "use_texel")
-        col.prop(self, "use_correct_aspect")
+        col.prop(prefs(), 'use_texel')
+        col.prop(self, 'use_correct_aspect')
 
-    def box(self, umeshes):
+    def box(self):
         all_lines = []
         degenerate_counter = 0
-        for umesh in umeshes:
+        for umesh in self.umeshes:
             if self.orient:
                 if self.is_edit_mode:
                     if self.has_selected:
@@ -132,14 +120,11 @@ class UNIV_OT_BoxProject(project.UNIV_OT_BoxProject):
                         continue
 
                     matrix_world, dims = OrientedBounds.oriented_bounds(vertices)
-                    mtx_x, mtx_y, mtx_z, r = self.get_box_transforms_orient(
-                        umesh, matrix_world
-                    )
+                    mtx_x, mtx_y, mtx_z, r = self.get_box_transforms_orient(umesh, matrix_world)
                     self.box_ex(mesh_isl, mtx_x, mtx_y, mtx_z, r, umesh.uv)
 
                     lines = draw.mesh_extract.extraxt_cube_lines_for_orient_bound(
-                        umesh.obj.matrix_world @ matrix_world, dims
-                    )
+                        umesh.obj.matrix_world @ matrix_world, dims)
                     all_lines.append(lines)
 
             else:
@@ -155,12 +140,9 @@ class UNIV_OT_BoxProject(project.UNIV_OT_BoxProject):
                 self.box_ex(faces, mtx_x, mtx_y, mtx_z, r, umesh.uv)
 
         if self.orient:
-            if all_lines:
-                draw.LinesDrawSimple3D.draw_register(np.concatenate(all_lines))
+            draw.LinesDrawSimple3D.draw_register(np.concatenate(all_lines))
         if degenerate_counter:
-            self.report(
-                {"WARNING"}, f"Detected {degenerate_counter} degenerate mesh islands"
-            )
+            self.report({'WARNING'}, f'Detected {degenerate_counter} degenerate mesh islands')
 
     def get_box_transforms_orient(self, umesh, compensate_matrix: Matrix):
         aspect_x_mtx, aspect_y_mtx, aspect_z_mtx = self.get_aspect_matrix(umesh)
@@ -193,13 +175,14 @@ class UNIV_OT_BoxProject(project.UNIV_OT_BoxProject):
         scale_obj *= utils.get_scale_from_texel()
         matrix_world_scale_ = Matrix.LocRotScale(None, None, scale_obj)
 
+
         orient_mat = compensate_matrix @ matrix_world_scale_
         mtx_x = aspect_x_mtx @ orient_mat
         mtx_y = aspect_y_mtx @ orient_mat
         mtx_z = aspect_z_mtx @ orient_mat
 
-        return mtx_x, mtx_y, mtx_z, compensate_r
 
+        return mtx_x, mtx_y, mtx_z, compensate_r
 
 class OrientedBounds:
     @classmethod
@@ -217,15 +200,11 @@ class OrientedBounds:
             # convert face normals to spherical coordinates on the upper hemisphere
             # the vector_hemisphere call effectively merges negative but otherwise
             # identical vectors
-            spherical_coords = vector_to_spherical(
-                vector_hemisphere(hull_normals)  # noqa
-            )
+            spherical_coords = vector_to_spherical(vector_hemisphere(hull_normals))  # noqa
             # the unique_rows call on merge angles gets unique spherical directions to check
             # we get a substantial speedup in the transformation matrix creation
             # inside the loop by converting to angles ahead of time
-            spherical_coords = spherical_coords[
-                UniqueRows.unique_rows(spherical_coords, digits=angle_digits)[0]
-            ]
+            spherical_coords = spherical_coords[UniqueRows.unique_rows(spherical_coords, digits=angle_digits)[0]]
             matrices = [spherical_matrix(*s).T for s in spherical_coords]
             normals = spherical_to_vector(spherical_coords)
 
@@ -254,11 +233,11 @@ class OrientedBounds:
                 edge_vert = projected[:, :2][edges]
                 # now get them as unit vectors
                 edge_vectors = edge_vert[:, 1, :] - edge_vert[:, 0, :]
-                edge_norm = np.sqrt(np.dot(edge_vectors**2, [1, 1]))
+                edge_norm = np.sqrt(np.dot(edge_vectors ** 2, [1, 1]))
                 edge_nonzero = edge_norm > 1e-10
-                edge_vectors = edge_vectors[edge_nonzero] / edge_norm[
-                    edge_nonzero
-                ].reshape((-1, 1))
+                edge_vectors = edge_vectors[edge_nonzero] / edge_norm[edge_nonzero].reshape(
+                    (-1, 1)
+                )
                 # create a set of perpendicular vectors
                 persp_vectors = np.fliplr(edge_vectors) * [-1.0, 1.0]
 
@@ -270,9 +249,7 @@ class OrientedBounds:
                 edge_points = edge_vert[:, 0, :2]
                 x = np.dot(edge_vectors, edge_points.T)
                 y = np.dot(persp_vectors, edge_points.T)
-                area: np.float64 = (
-                    (x.max(axis=1) - x.min(axis=1)) * (y.max(axis=1) - y.min(axis=1))
-                ).min()
+                area: np.float64 = ((x.max(axis=1) - x.min(axis=1)) * (y.max(axis=1) - y.min(axis=1))).min()
 
                 # the volume is 2D area plus the projected height
                 size_z: np.float64 = np.ptp(projected[:, 2])
@@ -285,9 +262,7 @@ class OrientedBounds:
 
             # we know the minimum volume transform which should be the expensive
             # part so now we need to do the bookkeeping to find the box
-            vert_ones = np.column_stack(
-                (vertices, np.ones(len(vertices), dtype=np.float32))
-            ).T
+            vert_ones = np.column_stack((vertices, np.ones(len(vertices), dtype=np.float32))).T
             projected = np.dot(min_2d, vert_ones).T[:, :3]
 
             height = np.ptp(projected[:, 2])
@@ -305,15 +280,12 @@ class OrientedBounds:
             to_origin[:3, 3] = -box_center
 
             # # return ordered 3D extents
-            to_origin, min_dimensions = cls.sorted_dims_to_orient_by_longest_axis(
-                to_origin, min_dimensions
-            )
+            to_origin, min_dimensions = cls.sorted_dims_to_orient_by_longest_axis(to_origin, min_dimensions)
 
             return Matrix(to_origin).adjugated(), min_dimensions
         except:  # noqa
             to_origin, dimensions = OrientedBounds.oriented_bounds_coplanar(
-                np.asanyarray(list(verts), dtype=np.float32)  # noqa
-            )
+                np.asanyarray(list(verts), dtype=np.float32))  # noqa
             matrix_world = Matrix(to_origin).inverted()
             return matrix_world, dimensions
 
@@ -340,14 +312,13 @@ class OrientedBounds:
     @staticmethod
     def oriented_bounds_2d(points) -> tuple[np.ndarray, np.ndarray]:
         from collections import Counter
-
         angles: Counter[float] = Counter()
 
         convex_indexes = mathutils.geometry.convex_hull_2d(points)
         points = points[convex_indexes]
 
         for i in range(len(points) - 1):
-            edge_vec = Vector(points[i] - points[i + 1])
+            edge_vec = Vector(points[i] - points[i+1])
             current_angle = atan2(*edge_vec)
             angle_to_rotate = -utils.find_min_rotate_angle(round(current_angle, 4))
             angles[round(angle_to_rotate, 4)] += edge_vec.length
@@ -372,9 +343,7 @@ class OrientedBounds:
         return transform, rectangle
 
     @classmethod
-    def oriented_bounds_coplanar(
-        cls, points: np.ndarray
-    ) -> tuple[np.ndarray, np.ndarray]:
+    def oriented_bounds_coplanar(cls, points: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """
         Find an oriented bounding box for an array of coplanar 3D points.
 
@@ -448,7 +417,9 @@ def vector_hemisphere(vectors: np.ndarray) -> np.ndarray:
     signs[np.logical_and(zero[:, 2], negative[:, 1])] = -1.0
     # all on-plane vectors with zero Y values
     # and negative X values
-    signs[np.logical_and(np.logical_and(zero[:, 2], zero[:, 1]), negative[:, 0])] = -1.0
+    signs[
+        np.logical_and(np.logical_and(zero[:, 2], zero[:, 1]), negative[:, 0])
+    ] = -1.0
 
     # apply the signs to the vectors
     oriented = vectors * signs.reshape((-1, 1))
@@ -495,9 +466,9 @@ def planar_matrix_to_3d(matrix_2d: np.ndarray) -> np.ndarray:
     return matrix_3d
 
 
-def transform_points(
-    points: np.ndarray, matrix: np.ndarray, translate: bool = True
-) -> np.ndarray:
+def transform_points(points: np.ndarray,
+                     matrix: np.ndarray,
+                     translate: bool = True) -> np.ndarray:
     """
     Returns points rotated by a homogeneous
     transformation matrix.
@@ -553,9 +524,7 @@ def spherical_matrix(theta: np.ndarray, phi: np.ndarray) -> np.ndarray:
              input spherical coordinates: np.dot(matrix, [0,0,1,0])
 
     """
-    return np.array(
-        Euler((0.0, phi, theta), "XYZ").to_matrix().to_4x4(), dtype=np.float32
-    )
+    return np.array(Euler((0.0, phi, theta), 'XYZ').to_matrix().to_4x4(), dtype=np.float32)
 
 
 class UniqueRows:
@@ -644,9 +613,7 @@ class UniqueRows:
                 # make sure as_int is int64 otherwise bit offset won't work
                 for offset, column in enumerate(bitbang):
                     # will modify hashable in place
-                    np.bitwise_xor(
-                        hashable, column << (offset * precision), out=hashable
-                    )  # noqa
+                    np.bitwise_xor(hashable, column << (offset * precision), out=hashable)  # noqa
                 return hashable
 
         # reshape array into magical data type that is weird but works with unique
@@ -693,188 +660,4 @@ class UniqueRows:
         # multiply by requested power of ten
         # then subtract small epsilon to avoid "go either way" rounding
         # then do the rounding and convert to integer
-        return np.round((data * 10**digits) - 1e-6).astype(np.int64)
-
-
-# noinspection PyTypeHints
-class UNIV_OT_CylinderProject(bpy.types.Operator):
-    bl_idname = "mesh.univ_cylinder_project"
-    bl_label = "Cylinder"
-    bl_description = "Cylinder Projection"
-    bl_options = {"REGISTER", "UNDO"}
-
-    scale: bpy.props.FloatProperty(name="Scale", default=1, soft_min=0.5, soft_max=2)
-    scale_individual: bpy.props.FloatVectorProperty(
-        name="Scale Individual", default=(1.0, 1.0, 1.0), soft_min=0.5, soft_max=2
-    )
-    rotation: bpy.props.FloatVectorProperty(
-        name="Rotate", subtype="EULER", soft_min=-pi, soft_max=pi
-    )
-    move: bpy.props.FloatVectorProperty(name="Move", subtype="XYZ")
-    use_correct_aspect: bpy.props.BoolProperty(
-        name="Correct Aspect",
-        default=True,
-        description="Gets Aspect Correct from the active image from the shader node editor",
-    )
-    avoid_flip: bpy.props.BoolProperty(name="Avoid Flip", default=True)
-
-    def draw(self, context):
-        self.layout.prop(self, "scale", slider=True)
-        col = self.layout.column(align=True)
-        col.prop(self, "scale_individual", expand=True, slider=True)
-        col.prop(self, "rotation", expand=True, slider=True)
-        col.prop(self, "move", expand=True)
-        col.prop(self, "avoid_flip")
-        col.separator()
-        col.prop(prefs(), "use_texel")
-        col.prop(self, "use_correct_aspect")
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.is_edit_mode: bool = bpy.context.mode == "EDIT_MESH"
-        self.has_selected: bool = True
-
-    def execute(self, context):
-        umeshes = utypes.UMeshes.calc_with_no_uv(self.report, verify_uv=False)
-        umeshes.set_sync(True)
-        if self.is_edit_mode:
-            selected, visible = umeshes.filtered_by_selected_and_visible_uv_faces()
-            if selected:
-                umeshes = selected
-                self.has_selected = True
-            elif visible:
-                umeshes = visible
-                self.has_selected = False
-            else:
-                self.report({"WARNING"}, "Not found faces for manipulate")
-                return {"CANCELLED"}
-        umeshes.verify_uv()
-
-        self.box(umeshes)
-        for u in umeshes:
-            u.check_uniform_scale(self.report)
-
-        if not self.is_edit_mode:
-            umeshes.update("No faces for manipulate")
-            umeshes.free()
-            bpy.context.area.tag_redraw()
-        else:
-            umeshes.update(info="Not selected face")
-        return {"FINISHED"}
-
-    def box(self, umeshes):
-        for umesh in umeshes:
-
-            mtx_x, mtx_y, mtx_z, r = self.get_cylinder_transforms(umesh)
-            if self.is_edit_mode:
-                if self.has_selected:
-                    faces = utils.calc_selected_uv_faces_iter(umesh)
-                else:
-                    faces = utils.calc_visible_uv_faces_iter(umesh)
-            else:
-                faces = umesh.bm.faces
-
-            self.cylinder_ex(faces, mtx_x, mtx_y, mtx_z, r, umesh.uv)
-
-    def get_cylinder_transforms(self, umesh):
-        move = Vector(self.move) * -1
-        scale = Vector(self.scale_individual) * self.scale
-        scale *= utils.get_scale_from_texel()
-
-        mtx_from_prop_x = Matrix.LocRotScale(
-            move, Euler((self.rotation[0], 0, 0)), scale
-        )
-        mtx_from_prop_y = Matrix.LocRotScale(
-            move, Euler((0, self.rotation[1], 0)), scale
-        )
-        mtx_from_prop_z = Matrix.LocRotScale(
-            move, Euler((0, 0, self.rotation[2])), scale
-        )
-
-        aspect_x_mtx, aspect_y_mtx, aspect_z_mtx = self.get_aspect_matrix(umesh)
-
-        mtx_x = aspect_x_mtx @ umesh.obj.matrix_world @ mtx_from_prop_x
-        mtx_y = aspect_y_mtx @ umesh.obj.matrix_world @ mtx_from_prop_y
-        mtx_z = aspect_z_mtx @ umesh.obj.matrix_world @ mtx_from_prop_z
-        _, r, _ = umesh.obj.matrix_world.decompose()
-        # TODO: r.rotate(Euler(self.rotation))
-        return mtx_x, mtx_y, mtx_z, r
-
-    def get_aspect_matrix(self, umesh):
-        aspect = utils.get_aspect_ratio(umesh) if self.use_correct_aspect else 1.0
-        if aspect >= 1.0:
-            aspect_x_mtx = Matrix.Diagonal((1, 1 / aspect, 1))
-            aspect_y_mtx = Matrix.Diagonal((1 / aspect, 1, 1))
-            aspect_z_mtx = Matrix.Diagonal((1 / aspect, 1, 1))
-        else:
-            aspect_x_mtx = Matrix.Diagonal((1, 1, aspect))
-            aspect_y_mtx = Matrix.Diagonal((1, 1, aspect))
-            aspect_z_mtx = Matrix.Diagonal((1, aspect, 1))
-        return aspect_x_mtx.to_4x4(), aspect_y_mtx.to_4x4(), aspect_z_mtx.to_4x4()
-
-    @staticmethod
-    def cylinder_ex(faces, mtx_x, mtx_y, mtx_z, r, uv):
-        for f in faces:
-            n = f.normal.copy()
-            n.rotate(r)
-            if abs(n.x) >= abs(n.y) and abs(n.x) >= abs(n.z):  # X
-                for crn in f.loops:
-                    crn[uv].uv = (mtx_x @ crn.vert.co).yz
-            elif abs(n.y) >= abs(n.x) and abs(n.y) >= abs(n.z):  # Y
-                for crn in f.loops:
-                    crn[uv].uv = (mtx_y @ crn.vert.co).xz
-            else:  # Z
-                for crn in f.loops:
-                    crn[uv].uv = (mtx_z @ crn.vert.co).to_2d()
-
-    @staticmethod
-    def fit_cylinder(verts, obj, centering="AVERAGE"):
-        # Copy and modified from: https://github.com/pfalkingham/blenderShapeFitter/blob/main/fitCylinder.py
-        wm = obj.matrix_world
-        points = np.array([(wm @ v).to_tuple() for v in verts])
-
-        centroid = points.mean(axis=0)
-        centered = points - centroid
-
-        # PCA: z_axis is first principal component
-        _, _, vh = np.linalg.svd(centered)
-        z_axis = vh[0, :]
-        z_axis = z_axis / np.linalg.norm(z_axis)
-
-        # Build orthonormal basis (z_axis, x_axis, y_axis)
-        x_axis = vh[1, :]
-        y_axis = vh[2, :]
-
-        # Project points onto plane perpendicular to z-axis
-        proj = np.dot(points - centroid, np.vstack([x_axis, y_axis]).T)
-        x = proj[:, 0]
-        y = proj[:, 1]
-
-        # Fit circle to projected points
-        A = np.c_[2 * x, 2 * y, np.ones_like(x)]
-        B = x**2 + y**2
-        sol, *_ = np.linalg.lstsq(A, B, rcond=None)
-        center2d = sol[:2]
-        radius = np.sqrt(sol[2] + center2d.dot(center2d))
-        center3d = centroid + center2d[0] * x_axis + center2d[1] * y_axis
-
-        # Height: full span of points projected onto z-axis
-        heights = np.dot(points - center3d, z_axis)
-        height = heights.max() - heights.min()
-        if centering == "MIDPOINT":
-            mid_height = (heights.max() + heights.min()) / 2
-            location = center3d + z_axis * mid_height
-        else:
-            location = centroid
-
-        # Add cylinder at center3d_cyl, aligned to z-axis, with radius and height
-        bpy.ops.mesh.primitive_cylinder_add(
-            radius=radius, depth=height, location=location
-        )
-        cyl = bpy.context.active_object
-        up = Vector((0, 0, 1))
-        n = Vector(z_axis)
-        if n.length > 0:
-            n.normalize()
-            rot = up.rotation_difference(n)
-            cyl.rotation_euler = rot.to_euler()
+        return np.round((data * 10 ** digits) - 1e-6).astype(np.int64)

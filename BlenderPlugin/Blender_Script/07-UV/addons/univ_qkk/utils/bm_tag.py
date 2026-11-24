@@ -6,8 +6,7 @@ import typing
 
 from bmesh.types import BMesh, BMFace, BMLoop, BMLayerItem
 
-USE_GENERIC_UV_SYNC = hasattr(BMesh, "uv_select_sync_valid")
-
+USE_GENERIC_UV_SYNC = hasattr(BMesh, 'uv_select_sync_valid')
 
 def shared_crn(crn: BMLoop) -> BMLoop | None:
     shared = crn.link_loop_radial_prev
@@ -24,39 +23,28 @@ def is_flipped_3d(crn):
 
 
 def shared_is_linked(crn: BMLoop, _shared_crn: BMLoop, uv: BMLayerItem):
-    return (
-        crn.link_loop_next[uv].uv == _shared_crn[uv].uv
-        and crn[uv].uv == _shared_crn.link_loop_next[uv].uv
-    )
+    return crn.link_loop_next[uv].uv == _shared_crn[uv].uv and \
+        crn[uv].uv == _shared_crn.link_loop_next[uv].uv
 
 
 def is_pair(crn: BMLoop, _rad_prev: BMLoop, uv: BMLayerItem):
-    return (
-        crn.link_loop_next[uv].uv == _rad_prev[uv].uv
-        and crn[uv].uv == _rad_prev.link_loop_next[uv].uv
-    )
+    return crn.link_loop_next[uv].uv == _rad_prev[uv].uv and \
+        crn[uv].uv == _rad_prev.link_loop_next[uv].uv
 
 
 def is_pair_with_flip(crn: BMLoop, _rad_prev: BMLoop, uv: BMLayerItem):
     if crn.vert == _rad_prev.vert:  # is flipped
-        return (
-            crn[uv].uv.to_tuple() == _rad_prev[uv].uv.to_tuple()
-            and crn.link_loop_next[uv].uv.to_tuple() == _rad_prev.link_loop_next[uv].uv.to_tuple()
-        )
-    return (
-        crn.link_loop_next[uv].uv.to_tuple() == _rad_prev[uv].uv.to_tuple()
-        and crn[uv].uv.to_tuple() == _rad_prev.link_loop_next[uv].uv.to_tuple()
-    )
+        return crn[uv].uv.to_tuple() == _rad_prev[uv].uv.to_tuple() and \
+            crn.link_loop_next[uv].uv.to_tuple() == _rad_prev.link_loop_next[uv].uv.to_tuple()
+    return crn.link_loop_next[uv].uv.to_tuple() == _rad_prev[uv].uv.to_tuple() and \
+        crn[uv].uv.to_tuple() == _rad_prev.link_loop_next[uv].uv.to_tuple()
 
 
 def is_pair_by_idx(crn: BMLoop, _rad_prev: BMLoop, uv: BMLayerItem):
     if crn == _rad_prev or crn.face.index != _rad_prev.face.index:
         return False
-    return (
-        crn.link_loop_next[uv].uv == _rad_prev[uv].uv
-        and crn[uv].uv == _rad_prev.link_loop_next[uv].uv
-    )  # noqa
-
+    return crn.link_loop_next[uv].uv == _rad_prev[uv].uv and \
+           crn[uv].uv == _rad_prev.link_loop_next[uv].uv  # noqa
 
 def set_faces_tag(faces, tag=True):
     if tag:  # Constant load optimisation
@@ -74,10 +62,8 @@ def is_boundary_non_sync(crn: BMLoop, uv: BMLayerItem):
         return True
     if not pair.face.select:
         return True
-    return (
-        crn[uv].uv.to_tuple() != pair.link_loop_next[uv].uv.to_tuple()
-        or crn.link_loop_next[uv].uv.to_tuple() != pair[uv].uv.to_tuple()
-    )
+    return (crn[uv].uv.to_tuple() != pair.link_loop_next[uv].uv.to_tuple() or
+            crn.link_loop_next[uv].uv.to_tuple() != pair[uv].uv.to_tuple())
 
 
 def is_boundary_sync(crn: BMLoop, uv: BMLayerItem):
@@ -87,11 +73,8 @@ def is_boundary_sync(crn: BMLoop, uv: BMLayerItem):
         return True
     if pair.face.hide:
         return True
-    return (
-        crn[uv].uv.to_tuple() != pair.link_loop_next[uv].uv.to_tuple()
-        or crn.link_loop_next[uv].uv.to_tuple() != pair[uv].uv.to_tuple()
-    )
-
+    return (crn[uv].uv.to_tuple() != pair.link_loop_next[uv].uv.to_tuple() or
+            crn.link_loop_next[uv].uv.to_tuple() != pair[uv].uv.to_tuple())
 
 def is_boundary_with_flip_check_non_sync(crn: BMLoop, uv: BMLayerItem):
     # assert(l.face.select)
@@ -102,15 +85,12 @@ def is_boundary_with_flip_check_non_sync(crn: BMLoop, uv: BMLayerItem):
         return True
     if crn.vert == pair.vert:
         return True
-    return (
-        crn[uv].uv.to_tuple() != pair.link_loop_next[uv].uv.to_tuple()
-        or crn.link_loop_next[uv].uv.to_tuple() != pair[uv].uv.to_tuple()
-    )
+    return (crn[uv].uv.to_tuple() != pair.link_loop_next[uv].uv.to_tuple() or
+            crn.link_loop_next[uv].uv.to_tuple() != pair[uv].uv.to_tuple())
 
 
 def is_boundary_with_flip_check_sync(crn: BMLoop, uv: BMLayerItem):
     # assert(not l.face.hide)
-    # TODO: Add check with is_contiguous instead two check
     pair = crn.link_loop_radial_prev
     if pair == crn:
         return True
@@ -118,40 +98,32 @@ def is_boundary_with_flip_check_sync(crn: BMLoop, uv: BMLayerItem):
         return True
     if crn.vert == pair.vert:
         return True
-    return (
-        crn[uv].uv.to_tuple() != pair.link_loop_next[uv].uv.to_tuple()
-        or crn.link_loop_next[uv].uv.to_tuple() != pair[uv].uv.to_tuple()
-    )
+    return (crn[uv].uv.to_tuple() != pair.link_loop_next[uv].uv.to_tuple() or
+            crn.link_loop_next[uv].uv.to_tuple() != pair[uv].uv.to_tuple())
 
 
-def is_boundary_func(
-    umesh, with_seam=True, with_flipped_check=True, invisible_check=True
-) -> typing.Callable[[BMLoop], bool]:
+def is_boundary_func(umesh, with_seam=True, with_flipped_check=True, invisible_check=True) -> typing.Callable[[BMLoop], bool]:
     """
     with_seam - check seams
 
-    with_flipped_check - non-manifolds edges always returns True (this is not flipped correction check)
+    with_flipped_check - if True, non-manifolds edges returns True (this is not flipped correction check)
 
     invisible_check - hidden shared face return True
     """
-
     def catcher(uv: BMLayerItem, is_boundary_):
         if with_seam:
-
             def is_boundary(crn: BMLoop):
                 # assert(l.face.select)
                 if crn.edge.seam:
                     return True
                 return is_boundary_(crn, uv)
-
             return is_boundary
         else:
-
             def is_boundary(crn: BMLoop):
                 # assert(l.face.select)
                 return is_boundary_(crn, uv)
-
             return is_boundary
+
 
     if invisible_check:
         if umesh.sync:
@@ -166,101 +138,25 @@ def is_boundary_func(
                 return catcher(umesh.uv, is_boundary_non_sync)
     else:
         if with_flipped_check:
-
             def is_boundary_with_flip_no_invisible_check(crn: BMLoop, uv: BMLayerItem):
                 pair = crn.link_loop_radial_prev
                 if pair == crn:
                     return True
                 if crn.vert == pair.vert:
                     return True
-                return (
-                    crn[uv].uv.to_tuple() != pair.link_loop_next[uv].uv.to_tuple()
-                    or crn.link_loop_next[uv].uv.to_tuple() != pair[uv].uv.to_tuple()
-                )
+                return (crn[uv].uv.to_tuple() != pair.link_loop_next[uv].uv.to_tuple() or
+                        crn.link_loop_next[uv].uv.to_tuple() != pair[uv].uv.to_tuple())
 
             return catcher(umesh.uv, is_boundary_with_flip_no_invisible_check)
         else:
-
             def is_boundary_no_invisible_check(crn: BMLoop, uv: BMLayerItem):
                 pair = crn.link_loop_radial_prev
                 if pair == crn:
                     return True
-                return (
-                    crn[uv].uv.to_tuple() != pair.link_loop_next[uv].uv.to_tuple()
-                    or crn.link_loop_next[uv].uv.to_tuple() != pair[uv].uv.to_tuple()
-                )
+                return (crn[uv].uv.to_tuple() != pair.link_loop_next[uv].uv.to_tuple() or
+                        crn.link_loop_next[uv].uv.to_tuple() != pair[uv].uv.to_tuple())
 
             return catcher(umesh.uv, is_boundary_no_invisible_check)
-
-
-def is_boundary_3d_func(_umesh=None, *, with_seam=True, with_contiguous_check=True, invisible_check=True
-                        ) -> typing.Callable[[BMLoop], bool]:
-    """
-    with_seam - check seams
-
-    with_flipped_check - non-manifolds edges always returns True (this is not flipped correction check)
-
-    invisible_check - hidden shared face return True
-    """
-    if with_seam:
-        if invisible_check:
-            if with_contiguous_check:
-
-                def is_boundary(crn: BMLoop):
-                    e = crn.edge
-                    if not e.is_contiguous or e.seam:
-                        return True
-                    return crn.link_loop_radial_prev.face.hide
-
-            else:
-
-                def is_boundary(crn: BMLoop):
-                    e = crn.edge
-                    if e.is_boundary or e.seam:
-                        return True
-                    return crn.link_loop_radial_prev.face.hide
-
-        else:
-            if with_contiguous_check:
-
-                def is_boundary(crn: BMLoop):
-                    e = crn.edge
-                    return not e.is_contiguous or e.seam
-
-            else:
-
-                def is_boundary(crn: BMLoop):
-                    e = crn.edge
-                    return e.is_boundary or e.seam
-
-        return is_boundary
-
-    # Without seam.
-    if invisible_check:
-        if with_contiguous_check:
-
-            def is_boundary(crn: BMLoop):
-                if not crn.edge.is_contiguous:
-                    return True
-                return crn.link_loop_radial_prev.face.hide
-
-        else:
-
-            def is_boundary(crn: BMLoop):
-                return crn.edge.is_boundary or crn.link_loop_radial_prev.face.hide
-
-    else:
-        if with_contiguous_check:
-
-            def is_boundary(crn: BMLoop):
-                return not crn.edge.is_contiguous
-
-        else:
-
-            def is_boundary(crn: BMLoop):
-                return crn.edge.is_boundary
-
-    return is_boundary
 
 
 def is_visible_func(sync: bool):
@@ -290,7 +186,6 @@ def linked_hide_faces_for_3d(faces):
         for v in f.verts:
             if any(ff.select for ff in v.link_faces):  # Preserve vertex selection.
                 v.select = True
-
 
 def unhide_faces_for_3d(faces):
     for f in faces:

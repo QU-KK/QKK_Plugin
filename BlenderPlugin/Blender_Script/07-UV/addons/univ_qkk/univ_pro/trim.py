@@ -26,6 +26,7 @@ from gpu_extras.batch import batch_for_shader
 from ..draw import shaders
 from ..utypes import BBox
 
+
 # Trim generator
 # sizes = []
 # x = 0.5
@@ -74,43 +75,41 @@ def get_active_empty_slot_or_create_new():
             return new_slot
 
 
+
 class UNIV_OT_TrimPresetsProcessing(Operator):
     bl_idname = "scene.univ_trim_presets_processing"
     bl_label = "Presets Processing"
     # noinspection PyTypeHints
-    operation_type: EnumProperty(
-        default="ADD",
-        options={"SKIP_SAVE"},
-        items=(
-            ("ADD", "Add", ""),
-            ("REMOVE", "Remove", ""),
-            ("REMOVE_ALL", "Remove All", ""),
-        ),
-    )
+    operation_type: EnumProperty(default='ADD',
+                                 options={'SKIP_SAVE'},
+                                 items=(('ADD', 'Add', ''),
+                                        ('REMOVE', 'Remove', ''),
+                                        ('REMOVE_ALL', 'Remove All', ''))
+                                 )
 
     def execute(self, _context):
-        if self.operation_type == "ADD":
+        if self.operation_type == 'ADD':
             self.add(self.report)
         else:
             if not prefs().trims_presets_slots:
-                self.report({"WARNING"}, "Not found presets for remove.")
-                return {"CANCELLED"}
+                self.report({'WARNING'}, "Not found presets for remove.")
+                return {'CANCELLED'}
             else:
                 self.sanitize_slot_index_and_add_if_missed()
                 slot = prefs().get_active_trim_slot()
-                if self.operation_type == "REMOVE_ALL":
+                if  self.operation_type == 'REMOVE_ALL':
                     slot.trims_preset.clear()
                     slot.active_trim_index = 0
                     prefs().use_trims = False
                 else:
                     self.remove(self.report)
 
-        for a in utils.get_areas_by_type("VIEW_3D"):
+        for a in utils.get_areas_by_type('VIEW_3D'):
             a.tag_redraw()
-        for a in utils.get_areas_by_type("IMAGE_EDITOR"):
+        for a in utils.get_areas_by_type('IMAGE_EDITOR'):
             a.tag_redraw()
 
-        return {"FINISHED"}
+        return {'FINISHED'}
 
     @classmethod
     def add(cls, report=None, bbox=None, color=None):
@@ -120,14 +119,10 @@ class UNIV_OT_TrimPresetsProcessing(Operator):
 
         if len(trim_preset) >= MAX_TRIMS_SIZE:
             if report:
-                report(
-                    {"WARNING"},
-                    f"The preset limit of {MAX_TRIMS_SIZE} units has been reached",
-                )
+                report({'WARNING'}, f"The preset limit of {MAX_TRIMS_SIZE} units has been reached")
             return
 
         from ..draw import TrimDrawer
-
         prev_pause = TrimDrawer.pause
         try:
             TrimDrawer.pause = True
@@ -136,7 +131,7 @@ class UNIV_OT_TrimPresetsProcessing(Operator):
 
             if not color:
                 hues = [Color(trim.color).h for trim in trim_preset]
-                color = Color((0.9, 0.0, 0.0))
+                color = Color((0.9,0.0,0.0))
                 color.h = utils.largest_gap_midpoint_for_hue(hues)
 
             my_user = trim_preset.add()
@@ -152,26 +147,26 @@ class UNIV_OT_TrimPresetsProcessing(Operator):
                 my_user.height = 0.25
             my_user.color = color
 
+
+
             # Set unique name
-            my_user.name = "temp"
+            my_user.name = 'temp'
             all_names = {trim.name for trim in trim_preset}
 
-            if "Trim" not in all_names:
-                my_user.name = "Trim"
+            if 'Trim' not in all_names:
+                my_user.name = 'Trim'
             else:
                 for i in range(1, MAX_TRIMS_SIZE):
-                    name = f"Trim {i}"
+                    name = f'Trim {i}'
                     if name not in all_names:
                         my_user.name = name
                         break
                 else:
-                    my_user.name = "Trim"
+                    my_user.name = 'Trim'
 
             # NOTE: Swap after renaming, otherwise the name will be stored in an invalid object.
             if len(trim_preset) > 1:
-                trim_preset.move(
-                    len(trim_preset) - 1, prev_idx + 1
-                )  # move(src_index, dst_index)
+                trim_preset.move(len(trim_preset) - 1, prev_idx + 1)  # move(src_index, dst_index)
                 active_slot.active_trim_index = prev_idx + 1
             else:
                 active_slot.active_trim_index = len(trim_preset) - 1
@@ -186,7 +181,7 @@ class UNIV_OT_TrimPresetsProcessing(Operator):
         slot = prefs().get_active_trim_slot()
         trims_preset = slot.trims_preset
         if not len(trims_preset):
-            report({"WARNING"}, "The preset is empty")
+            report({'WARNING'}, 'The preset is empty')
             return
         active_trim_index = cls.get_sanitized_preset_index()
         if len(trims_preset) == active_trim_index - 1:
@@ -228,53 +223,48 @@ class UNIV_OT_TrimSlotsProcessing(Operator):
     bl_idname = "scene.univ_trim_slots_processing"
     bl_label = "Presets Processing"
     # noinspection PyTypeHints
-    operation_type: EnumProperty(
-        default="ADD",
-        options={"SKIP_SAVE"},
-        items=(
-            ("ADD", "Add", ""),
-            # ('DUPLICATE', 'Duplicate', ''),
-            ("REMOVE", "Remove", ""),
-            ("REMOVE_ALL", "Remove All", ""),
-        ),
-    )
+    operation_type: EnumProperty(default='ADD',
+                                 options={'SKIP_SAVE'},
+                                 items=(('ADD', 'Add', ''),
+                                        # ('DUPLICATE', 'Duplicate', ''),
+                                        ('REMOVE', 'Remove', ''),
+                                        ('REMOVE_ALL', 'Remove All', ''))
+                                 )
 
     def execute(self, _context):
-        if self.operation_type == "ADD":
+        if self.operation_type == 'ADD':
             self.add(self.report)
-        elif self.operation_type == "DUPLICATE":
+        elif self.operation_type == 'DUPLICATE':
             raise
         else:
             if not prefs().trims_presets_slots:
-                self.report({"WARNING"}, "Not found slots for remove.")
-                return {"CANCELLED"}
+                self.report({'WARNING'}, "Not found slots for remove.")
+                return {'CANCELLED'}
 
-            if self.operation_type == "REMOVE_ALL":
+
+            if self.operation_type == 'REMOVE_ALL':
                 prefs().trims_presets_slots.clear()
                 prefs().active_trim_index = 0
                 prefs().use_trims = False
             else:
                 self.remove(self.report)
 
-        for a in utils.get_areas_by_type("VIEW_3D"):
+        for a in utils.get_areas_by_type('VIEW_3D'):
             a.tag_redraw()
-        for a in utils.get_areas_by_type("IMAGE_EDITOR"):
+        for a in utils.get_areas_by_type('IMAGE_EDITOR'):
             a.tag_redraw()
 
-        return {"FINISHED"}
+        return {'FINISHED'}
 
     @classmethod
     def add(cls, report=None):
         if len(prefs().trims_presets_slots) >= MAX_SLOT_SIZE:
             if report:
-                report(
-                    {"WARNING"},
-                    f"The preset limit of {MAX_SLOT_SIZE} units has been reached",
-                )
+                report({'WARNING'}, f"The preset limit of {MAX_SLOT_SIZE} units has been reached")
             return
 
-        from ..draw import TrimDrawer
 
+        from ..draw import TrimDrawer
         prev_pause = TrimDrawer.pause
         try:
             TrimDrawer.pause = True
@@ -283,23 +273,23 @@ class UNIV_OT_TrimSlotsProcessing(Operator):
             new_slot = prefs().trims_presets_slots.add()
 
             # Set unique name
-            new_slot.name = "temp"
+            new_slot.name = 'temp'
             all_names = {slot.name for slot in prefs().trims_presets_slots}
-            if "Trim Preset" not in all_names:
-                new_slot.name = "Trim Preset"
+            if 'Trim Preset' not in all_names:
+                new_slot.name = 'Trim Preset'
             else:
                 for i in range(1, MAX_TRIMS_SIZE):
-                    name = f"Trim Preset {i}"
+                    name = f'Trim Preset {i}'
                     if name not in all_names:
                         new_slot.name = name
                         break
                 else:
-                    new_slot.name = "Trim Preset"
+                    new_slot.name = 'Trim Preset'
 
             # NOTE: Swap after renaming, otherwise the name will be stored in an invalid object.
             slots = prefs().trims_presets_slots
             if len(slots) > 1:
-                slots.move(len(slots) - 1, prev_idx + 1)
+                slots.move(len(slots)-1, prev_idx + 1)
                 prefs().active_trim_slot_index = prev_idx + 1
             else:
                 prefs().active_trim_slot_index = len(slots) - 1
@@ -313,7 +303,7 @@ class UNIV_OT_TrimSlotsProcessing(Operator):
     @classmethod
     def remove(cls, report):
         if not len(prefs().trims_presets_slots):
-            report({"WARNING"}, "The slot is empty")
+            report({'WARNING'}, 'The slot is empty')
             return
 
         UNIV_OT_TrimPresetsProcessing.sanitize_slot_index_and_add_if_missed()
@@ -334,15 +324,11 @@ class UNIV_OT_TrimSlotsProcessing(Operator):
 class UNIV_OT_TrimPresetLoad(Operator, ImportHelper):
     bl_idname = "scene.univ_trim_preset_load"
     bl_label = "Load..."
-    bl_options = {"REGISTER", "UNDO"}
-    bl_description = (
-        "Load trim preset. \n\nNOTE: If the active preset is empty, it overwrites it."
-    )
+    bl_options = {'REGISTER', 'UNDO'}
+    bl_description = "Load trim preset. \n\nNOTE: If the active preset is empty, it overwrites it."
 
     # noinspection PyTypeHints
-    filter_glob: StringProperty(
-        default="*.svg;*.bmp;*.png;*.tga;*.exr;*.hdr;*.tif;", options={"HIDDEN"}
-    )
+    filter_glob: StringProperty(default="*.svg;*.bmp;*.png;*.tga;*.exr;*.hdr;*.tif;", options={'HIDDEN'})
 
     def execute(self, context):
         import pathlib
@@ -350,37 +336,33 @@ class UNIV_OT_TrimPresetLoad(Operator, ImportHelper):
         from ..draw import TrimDrawer
 
         if len(prefs().trims_presets_slots) >= MAX_SLOT_SIZE:
-            self.report(
-                {"WARNING"},
-                f"The preset limit of {MAX_SLOT_SIZE!r} units has been reached",
-            )
-            return {"CANCELLED"}
+            self.report({"WARNING"}, f"The preset limit of {MAX_SLOT_SIZE!r} units has been reached")
+            return {'CANCELLED'}
 
         path = pathlib.Path(self.filepath)
-        if path.suffix == ".svg":
+        if path.suffix == '.svg':
             svg_file = utils.SVG.load(self.filepath)
             if svg_file is None:
-                self.report({"WARNING"}, f"SVG file is broken: {self.filepath!r}")
-                return {"CANCELLED"}
+                self.report({'WARNING'}, f"SVG file is broken: {self.filepath!r}")
+                return {'CANCELLED'}
 
             bboxes_with_colors = svg_file.to_bboxes()
 
             # Clean created materials
-            for mat in svg_file._context[  # noqa # pylint: disable=W0212
-                "materials"
-            ].values():
+            for mat in svg_file._context['materials'].values():  # noqa # pylint: disable=W0212
                 # for mat in materials.value():
                 bpy.data.materials.remove(mat)
             # Delete all materials created by svg importer
             for mtl in reversed(bpy.data.materials):
-                if mtl.users == 0 and "SVGMat" in mtl.name:
+                if mtl.users == 0 and 'SVGMat' in mtl.name:
                     bpy.data.materials.remove(mtl)
+
 
             view_box = svg_file.get_view_box(self.filepath)
             remap_scale_x = 1 / view_box.width
             remap_scale_y = 1 / -view_box.height
 
-            for bb, _ in bboxes_with_colors:
+            for (bb, _) in bboxes_with_colors:
                 bb.xmin *= remap_scale_x
                 bb.xmax *= remap_scale_x
                 bb.ymin *= remap_scale_y
@@ -393,20 +375,22 @@ class UNIV_OT_TrimPresetLoad(Operator, ImportHelper):
         else:
             inp = oiio.ImageInput.open(filename=self.filepath)
             if not inp:
-                self.report({"WARNING"}, f"Image not support {self.filepath!r}")
-                return {"CANCELLED"}
+                self.report({'WARNING'}, f"Image not support {self.filepath!r}")
+                return {'CANCELLED'}
 
             spec = inp.spec()
             x_res = spec.width
             y_res = spec.height
 
+
             n_channels = spec.nchannels
             if n_channels == 1:
-                self.report({"WARNING"}, "Not support gray texture")
-                return {"CANCELLED"}
+                self.report({'WARNING'}, 'Not support gray texture')
+                return {'CANCELLED'}
 
-            pixels = inp.read_image(0, 0, 0, n_channels, "uint8")
+            pixels = inp.read_image(0, 0, 0, n_channels, 'uint8')
             pixels = np.array(pixels)
+
 
             flat_coords = pixels.reshape(-1, n_channels)
             colors, counts = np.unique(flat_coords, return_counts=True, axis=0)
@@ -429,9 +413,9 @@ class UNIV_OT_TrimPresetLoad(Operator, ImportHelper):
                     continue
 
                 # Find X,Y coordinates of all trim pixels
-                trim_y, trim_x = np.where(np.all(pixels == col, axis=2))
+                trim_y, trim_x = np.where(np.all(pixels==col,axis=2))
 
-                if count < len(trim_x) * 0.5:  # Skip small noise bbox
+                if count < len(trim_x)*0.5:  # Skip small noise bbox
                     continue
 
                 top, bottom = trim_y[0], trim_y[-1]
@@ -444,27 +428,21 @@ class UNIV_OT_TrimPresetLoad(Operator, ImportHelper):
                 ymax = 1.0 - top / y_res
 
                 bb = utypes.BBox(xmin, xmax, ymin, ymax)
-                col = (col / 255)[:3]
+                col = (col/255)[:3]
                 bboxes_with_colors.append((bb, Color(col)))
 
             inp.close()
             # NOTE: Sort trims only for images, svg save order.
-            bboxes_with_colors.sort(
-                key=lambda bb_and_col: utils.wrap(bb_and_col[1].h - 0.001), reverse=True
-            )
+            bboxes_with_colors.sort(key=lambda bb_and_col: utils.wrap(bb_and_col[1].h - 0.001), reverse=True)
+
+
 
         if not bboxes_with_colors:
-            self.report(
-                {"WARNING"},
-                "Failed to get trim preset, possibly the file is broken or has unsupported shape types.",
-            )
-            return {"FINISHED"}
+            self.report({'WARNING'}, "Failed to get trim preset, possibly the file is broken or has unsupported shape types.")
+            return {'FINISHED'}
 
         if len(bboxes_with_colors) > 200:
-            self.report(
-                {"WARNING"},
-                f"The file contains more than 200 figures ({len(bboxes_with_colors)}), the data will not be read completely.",
-            )
+            self.report({"WARNING"}, f"The file contains more than 200 figures ({len(bboxes_with_colors)}), the data will not be read completely.")
             bboxes_with_colors = bboxes_with_colors[:200]
 
         TrimDrawer.unregister()
@@ -473,12 +451,12 @@ class UNIV_OT_TrimPresetLoad(Operator, ImportHelper):
         slot = get_active_empty_slot_or_create_new()
         slot.name = path.stem
 
-        for bb, col in bboxes_with_colors:
+        for (bb, col) in bboxes_with_colors:
             UNIV_OT_TrimPresetsProcessing.add(self.report, bb, col[:3])
 
         TrimDrawer.register()
 
-        return {"FINISHED"}
+        return {'FINISHED'}
 
 
 class UNIV_OT_TrimPresetSave(Operator, ExportHelper):
@@ -492,24 +470,23 @@ class UNIV_OT_TrimPresetSave(Operator, ExportHelper):
     filename_ext: EnumProperty(
         name="Format",
         description="Choose the file format to save to",
-        items=(
-            (".svg", "SVG", ""),
-            None,
-            (".tga", "TARGA", ""),
-            (".png", "PNG", ""),
-            (".exr", "OPEN_EXR", ""),
-            (".tif", "TIFF", ""),
-            (".bmp", "BMP", ""),
-            (".hdr", "HDR", ""),
-        ),
-        default=".svg",
+        items=(('.svg', "SVG", ""),
+               None,
+               ('.tga', 'TARGA', ""),
+               ('.png', 'PNG', ""),
+               ('.exr', 'OPEN_EXR', ""),
+               ('.tif', 'TIFF', ""),
+               ('.bmp', "BMP", ""),
+               ('.hdr', 'HDR', ""),
+              ),
+        default='.svg',
     )
 
     def invoke(self, context, event):
         pref = prefs()
         if not pref.use_trims:
-            self.report({"WARNING"}, "Trim System not enabled")
-            return {"CANCELLED"}
+            self.report({'WARNING'}, "Trim System not enabled")
+            return {'CANCELLED'}
 
         has_trim = False
         if pref.trims_presets_slots:
@@ -520,8 +497,8 @@ class UNIV_OT_TrimPresetSave(Operator, ExportHelper):
                     break
 
         if not has_trim:
-            self.report({"WARNING"}, "Visible trims not found")
-            return {"CANCELLED"}
+            self.report({'WARNING'}, 'Visible trims not found')
+            return {'CANCELLED'}
 
         return super().invoke(context, event)
 
@@ -529,7 +506,7 @@ class UNIV_OT_TrimPresetSave(Operator, ExportHelper):
         size_x = int(prefs().size_x)
         size_y = int(prefs().size_y)
 
-        if self.filename_ext == ".svg":
+        if self.filename_ext == '.svg':
             bbox_array_with_hex_color = []
             pref = prefs()
             for trim in pref.get_active_trim_slot().trims_preset:
@@ -545,7 +522,8 @@ class UNIV_OT_TrimPresetSave(Operator, ExportHelper):
             with open(file, "w", encoding="utf-8") as f:
                 f.write(svg)
 
-            return {"FINISHED"}
+            return {'FINISHED'}
+
 
         import gpu
         from .. import icons
@@ -569,14 +547,15 @@ class UNIV_OT_TrimPresetSave(Operator, ExportHelper):
             fb.clear(color=(0.0, 0.0, 0.0, 0.0))
             self.draw_image(tris, colors)
 
-            pixel_data = fb.read_color(0, 0, size_x, size_y, 4, 0, "UBYTE")
+            pixel_data = fb.read_color(0, 0, size_x, size_y, 4, 0, 'UBYTE')
             pixel_data.dimensions = size_x * size_y * 4
             icons.IconsCreator.save_pixels(file, pixel_data, size_x, size_y)
         finally:
             offscreen.unbind()
             offscreen.free()
 
-        return {"FINISHED"}
+        return {'FINISHED'}
+
 
     @staticmethod
     def svg_from_uv_bboxes(bboxes_with_color, width, height):
@@ -586,7 +565,7 @@ class UNIV_OT_TrimPresetSave(Operator, ExportHelper):
             f'viewBox="0 0 {width} {height}">'
         ]
 
-        for bb, hex_color in bboxes_with_color:
+        for (bb, hex_color) in bboxes_with_color:
             x = bb.xmin * width
             y = height - (bb.ymin + bb.height) * height
             w = bb.width * width
@@ -598,8 +577,9 @@ class UNIV_OT_TrimPresetSave(Operator, ExportHelper):
                 f'fill="{hex_color}"/>'
             )
 
-        parts.append("</svg>")
+        parts.append('</svg>')
         return "\n".join(parts)
+
 
     @classmethod
     def draw_image(cls, coords, colors):
@@ -607,22 +587,21 @@ class UNIV_OT_TrimPresetSave(Operator, ExportHelper):
         from mathutils import Matrix
         from gpu_extras.batch import batch_for_shader
 
-        gpu.state.blend_set("ALPHA")
+        gpu.state.blend_set('ALPHA')
 
         with gpu.matrix.push_pop():
             gpu.matrix.load_matrix(cls.get_normalize_uvs_matrix())
             gpu.matrix.load_projection_matrix(Matrix.Identity(4))
             shader = shaders.POLYLINE_FLAT_COLOR_2D
-            batch = batch_for_shader(shader, "TRIS", {"pos": coords, "color": colors})
+            batch = batch_for_shader(shader, 'TRIS', {"pos": coords, "color": colors})
             batch.draw(shader)
 
-        gpu.state.blend_set("NONE")
+        gpu.state.blend_set('NONE')
 
     @classmethod
     def get_normalize_uvs_matrix(cls):
         """Matrix maps x and y coordinates from [0, 1] to [-1, 1]"""
         from mathutils import Matrix
-
         matrix = Matrix.Identity(4)
         matrix.col[3][0] = -1
         matrix.col[3][1] = 1
@@ -631,73 +610,79 @@ class UNIV_OT_TrimPresetSave(Operator, ExportHelper):
         return matrix
 
 
+
 # noinspection PyTypeHints
 class UNIV_OT_TrimFromMesh(Operator, utils.PaddingHelper):
     bl_idname = "uv.univ_trim_from_mesh"
     bl_label = "Trim From Mesh"
     bl_description = "Trim from mesh or uv"
-    bl_options = {"REGISTER", "UNDO"}
+    bl_options = {'REGISTER', 'UNDO'}
 
-    mode: EnumProperty(
-        name="Mode", default="UV", items=utils.ENUM(("UV", "UV"), "MESH")
-    )
-    keep_extend: BoolProperty(
-        name="Keep Extend",
-        default=True,
-        description="No Padding for extended (1.0 length) trims",
-    )
-    padding_multiplayer: bpy.props.FloatProperty(
-        name="Padding Multiplayer", default=0, min=-32, soft_min=0, soft_max=4, max=32
-    )
+    mode: EnumProperty(name='Mode', default='UV', items=utils.ENUM(('UV', 'UV'), 'MESH'))
+    keep_extend: BoolProperty(name='Keep Extend', default=True, description="No Padding for extended (1.0 length) trims")
+    padding_multiplayer: bpy.props.FloatProperty(name='Padding Multiplayer', default=0, min=-32, soft_min=0, soft_max=4, max=32)
 
     def draw(self, context):
-        self.layout.prop(self, "keep_extend")
+        self.layout.prop(self, 'keep_extend')
         self.draw_padding()
-        self.layout.row(align=True).prop(self, "mode", expand=True)
+        self.layout.row(align=True).prop(self, 'mode', expand=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.empty_slot_is_added = False
 
     def execute(self, context):
+        import bmesh
         from ..draw import TrimDrawer
         from ..operators import project
 
         if len(prefs().trims_presets_slots) >= MAX_SLOT_SIZE:
-            self.report(
-                {"WARNING"},
-                f"The preset limit of {MAX_SLOT_SIZE!r} units has been reached",
-            )
-            return {"CANCELLED"}
+            self.report({"WARNING"}, f"The preset limit of {MAX_SLOT_SIZE!r} units has been reached")
+            return {'CANCELLED'}
 
-        if self.mode == "UV":
-            umeshes = utypes.UMeshes()
+        obj = context.active_object
+        if not obj:
+            self.report({'WARNING'}, 'Active object not found.')
+            return {'CANCELLED'}
+
+        if obj.type != 'MESH':
+            self.report({'WARNING'}, 'Active object must be a mesh.')
+            return {'CANCELLED'}
+
+        if self.mode == 'UV' and not obj.data.uv_layers:
+            self.report({'WARNING'}, 'UV layers not found.')
+            return {'FINISHED'}
+
+        if not len(obj.data.polygons):
+            self.report({'INFO'}, 'Faces not found.')
+            return {'FINISHED'}
+        elif len(obj.data.polygons) > MAX_TRIMS_SIZE:
+            self.report({'INFO'}, f"The limit of {MAX_TRIMS_SIZE} faces has been exceeded.")
+            return {'CANCELLED'}
+
+
+        if bpy.context.mode == 'EDIT_MESH':
+            bm = bmesh.from_edit_mesh(obj.data)
+            umesh = utypes.UMesh(bm, obj)
         else:
-            umeshes = utypes.UMeshes.calc_with_no_uv(verify_uv=False)
-            for u in umeshes:
-                u.ensure()
+            bm = bmesh.new()
+            bm.from_mesh(obj.data)
+            umesh = utypes.UMesh(bm, obj, False)
+            umesh.ensure()
 
-        if not self.bl_idname.startswith("UV") or not umeshes.is_edit_mode or self.mode == "MESH":
-            umeshes.set_sync(True)
-            umeshes.sync_invalidate()
+        if not self.bl_idname.startswith('UV') or not umesh.is_edit_bm:
+            umesh.sync = True
+            umesh._sync_invalidate = True  # noqa
 
-        if bpy.context.mode == "EDIT_MESH":
-            selected, visible = umeshes.filtered_by_selected_and_visible_uv_faces()
-            if selected:
-                umeshes = selected
-                for umesh in umeshes:
-                    umesh.sequence = utils.calc_selected_uv_faces(umesh)
-            else:
-                umeshes = visible
-                for umesh in umeshes:
-                    umesh.sequence = utils.calc_visible_uv_faces(umesh)
+        if bpy.context.mode == 'EDIT_MESH':
+            faces = utils.calc_selected_uv_faces(umesh)
+            if not faces:
+                faces = utils.calc_visible_uv_faces(umesh)
+                if not faces:
+                    self.report({'WARNING'}, "Not found visible faces")
+                    return {'FINISHED'}
         else:
-            for umesh in     umeshes:
-                umesh.sequence = umesh.bm.faces
-
-        if not umeshes:
-            self.report({"WARNING"}, "Selected object or faces not found.")
-            return {"FINISHED"}
+            faces = umesh.bm.faces
 
         TrimDrawer.unregister()
 
@@ -714,58 +699,42 @@ class UNIV_OT_TrimFromMesh(Operator, utils.PaddingHelper):
         prefs().use_trims = False
 
         bboxes = []
-        if self.mode == "UV":
-            for umesh in umeshes:
-                for f in umesh.sequence:
-                    isl = utypes.AdvIsland([f], umesh)
-                    bboxes.append(isl.calc_bbox())
+        if self.mode == 'UV':
+            for f in faces:
+                isl = utypes.AdvIsland([f], umesh)
+                bboxes.append(isl.calc_bbox())
         else:
-            vector_nor, _ = project.UNIV_OT_Normal.avg_normal_and_calc_faces(umeshes, has_selected=True, faces_from_sequence=True)
+            vector_nor = Vector()
+            for f in faces:
+                vector_nor += f.normal * f.calc_area()
 
-            projected_bboxes = []
+            projected_faces = []
             rot_mtx_from_normal = project.UNIV_OT_Normal.calc_rot_mtx_from_normal(vector_nor)
+            for f in faces:
+                p_face = []
+                for v in f.verts:
+                    uv_co = (rot_mtx_from_normal @ v.co).to_2d()
+                    p_face.append(uv_co)
+                projected_faces.append(p_face)
 
-            for umesh in umeshes:
-                mtx = rot_mtx_from_normal @ umesh.obj.matrix_world
-                for f in umesh.sequence:
-                    bb = utypes.BBox.calc_bbox((mtx @ v.co).to_2d() for v in f.verts)
-                    projected_bboxes.append(bb)
+            bb = utypes.BBox.calc_bbox((co for f in projected_faces for co in f))
 
-            global_bbox = utypes.BBox()
-            for bb in projected_bboxes:
-                global_bbox.union(bb)
-
-            aspect = global_bbox.aspect
+            aspect = bb.aspect
             if aspect > 16:
-                self.report(
-                    {"WARNING"},
-                    f"Extreme aspect ratio - {aspect!r}, possibly geometry issues",
-                )
+                self.report({'WARNING'}, f"Extreme aspect ratio - {aspect!r}, possibly geometry issues")
 
             scale, delta, pivot = utils.get_transform_from_box(
-                global_bbox, utypes.BBox(0.0, 1.0, 0.0, 1.0), axis="XY", pad=0.0, use_crop=False
+                bb, utypes.BBox(0.0, 1.0, 0.0, 1.0), axis='XY', pad=0.0, use_crop=False
             )
 
             diff = pivot - pivot * scale
             diff += delta
 
-            for bb in projected_bboxes:
-                bb.scale(scale, Vector((0,0)))
-                bb.move(diff)
-                bboxes.append(bb)
-
-        non_zero_bboxes = [bb for bb in bboxes if bb.min_length != 0]
-        zero_faces = len(bboxes) - len(non_zero_bboxes)
-        if zero_faces:
-            bboxes = non_zero_bboxes
-            self.report(
-                {"WARNING"},
-                f"Found {zero_faces!r} with zero area faces.",
-            )
-
-        if len(bboxes) >= MAX_TRIMS_SIZE:
-            self.report({"WARNING"}, f"The preset limit of {MAX_TRIMS_SIZE!r} units has been reached, removed extra trims.")
-            bboxes = bboxes[:MAX_TRIMS_SIZE]
+            for f in projected_faces:
+                for co in f:
+                    co *= scale
+                    co += diff
+                bboxes.append(utypes.BBox.calc_bbox(f))
 
         pad = int(prefs().padding * self.padding_multiplayer)
         global_pad_x = pad / int(prefs().size_x)
@@ -787,9 +756,9 @@ class UNIV_OT_TrimFromMesh(Operator, utils.PaddingHelper):
 
         TrimDrawer.register()
 
-        umeshes.free()
-        return {"FINISHED"}
 
+        umesh.free()
+        return {'FINISHED'}
 
 class TrimEditorHistory:
     def __init__(self):
@@ -798,12 +767,12 @@ class TrimEditorHistory:
 
     def add(self):
         # Delete all 'future' history
-        del self.data[self.cur_idx + 1 :]
+        del self.data[self.cur_idx+1:]
         self.data.append(self.to_compact())
-        self.cur_idx = len(self.data) - 1
+        self.cur_idx = len(self.data)-1
 
     def redo(self):
-        if self.cur_idx >= len(self.data) - 1:
+        if self.cur_idx >= len(self.data)-1:
             return False
         self.cur_idx += 1
         self.from_compact(self.data[self.cur_idx])
@@ -840,7 +809,7 @@ class TrimEditorHistory:
 
             trim.name = name
             trim.color = color
-            trim.visible = bool(visible)
+            trim.visible = visible
             trim.x = x
             trim.y = y
             trim.width = width
@@ -863,15 +832,13 @@ class PickedGizmoType:
 
 
 class TrimMoveObject:
-    def __init__(
-        self,
-        orig_bb: BBox,
-        trim: preferences.UNIV_TrimPreset | None,
-        first_pick_co: Vector,
-        picked_gizmo_type=PickedGizmoType.NONE,
-        is_drag: bool = False,
-        is_draw: bool = False,
-    ):
+    def __init__(self,
+                 orig_bb: BBox,
+                 trim: preferences.UNIV_TrimPreset | None,
+                 first_pick_co: Vector,
+                 picked_gizmo_type = PickedGizmoType.NONE,
+                 is_drag: bool = False,
+                 is_draw: bool = False):
         self.orig_bb: BBox = orig_bb
         self.trim = trim
         self.first_pick_co = first_pick_co.copy().freeze()
@@ -880,40 +847,28 @@ class TrimMoveObject:
         self.picked_elem_type = picked_gizmo_type
 
     @classmethod
-    def find_nearest_trim(
-        cls,
-        pos: Vector,
-        gizmo_size: float,
-        aspect: float,
-        alt=False,
-        soft_start_pos=Vector((0.0, 0.0)),
-    ):
+    def find_nearest_trim(cls, pos: Vector, gizmo_size: float, aspect: float, alt=False, soft_start_pos=Vector((0.0,0.0))):
         picked_trim = None
         min_dist = inf
         picked_gizmo_type = PickedGizmoType.MAX  # Frequency used corner
 
         if alt:
-            trims = [
-                t for t in prefs().get_active_trim_slot().trims_preset if t.visible
-            ]
+            trims = [t for t in prefs().get_active_trim_slot().trims_preset if t.visible]
             assert len(trims)
 
             bboxes = [trim.to_bbox() for trim in trims]
             aspect = 1.0 / aspect
 
-            min_idx = utils.argmin(
-                bboxes,
-                lambda bb_: min(
-                    bb_.distance(pos, aspect), bb_.distance_to_center(pos, aspect)
-                ),
-            )
+            min_idx = utils.argmin(bboxes, lambda bb_: min(bb_.distance(pos, aspect), bb_.distance_to_center(pos, aspect)))
             return cls(bboxes[min_idx], trims[min_idx], pos, min_idx, is_drag=True)
+
 
         aspect_x = min(1.0, 1.0 / aspect)
         aspect_y = min(1.0, aspect)
 
         size_x = gizmo_size * aspect_x * 2.0
         size_y = gizmo_size * aspect_y * 2.0
+
 
         for trim in prefs().get_active_trim_slot().trims_preset:
             if not trim.visible:
@@ -930,9 +885,7 @@ class TrimMoveObject:
                 cross_size_x = min_size * aspect_x
                 cross_size_y = min_size * aspect_y
 
-            gizmos = UNIV_OT_TrimEditor.calc_gizmo(
-                bb, aspect_x, aspect_y, cross_size_x, cross_size_y, gizmo_size
-            )
+            gizmos = UNIV_OT_TrimEditor.calc_gizmo(bb, aspect_x, aspect_y, cross_size_x, cross_size_y, gizmo_size)
             for gizmo_typ, giz_bb in enumerate(gizmos):
                 new_dist = (giz_bb.center - pos).length
                 if new_dist < min_dist:
@@ -940,6 +893,7 @@ class TrimMoveObject:
                         min_dist = new_dist
                         picked_trim = trim
                         picked_gizmo_type = gizmo_typ
+
 
         if picked_trim is None:
             # Trim Add (Draw)
@@ -951,9 +905,7 @@ class TrimMoveObject:
             UNIV_OT_TrimPresetsProcessing.add(bbox=bb)
 
             created_trim = trim_presets[-1]
-            return cls(
-                bb, created_trim, soft_start_pos, picked_gizmo_type, is_draw=True
-            )
+            return cls(bb, created_trim, soft_start_pos, picked_gizmo_type, is_draw=True)
         else:
             # Gizmo Move
             return cls(picked_trim.to_bbox(), picked_trim, pos, picked_gizmo_type)
@@ -990,10 +942,9 @@ class TrimMoveObject:
             case PickedGizmoType.BOTTOM:
                 bb.ymin += delta.y
             case _:
-                print(
-                    f"UniV: Trim Editor: Unsupported Gizmo Type {self.picked_elem_type}"
-                )
+                print(f"UniV: Trim Editor: Unsupported Gizmo Type {self.picked_elem_type}")
                 raise NotImplementedError
+
 
         if alt:
             delta = self.orig_bb.center
@@ -1087,9 +1038,9 @@ class TrimFlags:
 
 
 class UNIV_OT_TrimEditor(bpy.types.Operator):
-    bl_idname = "uv.univ_trim_editor"
-    bl_label = "Trim Editor"
-    bl_options = {"REGISTER", "UNDO"}
+    bl_idname = 'uv.univ_trim_editor'
+    bl_label = 'Trim Editor'
+    bl_options = {'REGISTER', 'UNDO'}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1140,15 +1091,13 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
 
     def invoke(self, context, event):
         self.area = context.area
-        if self.area.ui_type != "UV":
-            self.report({"WARNING"}, "Area must be UV")
-            return {"CANCELLED"}
+        if self.area.ui_type != 'UV':
+            self.report({'WARNING'}, 'Area must be UV')
+            return {'CANCELLED'}
 
-        if context.region.type != "WINDOW":
-            self.report(
-                {"WARNING"}, "Incorrect operator context. Need `INVOKE_REGION_WIN`."
-            )
-            return {"CANCELLED"}
+        if context.region.type != 'WINDOW':
+            self.report({'WARNING'}, 'Incorrect operator context. Need `INVOKE_REGION_WIN`.')
+            return {'CANCELLED'}
 
         self.view = context.region.view2d
 
@@ -1162,71 +1111,64 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
         self.calc_radius_and_mouse_position(event)
         self.prev_mouse_pos = self.mouse_position
         self.first_mouse_pos = self.mouse_position.copy()
-        self.gizmo_size = utils.get_max_distance_from_px(
-            self.gizmo_pixel_size, self.view
-        )
+        self.gizmo_size = utils.get_max_distance_from_px(self.gizmo_pixel_size, self.view)
 
         self.history = TrimEditorHistory()
 
         # Create empty trim kdtree, which will be calculated when the eSnapPointMode flag does not match
         from ..draw import TrimDrawer
-
         TrimDrawer.unregister()
         TrimDrawer.pause = True
         self.calc_draw_data()
 
         # Add help info
-        info = (
-            "UniV: [Ctrl]-Snap.  [Shift]-Soft Snap.  [Alt]-Proportional.  [P]-Padding.  [+, -]-Gizmo Scale.  "
-            "[K]-Knife.  [F]-Flip Cut Axis.  [C]-Cut Through.  [H]-Hide.  [Alt+H]-Unhide All.  [X, Del]-Remove.  "
-            "[Ctrl+Z]-Undo.  [Ctrl+Shift+Z]-Redo.  [Esc, Space, Enter]-Exit."
-        )
+        info = ('UniV: [Ctrl]-Snap.  [Shift]-Soft Snap.  [Alt]-Proportional.  [P]-Padding.  [+, -]-Gizmo Scale.  '
+                '[K]-Knife.  [F]-Flip Cut Axis.  [C]-Cut Through.  [H]-Hide.  [Alt+H]-Unhide All.  [X, Del]-Remove.  '
+                '[Ctrl+Z]-Undo.  [Ctrl+Shift+Z]-Redo.  [Esc, Space, Enter]-Exit.')
         context.area.header_text_set(info)
 
         self.register_draw()
 
         wm = context.window_manager
         wm.modal_handler_add(self)
-        return {"RUNNING_MODAL"}
+        return {'RUNNING_MODAL'}
 
     def modal(self, context, event):
         try:
             return self.modal_ex(context, event)
         except Exception as e:  # noqa
             import traceback
-
             traceback.print_exc()
-            self.report({"ERROR"}, str(e))
+            self.report({'ERROR'}, str(e))
             self.exit()
-            return {"FINISHED"}
+            return {'FINISHED'}
+
 
     def modal_ex(self, context, event):
         prev_mouse_pos = self.mouse_position
         self.calc_radius_and_mouse_position(event)
 
         if not self.is_edit:
-            curr_gizmo_size = utils.get_max_distance_from_px(
-                self.gizmo_pixel_size, self.view
-            )
+            curr_gizmo_size = utils.get_max_distance_from_px(self.gizmo_pixel_size, self.view)
             if self.gizmo_size != curr_gizmo_size:
                 self.calc_draw_data()
                 self.area.tag_redraw()
                 self.update_knife_line()
             self.gizmo_size = curr_gizmo_size
 
-        if event.type == "MOUSEMOVE":
+        if event.type == 'MOUSEMOVE':
             if self.drag_trim:
                 self.area.tag_redraw()
             elif TrimFlags.use_knife:
                 self.update_knife_line()
                 self.area.tag_redraw()
 
-        elif event.type in ("INBETWEEN_MOUSEMOVE", "TIMER_REPORT"):
-            return {"RUNNING_MODAL"}
+        elif event.type in ('INBETWEEN_MOUSEMOVE', 'TIMER_REPORT'):
+            return {'RUNNING_MODAL'}
 
-        elif event.type == "LEFTMOUSE":
+        elif event.type == 'LEFTMOUSE':
             self.area.tag_redraw()
-            if event.value == "PRESS":
+            if event.value == 'PRESS':
                 if TrimFlags.use_knife:
                     self.update_knife_line()
                     x, y = self.soft_snap_lines
@@ -1239,7 +1181,7 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
 
                     min_size = 0.002
 
-                    min_dist = float("inf")
+                    min_dist = float('inf')
                     min_dist_trim = None
                     all_trims = []
                     for trim in prefs().get_active_trim_slot().trims_preset:
@@ -1248,15 +1190,11 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
                         bb = trim.to_bbox()
 
                         if TrimFlags.use_knife_x_axis:
-                            offset_to_avoid_small_trim = min_size * 0.5 + (
-                                self.pad_y * 0.5
-                            )
+                            offset_to_avoid_small_trim = min_size*0.5 + (self.pad_y * 0.5)
                             bb.ymin += offset_to_avoid_small_trim
                             bb.ymax -= offset_to_avoid_small_trim
                         else:
-                            offset_to_avoid_small_trim = min_size * 0.5 + (
-                                self.pad_x * 0.5
-                            )
+                            offset_to_avoid_small_trim = min_size*0.5 + (self.pad_x * 0.5)
                             bb.xmin += offset_to_avoid_small_trim
                             bb.xmax -= offset_to_avoid_small_trim
 
@@ -1271,10 +1209,8 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
                             if pos not in bb:
                                 continue
                             bb = trim.to_bbox()
-                            new_dist = min(
-                                bb.distance(pos, 1 / self.aspect),
-                                bb.distance_to_center(pos, 1 / self.aspect),
-                            )
+                            new_dist = min(bb.distance(pos, 1 / self.aspect),
+                                           bb.distance_to_center(pos, 1 / self.aspect))
                             if new_dist < min_dist:
                                 min_dist = new_dist
                                 min_dist_trim = trim
@@ -1287,36 +1223,30 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
                     for trim in all_trims:
                         bb = trim.to_bbox()
                         if TrimFlags.use_knife_x_axis:
-                            new_trims.append(
-                                BBox(bb.xmin, bb.xmax, y + (self.pad_y * 0.5), bb.ymax)
-                            )
+                            new_trims.append(BBox(bb.xmin, bb.xmax, y + (self.pad_y * 0.5), bb.ymax))
 
                             bb.ymax = y - (self.pad_y * 0.5)
                             trim.height = bb.height
                         else:
-                            new_trims.append(
-                                BBox(x + (self.pad_x * 0.5), bb.xmax, bb.ymin, bb.ymax)
-                            )
+                            new_trims.append(BBox(x + (self.pad_x * 0.5), bb.xmax,bb.ymin, bb.ymax))
 
                             bb.xmax = x - (self.pad_x * 0.5)
                             trim.width = bb.width
 
                     for new_trim in new_trims:
-                        UNIV_OT_TrimPresetsProcessing.add(
-                            report=self.report, bbox=new_trim
-                        )
+                        UNIV_OT_TrimPresetsProcessing.add(report=self.report, bbox=new_trim)
 
                     if all_trims or new_trims:
                         self.history.add()
 
                     self.update_dynamic_data()
-                    return {"RUNNING_MODAL"}
+                    return {'RUNNING_MODAL'}
 
                 if event.alt and not prefs().get_active_trim_slot().trims_preset:
                     self.is_edit = False
                     self.drag_trim = None
-                    self.report({"WARNING"}, "Not found trim for drag")
-                    return {"RUNNING_MODAL"}
+                    self.report({'WARNING'}, 'Not found trim for drag')
+                    return {'RUNNING_MODAL'}
 
                 self.is_edit = True
                 if event.shift:
@@ -1327,36 +1257,24 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
                 self.soft_snap_x_coords = []
 
                 self.drag_trim = TrimMoveObject.find_nearest_trim(
-                    self.mouse_position,
-                    self.gizmo_size,
-                    self.aspect,
-                    event.alt,
-                    soft_start_pos,
-                )
+                    self.mouse_position, self.gizmo_size, self.aspect, event.alt, soft_start_pos)
 
                 if not self.drag_trim:
                     self.is_edit = False
                     self.drag_trim = None
-                    self.report(
-                        {"WARNING"}, "The preset limit of 200 units has been reached"
-                    )
-                    return {"RUNNING_MODAL"}
+                    self.report({'WARNING'}, 'The preset limit of 200 units has been reached')
+                    return {'RUNNING_MODAL'}
                 self.first_mouse_pos = self.mouse_position.copy()
             else:
                 if TrimFlags.use_knife:
-                    return {"RUNNING_MODAL"}
+                    return {'RUNNING_MODAL'}
 
                 self.is_edit = False
                 is_remove = False
                 if self.drag_trim:
                     # Remove small trims
-                    if (
-                        self.drag_trim.trim.width <= 0.0025
-                        and self.drag_trim.trim.height <= 0.0025
-                    ):
-                        for idx, trim in enumerate(
-                            prefs().get_active_trim_slot().trims_preset
-                        ):
+                    if self.drag_trim.trim.width <= 0.0025 and self.drag_trim.trim.height <= 0.0025:
+                        for idx, trim in enumerate(prefs().get_active_trim_slot().trims_preset):
                             if self.drag_trim.trim == trim:
                                 is_remove = True
                                 prefs().get_active_trim_slot().trims_preset.remove(idx)
@@ -1368,21 +1286,21 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
                 self.trim_kdtree = None
                 self.update_dynamic_data()
 
-        elif event.type in ("LEFT_ALT", "RIGHT_ALT"):  # Proportional move
+        elif event.type in ('LEFT_ALT', 'RIGHT_ALT'):  # Proportional move
             self.change_prev_set_pos_for_call_update()
-        elif event.value == "PRESS":
-            if event.type == "K" and not self.is_edit:
+        elif event.value == 'PRESS':
+            if event.type == 'K' and not self.is_edit:
                 TrimFlags.use_knife ^= 1
                 self.update_dynamic_data()
 
-            elif event.type == "F" and TrimFlags.use_knife:
+            elif event.type == 'F' and TrimFlags.use_knife:
                 TrimFlags.use_knife_x_axis ^= 1
                 self.update_knife_line()
-            elif event.type == "C" and TrimFlags.use_knife:
+            elif event.type == 'C' and TrimFlags.use_knife:
                 TrimFlags.use_cut_through ^= 1
                 self.update_knife_line()
 
-            elif event.type == "P":
+            elif event.type == 'P':
                 TrimFlags.use_padding ^= 1
                 self.update_padding()
 
@@ -1391,19 +1309,17 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
                 self.trim_kdtree = None
                 self.update_dynamic_data()
 
-            elif (
-                event.type == "Z" and not self.is_edit and not event.alt and event.ctrl
-            ):
+            elif event.type == 'Z' and not self.is_edit and not event.alt and event.ctrl:
                 if not event.shift:
                     if self.history.undo():
                         self.update_dynamic_data()
-                        return {"RUNNING_MODAL"}
+                        return {'RUNNING_MODAL'}
                 else:
                     if self.history.redo():
                         self.update_dynamic_data()
-                        return {"RUNNING_MODAL"}
+                        return {'RUNNING_MODAL'}
 
-            elif event.type == "H" and not self.is_edit:
+            elif event.type == 'H' and not self.is_edit:
                 has_hidden = False
                 if event.alt:
                     for t in prefs().get_active_trim_slot().trims_preset:
@@ -1413,15 +1329,13 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
                     if has_hidden:
                         self.history.add()
                 else:
-                    min_dist = float("inf")
+                    min_dist = float('inf')
                     min_dist_trim = None
 
                     for t in prefs().get_active_trim_slot().trims_preset:
                         if t.visible:
                             bb = t.to_bbox()
-                            new_dist = bb.distance(
-                                self.mouse_position, 1 / self.aspect, True
-                            )
+                            new_dist = bb.distance(self.mouse_position, 1/self.aspect, True)
                             if new_dist <= self.radius and new_dist < min_dist:
                                 min_dist = new_dist
                                 min_dist_trim = t
@@ -1430,62 +1344,50 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
                         self.history.add()
 
                 self.update_dynamic_data()
-                return {"RUNNING_MODAL"}
+                return {'RUNNING_MODAL'}
 
-            elif event.type in ("X", "DEL") and not self.is_edit:
-                min_dist = float("inf")
+            elif event.type in ('X', 'DEL') and not self.is_edit:
+                min_dist = float('inf')
                 min_dist_trim = None
 
                 for t in prefs().get_active_trim_slot().trims_preset:
                     if t.visible:
                         bb = t.to_bbox()
-                        new_dist = bb.distance(
-                            self.mouse_position, 1 / self.aspect, True
-                        )
+                        new_dist = bb.distance(self.mouse_position, 1/self.aspect, True)
                         if new_dist <= self.radius and new_dist < min_dist:
                             min_dist = new_dist
                             min_dist_trim = t
 
                 if min_dist_trim:
-                    prefs().get_active_trim_slot().trims_preset.remove(
-                        min_dist_trim.get_index()
-                    )
+                    prefs().get_active_trim_slot().trims_preset.remove(min_dist_trim.get_index())
                     self.history.add()
 
                     self.update_dynamic_data()
-                return {"RUNNING_MODAL"}
+                return {'RUNNING_MODAL'}
 
-            elif event.type in ("NUMPAD_MINUS", "MINUS"):  # Resize Gizmo
+            elif event.type in ('NUMPAD_MINUS', 'MINUS'):  # Resize Gizmo
                 TrimFlags.gizmo_pixel_size -= 1
-                TrimFlags.gizmo_pixel_size = utils.clamp(
-                    TrimFlags.gizmo_pixel_size, 4, 16
-                )
+                TrimFlags.gizmo_pixel_size = utils.clamp(TrimFlags.gizmo_pixel_size, 4, 16)
                 self.gizmo_pixel_size = TrimFlags.gizmo_pixel_size
                 if self.aspect < 1:
                     self.gizmo_pixel_size *= round(1 / self.aspect)
-                return {"RUNNING_MODAL"}
-            elif event.type == "NUMPAD_PLUS" or (event.type == "EQUAL" and event.shift):
+                return {'RUNNING_MODAL'}
+            elif event.type == 'NUMPAD_PLUS' or (event.type == 'EQUAL' and event.shift):
                 TrimFlags.gizmo_pixel_size += 1
-                TrimFlags.gizmo_pixel_size = utils.clamp(
-                    TrimFlags.gizmo_pixel_size, 4, 16
-                )
+                TrimFlags.gizmo_pixel_size = utils.clamp(TrimFlags.gizmo_pixel_size, 4, 16)
                 self.gizmo_pixel_size = TrimFlags.gizmo_pixel_size
                 if self.aspect < 1:
                     self.gizmo_pixel_size *= round(1 / self.aspect)
-                return {"RUNNING_MODAL"}
+                return {'RUNNING_MODAL'}
 
-            elif event.type in {
-                "WHEELUPMOUSE",
-                "WHEELDOWNMOUSE",
-                "MIDDLEMOUSE",
-                "RIGHTMOUSE",
-            } and not any((event.alt, event.shift)):
-                if event.ctrl and event.type in ("WHEELUPMOUSE", "WHEELDOWNMOUSE"):
-                    return {"RUNNING_MODAL"}
+            elif event.type in {'WHEELUPMOUSE', 'WHEELDOWNMOUSE', 'MIDDLEMOUSE', 'RIGHTMOUSE'} and not any(
+                    (event.alt, event.shift)):
+                if event.ctrl and event.type in ('WHEELUPMOUSE', 'WHEELDOWNMOUSE'):
+                    return {'RUNNING_MODAL'}
                 self.update_dynamic_data()
-                return {"PASS_THROUGH"}
+                return {'PASS_THROUGH'}
 
-            elif event.type in {"ESC", "SPACE", "RET", "NUMPAD_ENTER"}:
+            elif event.type in {'ESC', 'SPACE', 'RET', 'NUMPAD_ENTER'}:
                 return self.exit()
 
         self.snap_status_update(event)
@@ -1493,37 +1395,30 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
         #  --------- Event End ---------
 
         if TrimFlags.use_knife:
-            context.window.cursor_modal_set("KNIFE")
-            return {"RUNNING_MODAL"}
+            context.window.cursor_modal_set('KNIFE')
+            return {'RUNNING_MODAL'}
 
         # PICK_AREA - for draw
         if not self.is_edit:
-            context.window.cursor_modal_set("PAINT_CROSS")
-            return {"RUNNING_MODAL"}
+            context.window.cursor_modal_set('PAINT_CROSS')
+            return {'RUNNING_MODAL'}
 
         if self.drag_trim:
             if self.drag_trim.is_draw:
-                context.window.cursor_modal_set("PAINT_CROSS")
-            elif self.drag_trim.picked_elem_type in (
-                PickedGizmoType.LEFT,
-                PickedGizmoType.RIGHT,
-            ):
-                context.window.cursor_modal_set("MOVE_X")
-            elif self.drag_trim.picked_elem_type in (
-                PickedGizmoType.TOP,
-                PickedGizmoType.BOTTOM,
-            ):
-                context.window.cursor_modal_set("MOVE_Y")
+                context.window.cursor_modal_set('PAINT_CROSS')
+            elif self.drag_trim.picked_elem_type in (PickedGizmoType.LEFT, PickedGizmoType.RIGHT):
+                context.window.cursor_modal_set('MOVE_X')
+            elif self.drag_trim.picked_elem_type in (PickedGizmoType.TOP, PickedGizmoType.BOTTOM):
+                context.window.cursor_modal_set('MOVE_Y')
             else:
-                context.window.cursor_modal_set("SCROLL_XY")
+                context.window.cursor_modal_set('SCROLL_XY')
+
+
 
         set_pos_to, set_pos_from = self.proceed_find_nearest_target_pt()
 
-        if (
-            self.prev_set_pos_to == set_pos_to
-            and self.prev_set_pos_from == set_pos_from
-        ):
-            return {"RUNNING_MODAL"}
+        if self.prev_set_pos_to == set_pos_to and self.prev_set_pos_from == set_pos_from:
+            return {'RUNNING_MODAL'}
 
         self.drag_trim.set_position(set_pos_to, set_pos_from, event.alt)
 
@@ -1533,7 +1428,7 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
 
         self.calc_draw_data()
         self.area.tag_redraw()
-        return {"RUNNING_MODAL"}
+        return {'RUNNING_MODAL'}
 
     def update_dynamic_data(self):
         self.soft_snap_x_coords = []
@@ -1556,35 +1451,35 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
     def exit(self):
         bpy.context.area.header_text_set(None)
         from ..draw import TrimDrawer
-
         TrimDrawer.pause = False
         TrimDrawer.register()
         bpy.context.window.cursor_modal_restore()
 
-        for area in utils.get_areas_by_type("IMAGE_EDITOR"):
-            if area.ui_type == "UV":
+        for area in utils.get_areas_by_type('IMAGE_EDITOR'):
+            if area.ui_type == 'UV':
                 area.tag_redraw()
 
         if not (self.handler is None):
-            bpy.types.SpaceImageEditor.draw_handler_remove(self.handler, "WINDOW")
+            bpy.types.SpaceImageEditor.draw_handler_remove(self.handler, 'WINDOW')
         bpy.context.preferences.is_dirty = True
-        return {"FINISHED"}
+        return {'FINISHED'}
 
     def snap_status_update(self, event):
         if bpy.context.scene.tool_settings.use_snap_uv:
-            if event.ctrl and event.value == "PRESS":
+            if event.ctrl and event.value == 'PRESS':
                 self.use_snap = False
-            elif event.type in ("LEFT_CTRL", "RIGHT_CTRL") and event.value == "RELEASE":
+            elif event.type in ('LEFT_CTRL', 'RIGHT_CTRL') and event.value == 'RELEASE':
                 self.use_snap = True
         else:
-            if event.ctrl and event.value == "PRESS":
+            if event.ctrl and event.value == 'PRESS':
                 self.use_snap = True
-            elif event.type in ("LEFT_CTRL", "RIGHT_CTRL") and event.value == "RELEASE":
+            elif event.type in ('LEFT_CTRL', 'RIGHT_CTRL') and event.value == 'RELEASE':
                 self.use_snap = False
 
-        if event.shift and event.value == "PRESS":
+
+        if event.shift and event.value == 'PRESS':
             self.use_soft_snap = False
-        elif event.type in ("LEFT_SHIFT", "RIGHT_SHIFT") and event.value == "RELEASE":
+        elif event.type in ('LEFT_SHIFT', 'RIGHT_SHIFT') and event.value == 'RELEASE':
             self.use_soft_snap = True
 
     def change_prev_set_pos_for_call_update(self):
@@ -1598,6 +1493,7 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
                 active_trim = None
                 if self.drag_trim:
                     active_trim = self.drag_trim.trim
+
 
                 tile_bounds = np.linspace(0.0, 1.0, 3)
                 coords = [Vector((x, y)) for x in tile_bounds for y in tile_bounds]
@@ -1628,27 +1524,33 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
                     coords.extend((bb.left, bb.right, bb.upper, bb.bottom, bb.center))
 
                     if TrimFlags.use_padding:
-                        coords.append(bb_min + pad_left)
-                        coords.append(bb_min + pad_bottom)
-                        coords.append(bb_min + pad_lb)
+                        coords.append(bb_min+pad_left)
+                        coords.append(bb_min+pad_bottom)
+                        coords.append(bb_min+pad_lb)
 
-                        coords.append(bb_max + pad_right)
-                        coords.append(bb_max + pad_top)
-                        coords.append(bb_max + pad_rt)
+                        coords.append(bb_max+pad_right)
+                        coords.append(bb_max+pad_top)
+                        coords.append(bb_max+pad_rt)
 
-                        coords.append(bb_lt + pad_top)
-                        coords.append(bb_lt + pad_left)
-                        coords.append(bb_lt + pad_lt)
+                        coords.append(bb_lt+pad_top)
+                        coords.append(bb_lt+pad_left)
+                        coords.append(bb_lt+pad_lt)
 
-                        coords.append(bb_rb + pad_right)
-                        coords.append(bb_rb + pad_bottom)
-                        coords.append(bb_rb + pad_rb)
+                        coords.append(bb_rb+pad_right)
+                        coords.append(bb_rb+pad_bottom)
+                        coords.append(bb_rb+pad_rb)
 
-                self.trim_kdtree = utils.KDTree_from_coords(coords, dimensions=2)
+                kd_tree = kdtree.KDTree(len(coords))
 
-            set_pos_to, _, dist = self.trim_kdtree.find(self.mouse_position)
+                insert = kd_tree.insert
+                for i, co in enumerate(coords):
+                    insert(co.to_3d(), i)
+                kd_tree.balance()
+                self.trim_kdtree = kd_tree
+
+            set_pos_to, _, dist = self.trim_kdtree.find(self.mouse_position.to_3d())
             if dist <= self.radius:
-                set_pos_to = set_pos_to.copy()  #  TODO: Remove copy ?
+                set_pos_to = set_pos_to.to_2d()
             else:
                 set_pos_to = self.mouse_position.copy()
             set_pos_from = self.drag_trim.get_nearest_pt_to_picked_trim()
@@ -1673,7 +1575,7 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
                 self.soft_snap_lines[1] = to_y
                 _, from_y = self.drag_trim.get_nearest_pt_to_picked_trim()
             set_pos_to = Vector((to_x, to_y))
-            set_pos_from = Vector((from_x, from_y))
+            set_pos_from =  Vector((from_x, from_y))
 
         else:
             set_pos_to = self.mouse_position.copy()
@@ -1681,9 +1583,7 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
         return set_pos_to, set_pos_from
 
     def calc_radius_and_mouse_position(self, event):
-        mouse_position = Vector(
-            self.view.region_to_view(event.mouse_region_x, event.mouse_region_y)
-        )
+        mouse_position = Vector(self.view.region_to_view(event.mouse_region_x, event.mouse_region_y))
         dist = prefs().max_pick_distance // 2
         self.radius = utils.get_max_distance_from_px(dist, self.view)
         self.mouse_position = mouse_position
@@ -1708,20 +1608,18 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
 
             coords_quadro = np.array(coords_quadro, dtype=np.float32)
 
-            coords_x_left = coords_quadro[0::4]
-            coords_x_right = coords_quadro[1::4]
-            coords_y_upper = coords_quadro[2::4]
+            coords_x_left   = coords_quadro[0::4]
+            coords_x_right  = coords_quadro[1::4]
+            coords_y_upper  = coords_quadro[2::4]
             coords_y_bottom = coords_quadro[3::4]
 
             if TrimFlags.use_padding:
-                coords_x_left_pad = coords_x_left - np.float32(self.pad_x)
-                coords_x_right_pad = coords_x_right + np.float32(self.pad_x)
-                coords_y_upper_pad = coords_y_upper + np.float32(self.pad_y)
+                coords_x_left_pad   = coords_x_left - np.float32(self.pad_x)
+                coords_x_right_pad  = coords_x_right + np.float32(self.pad_x)
+                coords_y_upper_pad  = coords_y_upper + np.float32(self.pad_y)
                 coords_y_bottom_pad = coords_y_bottom - np.float32(self.pad_y)
             else:
-                coords_x_left_pad = coords_x_right_pad = coords_y_upper_pad = (
-                    coords_y_bottom_pad
-                ) = []
+                coords_x_left_pad = coords_x_right_pad = coords_y_upper_pad = coords_y_bottom_pad = []
 
             center_x = coords_x_left + coords_x_right
             center_x *= np.float32(0.5)
@@ -1729,28 +1627,12 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
             center_y = coords_y_bottom + coords_y_upper
             center_y *= np.float32(0.5)
 
-            arr_x = [
-                [0.0],
-                coords_x_left_pad,
-                coords_x_left,
-                center_x,
-                coords_x_right,
-                coords_x_right_pad,
-                [0.5, 1.0],
-            ]
+            arr_x = [[0.0], coords_x_left_pad, coords_x_left, center_x, coords_x_right, coords_x_right_pad, [0.5, 1.0]]
             coords_x = np.concatenate(arr_x, dtype=np.float32)
             np.clip(coords_x, a_min=0.0, a_max=1.0, out=coords_x)
             self.soft_snap_x_coords = np.unique(np.sort(coords_x))
 
-            arr_y = [
-                [0.0],
-                coords_y_bottom_pad,
-                coords_y_bottom,
-                center_y,
-                coords_y_upper,
-                coords_y_upper_pad,
-                [0.5, 1.0],
-            ]
+            arr_y = [[0.0], coords_y_bottom_pad, coords_y_bottom, center_y, coords_y_upper, coords_y_upper_pad, [0.5, 1.0]]
             coords_y = np.concatenate(arr_y, dtype=np.float32)
             np.clip(coords_y, a_min=0.0, a_max=1.0, out=coords_y)
             self.soft_snap_y_coords = np.unique(np.sort(coords_y))
@@ -1766,26 +1648,26 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
         size_y = gizmo_size * aspect_y
 
         crn = bb.min + Vector((size_x, size_y))
-        gizmo_min = BBox(crn.x - size_x, crn.x + size_x, crn.y - size_y, crn.y + size_y)
+        gizmo_min = BBox(crn.x-size_x, crn.x+size_x, crn.y-size_y, crn.y+size_y)
 
         crn = bb.max - Vector((size_x, size_y))
-        gizmo_max = BBox(crn.x - size_x, crn.x + size_x, crn.y - size_y, crn.y + size_y)
+        gizmo_max = BBox(crn.x-size_x, crn.x+size_x, crn.y-size_y, crn.y+size_y)
 
         crn = bb.left_upper + Vector((size_x, -size_y))
-        gizmo_lu = BBox(crn.x - size_x, crn.x + size_x, crn.y - size_y, crn.y + size_y)
+        gizmo_lu = BBox(crn.x-size_x, crn.x+size_x, crn.y-size_y, crn.y+size_y)
 
         crn = bb.right_bottom + Vector((-size_x, size_y))
-        gizmo_rb = BBox(crn.x - size_x, crn.x + size_x, crn.y - size_y, crn.y + size_y)
+        gizmo_rb = BBox(crn.x-size_x, crn.x+size_x, crn.y-size_y, crn.y+size_y)
 
         # Sides
-        width_off = bb.half_width - size_x
+        width_off = (bb.half_width - size_x)
         if width_off < size_x * 3.5:
             width_off = size_x
         else:
             width_off = size_x * 3.0
         width_off *= 0.8
 
-        height_off = bb.half_height - size_y
+        height_off = (bb.half_height - size_y)
         if height_off < size_y * 3.5:
             height_off = size_y
         else:
@@ -1794,59 +1676,24 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
 
         side = bb.left
         side.x += size_x
-        gizmo_left = BBox(
-            side.x - size_x,
-            side.x + size_x * 0.25,
-            side.y - height_off,
-            side.y + height_off,
-        )
+        gizmo_left = BBox(side.x-size_x, side.x+size_x*0.25, side.y-height_off, side.y+height_off)
 
         side = bb.right
         side.x -= size_x
-        gizmo_right = BBox(
-            side.x - size_x * 0.25,
-            side.x + size_x,
-            side.y - height_off,
-            side.y + height_off,
-        )
+        gizmo_right = BBox(side.x-size_x*0.25, side.x+size_x, side.y-height_off, side.y+height_off)
 
         side = bb.upper
         side.y -= size_y
-        gizmo_upper = BBox(
-            side.x - width_off,
-            side.x + width_off,
-            side.y - size_y * 0.25,
-            side.y + size_y,
-        )
+        gizmo_upper = BBox(side.x-width_off, side.x+width_off, side.y-size_y*0.25, side.y+size_y)
 
         side = bb.bottom
         side.y += size_y
-        gizmo_bottom = BBox(
-            side.x - width_off,
-            side.x + width_off,
-            side.y - size_y,
-            side.y + size_y * 0.25,
-        )
+        gizmo_bottom = BBox(side.x-width_off, side.x+width_off, side.y-size_y, side.y+size_y*0.25)
 
         center = bb.center
-        gizmo_center = BBox(
-            center.x - cross_off_x,
-            center.x + cross_off_x,
-            center.y - cross_off_y,
-            center.y + cross_off_y,
-        )
+        gizmo_center = BBox(center.x - cross_off_x, center.x + cross_off_x, center.y - cross_off_y, center.y + cross_off_y)
 
-        return [
-            gizmo_min,
-            gizmo_max,
-            gizmo_lu,
-            gizmo_rb,
-            gizmo_left,
-            gizmo_right,
-            gizmo_upper,
-            gizmo_bottom,
-            gizmo_center,
-        ]
+        return [gizmo_min, gizmo_max, gizmo_lu, gizmo_rb, gizmo_left, gizmo_right, gizmo_upper, gizmo_bottom, gizmo_center]
 
     def get_first_soft_snap_pos(self):
         find_x, find_y = self.find_nearest_soft_snap_pos(self.mouse_position)
@@ -1870,12 +1717,14 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
         line_opacity = prefs().trim_line_opacity
         tris_opacity = prefs().trim_tris_opacity
 
+
         aspect_x = min(1.0, 1.0 / self.aspect)
         aspect_y = min(1.0, self.aspect)
 
         gizmo_size = self.gizmo_size * self.gizmo_size_draw_multiplayer
         size_x = gizmo_size * aspect_x * 2.0
         size_y = gizmo_size * aspect_y * 2.0
+
 
         for trim in prefs().get_active_trim_slot().trims_preset:
             if not trim.visible:
@@ -1892,6 +1741,7 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
                 cross_size_x = min_size * aspect_x
                 cross_size_y = min_size * aspect_y
 
+
             center = bb.center
             lines.append(center - Vector((cross_size_x, 0)))
             lines.append(center + Vector((cross_size_x, 0)))
@@ -1905,21 +1755,13 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
             tris_colors.extend([[*trim.color, tris_opacity + 0.15]] * (1 * 2 * 3))
 
             if not self.is_edit:
-                gizmos = self.calc_gizmo(
-                    bb, aspect_x, aspect_y, cross_size_x, cross_size_y, gizmo_size
-                )[:8]
+                gizmos = self.calc_gizmo(bb, aspect_x, aspect_y, cross_size_x, cross_size_y, gizmo_size)[:8]
                 for giz_bb in gizmos:
                     tris.extend(giz_bb.draw_data_tris())
-                tris_colors.extend(
-                    [[*trim.color, 1.0]] * (8 * 2 * 3)
-                )  # bbox * two_tris * tree_points
+                tris_colors.extend([[*trim.color, 1.0]] * (8 * 2 * 3))  # bbox * two_tris * tree_points
 
-        self.batch_lines = batch_for_shader(
-            self.line_shader, "LINES", {"pos": lines, "color": lines_colors}
-        )
-        self.batch_tris = batch_for_shader(
-            self.tris_shader, "TRIS", {"pos": tris, "color": tris_colors}
-        )
+        self.batch_lines = batch_for_shader(self.line_shader, 'LINES', {"pos": lines, 'color': lines_colors})
+        self.batch_tris = batch_for_shader(self.tris_shader, 'TRIS', {"pos": tris, 'color': tris_colors})
 
     def update_knife_line(self):
         """NOTE: Need actual mouse position"""
@@ -1947,8 +1789,7 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
 
     def register_draw(self):
         self.handler = bpy.types.SpaceImageEditor.draw_handler_add(
-            self.univ_quick_snap_draw_callback, (), "WINDOW", "POST_VIEW"
-        )
+            self.univ_quick_snap_draw_callback, (), 'WINDOW', 'POST_VIEW')
         self.area.tag_redraw()
 
     def univ_quick_snap_draw_callback(self):
@@ -1959,19 +1800,17 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
         shaders.blend_set_alpha()
         self.line_shader.bind()
 
+
         # shaders.set_line_width_vk(TrimDrawer.shader, line_width)
         try:
             self.line_shader.uniform_float("viewportSize", gpu.state.viewport_get()[2:])
             self.line_shader.uniform_float("lineWidth", prefs().trim_line_width)
-        except:  # noqa
-            pass
+        except: pass  # noqa
 
         self.batch_lines.draw(self.line_shader)
         self.batch_tris.draw(self.tris_shader)
 
-        if (
-            not self.use_snap and self.use_soft_snap and self.drag_trim
-        ) or TrimFlags.use_knife:
+        if (not self.use_snap and self.use_soft_snap and self.drag_trim) or TrimFlags.use_knife:
             lines = []
             if self.soft_snap_lines[0] is not None:
                 x = self.soft_snap_lines[0]
@@ -1985,10 +1824,8 @@ class UNIV_OT_TrimEditor(bpy.types.Operator):
 
             if lines:
                 if TrimFlags.use_knife and TrimFlags.use_cut_through:
-                    colors = [Vector((1.0, 0.1, 0.1, 0.7))] * len(lines)
+                    colors = [Vector((1.0,0.1,0.1,0.7))] * len(lines)
                 else:
-                    colors = [Vector((1, 1, 1, 0.3))] * len(lines)
-                soft_line_batch = batch_for_shader(
-                    self.line_shader, "LINES", {"pos": lines, "color": colors}
-                )
+                    colors = [Vector((1,1,1,0.3))] * len(lines)
+                soft_line_batch = batch_for_shader(self.line_shader, 'LINES', {"pos": lines, 'color': colors})
                 soft_line_batch.draw(self.line_shader)

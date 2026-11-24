@@ -6,179 +6,153 @@ import bpy
 import math
 import bmesh
 
-from mathutils import Vector
 from bpy.props import *
 from bpy.types import Operator
 from collections.abc import Callable
-from bmesh.types import BMFace
-
+from bmesh.types import BMEdge, BMFace
 
 from .. import utils
-from .. import utypes
-from ..utypes import AdvIsland, Islands, MeshIslands, UMeshes, AdvEdge3D, AdvCorner
+from ..utypes import AdvIsland, Islands, MeshIslands, UMeshes
 from ..operators import select
 
 
 # noinspection PyTypeHints
 class UNIV_OT_Select_Flat(Operator):
-    bl_idname = "uv.univ_select_flat"
-    bl_label = "Flat"
+    bl_idname = 'uv.univ_select_flat'
+    bl_label = 'Flat'
     bl_description = "Select linked flat faces"
-    bl_options = {"REGISTER", "UNDO"}
+    bl_options = {'REGISTER', 'UNDO'}
 
-    angle: FloatProperty(
-        name="Angle",
-        default=math.radians(15),
-        min=math.radians(0.1),
-        max=math.radians(180),
-        soft_min=math.radians(1),
-        soft_max=math.radians(89),
-        subtype="ANGLE",
-    )
-    clamp_by_seams: BoolProperty(name="Clamp by Seams", default=True)
-    grow_method: EnumProperty(
-        name="Grow Method",
-        default="ABSOLUTE",
-        items=(("ABSOLUTE", "Absolute", ""), ("RELATIVE", "Relative", "")),
-    )
+    angle: FloatProperty(name='Angle',
+                         default=math.radians(15),
+                         min=math.radians(0.1),
+                         max=math.radians(180),
+                         soft_min=math.radians(1),
+                         soft_max=math.radians(89),
+                         subtype='ANGLE'
+                         )
+    clamp_by_seams: BoolProperty(name='Clamp by Seams', default=True)
+    grow_method: EnumProperty(name='Grow Method', default='ABSOLUTE',
+                              items=(('ABSOLUTE', 'Absolute', ''), ('RELATIVE', 'Relative', '')))
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.umeshes: UMeshes | None = None
+        self.need_sync_validation_check = False
 
     @classmethod
     def poll(cls, context):
-        return context.mode == "EDIT_MESH"
+        return context.mode == 'EDIT_MESH'
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(self, "angle", slider=True)
-        layout.prop(self, "clamp_by_seams")
-        layout.row(align=True).prop(self, "grow_method", expand=True)
+        layout.prop(self, 'angle', slider=True)
+        layout.prop(self, 'clamp_by_seams')
+        layout.row(align=True).prop(self, 'grow_method', expand=True)
 
     def invoke(self, context, event):
-        if event.value == "PRESS":
+        if event.value == 'PRESS':
             return self.execute(context)
 
-        self.grow_method = "RELATIVE" if event.alt else "ABSOLUTE"
+        self.grow_method = 'RELATIVE' if event.alt else 'ABSOLUTE'
         return self.execute(context)
 
     def execute(self, context):
-        umeshes = UMeshes(report=self.report)
-        umeshes.update_tag = False
+        self.umeshes = UMeshes(report=self.report)
+        self.umeshes.filter_by_partial_selected_uv_faces()
+        self.umeshes.update_tag = False
 
-        if not umeshes:
-            self.report({"WARNING"}, "Not found selected faces to extend selection.")
-            return {"CANCELLED"}
+        if not self.umeshes:
+            self.report({'WARNING'}, "Not found selected faces to extend selection.")
+            return {'CANCELLED'}
 
-        need_sync_validation_check = False
-        if umeshes.sync:
+        self.need_sync_validation_check = False
+        if self.umeshes.sync:
             if utils.USE_GENERIC_UV_SYNC:
-                need_sync_validation_check = umeshes.elem_mode in ("VERT", "EDGE")
+                self.need_sync_validation_check = self.umeshes.elem_mode in ('VERT', 'EDGE')
 
         # TODO: For pick system cache face by angle
 
-        if self.grow_method == "ABSOLUTE":
-            self.select_absolute_uv(umeshes, need_sync_validation_check)
+        if self.grow_method == 'ABSOLUTE':
+            self.select_absolute_uv()
         else:
-            umeshes.filter_by_partial_selected_uv_faces()
-            self.select_relative_uv(umeshes, need_sync_validation_check)
-        umeshes.update(info="Not found flat linked faces for extend selection.")
-        return {"FINISHED"}
+            self.select_relative_uv()
+        self.umeshes.update(info="Not found flat linked faces for extend selection.")
+        return {'FINISHED'}
 
-    def select_absolute_uv(self, umeshes: UMeshes, need_sync_validation_check: bool):
-        cos_angle = math.cos(self.angle)
-        for umesh in umeshes:
-            if umesh.is_full_face_deselected:
-                continue
-            if umesh.is_full_face_selected_for_avoid_force_explicit_check:
-                continue
 
-            get_face_select = utils.face_select_get_func(umesh)
+    def select_absolute_uv(self):
+        for umesh in self.umeshes:
             is_boundary = utils.is_boundary_func(umesh, with_seam=self.clamp_by_seams)
+            if self.clamp_by_seams:
+                islands = Islands.calc_partial_selected(umesh)
+            else:
+                islands = Islands.calc_partial_selected_without_ms(umesh)
 
-            # Find the first layer of unselected faces connected to selected faces.
-            # Each face stores the normal of the selected face it was reached from
-            step = self.select_absolute_uv_first_step(umesh)
-            visited = set(step.keys())
+            for isl in islands:
+                isl.tag_selected_faces()
 
-            # Propagate the absolute normal through connected unselected faces.
-            # A face is accepted when the angle to the normal of the face it was
-            # reached from is within the specified threshold.
-            while step:
-                next_step: dict[BMFace, Vector] = {}
-                for grow_face, abs_face_normal in step.items():
-                    for crn in grow_face.loops:
-                        next_face = crn.link_loop_radial_prev.face
-
-                        if next_face in visited:
-                            continue
-
-                        if next_face in next_step:
-                            # TODO: Set abs_face in next_step by min angle.
-                            continue
-
-                        if is_boundary(crn):
-                            continue
-
-                        # Skip selected face.
-                        if get_face_select(next_face):
-                            continue
-
-                        # Dot angle, large = flatness.
-                        if abs_face_normal.dot(next_face.normal) >= cos_angle:
-                            # TODO: Allow this, used link_loop_radial_next and link_loop_radial_prev
-                            next_step[next_face] = abs_face_normal
-
-                visited.update(next_step.keys())
-                step = next_step
-
-            umesh.update_tag = bool(visited)
-
-            if need_sync_validation_check:
-                umesh.sync_from_mesh_if_needed()
-            # TODO: Replace with face_select_linked_full
-            AdvIsland(visited, umesh).select = True
-
-    def select_absolute_uv_first_step(self, umesh):
-        get_face_select = utils.face_select_get_func(umesh)
-        is_boundary = utils.is_boundary_func(umesh, with_seam=self.clamp_by_seams)
-
-        # Unselected linked to selected by angle faces.
-        visited: dict[BMFace, Vector] = {}
-
-        for abs_face in utils.calc_selected_uv_faces(umesh):
-            for abs_crn in abs_face.loops:
-                pair_unsel_face = abs_crn.link_loop_radial_prev.face
-                if get_face_select(pair_unsel_face) or pair_unsel_face in visited:
-                    continue
-
-                if is_boundary(abs_crn):
-                    continue
-
-                min_angle = float("inf")
-                min_angle_sel_face: BMFace | None = None
-
-                # A face can be connected to multiple selected faces.
-                # Use the selected neighbor with the smallest face angle.
-                for crn in pair_unsel_face.loops:
-                    edge = crn.edge
-                    face_angle = edge.calc_face_angle(
-                        180.1
-                    )  # TODO: Check invalid when non-contiguous ???
-                    if face_angle > min_angle or face_angle >= self.angle:
+                stack = []
+                selected_faces = []
+                for f in isl:
+                    if f.tag:
                         continue
+                    min_angle = float('inf')
+                    min_angle_face = None
+                    for crn in f.loops:
+                        new_face_angle = crn.edge.calc_face_angle(999.0)
+                        if new_face_angle <= self.angle:
+                            pair_crn = crn.link_loop_radial_prev
+                            if pair_crn.face.tag and not is_boundary(crn):
+                                if new_face_angle < min_angle:
+                                    min_angle = new_face_angle
+                                    min_angle_face = crn.face
+                    if min_angle_face:
+                        selected_faces.append(min_angle_face)
+                        stack.append(f)
+                if not selected_faces:
+                    continue
+                for f in isl:
+                    f.index = -1
+                isl.umesh.update_tag = True
 
-                    if is_boundary(crn):
-                        continue
+                normals = [f.normal for f in selected_faces]
 
-                    selected_neighbor = crn.link_loop_radial_prev.face
-                    if get_face_select(selected_neighbor):
-                        min_angle = face_angle
-                        min_angle_sel_face = selected_neighbor
+                for idx, stack_face in enumerate(stack):
+                    stack_face.index = idx
+                    stack_face.tag = True
 
-                if min_angle_sel_face:
-                    visited[pair_unsel_face] = min_angle_sel_face.normal
-        return visited
+                cos_angle = math.cos(self.angle)
+                while stack:
+                    temp = []
+                    for stack_face in stack:
+                        stack_face_idx = stack_face.index
+                        for crn in stack_face.loops:
+                            pair_crn = crn.link_loop_radial_prev
+                            pair_crn_face = pair_crn.face
 
-    def select_relative_uv(self, umeshes: UMeshes, need_sync_validation_check: bool):
-        for umesh in umeshes:
+                            if pair_crn_face.tag or is_boundary(crn):
+                                continue
+
+                            angle_cos = normals[stack_face_idx].dot(pair_crn_face.normal)
+                            if angle_cos >= cos_angle:
+                                if pair_crn_face.index == -1:
+                                    pair_crn_face.index = stack_face_idx
+                                    temp.append(pair_crn_face)
+                                else:
+                                    angle_cos_first = normals[pair_crn_face.index].dot(pair_crn_face.normal)
+                                    if angle_cos > angle_cos_first:
+                                        pair_crn_face.index = stack_face_idx
+
+                    if self.need_sync_validation_check:
+                        umesh.sync_from_mesh_if_needed()
+                    AdvIsland(stack, umesh).select = True
+                    for f in temp:
+                        f.tag = True
+                    stack = temp
+
+    def select_relative_uv(self):
+        for umesh in self.umeshes:
             is_boundary = utils.is_boundary_func(umesh, with_seam=self.clamp_by_seams)
             Islands.tag_filter_non_selected(umesh)
             selected_faces = []
@@ -200,124 +174,114 @@ class UNIV_OT_Select_Flat(Operator):
                     temp = []
 
             if selected_faces:
-                if need_sync_validation_check:
+                if self.need_sync_validation_check:
                     umesh.sync_from_mesh_if_needed()
                 AdvIsland(selected_faces, umesh).select = True
                 umesh.update_tag = True
 
 
 class UNIV_OT_Select_Flat_VIEW3D(UNIV_OT_Select_Flat):
-    bl_idname = "mesh.univ_select_flat"
+    bl_idname = 'mesh.univ_select_flat'
 
     def execute(self, context):
-        umeshes = UMeshes.calc_with_no_uv(report=self.report, verify_uv=False)
-        umeshes.set_sync()
-        umeshes.sync_invalidate()
+        self.umeshes = UMeshes.calc(report=self.report, verify_uv=False)
+        self.umeshes.set_sync()
+        self.umeshes.sync_invalidate()
 
-        umeshes.update_tag = False
-        if not umeshes:
-            self.report({"WARNING"}, "Not found selected faces to extend selection.")
-            return {"CANCELLED"}
+        self.umeshes.filter_by_partial_selected_uv_faces()
+        self.umeshes.update_tag = False
+        if not self.umeshes:
+            self.report({'WARNING'}, "Not found selected faces to extend selection.")
+            return {'CANCELLED'}
 
-        if self.grow_method == "ABSOLUTE":
-            self.select_absolute_3d(umeshes)
+        if self.grow_method == 'ABSOLUTE':
+            self.select_absolute_3d()
         else:
-            umeshes.filter_by_partial_selected_uv_faces()
-            self.select_relative_3d(umeshes)
+            self.select_relative_3d()
 
-        umeshes.update(info="Not found linked flat faces for extend selection.")
-        return {"FINISHED"}
+        self.umeshes.update(info="Not found linked flat faces for extend selection.")
+        return {'FINISHED'}
 
-    def select_absolute_3d(self, umeshes: UMeshes):
-        cos_angle = math.cos(self.angle)
-        for umesh in umeshes:
-            if umesh.is_full_face_selected or umesh.is_full_face_deselected:
-                continue
+    def select_absolute_3d(self):
+        for umesh in self.umeshes:
+            if self.clamp_by_seams:
+                # TODO: Replace islands with visited set for speedup.
+                # Need iterate over all selected faces, collect their normals,
+                # and sort them by the smallest growth angles.
 
-            # Find the first layer of unselected faces connected to selected faces.
-            # Each face stores the normal of the selected face it was reached from
-            step = self.select_absolute_3d_first_step(umesh)
-            visited = set(step.keys())
+                # Then, for each grown face, iterate over neighboring selected and already grown faces and take the smallest vectors from them.
+                islands = MeshIslands.calc_partial_selected(umesh)
+            else:
+                islands = MeshIslands.calc_partial_selected_without_ms(umesh)
 
-            # Propagate the absolute normal through connected unselected faces.
-            # A face is accepted when the angle to the normal of the face it was
-            # reached from is within the specified threshold.
-            while step:
-                next_step: dict[BMFace, Vector] = {}
-                for grow_face, abs_face_normal in step.items():
-                    for crn in grow_face.loops:
-                        next_face = crn.link_loop_radial_prev.face
+            for isl in islands:
+                isl.tag_selected_faces()
 
-                        if next_face in visited:
-                            continue
-
-                        if next_face in next_step:
-                            # TODO: Set abs_face in next_step by min angle.
-                            continue
-
-                        # Skip selected or hidden face.
-                        if next_face.select or next_face.hide:
-                            continue
-                        # Do not cross seams when seam clamping is enabled.
-                        if self.clamp_by_seams and crn.edge.seam:
-                            continue
-
-                        # Dot angle, large = flatness.
-                        if abs_face_normal.dot(next_face.normal) >= cos_angle:
-                            # TODO: Allow this, used link_loop_radial_next and link_loop_radial_prev
-                            next_step[next_face] = abs_face_normal
-
-                visited.update(next_step.keys())
-                step = next_step
-
-            umesh.update_tag = bool(visited)
-            for f in visited:
-                f.select = True
-
-    def select_absolute_3d_first_step(self, umesh):
-        import itertools
-
-        # Unselected linked to selected by angle faces.
-        visited: dict[BMFace, Vector] = {}
-
-        # Limit iteration using the known number of selected faces.
-        # This avoids traversing the whole face sequence when only a few faces
-        # are selected.
-        selected_faces_iter = (f for f in umesh.bm.faces if f.select)
-        # TODO: Add Early exit for utils (by few/lot selected faces)
-        for abs_face in itertools.islice(selected_faces_iter, umesh.total_face_sel):
-            for abs_crn in abs_face.loops:
-                pair_unsel_face = abs_crn.link_loop_radial_prev.face
-                if pair_unsel_face.select or pair_unsel_face in visited:
+                stack = []
+                selected_faces = []
+                for f in isl:
+                    if f.tag:
+                        continue
+                    min_angle = float('inf')
+                    min_angle_face = None
+                    for crn in f.loops:
+                        face_angle = crn.edge.calc_face_angle(180.1)
+                        if face_angle <= self.angle:
+                            pair_crn = crn.link_loop_radial_prev
+                            if not (self.clamp_by_seams and crn.edge.seam) and pair_crn.face.tag:
+                                if face_angle < min_angle:
+                                    min_angle = face_angle
+                                    min_angle_face = crn.face
+                    if min_angle_face:
+                        selected_faces.append(min_angle_face)
+                        stack.append(f)
+                if not selected_faces:
                     continue
+                for f in isl:
+                    f.index = -1
 
-                min_angle = float("inf")
-                min_angle_sel_face: BMFace | None = None
+                normals = [f.normal for f in selected_faces]
 
-                # A face can be connected to multiple selected faces.
-                # Use the selected neighbor with the smallest face angle.
-                for crn in pair_unsel_face.loops:
-                    edge = crn.edge
-                    face_angle = edge.calc_face_angle(
-                        180.1
-                    )  # TODO: Check invalid when non-contiguous ???
-                    if face_angle > min_angle or face_angle >= self.angle:
-                        continue
+                for idx, stack_face in enumerate(stack):
+                    stack_face.index = idx
+                    stack_face.tag = True
 
-                    if self.clamp_by_seams and edge.seam:
-                        continue
+                cos_angle = math.cos(self.angle)
+                while stack:
+                    temp = []
+                    for stack_face in stack:
+                        stack_face_idx = stack_face.index
+                        for crn in stack_face.loops:
+                            pair_crn = crn.link_loop_radial_prev
+                            pair_crn_face = pair_crn.face
 
-                    selected_neighbor = crn.link_loop_radial_prev.face
-                    if selected_neighbor.select:
-                        min_angle = face_angle
-                        min_angle_sel_face = selected_neighbor
+                            if pair_crn_face.tag or pair_crn_face.hide or (self.clamp_by_seams and crn.edge.seam):
+                                continue
 
-                if min_angle_sel_face:
-                    visited[pair_unsel_face] = min_angle_sel_face.normal
-        return visited
+                            angle_cos = normals[stack_face_idx].dot(pair_crn_face.normal)
+                            if angle_cos >= cos_angle:
+                                if pair_crn_face.index == -1:
+                                    pair_crn_face.index = stack_face_idx
+                                    temp.append(pair_crn_face)
+                                else:
+                                    try:
+                                        # Three and more linked face case.
+                                        # TODO: Allow this, used link_loop_radial_next and link_loop_radial_prev
+                                        angle_cos_first = normals[pair_crn_face.index].dot(pair_crn_face.normal)
+                                    except IndexError:
+                                        continue
+                                    if angle_cos > angle_cos_first:
+                                        pair_crn_face.index = stack_face_idx
 
-    def select_relative_3d(self, umeshes: UMeshes):
-        for umesh in umeshes:
+                    umesh.sync_valid = False
+                    isl.umesh.update_tag = True
+                    AdvIsland(stack, umesh).select = True
+                    for f in temp:
+                        f.tag = True
+                    stack = temp
+
+    def select_relative_3d(self):
+        for umesh in self.umeshes:
             MeshIslands.tag_filter_non_selected(umesh)
             selected_faces = []
             for f in utils.calc_selected_uv_faces(umesh):
@@ -343,567 +307,838 @@ class UNIV_OT_Select_Flat_VIEW3D(UNIV_OT_Select_Flat):
                 umesh.update_tag = True
 
 
-class UNIV_OT_Select_Loop_VIEW2D(select.UNIV_OT_Select_Edge_Grow_Base):
-    bl_label = "Loop"
-    bl_idname = "uv.univ_select_loop"
-    bl_description = "Edge Loop Select\n\n" "Has [Alt + Scroll Up/Down] keymap"
+class CrnEdgeGrow:
+    def __init__(self, crn: bmesh.types.BMLoop, uv, invert=False):
+        self.crn = crn
+        self.invert: bool = invert
+        self.uv = uv
+        self._vec = None
+        self.is_pair = None
 
-    # noinspection PyTypeHints
-    use_aspect: BoolProperty(name="Correct Aspect", default=True)
+    @property
+    def vec(self):
+        if not self._vec:
+            if self.invert:
+                self._vec = self.crn.link_loop_prev[self.uv].uv - self.crn[self.uv].uv
+            else:
+                self._vec = self.crn.link_loop_next[self.uv].uv - self.crn[self.uv].uv
+        return self._vec
+
+    @vec.setter
+    def vec(self, v):
+        self._vec = v
+
+    def angle(self, other: 'typing.Self', max_angle: float):
+        # TODO: Use extrapolate vector
+        # 2D
+        # a = Vector((0.34202, 0.939693))
+        # b = Vector((0.642788, 0.766044))
+        # extrapolate_vector = b @ Matrix.Rotation(a.angle_signed(b), 2)
+
+        # 3D
+        # # Rotate around axis (axis is the normal to the plane A and B)
+        # axis = a.cross(b).normalized()
+        # theta = a.angle(b)
+        #
+        # rotation_matrix = mathutils.Matrix.Rotation(theta, 4, axis)
+        # v_rotated = rotation_matrix @ b
+        return self.vec.angle(other.vec, max_angle)  # noqa
+
+    @property
+    def is_pair(self):
+        if self._is_pair is None:
+            if self.invert:
+                pair = self.crn.link_loop_prev.link_loop_radial_prev
+                self._is_pair = utils.is_pair_by_idx(self.crn.link_loop_prev, pair, self.uv)
+            else:
+                pair = self.crn.link_loop_radial_prev
+                self._is_pair = utils.is_pair_by_idx(self.crn, pair, self.uv)
+        return self._is_pair
+
+    @is_pair.setter
+    def is_pair(self, v):
+        self._is_pair = v
+
+    def linked_edges(self):
+        linked = []
+        uv = self.uv
+        idx = self.crn.face.index
+        if self.is_pair:
+            pair = self.crn.link_loop_radial_prev
+            uv_co = pair[uv].uv
+            pair_prev = pair.link_loop_prev
+            if not pair_prev.tag:
+                # boundary invert add
+                if not utils.is_pair_by_idx(pair_prev, pair_prev.link_loop_radial_prev, uv):
+                    eg = CrnEdgeGrow(self.crn, uv, True)
+                    eg.is_pair = False
+                    linked.append(eg)
+
+            for crn in pair.vert.link_loops:
+                if crn.face.index == idx and not crn.tag and crn[uv].uv == uv_co:
+                    if crn != pair:
+                        if utils.is_pair_by_idx(crn, crn.link_loop_radial_prev, uv):
+                            eg = CrnEdgeGrow(crn, uv)
+                            eg.is_pair = True
+                            linked.append(eg)
+                        else:
+                            # boundary add
+                            eg = CrnEdgeGrow(crn, uv)
+                            eg.is_pair = False
+                            linked.append(eg)
+
+                        # boundary invert add
+                        prev_crn = crn.link_loop_prev
+                        if not utils.is_pair_by_idx(prev_crn, prev_crn.link_loop_radial_prev, uv) and \
+                                prev_crn != self.crn and not prev_crn.tag:
+                            eg = CrnEdgeGrow(crn, uv, True)
+                            eg.is_pair = False
+                            linked.append(eg)
+
+        else:
+            if self.invert:
+                prev_crn = self.crn.link_loop_prev
+                uv_co = prev_crn[uv].uv
+
+                prev_crn_prev = prev_crn.link_loop_prev
+                if not prev_crn_prev.tag:
+                    # boundary invert add
+                    if not utils.is_pair_by_idx(prev_crn_prev, prev_crn_prev.link_loop_radial_prev, uv):
+                        eg = CrnEdgeGrow(prev_crn, uv, True)
+                        eg.is_pair = False
+                        linked.append(eg)
+
+                for crn in prev_crn.vert.link_loops:
+                    if crn.face.index == idx and not crn.tag and crn[uv].uv == uv_co:
+                        if crn != prev_crn:
+                            if utils.is_pair_by_idx(crn, crn.link_loop_radial_prev, uv):
+                                eg = CrnEdgeGrow(crn, uv)
+                                eg.is_pair = True
+                                linked.append(eg)
+                            else:
+                                # boundary add
+                                eg = CrnEdgeGrow(crn, uv)
+                                eg.is_pair = False
+                                linked.append(eg)
+
+                            # boundary invert add
+                            prev_crn_ = crn.link_loop_prev
+                            if not utils.is_pair_by_idx(prev_crn_, prev_crn_.link_loop_radial_prev, uv) and \
+                                    prev_crn_ != self.crn and not prev_crn_.tag:
+                                eg = CrnEdgeGrow(crn, uv, True)
+                                eg.is_pair = False
+                                linked.append(eg)
+            else:
+                next_crn = self.crn.link_loop_next
+                uv_co = next_crn[uv].uv
+
+                # add pair
+                if utils.is_pair_by_idx(next_crn, next_crn.link_loop_radial_prev, uv):
+                    eg = CrnEdgeGrow(next_crn, uv)
+                    eg.is_pair = True
+                    linked.append(eg)
+
+                for crn in next_crn.vert.link_loops:
+                    if crn.face.index == idx and not crn.tag and crn[uv].uv == uv_co:
+                        if crn != next_crn:
+                            if utils.is_pair_by_idx(crn, crn.link_loop_radial_prev, uv):
+                                eg = CrnEdgeGrow(crn, uv)
+                                eg.is_pair = True
+                                linked.append(eg)
+                            else:
+                                # boundary add
+                                eg = CrnEdgeGrow(crn, uv)
+                                eg.is_pair = False
+                                linked.append(eg)
+
+                            # boundary invert add
+                            prev_crn_ = crn.link_loop_prev
+                            if not utils.is_pair_by_idx(prev_crn_, prev_crn_.link_loop_radial_prev, uv) and \
+                                    prev_crn_ != self.crn and not prev_crn_.tag:
+                                eg = CrnEdgeGrow(crn, uv, True)
+                                eg.is_pair = False
+                                linked.append(eg)
+        return linked
+
+    def linked_edges_contiguous(self):
+        # assert self.is_pair
+        linked = []
+        uv = self.uv
+        pair = self.crn.link_loop_radial_prev
+        idx = pair.face.index
+        uv_co = pair[uv].uv
+        for crn in pair.vert.link_loops:
+            if crn != pair and crn.face.index == idx and not crn.tag and crn[uv].uv == uv_co:
+                if utils.is_pair_by_idx(crn, crn.link_loop_radial_prev, uv):
+                    eg = CrnEdgeGrow(crn, uv)
+                    eg.is_pair = True
+                    linked.append(eg)
+        return linked
+
+    def linked_edges_boundary(self):
+        # assert not self.is_pair
+        linked = []
+        uv = self.uv
+        idx = self.crn.face.index
+
+        if self.invert:
+            prev_crn = self.crn.link_loop_prev
+            uv_co = prev_crn[uv].uv
+
+            prev_crn_prev = prev_crn.link_loop_prev
+            if not prev_crn_prev.tag:
+                # boundary invert add
+                if not utils.is_pair_by_idx(prev_crn_prev, prev_crn_prev.link_loop_radial_prev, uv):
+                    eg = CrnEdgeGrow(self.crn, uv, True)
+                    eg.is_pair = False
+                    linked.append(eg)
+
+            for crn in prev_crn.vert.link_loops:
+                if crn.face.index == idx and not crn.tag and crn[uv].uv == uv_co:
+                    if crn != prev_crn:
+                        if not utils.is_pair_by_idx(crn, crn.link_loop_radial_prev, uv):
+                            # boundary add
+                            eg = CrnEdgeGrow(crn, uv)
+                            eg.is_pair = False
+                            linked.append(eg)
+
+                        # boundary invert add
+                        prev_crn_ = crn.link_loop_prev
+                        if not utils.is_pair_by_idx(prev_crn_, prev_crn_.link_loop_radial_prev, uv) and \
+                                prev_crn_ != self.crn and not prev_crn_.tag:
+                            eg = CrnEdgeGrow(crn, uv, True)
+                            eg.is_pair = False
+                            linked.append(eg)
+        else:
+            next_crn = self.crn.link_loop_next
+            uv_co = next_crn[uv].uv
+
+            if not utils.is_pair_by_idx(next_crn, next_crn.link_loop_radial_prev, uv):
+                eg = CrnEdgeGrow(next_crn, uv)
+                eg.is_pair = False
+                linked.append(eg)
+
+            for crn in next_crn.vert.link_loops:
+                if crn.face.index == idx and not crn.tag and crn[uv].uv == uv_co:
+                    if crn != next_crn:
+                        if not utils.is_pair_by_idx(crn, crn.link_loop_radial_prev, uv):
+                            # boundary add
+                            eg = CrnEdgeGrow(crn, uv)
+                            eg.is_pair = False
+                            linked.append(eg)
+
+                        # boundary invert add
+                        prev_crn_ = crn.link_loop_prev
+                        if not utils.is_pair_by_idx(prev_crn_, prev_crn_.link_loop_radial_prev, uv) and \
+                                prev_crn_ != self.crn and not prev_crn_.tag:
+                            eg = CrnEdgeGrow(crn, uv, True)
+                            eg.is_pair = False
+                            linked.append(eg)
+        return linked
+
+    def has_clamp(self, check_seam):
+        uv = self.uv
+        crn = self.crn
+        idx = crn.face.index
+
+        if self.is_pair:
+            pair = crn.link_loop_radial_prev
+            uv_co = pair[uv].uv
+            if pair.link_loop_prev.tag or (check_seam and pair.link_loop_prev.edge.seam):
+                return True
+
+            for crn_ in pair.vert.link_loops:
+                if crn_ != pair and crn_.face.index == idx and crn_[uv].uv == uv_co:
+                    if crn_.tag or (check_seam and crn_.edge.seam):
+                        return True
+                    prev_crn = crn_.link_loop_prev
+                    if (prev_crn != crn and prev_crn.tag) or (check_seam and prev_crn.edge.seam):
+                        return True
+
+        elif self.invert:
+            prev_crn = crn.link_loop_prev
+            prev_prev_crn = prev_crn.link_loop_prev
+            if prev_prev_crn.tag or (check_seam and prev_prev_crn.edge.seam):
+                return True
+
+            uv_co = prev_crn[uv].uv
+            for crn_ in prev_crn.vert.link_loops:
+                if crn_ != prev_crn and crn_.face.index == idx and crn_[uv].uv == uv_co:
+                    if crn_.tag or (check_seam and crn_.edge.seam):
+                        return True
+                    prev_crn_ = crn_.link_loop_prev
+                    if prev_crn_ != crn and prev_crn_.tag or (check_seam and prev_crn_.edge.seam):
+                        return True
+        else:
+            next_crn = crn.link_loop_next
+            if next_crn.tag or (check_seam and next_crn.edge.seam):
+                return True
+
+            uv_co = next_crn[uv].uv
+            for crn_ in next_crn.vert.link_loops:
+                if crn_ != next_crn and crn_.face.index == idx and crn_[uv].uv == uv_co:
+                    if crn_.tag or (check_seam and crn_.edge.seam):
+                        return True
+                    prev_crn_ = crn_.link_loop_prev
+                    if prev_crn_ != crn and prev_crn_.tag or (check_seam and prev_crn_.edge.seam):
+                        return True
+        return False
+
+    def __hash__(self):
+        return hash(self.crn)
+
+    def __eq__(self, other):
+        return self.crn == other.crn and self.invert == other.invert
+
+
+class UNIV_OT_Select_Loop_VIEW2D(select.UNIV_OT_Select_Edge_Grow_Base):
+    bl_label = 'Loop'
+    bl_idname = 'uv.univ_select_loop'
+    bl_description = "Edge Loop Select\n\n" \
+                     "Has [Alt + Scroll Up/Down] keymap"
 
     def draw(self, context):
         layout = self.layout
         if self.grow:
-            layout.prop(self, "prioritize_sharps")
-        layout.prop(self, "boundary_by_boundary")
-        layout.prop(self, "ignore_seams")
-        layout.prop(self, "use_aspect")
-        layout.prop(self, "max_angle")
+            layout.prop(self, 'prioritize_sharps')
+        layout.prop(self, 'boundary_by_boundary')
+        layout.prop(self, 'clamp_on_seam')
+        layout.prop(self, 'max_angle')
 
     def execute(self, context):
-        umeshes = UMeshes(report=self.report)
-        umeshes.fix_context()
+        self.umeshes = UMeshes(report=self.report)
+        self.umeshes.fix_context()
 
-        if umeshes.elem_mode not in ("VERT", "EDGE"):
+        if self.umeshes.elem_mode not in ('VERT', 'EDGE'):
             # TODO: Implement loop select by face by 'edge apex'
             return bpy.ops.uv.univ_select_linked(deselect=False)  # noqa
 
-        umeshes.filter_by_partial_selected_uv_edges()
+        self.calc_islands = Islands.calc_extended_any_edge if self.clamp_on_seam else Islands.calc_extended_any_edge_without_ms
+        self.umeshes.filter_by_partial_selected_uv_edges()
 
-        if self.use_aspect:
-            umeshes.calc_aspect_ratio(from_mesh=False)
-        self.loop_select(umeshes)
+        self.loop_select()
 
-        umeshes.update(info="Not found edges for loop select")
-        return {"FINISHED"}
+        self.umeshes.update(info='Not found edges for loop select')
+        return {'FINISHED'}
 
-    def loop_select(self, umeshes: UMeshes):
+    def loop_select(self):
         from ..preferences import debug
+        for umesh in reversed(self.umeshes):
+            islands = self.calc_islands(umesh)  # noqa
+            if not islands:
+                self.umeshes.umeshes.remove(umesh)
+                continue
+            uv = umesh.uv
+            islands.indexing()
+            global_grow = []
+            for isl in islands:
+                grow = []
+                isl.set_selected_crn_edge_tag()
 
-        umeshes.update_tag = False
-        max_angle = math.nextafter(self.max_angle, float("inf"))
-
-        for umesh in umeshes:
-            stack = list(self.get_unique_selected_uv_corners_without_selected_faces_iter(umesh))
-            # assert len(stack) == len(exclude_edges), f"{len(stack) = }, {len(set(stack)) = }"
-
-            grow = self.loop_select_ex(umesh, stack, max_angle, self.ignore_seams, self.prioritize_sharps, self.boundary_by_boundary)
-            if grow:
-                if umesh.sync:
-                    umesh.sync_from_mesh_if_needed()
-
-                edge_select_set = utils.edge_select_linked_set_func(umesh)
-                for adv_crn in grow:
-                    edge_select_set(adv_crn.orig_crn, True)
-                umesh.update_tag = True
-
-                if debug():
-                    duplicates = len(grow) - len(set(grow))
-                    if duplicates:
-                        print(f"UniV Debug: Loop Select: Duplicate selection {duplicates}.")
-
-    @classmethod
-    def loop_select_ex(cls, umesh, stack: list[AdvCorner], max_angle: float, ignore_seams: bool, prioritize_sharps: bool, boundary_by_boundary: bool):
-        grow: list[AdvCorner] = []
-        exclude_edges = set()
-        is_boundary = utils.is_boundary_func(umesh, with_seam=False)
-        get_edge_select = utils.edge_select_get_func(umesh)
-
-        is_first_loop = True
-        while stack:
-            next_stack = []
-            for eg in stack:
-                left, right, is_cyclic = eg.get_linked_left_right_and_get_cyclic_status(is_boundary)
-                linked = left + right
-
-                # Clamp by seams or selection.
-                if ignore_seams or eg.orig_crn.edge.seam:
-                    if any(get_edge_select(adv_crn.orig_crn) for adv_crn in linked):
+                stack: list[CrnEdgeGrow] = []
+                exclude_pair = set()
+                for crn in isl.iter_corners_by_tag():
+                    if crn in exclude_pair:
                         continue
+
+                    if not self.boundary_by_boundary:
+                        pair = crn.link_loop_radial_prev
+                        if utils.is_pair_by_idx(crn, pair, uv):
+                            exclude_pair.add(pair)
+                            self.pair_stack_append(crn, pair, uv, stack)
+                        else:
+                            self.unpair_stack_append(crn, uv, stack)
+
+                    elif utils.is_pair_by_idx(crn, crn.link_loop_radial_prev, uv):
+                        pair = crn.link_loop_radial_prev
+                        exclude_pair.add(pair)
+                        self.pair_stack_append(crn, pair, uv, stack)
+                    else:  # boundary
+                        self.unpair_stack_append(crn, uv, stack)
+
+                exclude_edges = set()
+                max_angle = math.nextafter(self.max_angle, float('inf'))
+
+                while stack:
+                    temp = []
+                    for eg in stack:
+                        if self.clamp_on_seam:
+                            if eg.invert:
+                                check_seam = not eg.crn.link_loop_prev.edge.seam
+                            else:
+                                check_seam = not eg.crn.edge.seam
+                        else:
+                            check_seam = False
+
+                        if eg.has_clamp(check_seam):
+                            continue
+
+                        if not self.boundary_by_boundary:
+                            linked = eg.linked_edges()
+                        elif eg.is_pair:
+                            linked = eg.linked_edges_contiguous()
+                        else:
+                            linked = eg.linked_edges_boundary()
+
+                        # assert len(linked) == len(set(linked))
+                        # Grow without check angle
+                        if not self.boundary_by_boundary:
+                            if eg.is_pair:
+                                if len(eg.crn.link_loop_next.vert.link_loops) - \
+                                        1 == sum(pair_eg.is_pair for pair_eg in linked):
+                                    if self.grow_without_check_angle_or_with_prioritize(
+                                            eg, linked, exclude_edges, temp, max_angle):
+                                        continue
+                            else:
+                                if len(linked) == 2:
+                                    linked_boundary: list[CrnEdgeGrow] = [b_eg for b_eg in linked if not b_eg.is_pair]
+                                    if len(linked_boundary) == 1:
+                                        linked_boundary: CrnEdgeGrow = linked_boundary[0]
+                                        crn_with_pair = next(b_eg for b_eg in linked if b_eg.is_pair).crn
+
+                                        if len(crn_with_pair.face.loops) == 4 and len(crn_with_pair.link_loop_radial_prev.face.loops) == 4:
+                                            if linked_boundary not in exclude_edges:
+                                                temp.append(linked_boundary)
+                                                exclude_edges.add(linked_boundary)
+                                            continue
+                                        else:
+                                            angle = eg.angle(linked_boundary, max_angle) * 0.65
+                                            if angle <= max_angle:
+                                                if linked_boundary not in exclude_edges:
+                                                    temp.append(linked_boundary)
+                                                    exclude_edges.add(linked_boundary)
+                                                continue
+
+                        elif eg.is_pair:
+                            if len(eg.crn.link_loop_next.vert.link_loops) - 1 == len(linked):
+                                if self.grow_without_check_angle_or_with_prioritize(
+                                        eg, linked, exclude_edges, temp, max_angle):
+                                    continue
+                        else:  # boundary
+                            if len(linked) == 1:
+                                linked_edges = eg.linked_edges()
+                                if len(linked_edges) == 2:
+                                    if linked[0] in linked_edges:
+                                        linked_edges.remove(linked[0])
+                                        link_e = linked_edges[0]
+                                        if len(link_e.crn.face.loops) == 4 and len(link_e.crn.link_loop_radial_prev.face.loops) == 4:
+                                            if linked[0] not in exclude_edges:
+                                                temp.append(linked[0])
+                                                exclude_edges.add(linked[0])
+                                            continue
+                                    else:
+                                        angle = eg.angle(linked[0], max_angle) * 0.65
+                                        if angle <= max_angle:
+                                            if linked[0] not in exclude_edges:
+                                                temp.append(linked[0])
+                                                exclude_edges.add(linked[0])
+                                            continue
+
+                        min_eg = None
+                        min_angle = max_angle
+                        for ed_ in linked:
+                            angle = eg.angle(ed_, max_angle)
+                            if angle <= max_angle:
+                                if self.prioritize_sharps and not ed_.crn.edge.smooth:
+                                    angle *= 0.65
+                                if angle < min_angle:
+                                    min_eg = ed_
+                                    min_angle = angle
+                        if min_eg and min_eg not in exclude_edges:
+                            temp.append(min_eg)
+                            exclude_edges.add(min_eg)
+
+                    grow.append(stack)
+                    stack = temp
+
+                if grow:
+                    del grow[0]
+                    if grow:
+                        global_grow.append(grow)
+
+            if global_grow:
+                to_select = []
+                for grow_ in global_grow:
+                    for edge_group in grow_:
+                        for eg in edge_group:
+                            to_select.append(eg.crn.link_loop_prev if eg.invert else eg.crn)
+
+                if utils.USE_GENERIC_UV_SYNC:
+                    if umesh.sync:
+                        umesh.sync_from_mesh_if_needed()
+
+                    edge_select_set = utils.edge_select_linked_set_func(umesh)
+                    for crn in to_select:
+                        edge_select_set(crn, True)
+
+                    if debug():
+                        duplicates = len(to_select) - len(set(to_select))
+                        if duplicates:
+                            print(f"UniV Debug: Loop Select: Duplicate selection {duplicates}.")
                 else:
-                    if any(get_edge_select(adv_crn.orig_crn) or adv_crn.edge.seam for adv_crn in linked):
-                        continue
+                    edge_select_set = utils.edge_select_linked_set_func(umesh)
+                    for crn in to_select:
+                        edge_select_set(crn, True)
 
-                eg = eg.copy()
-                eg.toggle_dir()
-
-                # Grow without check angle
-                if is_cyclic:
-                    if cls.grow_without_check_angle_or_with_prioritize_contiguous(eg, linked, exclude_edges, next_stack, max_angle):  # fmt: skip
-                        continue
-                elif not eg.is_pair:
-                    if cls.grow_without_check_angle_or_with_prioritize_boundary(eg, exclude_edges, linked, next_stack, max_angle):
-                        continue
-
-                min_angle_adv_crn = cls.get_grow_by_angle_crn(eg, linked, max_angle, prioritize_sharps, boundary_by_boundary)
-                if min_angle_adv_crn and min_angle_adv_crn not in exclude_edges:
-                    exclude_edges.add(min_angle_adv_crn)
-
-                    other_dir = min_angle_adv_crn.copy()
-                    other_dir.toggle_dir()
-                    exclude_edges.add(other_dir)
-
-                    next_stack.append(other_dir)
-
-            if not is_first_loop:
-                grow.extend(stack)
-            is_first_loop = False
-            stack = next_stack
-        return grow
+                umesh.update()
 
     @staticmethod
-    def grow_without_check_angle_or_with_prioritize_contiguous(
-        eg: AdvCorner, linked: list[AdvCorner], exclude_edges: set[AdvCorner], next_stack: list[AdvCorner], max_angle: float
-    ):
-        """Grow when start edge has two same poly count faces and grew edge has two same poly count faces"""
-        # TODO: Add case with prioritize by (len(linked) % 2).
-
+    def grow_without_check_angle_or_with_prioritize(eg: CrnEdgeGrow, linked: list[CrnEdgeGrow], exclude_edges, temp, max_angle):
+        """ Grow when start edge has two same poly count faces and grew edge has two same poly count faces """
+        # case when has quadro faces
+        idx = eg.crn.face.index
         if len(linked) == 3:
-            is_grow = False
-            next_adv_crn = linked[1]
-
-            # A case where a next corner has the same number of polygons as its linked faces.
-            #  * - - - * - - - *
-            #  |   N   | ^  N  |
-            #  |       | |     |
-            #  * - - - * - - - *
-            #  |       | ^     |
-            #  *       | |     *
-            #  |       |       |
-            #  * - - - * - - - *
-            if len(next_adv_crn.face.loops) == len(next_adv_crn.pair_face.loops):
-                is_grow = True
-
-            if not is_grow:
-                # A case where a corner has the same number of polygons.
-                #           *
-                #         / | \
-                #       /   |   \
-                #     /     | ^   \
-                #   /       | |     \
-                #  *  - - - * - - -  *
-                #   \       | ^     /
-                #     \     | |   /
-                #       \   |   /
-                #         \ | /
-                #           *
-                face_size = len(eg.face.loops)
-                is_grow = all(face_size == len(l_adv_crn.face.loops) for l_adv_crn in linked)
-
-            if not is_grow:
-                # A case where linked faces have different polycounts.
-                #  * - * - * - - - *
-                #  |       |       |
-                #  |   N1  | ^ N1  |
-                #  |       | |     |
-                #  * - - - * - - - *
-                #  |       | ^    /
-                #  *   N2  | | T /
-                #  |       |    /
-                #  |       |   /
-                #  *       |  /
-                #  |       | /
-                #  |       |/
-                #  * - - - *
-
-                angle = eg.angle(next_adv_crn, max_angle) * 0.6
-                if angle < max_angle:
-                    is_grow = True
-
-            if is_grow:
-                if next_adv_crn in exclude_edges:
-                    return True  # Skip circular step without add.
-
-                next_grow = linked[1].copy()
-                next_grow.toggle_dir()
-                if next_grow not in exclude_edges:
-                    next_stack.append(next_grow)
-                    exclude_edges.add(next_grow)
-                exclude_edges.add(linked[1])
-                return True
-
-        elif len(linked) == 2:
-            # A case with prioritize one N-Gone and either two Quads or two Tris.
-            #  * - - - * - - - *
-            #  |       | ^     |
-            #  *       | | 3|4 |
-            #  |       |       |
-            #  *   N   * - - - *
-            #  |       | ^     |
-            #  *       | | 3|4 |
-            #  |       |       |
-            #  * - - - * - - - *
-            faces_gons_count = sorted(len(f.loops) for f in eg.crn.vert.link_faces)
-            if faces_gons_count[-1] >= 5 and faces_gons_count[:2] in ([3, 3], [4, 4]):
-                for l_adv_crn in linked:
-                    if any(len(f.loops) >= 5 for f in l_adv_crn.edge.link_faces):
-
-                        angle = eg.angle(l_adv_crn, max_angle) * 0.65
-                        if angle < max_angle:
-                            next_grow = l_adv_crn.copy()
-                            next_grow.toggle_dir()
-
-                            if l_adv_crn not in exclude_edges:
-                                next_stack.append(next_grow)
-                                exclude_edges.add(next_grow)
-                            exclude_edges.add(l_adv_crn)
+            if len(eg.crn.face.loops) == len(eg.crn.link_loop_radial_prev.face.loops):
+                left_next_face_crn_size = len(eg.crn.link_loop_next.link_loop_radial_prev.face.loops)
+                right_next_face_crn_size = len(
+                    eg.crn.link_loop_radial_prev.link_loop_prev.link_loop_radial_prev.face.loops)
+                if left_next_face_crn_size == right_next_face_crn_size:
+                    target_crn = eg.crn.link_loop_next.link_loop_radial_prev.link_loop_next
+                    for eg_ in linked:
+                        if eg_.crn == target_crn:
+                            if eg_ not in exclude_edges:
+                                temp.append(eg_)
+                                exclude_edges.add(eg_)
                             return True
-        # Case when has two shared N-Gone.
-        #  * - - - * - - - *
-        #  |       | |     |
-        #  |       |       *
-        #  *  N1   *   N2  |
-        #  |       | ^     *
-        #  |       | |     |
-        #  * - - - * - - - *
+        elif len(linked) == 2:
+            faces_gons_count = [len(f.loops) for f in eg.crn.vert.link_faces if f.index == idx]
+            faces_gons_count.sort()
+            if faces_gons_count[-1] >= 5 and faces_gons_count[:2] in ([3, 3], [4, 4]):
+                for eg_ in linked:
+                    if len(eg_.crn.face.loops) >= 5 or len(eg_.crn.link_loop_radial_prev.face.loops) >= 5:
+                        angle = eg.angle(eg_, max_angle) * 0.65
 
+                        if angle < max_angle and eg_ not in exclude_edges:
+                            temp.append(eg_)
+                            exclude_edges.add(eg_)
+                        return True
+        # case when has two shared faces
         elif len(linked) == 1:
-            l_adv_crn = linked[0]
-            angle = eg.angle(l_adv_crn, max_angle) * 0.65
-            if angle < max_angle:
-                next_grow = l_adv_crn.copy()
-                next_grow.toggle_dir()
-
-                if l_adv_crn not in exclude_edges:
-                    next_stack.append(next_grow)
-                    exclude_edges.add(next_grow)
-                exclude_edges.add(l_adv_crn)
-                return True
+            eg_ = linked[0]
+            angle = eg.angle(eg_, max_angle) * 0.65
+            if angle < max_angle and eg_ not in exclude_edges:
+                temp.append(eg_)
+                exclude_edges.add(eg_)
+            return True
         return False
 
     @staticmethod
-    def grow_without_check_angle_or_with_prioritize_boundary(adv_edge: AdvCorner,
-                                                             added_edges: set[AdvCorner],
-                                                             linked: list[AdvCorner],
-                                                             next_stack: list[AdvCorner],
-                                                             max_angle: float
-                                                             ):
+    def has_unselect_linked_corners_pair(crn, uv):
+        idx = crn.face.index
+        pair = crn.link_loop_radial_prev
+        uv_co = crn[uv].uv
 
-        assert not adv_edge.is_pair
-        # NOTE: Not replace contiguous with simple check. This does not take hidden linked faces into account.
-
-        if len(linked) == 2:
-            # Multi-bounds select case along two quads (or by angle with other bound with priority).
-            #   * - * - *
-            #   | F | F |
-            #   *   |   *
-            #    \  |  /
-            #  \  \ | /  /\
-            #  \/  \|/   /
-            #       *
-            linked_contiguous = [adv_crn for adv_crn in linked if adv_crn.is_pair]
-            if len(linked_contiguous) != 1:  # Nothing be happened.
-                raise ValueError(f"Given 3 boundary's corners, linked_crn incorrect worked.")
-                # return False
-            link_eg_with_pair = linked_contiguous[0]
-
-            linked_boundary = [b_eg for b_eg in linked if not b_eg.is_pair]
-            if len(linked_boundary) != 1:  # Nothing be happened.
-                raise ValueError(f"Given 2 contiguous corners, linked_crn incorrect worked.")
-                # return False
-            bound_edge = linked_boundary[0]
-
-            face_sizes = [len(f.loops) for f in link_eg_with_pair.edge.link_faces]
-            if any(f_size != 4 for f_size in face_sizes):
-                # Ignore prioritize for tris.
-                if 3 in face_sizes:
+        for crn__ in crn.vert.link_loops:
+            if crn__ != crn and crn__.face.index == idx and crn__[uv].uv == uv_co:
+                if crn__.tag:
                     return False
-
-                # Non-quads case, check other bound with priority.
-                angle = adv_edge.angle(bound_edge, max_angle) * 0.65
-                if max_angle < angle:
+                prev_crn = crn__.link_loop_prev
+                if prev_crn != pair and prev_crn.tag:
                     return False
+        return True
 
-            next_grow = bound_edge.copy()
-            next_grow.toggle_dir()
+    @staticmethod
+    def has_unselect_linked_corners_a(crn, uv):
+        idx = crn.face.index
+        uv_co = crn[uv].uv
 
-            if bound_edge not in added_edges:
-                next_stack.append(next_grow)
-                added_edges.add(next_grow)
-            added_edges.add(bound_edge)
-            return True
-        # The prioritization triangle usually gives an unnecessary result, so ignore the prioritization.
-        elif len(linked) == 1 and len(adv_edge.face.loops) != 3:
-            # Bounds with priority along single face.
-            #  * - * - *
-            #  | F | F |  /\
-            #  *   |   *  ||
-            #   \  |  /
-            #    \ | /  /\
-            #     \|/   /
-            #      *
+        if crn.link_loop_prev.tag:
+            return False
 
-            bound_edge = linked[0]
-            assert not bound_edge.is_pair
-            angle = adv_edge.angle(bound_edge, max_angle) * 0.65
+        for crn__ in crn.vert.link_loops:
+            if crn__ != crn and crn__.face.index == idx and crn__[uv].uv == uv_co:
+                if crn__.tag or crn__.link_loop_prev.tag:
+                    return False
+        return True
 
-            if angle <= max_angle:
-                get_linked_unordered_inc = utils.linked_crn_uv_to_vert_unordered_included_func(adv_edge.umesh)
+    @staticmethod
+    def has_unselect_linked_corners_b(crn, uv):
+        idx = crn.face.index
+        next_crn = crn.link_loop_next
+        uv_co = next_crn[uv].uv
 
-                if len(get_linked_unordered_inc(bound_edge.crn)) == 1: # Non-manifold preserve case.
-                    next_grow = bound_edge.copy()
-                    next_grow.toggle_dir()
+        if next_crn.tag:
+            return False
 
-                    if bound_edge not in added_edges:
-                        next_stack.append(next_grow)
-                        added_edges.add(next_grow)
-                    added_edges.add(bound_edge)
-                    return True
+        for crn__ in next_crn.vert.link_loops:
+            if crn__ != next_crn and crn__.face.index == idx and crn__[uv].uv == uv_co:
+                if crn__.tag or crn__.link_loop_prev.tag:
+                    return False
+        return True
 
+    def pair_stack_append(self, crn, pair, uv, stack):
+        if self.has_unselect_linked_corners_pair(crn, uv):
+            eg = CrnEdgeGrow(pair, uv)
+            eg.is_pair = True
+            stack.append(eg)
+        if self.has_unselect_linked_corners_pair(pair, uv):
+            eg = CrnEdgeGrow(crn, uv)
+            eg.is_pair = True
+            stack.append(eg)
+
+    def unpair_stack_append(self, crn, uv, stack):
+        if self.has_unselect_linked_corners_a(crn, uv):
+            eg = CrnEdgeGrow(crn.link_loop_next, uv, True)
+            eg.is_pair = False
+            stack.append(eg)
+        if self.has_unselect_linked_corners_b(crn, uv):
+            eg = CrnEdgeGrow(crn, uv)
+            eg.is_pair = False
+            stack.append(eg)
+
+
+class EdgeGrow:
+    def __init__(self, e, head_v):
+        self.e: BMEdge = e
+        self.head_v: bmesh.types.BMVert = head_v
+        self._vec = None
+
+    @property
+    def vec(self):
+        if not self._vec:
+            tail_v = self.e.other_vert(self.head_v)
+            self._vec = self.head_v.co - tail_v.co
+        return self._vec
+
+    @vec.setter
+    def vec(self, v):
+        self._vec = v
+
+    def angle(self, other: 'typing.Self', max_angle: float):
+        return self.vec.angle(other.vec, max_angle)  # noqa
+
+    def linked_edges_wire(self):
+        return [EdgeGrow(e, e.other_vert(self.head_v))
+                for e in self.head_v.link_edges if not e.hide and e.is_wire and e != self.e]
+
+    def linked_edges_contiguous(self):
+        return [EdgeGrow(e, e.other_vert(self.head_v)) for e in self.head_v.link_edges
+                if e != self.e and not e.hide and e.is_contiguous and all(not f.hide for f in self.e.link_faces)]
+
+    def linked_edges_boundary_by_boundary(self):
+        edges = []
+        for e in self.head_v.link_edges:
+            if e != self.e:
+                if not e.hide:
+                    if e.is_boundary:
+                        edges.append(EdgeGrow(e, e.other_vert(self.head_v)))
+                    elif sum(not f.hide for f in e.link_faces) == 1:
+                        edges.append(EdgeGrow(e, e.other_vert(self.head_v)))
+        return edges
+
+    def linked_edges_non_wire(self):
+        return [EdgeGrow(e, e.other_vert(self.head_v)) for e in self.head_v.link_edges
+                if e != self.e and not e.hide and not e.is_wire]
+
+    def linked_edges(self):
+        if self.is_wire:
+            return self.linked_edges_wire()
+        if self.is_contiguous:
+            return self.linked_edges_contiguous()
+        return self.linked_edges_boundary_by_boundary()
+
+    @property
+    def is_wire(self):
+        return self.e.is_wire
+
+    @property
+    def is_boundary(self):
+        return self.e.is_boundary or sum(not f.hide for f in self.e.link_faces) == 1
+
+    @property
+    def is_contiguous(self):
+        if self.e.is_contiguous:
+            return all(not f.hide for f in self.e.link_faces)
         return False
 
+    def __hash__(self):
+        return hash(self.e)
 
-class UNIV_OT_Select_Loop_Pick_VIEW2D(utypes.RayCastAndPick, UNIV_OT_Select_Loop_VIEW2D):
-    bl_label = "Loop Pick"
-    bl_idname = "uv.univ_select_loop_pick"
-    bl_description = "Edge Loop Select Pick\n\n" "Has [Double LMB] and [Shift + Double LMB] keymap"
-
-    def invoke(self, context, event):
-        if not (context.area.type == "IMAGE_EDITOR" and context.area.ui_type == "UV"):
-            self.report({"WARNING"}, "Active area must be UV type")
-            return {"CANCELLED"}
-
-        self.store_mouse_pose_on_uv_and_max_distance_if_allowed(event)
-        return self.execute(context)
-
-    def execute(self, context):
-        umeshes = UMeshes(report=self.report)
-        umeshes.fix_context()
-
-        if umeshes.elem_mode != "EDGE" or not self.mouse_position:
-            # TODO: Implement loop select by face by 'edge apex'
-            return bpy.ops.uv.univ_select_linked(deselect=False)  # noqa
-
-        hit = utypes.CrnEdgeHit(self.mouse_position)  # TODO: Use 75 px with scale correction
-        for umesh in umeshes:
-            e = umesh.bm.select_history.active
-            if isinstance(e, bmesh.types.BMEdge):
-
-                get_face_visible = utils.face_visible_get_func(umesh)
-                visible_selected_crn = [crn for crn in getattr(e, "link_loops", ()) if get_face_visible(crn.face)]
-                if not any(visible_selected_crn):
-                    continue
-
-                hit.find_nearest_crn_by_corners_from_pick(umesh, visible_selected_crn)
-
-        if not hit:
-            self.report({"WARNING"}, "Not found edge for loop select.")
-            return {"CANCELLED"}
-
-        if self.use_aspect:
-            umeshes.calc_aspect_ratio(from_mesh=False)
-
-        umesh = hit.umesh
-        crn = hit.crn
-        is_boundary = utils.is_boundary_func(umesh, with_seam=False)
-
-        if is_boundary(crn):
-            stack = [AdvCorner(crn, umesh, is_pair=False), AdvCorner(crn.link_loop_next, umesh, is_pair=False, invert=True)]
-        else:
-            stack = [AdvCorner(crn, umesh, is_pair=True), AdvCorner(crn.link_loop_radial_prev, umesh, is_pair=True)]
-
-        max_angle = math.nextafter(self.max_angle, float("inf"))
-        grow = self.loop_select_ex(umesh, stack, max_angle, self.ignore_seams, self.prioritize_sharps, self.boundary_by_boundary)
-        umesh.update_tag = bool(grow)
-
-        if grow:
-            if umesh.sync:
-                umesh.sync_from_mesh_if_needed()
-            edge_select_set = utils.edge_select_linked_full_func(umesh)
-            for adv_crn in grow:
-                edge_select_set(adv_crn.orig_crn)
-
-            if context.view_layer.objects.active != umesh.obj:
-                context.view_layer.objects.active = umesh.obj
-        umeshes.umeshes = [umesh]
-        umeshes.update(info="Not found edges for loop select")
-        return {"FINISHED"}
+    def __eq__(self, other):
+        return self.e == other.e and self.head_v == other.head_v
 
 
 class UNIV_OT_Select_Loop_VIEW3D(select.UNIV_OT_Select_Edge_Grow_Base):
-    bl_label = "Loop"
-    bl_idname = "mesh.univ_select_loop"
-    bl_description = "Loop Select\n\n" "Has [Alt + Scroll Up] keymap"
+    bl_label = 'Loop'
+    bl_idname = 'mesh.univ_select_loop'
+    bl_description = "Loop Select\n\n" \
+                     "Has [Alt + Scroll Up] keymap"
     # noinspection PyTypeHints
-    max_angle: FloatProperty(
-        name="Angle",
-        default=math.radians(40),
-        min=math.radians(1),
-        soft_min=math.radians(5),
-        max=math.radians(90),
-        subtype="ANGLE",
-        description="Max select angle.",
-    )
+    max_angle: FloatProperty(name='Angle', default=math.radians(40), min=math.radians(1), soft_min=math.radians(5), max=math.radians(90), subtype='ANGLE',
+                             description="Max select angle.")
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(self, "prioritize_sharps")
-        layout.prop(self, "boundary_by_boundary")
-        layout.prop(self, "ignore_seams")
-        layout.prop(self, "max_angle")
+        layout.prop(self, 'prioritize_sharps')
+        layout.prop(self, 'boundary_by_boundary')
+        layout.prop(self, 'clamp_on_seam')
+        layout.prop(self, 'max_angle')
 
     def execute(self, context):
-        if utils.get_select_mode_mesh() not in ("VERT", "EDGE"):
+        self.umeshes = UMeshes.calc_any_unique(verify_uv=False)
+        self.umeshes.set_sync()
+        self.umeshes.sync_invalidate()
+
+        if self.umeshes.elem_mode not in ('VERT', 'EDGE'):
             # TODO: Implement loop select by face by 'edge apex'
-            return bpy.ops.mesh.select_linked(
-                delimit={"NORMAL"} if self.ignore_seams else {"SEAM"}
-            )
+            return bpy.ops.mesh.select_linked(delimit={'SEAM'} if self.clamp_on_seam else {'NORMAL'})
 
-        umeshes = UMeshes.calc_with_no_uv_and_no_faces(verify_uv=False)
-        umeshes.set_sync()
-        umeshes.sync_invalidate()
-        self.loop_select_edge(umeshes)
+        self.loop_select_edge()
 
-        if not umeshes:
-            self.report({"WARNING"}, "Not found edges for loop select")
-        return {"FINISHED"}
+        if not self.umeshes:
+            self.report({'WARNING'}, 'Not found edges for loop select')
+        return {'FINISHED'}
 
-    def loop_select_edge(self, umeshes: UMeshes):
-        umeshes.filter_by_partial_selected_3d_edges()
-        for umesh in umeshes:
+    def loop_select_edge(self):
+        self.umeshes.filter_by_partial_selected_3d_edges()
+        for umesh in self.umeshes:
             selected_edges = utils.calc_selected_edges_iter(umesh)
-            stack = self.get_start_growable_edges_3d(selected_edges)
+            stack = self.get_growable_edges(selected_edges)
             self.grow_by_angle(stack, umesh)
 
-    def grow_by_angle(self, stack: list[AdvEdge3D], umesh):
-        max_angle = math.nextafter(self.max_angle, float("inf"))
+    def get_growable_edges(self, selected_edges) -> list[EdgeGrow]:
+        stack = []
+        for e in selected_edges:
+            a, b = e.verts
+            if e.is_wire:
+                can_be_grow_a = not any(ee.select for ee in self.linked_edges_wire_start(e, a))
+                can_be_grow_b = not any(ee.select for ee in self.linked_edges_wire_start(e, b))
+            elif not self.boundary_by_boundary:
+                can_be_grow_a = not any(ee.select for ee in self.linked_edges_non_wire_start(e, a))
+                can_be_grow_b = not any(ee.select for ee in self.linked_edges_non_wire_start(e, b))
+            elif e.is_boundary or sum(not f.hide for f in e.link_faces) == 1:
+                can_be_grow_a = not any(ee.select for ee in self.linked_edges_boundary_start(e, a))
+                can_be_grow_b = not any(ee.select for ee in self.linked_edges_boundary_start(e, b))
+            else:  # contiguous
+                can_be_grow_a = not any(ee.select for ee in self.linked_edges_contiguous_start(e, a))
+                can_be_grow_b = not any(ee.select for ee in self.linked_edges_contiguous_start(e, b))
 
-        grow: list[list[AdvEdge3D]] = []
-        added_edges: set[AdvEdge3D] = set()
+            if can_be_grow_a:
+                stack.append(EdgeGrow(e, a))
+            if can_be_grow_b:
+                stack.append(EdgeGrow(e, b))
+        return stack
+
+    def grow_by_angle(self, stack: list[EdgeGrow], umesh):
+        grow = []
+        exclude_edges = set()
+        max_angle = math.nextafter(self.max_angle, float('inf'))
         while stack:
-            next_stack = []
+            temp = []
             for eg in stack:
                 if eg.is_wire:
-                    linked = eg.get_linked_wire()
+                    linked = eg.linked_edges_wire()
                 elif not self.boundary_by_boundary:
-                    linked = eg.get_linked_non_wire()
+                    linked = eg.linked_edges_non_wire()
                 elif eg.is_boundary:
-                    linked = eg.get_linked_bound_by_bound()
+                    linked = eg.linked_edges_boundary_by_boundary()
                 else:
-                    linked = eg.get_linked_contiguous()
+                    linked = eg.linked_edges_contiguous()
 
                 # Clamp on selected edges and on seams.
-                if self.ignore_seams or eg.e.seam:
-                    if any(next_e.select for next_e in linked):
-                        continue
-                else:
-                    if any(next_e.select or next_e.seam for next_e in linked):
-                        continue
+                check_seam = self.clamp_on_seam and not eg.e.seam
+                if any(next_edge.e.select or (check_seam and next_edge.e.seam) for next_edge in linked):
+                    continue
+
 
                 # Grow without check angle.
                 if not eg.is_wire:
-                    if self.grow_without_check_angle(eg, added_edges, linked, next_stack, max_angle):
-                        continue
+                    if not self.boundary_by_boundary:
+                        if eg.is_boundary:
+                            if len(linked) == 2:
+                                linked_boundary = [b_eg for b_eg in linked if b_eg.is_boundary]
+                                if len(linked_boundary) == 1:
+                                    link_eg_with_pair = next(b_eg for b_eg in linked if b_eg.is_contiguous)
 
-                min_angle_edge = self.get_grow_by_angle_edge(eg, linked, max_angle)
-                if min_angle_edge and min_angle_edge not in added_edges:
-                    next_stack.append(min_angle_edge)
-                    added_edges.add(min_angle_edge)
+                                    if len(link_eg_with_pair.e.link_faces[0].loops) == 4 and len(link_eg_with_pair.e.link_faces[1].loops) == 4:
+                                        if linked_boundary[0] not in exclude_edges:
+                                            temp.append(linked_boundary[0])
+                                            exclude_edges.add(linked_boundary[0])
+                                            continue
+                                    else:
+                                        angle = eg.angle(linked_boundary[0], max_angle) * 0.65
+                                        if angle <= max_angle:
+                                            if linked_boundary[0] not in exclude_edges:
+                                                temp.append(linked_boundary[0])
+                                                exclude_edges.add(linked_boundary[0])
+                                            continue
+                        else:
+                            if all(b_eg.is_contiguous for b_eg in linked):
+                                if self.grow_without_check_angle_or_with_prioritize_contiguous(eg, linked, exclude_edges, temp, max_angle):
+                                    continue
+
+                    elif eg.is_boundary:
+                        if len(linked) == 1:
+                            linked_non_wire = eg.linked_edges_contiguous()
+                            if len(linked_non_wire) == 1:
+                                link_eg_with_pair = linked_non_wire[0]
+                                if len(link_eg_with_pair.e.link_faces[0].loops) == 4 and len(link_eg_with_pair.e.link_faces[1].loops) == 4:
+                                    if linked[0] not in exclude_edges:
+                                        temp.append(linked[0])
+                                        exclude_edges.add(linked[0])
+                                else:
+                                    angle = eg.angle(linked[0], max_angle) * 0.65
+                                    if angle <= max_angle:
+                                        if linked[0] not in exclude_edges:
+                                            temp.append(linked[0])
+                                            exclude_edges.add(linked[0])
+                                continue
+
+                    else:  # contiguous
+                        if self.grow_without_check_angle_or_with_prioritize_contiguous(eg, linked, exclude_edges, temp, max_angle):
+                            continue
+
+
+                # Check angle.
+                min_eg = None
+                min_angle = max_angle
+                for next_edge in linked:
+                    angle = eg.angle(next_edge, max_angle)
+                    if angle <= max_angle:
+                        if self.prioritize_sharps and not next_edge.e.smooth:
+                            angle *= 0.65
+                        if angle < min_angle:
+                            min_eg = next_edge
+                            min_angle = angle
+                if min_eg and min_eg not in exclude_edges:
+                    temp.append(min_eg)
+                    exclude_edges.add(min_eg)
 
             grow.append(stack)
-            stack = next_stack
-
+            stack = temp
         if grow:
             del grow[0]
+
             for edge_group in grow:
                 for eg in edge_group:
                     eg.e.select = True
             umesh.update()
 
-    def grow_without_check_angle(self,
-                                 adv_edge: AdvEdge3D,
-                                 added_edges: set[AdvEdge3D],
-                                 linked: list[AdvEdge3D],
-                                 next_stack: list[AdvEdge3D],
-                                 max_angle: float
-                                 ):
+    @staticmethod
+    def linked_edges_wire_start(e: BMEdge, v):
+        return [e_ for e_ in v.link_edges if e_ != e and not e_.hide and e_.is_wire]
 
-        if adv_edge.is_boundary:
-            # NOTE: Not replace contiguous with simple check. This does not take hidden linked faces into account.
-            linked_contiguous = adv_edge.get_linked_contiguous()
+    @staticmethod
+    def linked_edges_boundary_start(e: BMEdge, v):
+        return [e_ for e_ in v.link_edges if e_ != e and not e_.hide and (e_.is_boundary or sum(not f.hide for f in e_.link_faces) == 1)]
 
-            if len(linked_contiguous) == 1:
-                # Multi-bounds select case along two quads (or by angle with other bound with priority).
-                #   * - * - *
-                #   | F | F |
-                #   *   |   *
-                #    \  |  /
-                #  \  \ | /  /\
-                #  \/  \|/   /
-                #       *
+    @staticmethod
+    def linked_edges_contiguous_start(e: BMEdge, v):
+        return [e_ for e_ in v.link_edges if e_ != e and not e_.hide and (e.is_contiguous and all(not f.hide for f in e.link_faces))]
 
-                if len(linked) != [2,1][self.boundary_by_boundary]:
-                    return False
-
-                link_eg_with_pair = linked_contiguous[0]
-                if self.boundary_by_boundary:
-                    bound_edge = linked[0]
-
-                else:
-                    linked_boundary = [b_eg for b_eg in linked if b_eg.is_boundary]
-                    if len(linked_boundary) != 1:  # Unlikely?
-                        return False
-                    bound_edge = linked_boundary[0]
-
-                face_sizes = [len(f.loops) for f in link_eg_with_pair.e.link_faces]
-                if any(f_size != 4 for f_size in face_sizes):
-                    # Ignore prioritize for tris.
-                    if 3 in face_sizes:
-                        return False
-
-                    # Non-quads case, check other bound with priority.
-                    angle = adv_edge.angle(bound_edge, max_angle) * 0.65
-                    if max_angle < angle:
-                        return False
-
-                if bound_edge not in added_edges:
-                    next_stack.append(bound_edge)
-                    added_edges.add(bound_edge)
-                    return True
-            elif len(linked) == 1:
-                # Bounds with priority along single face.
-                #  * - * - *
-                #  | F | F |  /\
-                #  *   |   *  ||
-                #   \  |  /
-                #    \ | /  /\
-                #     \|/   /
-                #      *
-                visible_faces = [f for f in adv_edge.head_v.link_faces if not f.hide]
-                # Non-manifold preserve case.
-                if len(visible_faces) == 1:
-                    # The prioritization triangle usually gives an unnecessary result, so ignore the prioritization.
-                    if len(visible_faces[0].loops) != 3:
-                        bound_edge = linked[0]
-                        assert bound_edge.is_boundary
-                        angle = adv_edge.angle(bound_edge, max_angle) * 0.65
-
-                        if angle <= max_angle:
-                            if bound_edge not in added_edges:
-                                next_stack.append(bound_edge)
-                                added_edges.add(bound_edge)
-                                return True
-
-        else:
-            return self.grow_without_check_angle_or_with_prioritize_contiguous(
-                adv_edge, linked, added_edges, next_stack, max_angle
-            )
-        return False
+    @staticmethod
+    def linked_edges_non_wire_start(e: BMEdge, v):
+        return [e_ for e_ in v.link_edges if e_ != e and not e_.hide and not e_.is_wire]
 
     # TODO: Grow without check should be done on a flat Edge, that is, the 2 faces should be coplanar.
     #  And also for triangulated grid it is necessary to make the rules stricter,
     #  i.e. check first by the angle of the edge, and then with the coefficient to check with no check.
     @staticmethod
     def grow_without_check_angle_or_with_prioritize_contiguous(
-        eg: AdvEdge3D,
-        linked: list[AdvEdge3D],
-        added_edges: set[AdvEdge3D],
-        next_stack: list[AdvEdge3D],
-        max_angle: float,
-    ):
-        """Grow when start edge has two same poly count faces and grew edge has two same poly count faces"""
+            eg: EdgeGrow, non_included_linked: list[EdgeGrow], exclude_edges: set[EdgeGrow], temp: list[EdgeGrow], max_angle: float):
+        """ Grow when start edge has two same poly count faces and grew edge has two same poly count faces """
         linked_to_vert_size = len(eg.head_v.link_faces)
-        match len(linked):
+        match len(non_included_linked):
             case 3:  # Quad - Quad case.
                 #  *  -  *  -  *
                 #  |  F  |  F  |
@@ -911,9 +1146,7 @@ class UNIV_OT_Select_Loop_VIEW3D(select.UNIV_OT_Select_Edge_Grow_Base):
                 #  |  F  |  F  |
                 #  *  -  *  -  *
                 if linked_to_vert_size == 4:
-                    linked_faces: list[BMFace] = [
-                        f for f in eg.head_v.link_faces if not f.hide
-                    ]
+                    linked_faces: list[BMFace] = [f for f in eg.head_v.link_faces if not f.hide]
                     if len(linked_faces) == 4:
                         # TODO: improve behavior for tris and ngons (* 0.65)
                         curr_face_a = eg.e.link_faces[0]
@@ -923,18 +1156,12 @@ class UNIV_OT_Select_Loop_VIEW3D(select.UNIV_OT_Select_Edge_Grow_Base):
                             linked_faces.remove(curr_face_b)
 
                             next_face_a, next_face_b = linked_faces
-                            if (
-                                len(next_face_a.loops) == 4
-                                and len(next_face_a.loops) == 4
-                            ):
-                                for edge_grow in linked:
-                                    if edge_grow not in added_edges:
-                                        if not any(
-                                            f in [curr_face_a, curr_face_b]
-                                            for f in edge_grow.e.link_faces
-                                        ):
-                                            next_stack.append(edge_grow)
-                                            added_edges.add(edge_grow)
+                            if len(next_face_a.loops) == 4 and len(next_face_a.loops) == 4:
+                                for edge_grow in non_included_linked:
+                                    if edge_grow not in exclude_edges:
+                                        if not any(f in [curr_face_a, curr_face_b] for f in edge_grow.e.link_faces):
+                                            temp.append(edge_grow)
+                                            exclude_edges.add(edge_grow)
                                             return True
             case 2:  # N-Gon and two Face case.
                 #  *  -  *  -  *
@@ -943,30 +1170,21 @@ class UNIV_OT_Select_Loop_VIEW3D(select.UNIV_OT_Select_Edge_Grow_Base):
                 #  |     |  F  |
                 #  *  -  *  -  *
                 if linked_to_vert_size == 3:
-                    faces_gons_count = sorted(
-                        len(f.loops) for f in eg.head_v.link_faces if not f.hide
-                    )
+                    faces_gons_count = sorted(len(f.loops) for f in eg.head_v.link_faces if not f.hide)
                     if len(faces_gons_count) == 3:
                         ngone = faces_gons_count.pop()
                         if ngone >= 5 and faces_gons_count[:2] in ([3, 3], [4, 4]):
-                            for edge_grow in linked:
-                                if any(
-                                    len(f.loops) >= 5
-                                    for f in edge_grow.e.link_faces
-                                    if not f.hide
-                                ):
+                            for edge_grow in non_included_linked:
+                                if any(len(f.loops) >= 5 for f in edge_grow.e.link_faces if not f.hide):
                                     # TODO: With pointers to previous edges, one does not have to check for angle from vectors,
                                     #  but rather check by the normal that forms the previous edges and check against the subsequent one.
                                     angle = eg.angle(edge_grow, max_angle) * 0.65
 
-                                    if (
-                                        angle < max_angle
-                                        and edge_grow not in added_edges
-                                    ):
-                                        next_stack.append(edge_grow)
-                                        added_edges.add(edge_grow)
+                                    if angle < max_angle and edge_grow not in exclude_edges:
+                                        temp.append(edge_grow)
+                                        exclude_edges.add(edge_grow)
                                     return True
-            case 1:  # Edge inner two N-Gon, with prioritize case.
+            case 1:  # Edge inner two N-Gon case.
                 #  *  -  *  -  *
                 #  |     |     |
                 #  *     * <-  *
@@ -976,95 +1194,83 @@ class UNIV_OT_Select_Loop_VIEW3D(select.UNIV_OT_Select_Edge_Grow_Base):
                 #  *  -  *  -  *
                 if linked_to_vert_size == 2:
                     if sum(not f.hide for f in eg.head_v.link_faces) == 2:
-                        edge_grow = linked[0]
-                        if edge_grow not in added_edges:
+                        edge_grow = non_included_linked[0]
+                        if edge_grow not in exclude_edges:
                             angle = eg.angle(edge_grow, max_angle) * 0.65
                             if angle < max_angle:
-                                next_stack.append(edge_grow)
-                                added_edges.add(edge_grow)
+                                temp.append(edge_grow)
+                                exclude_edges.add(edge_grow)
                                 return True
         return False
 
 
 class UNIV_OT_Select_Loop_Pick_VIEW3D(UNIV_OT_Select_Loop_VIEW3D):
-    bl_label = "Select Loop Pick"
-    bl_idname = "mesh.univ_select_loop_pick"
-    bl_description = (
-        "Loop Select Pick\n\n" "Has [Double Click and Shift+Double Click] keymaps"
-    )
+    bl_label = 'Select Loop Pick'
+    bl_idname = 'mesh.univ_select_loop_pick'
+    bl_description = "Loop Select Pick\n\n" \
+                     "Has [Double Click and Shift+Double Click] keymaps"
 
-    def loop_select_edge(self, umeshes: UMeshes):
+    def loop_select_edge(self):
         # TODO: Implement ray cast, for pick in vertex mode and implement face loops select
         # Pick Vertex Mode: Need find by raycast (generated from linked faces) (for solid mode to avoid selecting edges under face)
         # If not found raycast -> find nearest edge by dot product
-        if utils.get_select_mode_mesh() == "VERT":
-            bpy.ops.mesh.select_linked(
-                delimit={"NORMAL"} if self.ignore_seams else {"SEAM"}
-            )
+        if self.umeshes.elem_mode == 'VERT':
+            bpy.ops.mesh.select_linked(delimit={'SEAM'} if self.clamp_on_seam else {'NORMAL'})
             return
 
-        for umesh in reversed(umeshes):
+        for umesh in reversed(self.umeshes):
             if umesh.obj != bpy.context.active_object:
-                umeshes.umeshes.remove(umesh)
+                self.umeshes.umeshes.remove(umesh)
                 continue
 
             if not umesh.total_edge_sel:
-                self.report({"WARNING"}, "Not found selected edge")
+                self.report({'WARNING'}, 'Not found selected edge')
                 return
             if not isinstance(umesh.bm.select_history.active, bmesh.types.BMEdge):
-                self.report({"WARNING"}, "Active element must be an edge")
+                self.report({'WARNING'}, 'Active element must be an edge')
                 return
 
-            stack = self.get_start_growable_edges_3d([umesh.bm.select_history.active])
+            stack = self.get_growable_edges([umesh.bm.select_history.active])
             self.grow_by_angle(stack, umesh)
-            return
 
 # noinspection PyTypeHints
 class UNIV_OT_SelectSimilar_VIEW3D(Operator):
     bl_idname = "mesh.univ_select_similar"
     bl_label = "Similar"
-    bl_options = {"REGISTER", "UNDO"}
-    bl_description = (
-        "Select Similar Islands\n\n"
-        "Default - Select Similar\n"
-        "Shift or Alt - By Selected\n\n"
-        "Has Shift+G keymap"
-    )
+    bl_options = {'REGISTER', 'UNDO'}
+    bl_description = "Select Similar Islands\n\n" \
+                     "Default - Select Similar\n" \
+                     "Shift or Alt - By Selected\n\n" \
+                     "Has Shift+G keymap"
 
-    by_selected: bpy.props.BoolProperty(name="By Selected", default=False)
+    by_selected: bpy.props.BoolProperty(name='By Selected', default=False)
 
-    walk_mode: bpy.props.EnumProperty(
-        name="Walk Mode",
-        default="BOTH",
-        items=(
-            ("BOTH", "Both", ""),
-            ("DIRECT", "Direct", ""),
-            ("SYMMETRY", "Symmetry", "For mirror islands"),
-        ),
-    )
-    island_mode: bpy.props.EnumProperty(
-        name="Island Mode",
-        default="UV",
-        items=(
-            # ('BOTH', 'Both', ''),
-            ("UV", "UV", "UV islands"),
-            ("MESH", "Mesh", "Mesh islands"),
-        ),
-    )
-    ignore_mark_seam: bpy.props.BoolProperty(name="Ignore Mark Seam", default=True)
+    walk_mode: bpy.props.EnumProperty(name='Walk Mode', default='BOTH',
+                                      items=(
+                                          ('BOTH', 'Both', ''),
+                                          ('DIRECT', 'Direct', ''),
+                                          ('SYMMETRY', 'Symmetry', 'For mirror islands')
+                                      ))
+    island_mode: bpy.props.EnumProperty(name='Island Mode', default='UV',
+                                        items=(
+                                            # ('BOTH', 'Both', ''),
+                                            ('UV', 'UV', 'UV islands'),
+                                            ('MESH', 'Mesh', 'Mesh islands')
+                                        ))
+    ignore_mark_seam: bpy.props.BoolProperty(name='Ignore Mark Seam', default=True)
 
     @classmethod
     def poll(cls, context):
-        return context.mode == "EDIT_MESH"
+        return context.mode == 'EDIT_MESH'
 
     def draw(self, context):
-        self.layout.row(align=True).prop(self, "walk_mode", expand=True)
-        self.layout.row(align=True).prop(self, "island_mode", expand=True)
-        self.layout.prop(self, "ignore_mark_seam")
-        self.layout.prop(self, "by_selected")
+        self.layout.row(align=True).prop(self, 'walk_mode', expand=True)
+        self.layout.row(align=True).prop(self, 'island_mode', expand=True)
+        self.layout.prop(self, 'ignore_mark_seam')
+        self.layout.prop(self, 'by_selected')
 
     def invoke(self, context, event):
-        if event.value == "PRESS":
+        if event.value == 'PRESS':
             return self.execute(context)
 
         self.by_selected = event.alt or event.shift
@@ -1072,101 +1278,94 @@ class UNIV_OT_SelectSimilar_VIEW3D(Operator):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        from . import stack
+        self.umeshes: UMeshes | None = None
+        self.targets: list[stack.StackIsland] = []
+        self.transfer: list[stack.StackIsland] = []
         self.counter: int = 0
-        self.island_calc_type: Callable = Islands.calc_selected
-        self.calc_non_selected: Callable = Islands.calc_non_selected
+        self.island_calc_type: Callable = Islands.calc_selected_without_ms
+        self.calc_non_selected: Callable = Islands.calc_non_selected_without_ms
         self.walk_direct = True
         self.walk_symmetry = True
         self.need_sync_validation_check = False
 
     def execute(self, context) -> set[str]:
         self.counter = 0
-        umeshes = UMeshes(report=self.report)
-        umeshes.update_tag = False
+        self.umeshes = UMeshes(report=self.report)
+        self.umeshes.update_tag = False
 
-        if not self.bl_idname.startswith("UV"):
-            umeshes.set_sync(True)
-            umeshes.sync_invalidate()
-            umeshes.elem_mode = "FACE"
+        if not self.bl_idname.startswith('UV'):
+            self.umeshes.set_sync(True)
+            self.umeshes.sync_invalidate()
+            self.umeshes.elem_mode = 'FACE'
         else:
             self.need_sync_validation_check = False
-            if umeshes.sync:
+            if self.umeshes.sync:
                 if utils.USE_GENERIC_UV_SYNC:
-                    self.need_sync_validation_check = umeshes.elem_mode in (
-                        "VERT",
-                        "EDGE",
-                    )
+                    self.need_sync_validation_check = self.umeshes.elem_mode in ('VERT', 'EDGE')
 
-        self.walk_direct = self.walk_mode in ("DIRECT", "BOTH")
-        self.walk_symmetry = self.walk_mode in ("SYMMETRY", "BOTH")
+
+
+        self.walk_direct = self.walk_mode in ('DIRECT', 'BOTH')
+        self.walk_symmetry = self.walk_mode in ('SYMMETRY', 'BOTH')
 
         self.get_island_calc_types()
 
         if self.by_selected:
-            self.select_similar_by_selected(umeshes)
+            self.select_similar_by_selected()
         else:
-            self.select_similar_reference_transfer(umeshes)
+            self.select_similar_reference_transfer()
 
         if self.counter:
-            self.report({"INFO"}, f"Found {self.counter} similar islands")
+            self.report({'INFO'}, f'Found {self.counter} similar islands')
 
-        return {"FINISHED"}
+        return {'FINISHED'}
 
-    def islands_preprocessing_reference_and_transfer(self, umeshes: UMeshes):
-        from .stack import StackIsland
+    def islands_preprocessing_reference_and_transfer(self) -> list[list]:
+        from . import stack
 
-        targets: list[StackIsland] = []
-        for umesh in reversed(umeshes):
-            islands = self.island_calc_type(umesh, with_seams=not self.ignore_mark_seam)
+        for umesh in reversed(self.umeshes):
+            islands = self.island_calc_type(umesh)
             if not islands:
-                umeshes.umeshes.remove(umesh)
+                self.umeshes.umeshes.remove(umesh)
                 continue
             if isinstance(islands, MeshIslands):
                 islands = islands.to_adv_islands()
             islands.indexing()
 
             for isl in islands:
-                stack_isl = StackIsland(isl)
+                stack_isl = stack.StackIsland(isl)
                 stack_isl.preprocessing()
-                targets.append(stack_isl)
+                self.targets.append(stack_isl)
 
-        if not targets:
-            self.report({"WARNING"}, "Not found islands")
+        if not self.targets:
+            self.report({'WARNING'}, 'Not found islands')
             return []
 
-        sort_stack_islands_groups = utils.true_groupby(targets)
+        sort_stack_islands_groups = utils.true_groupby(self.targets)
         if not sort_stack_islands_groups:
-            self.report(
-                {"WARNING"}, "Islands have different set and number of polygons"
-            )
+            self.report({'WARNING'}, 'Islands have different set and number of polygons')
             return []
         return sort_stack_islands_groups
 
     def get_island_calc_types(self):
-        type_class = Islands if self.island_mode == "UV" else MeshIslands
-        if self.by_selected:
-            self.island_calc_type = type_class.calc_selected
-        else:
-            self.island_calc_type = type_class.calc_visible
-        self.calc_non_selected = type_class.calc_non_selected
+        type_class = Islands if self.island_mode == 'UV' else MeshIslands
+        suffix = '' if self.ignore_mark_seam else '_with_mark_seam'
+        mode = 'selected' if self.by_selected else 'visible'
 
-    def islands_preprocessing_by_selected(self, umeshes: UMeshes):
+        self.island_calc_type = getattr(type_class, f'calc_{mode}{suffix}')
+        self.calc_non_selected = getattr(type_class, f'calc_non_selected{suffix}')
+
+    def islands_preprocessing_by_selected(self):
         from . import stack
-
-        targets = []
-        transfers = []
-        for umesh in reversed(umeshes):
+        for umesh in reversed(self.umeshes):
             # TODO: With extended selection, you can calculate islands via calc_visible
             #  and add them to selected and non_selected. This does not work with calc_selected.
-            selected = self.island_calc_type(
-                umesh, with_seams=not self.ignore_mark_seam
-            )
-            non_selected = self.calc_non_selected(
-                umesh, with_seams=not self.ignore_mark_seam
-            )
+            selected = self.island_calc_type(umesh)
+            non_selected = self.calc_non_selected(umesh)
 
             if not selected and not non_selected:
-                umeshes.umeshes.remove(umesh)
+                self.umeshes.umeshes.remove(umesh)
                 continue
 
             if isinstance(selected, MeshIslands):
@@ -1186,45 +1385,37 @@ class UNIV_OT_SelectSimilar_VIEW3D(Operator):
                 stack_isl = stack.StackIsland(sel_isl)
                 stack_isl.preprocessing()
                 stack_isl.calc_walked_reference_island_fw_and_for_bw()
-                targets.append(stack_isl)
+                self.targets.append(stack_isl)
 
             for non_sel_isl in non_selected:
                 stack_isl = stack.StackIsland(non_sel_isl)
                 stack_isl.preprocessing()
-                transfers.append(stack_isl)
+                self.transfer.append(stack_isl)
 
-        if not targets:
-            self.report({"WARNING"}, "Not found selected islands")
+        if not self.targets:
+            self.report({'WARNING'}, 'Not found selected islands')
             return []
 
-        if not transfers:
-            self.report({"WARNING"}, "Not found unselected islands")
+        if not self.transfer:
+            self.report({'WARNING'}, 'Not found unselected islands')
             return []
 
-        sort_stack_islands = (
-            stack.UNIV_OT_Stack_VIEW3D.sort_stack_islands_target_with_transfer(
-                targets, transfers
-            )
-        )
+        sort_stack_islands = stack.UNIV_OT_Stack_VIEW3D.sort_stack_islands_target_with_transfer(self)  # noqa
         if not sort_stack_islands:
-            self.report(
-                {"WARNING"}, "Islands have different set and number of polygons"
-            )
+            self.report({'WARNING'}, 'Islands have different set and number of polygons')
         return sort_stack_islands
 
     # By Selected
-    def select_similar_reference_transfer(self, umeshes: UMeshes):
+    def select_similar_reference_transfer(self):
         from .stack import StackIsland
-
-        preprocessing: list[list[StackIsland]] = (
-            self.islands_preprocessing_reference_and_transfer(umeshes)
-        )
+        self.targets: list[StackIsland] = []
+        preprocessing = self.islands_preprocessing_reference_and_transfer()
         if not preprocessing:
             return
 
-        umeshes.deselect_all_elem()
+        self.umeshes.deselect_all_elem()
 
-        to_select: set[AdvIsland] = set()
+        to_select = set()
         for sort_stack_islands in preprocessing:
             for reference in sort_stack_islands:
                 if reference.island.tag:
@@ -1232,20 +1423,15 @@ class UNIV_OT_SelectSimilar_VIEW3D(Operator):
                     if not any(i.island.tag for i in sort_stack_islands):
                         break
                     reference.calc_walked_reference_island_fw_and_for_bw()
-                    for trans in sort_stack_islands:
-                        if trans.island.tag:
-                            if (
-                                self.walk_direct
-                                and reference.calc_transfer_stack_island_fw(trans)
-                            ) or (
-                                self.walk_symmetry
-                                and reference.calc_transfer_stack_island_bw(trans)
-                            ):
-                                to_select.add(trans.island)
+                    for transfer in sort_stack_islands:
+                        if transfer.island.tag:
+                            if (self.walk_direct and reference.calc_transfer_stack_island_fw(transfer)) or \
+                                    (self.walk_symmetry and reference.calc_transfer_stack_island_bw(transfer)):
+                                to_select.add(transfer.island)
                                 to_select.add(reference.island)
-                                trans.island.tag = False
+                                transfer.island.tag = False
                                 self.counter += 1
-                            trans.island.set_tag(False)
+                            transfer.island.set_tag(False)
         if to_select:
             for isl in to_select:
                 if self.need_sync_validation_check:
@@ -1255,33 +1441,28 @@ class UNIV_OT_SelectSimilar_VIEW3D(Operator):
                 isl.select = True
                 isl.umesh.update_tag = True
 
-        umeshes.update(info_type={"WARNING"}, info="No found islands for stacking")
+        self.umeshes.update(info_type={'WARNING'}, info='No found islands for stacking')
 
     # Reference Transfer
-    def select_similar_by_selected(self, umeshes: UMeshes):
+    def select_similar_by_selected(self):
         from .stack import StackIsland
+        self.targets: list[StackIsland] = []
+        self.transfer: list[StackIsland] = []
 
-        sort_stack_islands: list[tuple[StackIsland, list[StackIsland]]] = (
-            self.islands_preprocessing_by_selected(umeshes)
-        )
+        sort_stack_islands = self.islands_preprocessing_by_selected()
         if not sort_stack_islands:
             return
 
         to_select = set()
-        for reference, transfers in sort_stack_islands:
-            for trans in transfers:
-                if trans.island.tag:
-                    if (
-                        self.walk_direct
-                        and reference.calc_transfer_stack_island_fw(trans)
-                    ) or (
-                        self.walk_symmetry
-                        and reference.calc_transfer_stack_island_bw(trans)
-                    ):
-                        trans.island.tag = False
+        for reference, stacks_transfers in sort_stack_islands:
+            for stack_transfer_isl in stacks_transfers:
+                if stack_transfer_isl.island.tag:
+                    if (self.walk_direct and reference.calc_transfer_stack_island_fw(stack_transfer_isl)) or \
+                            (self.walk_symmetry and reference.calc_transfer_stack_island_bw(stack_transfer_isl)):
+                        stack_transfer_isl.island.tag = False
                         to_select.add(reference.island)
-                        to_select.add(trans.island)
-                    trans.island.set_tag(False)
+                        to_select.add(stack_transfer_isl.island)
+                    stack_transfer_isl.island.set_tag(False)
 
         if to_select:
             for isl in to_select:
@@ -1293,121 +1474,8 @@ class UNIV_OT_SelectSimilar_VIEW3D(Operator):
                 isl.umesh.update_tag = True
 
         self.counter = len(to_select)
-        umeshes.update(info_type={"WARNING"}, info="No found islands for stacking")
+        self.umeshes.update(info_type={'WARNING'}, info='No found islands for stacking')
 
 
 class UNIV_OT_SelectSimilar_VIEW2D(UNIV_OT_SelectSimilar_VIEW3D):
     bl_idname = "uv.univ_select_similar"
-
-
-class UNIV_OT_SelectConstraints(Operator):
-    bl_idname = "uv.univ_select_constraints"
-    bl_label = "Select Constraints"
-    bl_options = {"REGISTER", "UNDO"}
-    bl_description = "Select constraints edges by type."
-
-    # noinspection PyTypeHints
-    mode: EnumProperty(
-        name="Select Mode",
-        default="SELECT",
-        items=(
-            ("SELECT", "Select", ""),
-            ("ADDITION", "Addition", ""),
-            # ('DESELECT', 'Deselect', ''), # TODO: Add Deselect
-        ),
-    )
-    # noinspection PyTypeHints
-    constraints_type: bpy.props.EnumProperty(
-        name="Constraint Type",
-        default="VERTICAL",
-        items=utils.ENUM(
-            "VERTICAL",
-            "HORIZONTAL",
-            "DIAGONAL"
-        ),
-    )
-
-    def invoke(self, context, event):
-        if event.value == "PRESS":
-            return self.execute(context)
-
-        # if event.ctrl:
-        #     self.mode = 'DESELECT'
-        if event.shift:
-            self.mode = "ADDITION"
-        else:
-            self.mode = "SELECT"
-        return self.execute(context)
-
-    @classmethod
-    def poll(cls, context):
-        return context.mode == "EDIT_MESH"
-
-    def draw(self, context):
-        self.layout.row(align=True).prop(self, "mode", expand=True)
-        self.layout.row(align=True).prop(self, "constraints_type", expand=True)
-
-    def execute(self, context):
-        umeshes = UMeshes()
-        umeshes.fix_context()
-        umeshes.update_tag = False
-
-        if self.mode == "SELECT":
-            bpy.ops.uv.select_all(action="DESELECT")
-
-        has_found_edges = False
-
-        from . import mark
-        if self.constraints_type == "VERTICAL":
-            expect_bits = mark.VERTICAL_CONSTR
-        elif self.constraints_type == "HORIZONTAL":
-            expect_bits = mark.HORIZONTAL_CONSTR
-        else:
-            expect_bits = mark.DIAGONAL_CONSTR
-
-        for umesh in umeshes:
-            constraints_attr = umesh.bm.edges.layers.int.get("univ_constraints")
-            if not constraints_attr:
-                continue
-
-            to_select = []
-            for crn in utils.calc_visible_uv_corners_iter(umesh):
-                e = crn.edge
-                edge_bits: int = e[constraints_attr]
-
-                if edge_bits:
-                    for i, crn_l in enumerate(e.link_loops):
-                        if crn == crn_l:
-                            if i == 16:
-                                break
-
-                            shift = i * 2
-                            bits = (edge_bits >> shift) & 3  # Isolate bits.
-                            if bits == expect_bits:
-                                to_select.append(crn_l)
-                            break
-            has_found_edges |= bool(to_select)
-            if self.mode == "ADDITION":
-                get_edge_selection = utils.edge_select_get_func(umesh)
-                to_select = [crn for crn in to_select if not get_edge_selection(crn)]
-
-            umesh.sequence = to_select
-            umesh.update_tag |= bool(to_select)
-
-        if umeshes.update_tag:
-            if umeshes.elem_mode not in ("EDGE", "VERT"):
-                umeshes.elem_mode = "EDGE"
-                umeshes.update_tag = True
-
-            for umesh in umeshes:
-                if utils.USE_GENERIC_UV_SYNC and umesh.sync:
-                    umesh.sync_from_mesh_if_needed()
-
-                select_set = utils.edge_select_linked_set_func(umesh)
-                for crn in umesh.sequence:
-                    select_set(crn, True)
-
-        if not has_found_edges:
-            self.report({"INFO"}, "Not found marked constraints edges for select.")
-        umeshes.silent_update()
-        return {"FINISHED"}

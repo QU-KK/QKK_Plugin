@@ -114,7 +114,7 @@ target_include_directories(univ_fastapi PRIVATE
 	${BLENLIB}
 	##########
 	
-	${BLENDER_ROOT}/intern/profile
+	
 	${BLENDER_ROOT}/source/blender/blenkernel
 	
 	${BLENDER_ROOT}/source/blender/makesdna
@@ -156,12 +156,9 @@ if(MSVC)
         /GR        #
         /MP        # Multiprocessing compilation
 
-#        /Zi        # For debug symbols.
-
     )
 
     target_link_options(univ_fastapi PRIVATE
-#        /DEBUG
         /LTCG      # linker optimization (must be used with /GL)
         /OPT:REF   # remove unused code
         /OPT:ICF   # function deduplication
