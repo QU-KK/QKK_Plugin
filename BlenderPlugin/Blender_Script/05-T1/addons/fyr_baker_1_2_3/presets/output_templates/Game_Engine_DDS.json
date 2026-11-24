@@ -1,0 +1,103 @@
+{
+  "name": "Game Engine (DDS)",
+  "notes": "Block-compressed textures ready to drop into an engine, each output carrying the BCn that suits it rather than one setting applied to all: BC7 for base colour, BC5 for the tangent-space normal (the two-channel format normals are meant to use, reconstructed in the shader), BC4 for the single-channel height mask, and BC7 for the packed ORM. Requires a Windows build with the DirectXTex packer.",
+  "outputs": [
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_OPACITY"
+        },
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "MATERIAL_ALBEDO"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "MATERIAL_ALBEDO"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "MATERIAL_ALBEDO"
+        }
+      },
+      "color_space": "SRGB",
+      "dds_compression": "BC7",
+      "filename": "T_$textureSet_BC",
+      "format": "DDS",
+      "notes": "BC7 keeps the alpha; drop the A channel and switch to BC1 for an opaque material."
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": null,
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "NORMAL"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "NORMAL"
+        }
+      },
+      "color_space": "LINEAR",
+      "dds_compression": "BC5",
+      "filename": "T_$textureSet_N",
+      "format": "DDS",
+      "notes": "BC5 stores two channels; Z is reconstructed in the shader, so B is left out."
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_METALNESS"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_ROUGHNESS"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "AO"
+        }
+      },
+      "color_space": "LINEAR",
+      "dds_compression": "BC7",
+      "filename": "T_$textureSet_ORM",
+      "format": "DDS",
+      "notes": "R occlusion, G roughness, B metallic."
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": null,
+        "G": null,
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "HEIGHT"
+        }
+      },
+      "color_space": "LINEAR",
+      "dds_compression": "BC4",
+      "filename": "T_$textureSet_H",
+      "format": "DDS",
+      "notes": "BC4 is the single-channel format: half the size of a greyscale BC7."
+    }
+  ],
+  "schema": "master_baker.output_template.v1"
+}

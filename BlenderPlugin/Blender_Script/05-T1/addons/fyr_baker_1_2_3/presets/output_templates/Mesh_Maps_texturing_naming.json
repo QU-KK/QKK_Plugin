@@ -1,0 +1,175 @@
+{
+  "name": "Mesh Maps (texturing app naming)",
+  "notes": "The same mesh maps as the raw template, named with the suffixes a texturing app auto-detects on import (_ambient_occlusion, _curvature, _normal_base, _world_space_normals, _position, _thickness, _id) instead of MasterBaker's own file labels. Matches what Send to Painter stages, so both routes write the same filenames. Outputs whose source map was not baked are skipped.",
+  "outputs": [
+    {
+      "bit_depth": 16,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "NORMAL"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "NORMAL"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "NORMAL"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_normal_base",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 16,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "WORLD_NORMAL"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "WORLD_NORMAL"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "WORLD_NORMAL"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_world_space_normals",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "AO"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "AO"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "AO"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_ambient_occlusion",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "CURVATURE"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "CURVATURE"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "CURVATURE"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_curvature",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "THICKNESS"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "THICKNESS"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "THICKNESS"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_thickness",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 16,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "POSITION"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "POSITION"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "POSITION"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_position",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "ID"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "ID"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "ID"
+        }
+      },
+      "color_space": "SRGB",
+      "filename": "$textureSet_id",
+      "format": "PNG"
+    }
+  ],
+  "schema": "master_baker.output_template.v1"
+}

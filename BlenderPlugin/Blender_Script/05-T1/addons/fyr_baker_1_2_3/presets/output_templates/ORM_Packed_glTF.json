@@ -1,0 +1,110 @@
+{
+  "name": "ORM Packed (glTF)",
+  "notes": "The packed occlusion / roughness / metallic layout the glTF specification defines, which Godot, three.js, and most Unreal projects consume directly. Base colour carries opacity in alpha; drop the A channel for an opaque material. Normals are OpenGL-oriented in glTF, so set the Normal row's format to OpenGL rather than DirectX.",
+  "outputs": [
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_OPACITY"
+        },
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "MATERIAL_ALBEDO"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "MATERIAL_ALBEDO"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "MATERIAL_ALBEDO"
+        }
+      },
+      "color_space": "SRGB",
+      "filename": "$textureSet_BaseColor",
+      "format": "PNG",
+      "notes": "Alpha carries opacity; drop the A channel for an opaque material."
+    },
+    {
+      "bit_depth": 16,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "NORMAL"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "NORMAL"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "NORMAL"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Normal",
+      "format": "PNG",
+      "notes": "glTF expects OpenGL-oriented normals."
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_METALNESS"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_ROUGHNESS"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "AO"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_ORM",
+      "format": "PNG",
+      "notes": "R occlusion, G roughness, B metallic."
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "MATERIAL_EMISSION"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "MATERIAL_EMISSION"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "MATERIAL_EMISSION"
+        }
+      },
+      "color_space": "SRGB",
+      "filename": "$textureSet_Emissive",
+      "format": "PNG"
+    }
+  ],
+  "schema": "master_baker.output_template.v1"
+}

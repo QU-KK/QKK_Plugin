@@ -1,0 +1,679 @@
+{
+  "name": "Mesh Maps (raw)",
+  "notes": "One file per baked map, named exactly as the Painter output preset names them today ($textureSet_$map with the standard map file labels). Outputs whose source map was not baked are skipped. Formats default to PNG, 16-bit for geometric maps (normals, position, height); the dialog's file-type and bit-depth overrides still win when set. The material alpha channel is labelled MaterialOpacity so it cannot overwrite the geometric Opacity map, which shares the same file label. Scene lighting outputs are 32-bit EXR so HDR irradiance survives. The two curvature variants (Principal, Direction) are written only when the Curvature row is set to that Output mode; the other two are skipped.",
+  "outputs": [
+    {
+      "bit_depth": 16,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "NORMAL"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "NORMAL"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "NORMAL"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Normal",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 16,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "OBJECT_NORMAL"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "OBJECT_NORMAL"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "OBJECT_NORMAL"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_ObjectNormal",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 16,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "WORLD_NORMAL"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "WORLD_NORMAL"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "WORLD_NORMAL"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_WorldNormal",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "AO"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "AO"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "AO"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_AO",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "CURVATURE"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "CURVATURE"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "CURVATURE"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Curvature",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 16,
+      "channels": {
+        "A": null,
+        "B": null,
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "PRINCIPAL_CURVATURE"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "PRINCIPAL_CURVATURE"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_PrincipalCurvature",
+      "format": "PNG",
+      "notes": "Written when the Curvature row's Output is set to Principal: R is sharp curvature, G is gentle curvature. Skipped on a Signed or Direction row."
+    },
+    {
+      "bit_depth": 16,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "CURVATURE_DIRECTION"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "CURVATURE_DIRECTION"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "CURVATURE_DIRECTION"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_CurvatureDirection",
+      "format": "PNG",
+      "notes": "Written when the Curvature row's Output is set to Direction: a vector along the strongest curvature. Skipped on a Signed or Principal row."
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "THICKNESS"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "THICKNESS"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "THICKNESS"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Thickness",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "DENSITY"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "DENSITY"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "DENSITY"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Density",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "CAVITY"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "CAVITY"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "CAVITY"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Cavity",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "CONCAVE"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "CONCAVE"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "CONCAVE"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Concave",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "CONVEX"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "CONVEX"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "CONVEX"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Convex",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "OPACITY"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "OPACITY"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "OPACITY"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Opacity",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 16,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "POSITION"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "POSITION"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "POSITION"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Position",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "VERTEX_COLOR"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "VERTEX_COLOR"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "VERTEX_COLOR"
+        }
+      },
+      "color_space": "SRGB",
+      "filename": "$textureSet_VertexColor",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "ENV_LIGHT"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "ENV_LIGHT"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "ENV_LIGHT"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_EnvLight",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 16,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "BENT_NORMAL"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "BENT_NORMAL"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "BENT_NORMAL"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_BentNormal",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 16,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "HEIGHT"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "HEIGHT"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "HEIGHT"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Height",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "ID"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "ID"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "ID"
+        }
+      },
+      "color_space": "SRGB",
+      "filename": "$textureSet_ID",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 32,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "LIGHTING"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "LIGHTING"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "LIGHTING"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Lighting",
+      "format": "EXR",
+      "notes": "Scene lighting is linear HDR irradiance. Written as 32-bit EXR because an 8-bit PNG clips every value above 1.0, which is most of a lit bake."
+    },
+    {
+      "bit_depth": 32,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "LIT_COLOR"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "LIT_COLOR"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "LIT_COLOR"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_LitColor",
+      "format": "EXR",
+      "notes": "Scene lighting is linear HDR irradiance. Written as 32-bit EXR because an 8-bit PNG clips every value above 1.0, which is most of a lit bake."
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "MATERIAL_ALBEDO"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "MATERIAL_ALBEDO"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "MATERIAL_ALBEDO"
+        }
+      },
+      "color_space": "SRGB",
+      "filename": "$textureSet_Albedo",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_ROUGHNESS"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_ROUGHNESS"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_ROUGHNESS"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Roughness",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_METALNESS"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_METALNESS"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_METALNESS"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Metalness",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "MATERIAL_EMISSION"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "MATERIAL_EMISSION"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "MATERIAL_EMISSION"
+        }
+      },
+      "color_space": "SRGB",
+      "filename": "$textureSet_Emission",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_OPACITY"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_OPACITY"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_OPACITY"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_MaterialOpacity",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_SPECULAR"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_SPECULAR"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_SPECULAR"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Specular",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_TRANSMISSION"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_TRANSMISSION"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_TRANSMISSION"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Transmission",
+      "format": "PNG"
+    }
+  ],
+  "schema": "master_baker.output_template.v1"
+}

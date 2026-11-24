@@ -1,0 +1,113 @@
+{
+  "name": "Unity HDRP (Mask Map)",
+  "notes": "High Definition Render Pipeline Lit inputs. The mask map is metallic / occlusion / detail mask / smoothness; MasterBaker has no detail-mask equivalent, so B is a constant 0 (no detail) rather than an approximation.",
+  "outputs": [
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_OPACITY"
+        },
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "MATERIAL_ALBEDO"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "MATERIAL_ALBEDO"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "MATERIAL_ALBEDO"
+        }
+      },
+      "color_space": "SRGB",
+      "filename": "$textureSet_BaseMap",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": {
+          "channel": "GRAY",
+          "invert": true,
+          "source": "MATERIAL_ROUGHNESS"
+        },
+        "B": {
+          "channel": "GRAY",
+          "constant": 0.0,
+          "invert": false,
+          "source": "CONSTANT"
+        },
+        "G": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "AO"
+        },
+        "R": {
+          "channel": "GRAY",
+          "invert": false,
+          "source": "MATERIAL_METALNESS"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_MaskMap",
+      "format": "PNG",
+      "notes": "R metallic, G occlusion, B detail mask, A smoothness. B is a flat 0: no detail mask."
+    },
+    {
+      "bit_depth": 16,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "NORMAL"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "NORMAL"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "NORMAL"
+        }
+      },
+      "color_space": "LINEAR",
+      "filename": "$textureSet_Normal",
+      "format": "PNG"
+    },
+    {
+      "bit_depth": 8,
+      "channels": {
+        "A": null,
+        "B": {
+          "channel": "B",
+          "invert": false,
+          "source": "MATERIAL_EMISSION"
+        },
+        "G": {
+          "channel": "G",
+          "invert": false,
+          "source": "MATERIAL_EMISSION"
+        },
+        "R": {
+          "channel": "R",
+          "invert": false,
+          "source": "MATERIAL_EMISSION"
+        }
+      },
+      "color_space": "SRGB",
+      "filename": "$textureSet_Emissive",
+      "format": "PNG"
+    }
+  ],
+  "schema": "master_baker.output_template.v1"
+}

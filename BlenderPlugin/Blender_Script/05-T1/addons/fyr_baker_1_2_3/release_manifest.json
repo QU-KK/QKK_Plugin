@@ -1,0 +1,19 @@
+{
+  "package_name": "FyrBaker",
+  "package_id": "fyr_baker",
+  "package_type": "blender_extension",
+  "addon_version": "1.2.3",
+  "protocol_version": "1.0",
+  "blender_min_version": "4.2.0",
+  "backend_executable": "bin/windows-x64/fyr_baker_backend.exe",
+  "bake_renderer": "fyr",
+  "backend_delivery": "bundled",
+  "backend_platforms": [
+    "windows-x64"
+  ],
+  "bake_renderer_fallback": "cycles",
+  "target": "universal",
+  "self_update": true,
+  "platforms": null,
+  "created_at_utc": "2026-11-21T23:01:41.369533+00:00"
+}
