@@ -1,9 +1,6 @@
-# SPDX-FileCopyrightText: 2024 Oxicid
+# SPDX-FileCopyrightText: 2026 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-if 'bpy' in locals():
-    from .. import reload
-    reload.reload(globals())
 
 import bpy
 import math
@@ -23,86 +20,88 @@ from collections import defaultdict
 
 from .. import utils
 from .. import info
+from .. import utypes
 from ..utypes import (
     BBox,
     UMeshes,
     Islands,
-    AdvIslands,
     AdvIsland,
-    FaceIsland,
     UnionIslands,
     Segment,
     Segments,
-    LoopGroup,
-    IslandHit
-
+    IslandHit,
 )
 from ..preferences import prefs, univ_settings
 
 
 # noinspection PyTypeHints
 class UNIV_OT_Fit(Operator, utils.PaddingHelper):
-    bl_idname = 'uv.univ_fit'
-    bl_label = 'Fit'
+    bl_idname = "uv.univ_fit"
+    bl_label = "Fit"
     bl_description = info.operator.crop_info
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {"REGISTER", "UNDO"}
 
-    axis: EnumProperty(name='Axis', default='XY', items=(('XY', 'Both', ''), ('X', 'X', ''), ('Y', 'Y', '')))
-    to_cursor: BoolProperty(name='To Cursor', default=False)
-    individual: BoolProperty(name='Individual', default=False)
-    inplace: BoolProperty(name='Inplace', default=False)
+    # fmt: off
+    axis: EnumProperty(name="Axis", default="XY", items=(("XY", "Both", ""), ("X", "X", ""), ("Y", "Y", "")))
+    to_cursor: BoolProperty(name="To Cursor", default=False)
+    individual: BoolProperty(name="Individual", default=False)
+    inplace: BoolProperty(name="Inplace", default=False)
+    ignore_seams: BoolProperty(name="Ignore Seams", default=False, description="Seams do not split islands at connected edges.")
+    # fmt: on
 
     def draw(self, context):
         layout = self.layout
 
-        layout.row(align=True).prop(self, 'axis', expand=True)
+        layout.row(align=True).prop(self, "axis", expand=True)
         if utils.is_pro_version_support():
             if prefs().use_trims:
                 # Global Trim System Settings
-                layout.prop(self, 'individual')
-                layout.prop(self, 'inplace')
+                layout.prop(self, "individual")
+                layout.prop(self, "inplace")
 
                 self.draw_padding()
                 layout.separator()
-                layout.prop(prefs(), 'use_trims')
+                layout.prop(prefs(), "use_trims")
                 return
 
         # Operator Settings
-        layout.prop(self, 'to_cursor')
-        layout.prop(self, 'individual')
+        layout.prop(self, "to_cursor")
+        layout.prop(self, "individual")
         if not self.to_cursor:
-            layout.prop(self, 'inplace')
-
+            layout.prop(self, "inplace")
+        layout.prop(self, "ignore_seams")
         self.draw_padding()
 
         if utils.is_pro_version_support():
             layout.separator()
-            layout.prop(prefs(), 'use_trims')
+            layout.prop(prefs(), "use_trims")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.mode: str = 'DEFAULT'
+        self.mode: str = "DEFAULT"
         self.use_crop: bool = True
-        self.umeshes: UMeshes | None = None
-        self.calc_island_method = AdvIslands.calc_extended_with_mark_seam
+        self.calc_island_method = Islands.calc_extended
 
     def invoke(self, context, event):
-        if event.value == 'PRESS':
+        if event.value == "PRESS":
             return self.execute(context)
-        self.use_crop = self.bl_label == 'Fit'
+        self.use_crop = self.bl_label == "Fit"
 
         self.to_cursor = event.ctrl
         self.individual = event.shift
         self.inplace = event.alt
 
         if all((event.ctrl, event.alt)):
-            self.report({'INFO'}, f"Event: {utils.event_to_string(event)} not implement. \n\n"
-                        f"See all variations:\n\n{self.get_event_info()}")
+            self.report(
+                {"INFO"},
+                f"Event: {utils.event_to_string(event)} not implement. \n\n"
+                f"See all variations:\n\n{self.get_event_info()}",
+            )
             self.to_cursor = False
         return self.execute(context)
 
     def execute(self, context):
-        self.use_crop = self.bl_label == 'Fit'
+        self.use_crop = self.bl_label == "Fit"
 
         self.calc_padding()
         self.report_padding()
@@ -110,77 +109,76 @@ class UNIV_OT_Fit(Operator, utils.PaddingHelper):
         if utils.is_pro_version_support():
             if prefs().use_trims:
                 self.mode_preprocessing_trim()
-                if self.mode in ('DEFAULT', 'INDIVIDUAL'):
+                if self.mode in ("DEFAULT", "INDIVIDUAL"):
                     if not utils.has_visible_active_trim(report=self.report):
-                        return {'FINISHED'}
+                        return {"FINISHED"}
                 else:
                     if not utils.has_visible_trim_bboxes():
-                        self.report({'WARNING'}, 'Trim presets not found')
-                        return {'FINISHED'}
+                        self.report({"WARNING"}, "Trim presets not found")
+                        return {"FINISHED"}
 
                 self.crop_trims()
 
-                return {'FINISHED'}
+                return {"FINISHED"}
 
         self.mode_preprocessing()
         self.crop()
 
-        return {'FINISHED'}
-
+        return {"FINISHED"}
 
     def crop(self):
         offset = None
-        if self.mode in ('TO_CURSOR', 'TO_CURSOR_INDIVIDUAL'):
+        if self.mode in ("TO_CURSOR", "TO_CURSOR_INDIVIDUAL"):
             offset = utils.get_tile_from_cursor()
 
-        self.umeshes = UMeshes(report=self.report)
-        self.umeshes.update_tag = False
-        if self.umeshes.is_edit_mode:
-            selected_umeshes, visible_umeshes = self.umeshes.filtered_by_selected_and_visible_uv_faces()
-            self.umeshes = selected_umeshes if selected_umeshes else visible_umeshes
+        umeshes = UMeshes(report=self.report)
+        umeshes.update_tag = False
+        if umeshes.is_edit_mode:
+            selected_umeshes, visible_umeshes = umeshes.filtered_by_selected_and_visible_uv_faces()
+            umeshes = selected_umeshes if selected_umeshes else visible_umeshes
 
-            if not self.umeshes:
+            if not umeshes:
                 return
 
             if selected_umeshes:
-                self.calc_island_method = AdvIslands.calc_extended_with_mark_seam
+                self.calc_island_method = Islands.calc_extended
             else:
-                self.calc_island_method = AdvIslands.calc_visible_with_mark_seam
+                self.calc_island_method = Islands.calc_visible
         else:
-            if not self.umeshes:
+            if not umeshes:
                 return
-            self.umeshes.ensure()
-            self.calc_island_method = AdvIslands.calc_with_hidden_with_mark_seam
+            umeshes.ensure()
+            self.calc_island_method = Islands.calc_with_hidden
 
         match self.mode:
-            case 'DEFAULT':
-                self.crop_default(inplace=False)
-            case 'TO_CURSOR':
-                self.crop_default(inplace=False, offset=offset)
-            case 'TO_CURSOR_INDIVIDUAL':
-                self.crop_individual(offset=offset, inplace=False)
-            case 'INDIVIDUAL':
-                self.crop_individual(inplace=False)
-            case 'INDIVIDUAL_INPLACE':
-                self.crop_individual(inplace=True)
-            case 'INPLACE':
-                self.crop_inplace()
+            case "DEFAULT":
+                self.crop_default(umeshes, inplace=False)
+            case "TO_CURSOR":
+                self.crop_default(umeshes, inplace=False, offset=offset)
+            case "TO_CURSOR_INDIVIDUAL":
+                self.crop_individual(umeshes, offset=offset, inplace=False)
+            case "INDIVIDUAL":
+                self.crop_individual(umeshes, inplace=False)
+            case "INDIVIDUAL_INPLACE":
+                self.crop_individual(umeshes, inplace=True)
+            case "INPLACE":
+                self.crop_inplace(umeshes)
             case _:
                 raise NotImplementedError(self.mode)
 
-        ot_name_to_report_name = 'cropped' if self.use_crop == 'Crop' else 'filled'
-        self.umeshes.update(info=f"All islands {ot_name_to_report_name}")
+        ot_name_to_report_name = "fitted" if self.use_crop == "Crop" else "filled"
+        umeshes.update(info=f"All islands {ot_name_to_report_name}")
 
-        if not self.umeshes.is_edit_mode:
-            self.umeshes.free()
-            utils.update_area_by_type('VIEW_3D')
+        if not umeshes.is_edit_mode:
+            umeshes.free()
+            utils.update_area_by_type("VIEW_3D")
 
-    def crop_default(self, inplace, offset=Vector((0, 0))):
+    def crop_default(self, umeshes: UMeshes, inplace, offset=Vector((0, 0))):
         islands_of_mesh = []
 
         general_bbox = BBox()
-        for umesh in self.umeshes:
-            islands = self.calc_island_method(umesh)
+        for umesh in umeshes:
+            islands = self.calc_island_method(umesh, with_seams=not self.ignore_seams)
             general_bbox.union(islands.calc_bbox())
             islands_of_mesh.append(islands)
 
@@ -192,9 +190,9 @@ class UNIV_OT_Fit(Operator, utils.PaddingHelper):
 
         self.crop_ex(general_bbox, tar_box, islands_of_mesh)
 
-    def crop_individual(self, inplace, offset=Vector((0, 0))):
-        for umesh in self.umeshes:
-            for island in self.calc_island_method(umesh):
+    def crop_individual(self, umeshes: UMeshes, inplace, offset=Vector((0, 0))):
+        for umesh in umeshes:
+            for island in self.calc_island_method(umesh, with_seams=not self.ignore_seams):
                 cur_bbox = island.calc_bbox()
                 if inplace:
                     tar_box = BBox.from_center(cur_bbox.center)
@@ -202,14 +200,16 @@ class UNIV_OT_Fit(Operator, utils.PaddingHelper):
                     tar_box = BBox.from_center(Vector((0.5, 0.5)))
                 tar_box.move(offset)
 
-                self.crop_ex(cur_bbox, tar_box, (island, ))
+                self.crop_ex(cur_bbox, tar_box, (island,))
 
-    def crop_inplace(self):
-        islands_of_tile: dict[int, list[tuple[FaceIsland, BBox]]] = {}
-        for umesh in self.umeshes:
-            for island in self.calc_island_method(umesh):
+    def crop_inplace(self, umeshes: UMeshes):
+        islands_of_tile: dict[int, list[tuple[AdvIsland, BBox]]] = {}
+        for umesh in umeshes:
+            for island in self.calc_island_method(umesh, with_seams=not self.ignore_seams):
                 bbox = island.calc_bbox()
-                islands_of_tile.setdefault(bbox.get_tile_start_pos_from_center(), []).append((island, bbox))
+                islands_of_tile.setdefault(bbox.get_tile_start_pos_from_center(), []).append(
+                    (island, bbox)
+                )
 
         for tile, islands_and_bboxes in islands_of_tile.items():
             islands = []
@@ -221,11 +221,12 @@ class UNIV_OT_Fit(Operator, utils.PaddingHelper):
             tar_box = BBox.from_center(general_bbox.center)
             self.crop_ex(general_bbox, tar_box, islands)
 
-    def crop_ex(self,curr_bbox: BBox, tar_bb: BBox, islands_of_mesh):
-        scale, delta, pivot = utils.get_transform_from_box(curr_bbox, tar_bb, self.axis, self.padding, self.use_crop)
+    def crop_ex(self, curr_bbox: BBox, tar_bb: BBox, islands_of_mesh):
+        scale, delta, pivot = utils.get_transform_from_box(
+            curr_bbox, tar_bb, self.axis, self.padding, self.use_crop
+        )
         for isl in islands_of_mesh:
             isl.umesh.update_tag |= isl.scale_with_move(scale, delta, pivot)
-
 
     def get_event_info(self):
         if self.use_crop:
@@ -238,68 +239,73 @@ class UNIV_OT_Fit(Operator, utils.PaddingHelper):
             self.inplace = False
         match self.to_cursor, self.individual, self.inplace:
             case False, False, False:
-                self.mode = 'DEFAULT'
+                self.mode = "DEFAULT"
             case True, False, False:
-                self.mode = 'TO_CURSOR'
+                self.mode = "TO_CURSOR"
             case True, True, False:
-                self.mode = 'TO_CURSOR_INDIVIDUAL'
+                self.mode = "TO_CURSOR_INDIVIDUAL"
             case False, True, False:
-                self.mode = 'INDIVIDUAL'
+                self.mode = "INDIVIDUAL"
             case False, False, True:
-                self.mode = 'INPLACE'
+                self.mode = "INPLACE"
             case False, True, True:
-                self.mode = 'INDIVIDUAL_INPLACE'
+                self.mode = "INDIVIDUAL_INPLACE"
 
     # Trim
     def crop_trims(self):
         found_in_active_trim = False
         skipped_counter = 0
-        self.umeshes = UMeshes(report=self.report)
-        self.umeshes.update_tag = False
-        if self.umeshes.is_edit_mode:
-            selected_umeshes, visible_umeshes = self.umeshes.filtered_by_selected_and_visible_uv_faces()
-            self.umeshes = selected_umeshes if selected_umeshes else visible_umeshes
+        umeshes = UMeshes(report=self.report)
+        umeshes.update_tag = False
+        if umeshes.is_edit_mode:
+            selected_umeshes, visible_umeshes = umeshes.filtered_by_selected_and_visible_uv_faces()
+            umeshes = selected_umeshes if selected_umeshes else visible_umeshes
 
-            if not self.umeshes:
+            if not umeshes:
                 return
 
             if selected_umeshes:
-                self.calc_island_method = AdvIslands.calc_extended_with_mark_seam
+                self.calc_island_method = Islands.calc_extended
             else:
-                self.calc_island_method = AdvIslands.calc_visible_with_mark_seam
+                self.calc_island_method = Islands.calc_visible
         else:
-            if not self.umeshes:
+            if not umeshes:
                 return
             selected_umeshes = []
-            self.umeshes.ensure()
-            self.calc_island_method = AdvIslands.calc_with_hidden_with_mark_seam
-
+            umeshes.ensure()
+            self.calc_island_method = Islands.calc_with_hidden
 
         match self.mode:
-            case 'DEFAULT':
+            case "DEFAULT":
                 active_trim_bbox = utils.get_active_trim().to_bbox()
                 general_bbox = BBox()
                 islands = []
-                for umesh in self.umeshes:
-                    for isl in self.calc_island_method(umesh):  # noqa # pycharm moment
+                for umesh in umeshes:
+                    for isl in self.calc_island_method(  # noqa # pycharm moment
+                        umesh, with_seams=not self.ignore_seams
+                    ):
                         if selected_umeshes or active_trim_bbox.isect_island(isl):
                             found_in_active_trim = True
                             general_bbox.union(isl.bbox)
                             islands.append(isl)
                 self.crop_ex(general_bbox, active_trim_bbox, islands)
 
-            case 'INDIVIDUAL':
+            case "INDIVIDUAL":
                 active_trim_bbox = utils.get_active_trim().to_bbox()
-                for umesh in self.umeshes:
-                    for isl in self.calc_island_method(umesh):  # noqa  # pycharm moment
+                for umesh in umeshes:
+                    for isl in self.calc_island_method(  # noqa # pycharm moment
+                        umesh, with_seams=not self.ignore_seams
+                    ):
                         if selected_umeshes or active_trim_bbox.isect_island(isl):
                             found_in_active_trim = True
                             self.crop_ex(isl.bbox, active_trim_bbox, (isl,))
 
-            case 'INDIVIDUAL_INPLACE':
+            case "INDIVIDUAL_INPLACE":
                 bboxes = utils.get_trim_bboxes()
-                for umesh in self.umeshes:
-                    for isl in self.calc_island_method(umesh):  # noqa  # pycharm moment
+                for umesh in umeshes:
+                    for isl in self.calc_island_method(  # noqa  # pycharm moment
+                        umesh, with_seams=not self.ignore_seams
+                    ):
                         idx = utils.get_inplace_trim_by_isl(bboxes, isl)
                         if idx == -1:
                             skipped_counter += 1
@@ -308,12 +314,14 @@ class UNIV_OT_Fit(Operator, utils.PaddingHelper):
 
                         self.crop_ex(isl.bbox, tar_bb, (isl,))
 
-            case 'INPLACE':
+            case "INPLACE":
                 bboxes = utils.get_trim_bboxes()
                 islands_of_tile: dict[BBox, list[AdvIsland]] = {}
 
-                for umesh in self.umeshes:
-                    for isl in self.calc_island_method(umesh):  # noqa  # pycharm moment
+                for umesh in umeshes:
+                    for isl in self.calc_island_method(  # noqa  # pycharm moment
+                        umesh, with_seams=not self.ignore_seams
+                    ):  # noqa  # pycharm moment
                         idx = utils.get_inplace_trim_by_isl(bboxes, isl)
                         if idx == -1:
                             skipped_counter += 1
@@ -330,51 +338,63 @@ class UNIV_OT_Fit(Operator, utils.PaddingHelper):
             case _:
                 raise NotImplementedError(self.mode)
 
-        if not selected_umeshes and not found_in_active_trim and self.mode in ('DEFAULT', 'INDIVIDUAL'):
-            self.report({'WARNING'}, 'Not found islands in active trim')
+        if (
+            not selected_umeshes
+            and not found_in_active_trim
+            and self.mode in ("DEFAULT", "INDIVIDUAL")
+        ):
+            self.report({"WARNING"}, "Not found islands in active trim")
         else:
-            ot_name_to_report_name = 'cropped' if self.use_crop else 'filled'
-            self.umeshes.update(info=f"All islands {ot_name_to_report_name}")
+            ot_name_to_report_name = "fitted" if self.use_crop else "filled"
+            umeshes.update(info=f"All islands {ot_name_to_report_name}")
 
         if skipped_counter:
-            self.report({'WARNING'}, f"Found {skipped_counter} islands for which no trim was found")
+            self.report({"WARNING"}, f"Found {skipped_counter} islands for which no trim was found")
 
-        if not self.umeshes.is_edit_mode:
-            self.umeshes.free()
-            utils.update_area_by_type('VIEW_3D')
+        if not umeshes.is_edit_mode:
+            umeshes.free()
+            utils.update_area_by_type("VIEW_3D")
 
     def mode_preprocessing_trim(self):
         match self.individual, self.inplace:
             case False, False:
-                self.mode = 'DEFAULT'
+                self.mode = "DEFAULT"
             case True, False:
-                self.mode = 'INDIVIDUAL'
+                self.mode = "INDIVIDUAL"
             case False, True:
-                self.mode = 'INPLACE'
+                self.mode = "INPLACE"
             case _:
-                self.mode = 'INDIVIDUAL_INPLACE'
+                self.mode = "INDIVIDUAL_INPLACE"
 
 
 class UNIV_OT_Fill(UNIV_OT_Fit):
-    bl_idname = 'uv.univ_fill'
-    bl_label = 'Fill'
+    bl_idname = "uv.univ_fill"
+    bl_label = "Fill"
     bl_description = info.operator.fill_info
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {"REGISTER", "UNDO"}
 
 
 class UNIV_OT_SnapToPixels(Operator):
-    bl_idname = 'uv.univ_snap_to_pixels'
-    bl_label = 'Snap to Pixels'
-    bl_description = 'Snap island by boundary box to pixels'
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_idname = "uv.univ_snap_to_pixels"
+    bl_label = "Snap to Pixels"
+    bl_description = "Snap island by boundary box to pixels"
+    bl_options = {"REGISTER", "UNDO"}
+
+    # noinspection PyTypeHints
+    ignore_seams: BoolProperty(
+        name="Ignore Seams",
+        default=False,
+        description="Seams do not split islands at connected edges.",
+    )
 
     def draw(self, context):
         pref = prefs()
-        row = self.layout.row(align=True, heading='Global Size')
-        row.prop(pref, 'size_x', text='')
-        row.prop(pref, 'lock_size', text='', icon='LOCKED' if pref.lock_size else 'UNLOCKED')
-        row.prop(pref, 'size_y', text='')
+        row = self.layout.row(align=True, heading="Global Size")
+        row.prop(pref, "size_x", text="")
+        row.prop(pref, "lock_size", text="", icon="LOCKED" if pref.lock_size else "UNLOCKED")
+        row.prop(pref, "size_y", text="")
 
+        self.layout.prop(self, "ignore_seams")
 
     def execute(self, context):
         umeshes = UMeshes(report=self.report)
@@ -385,12 +405,12 @@ class UNIV_OT_SnapToPixels(Operator):
             umeshes = selected_umeshes if selected_umeshes else visible_umeshes
 
             if selected_umeshes:
-                calc_island_method = AdvIslands.calc_extended_with_mark_seam
+                calc_island_method = Islands.calc_extended
             else:
-                calc_island_method = AdvIslands.calc_visible_with_mark_seam
+                calc_island_method = Islands.calc_visible
         else:
             umeshes.ensure()
-            calc_island_method = AdvIslands.calc_with_hidden_with_mark_seam
+            calc_island_method = Islands.calc_with_hidden
 
         if not umeshes:
             return umeshes.update()
@@ -399,7 +419,7 @@ class UNIV_OT_SnapToPixels(Operator):
         y_step = 1.0 / int(prefs().size_y)
 
         for umesh in umeshes:
-            for isl in calc_island_method(umesh):
+            for isl in calc_island_method(umesh, with_seams=not self.ignore_seams):
                 cur_bbox = isl.calc_bbox()
                 xmin = utils.round_threshold(cur_bbox.xmin, x_step)
                 xmax = utils.round_threshold(cur_bbox.xmax, x_step)
@@ -420,19 +440,25 @@ class UNIV_OT_SnapToPixels(Operator):
 
         if not umeshes.is_edit_mode:
             umeshes.free()
-            utils.update_area_by_type('VIEW_3D')
+            utils.update_area_by_type("VIEW_3D")
 
-        return {'FINISHED'}
+        return {"FINISHED"}
 
 
 class Align_by_Angle:
     # noinspection PyTypeHints
-    angle: FloatProperty(name='Angle', default=to_rad(5), min=to_rad(
-        2), max=to_rad(40), soft_min=to_rad(5), subtype='ANGLE')
+    angle: FloatProperty(
+        name="Angle",
+        default=to_rad(5),
+        min=to_rad(2),
+        max=to_rad(40),
+        soft_min=to_rad(5),
+        subtype="ANGLE",
+    )
 
-    def align_edge_by_angle(self, is_x_axis):
-        umeshes: UMeshes = self.umeshes  # noqa
-        if umeshes.is_edit_mode: # noqa
+    def align_edge_by_angle(self, is_x_axis, with_seams):
+        umeshes: UMeshes = UMeshes()
+        if umeshes.is_edit_mode:
             selected_umeshes, visible_umeshes = umeshes.filtered_by_selected_and_visible_uv_edges()
             umeshes: UMeshes = selected_umeshes if selected_umeshes else visible_umeshes
             umeshes.fix_context()
@@ -448,78 +474,79 @@ class Align_by_Angle:
 
         has_segments = False
         for umesh in umeshes:
-            for segments in self.get_segments_by_angle(umesh, self.angle, is_x_axis, bool(selected_umeshes)):
+            for segments in self.get_segments_by_angle(
+                umesh, self.angle, is_x_axis, bool(selected_umeshes), with_seams=with_seams
+            ):
                 self.align_by_angle_ex(segments, is_x_axis)
                 has_segments = True
 
         if not has_segments:
-            self.report({'INFO'}, f"Not found edges with {math.degrees(self.angle):.1f} angle")  # noqa
+            self.report(  # noqa
+                {"INFO"}, f"Not found edges with {math.degrees(self.angle):.1f} angle"
+            )
         elif not umeshes.update_tag:
-            self.report({'INFO'}, 'All edges aligned')  # noqa
+            self.report({"INFO"}, "All edges aligned")  # noqa
         umeshes.silent_update()
 
         if not umeshes.is_edit_mode:
             umeshes.free()
-            utils.update_area_by_type('VIEW_3D')
-        return {'FINISHED'}
+            utils.update_area_by_type("VIEW_3D")
+        return {"FINISHED"}
 
     @classmethod
-    def get_segments_by_angle(cls, umesh, angle, is_x_axis, has_selected_umeshes):
+    def get_segments_by_angle(cls, umesh, angle, is_y_axis, has_selected_umeshes, with_seams: bool):
 
         uv = umesh.uv
-        edge_orient = Vector((not is_x_axis, is_x_axis))
+        edge_orient = Vector((not is_y_axis, is_y_axis))
         negative_ange = math.pi - angle
 
-        is_boundary = utils.is_boundary_func(umesh, with_seam=False)
+        is_boundary = utils.is_boundary_func(umesh, with_seam=with_seams)
         get_face_select = utils.face_select_get_func(umesh)
         get_edge_select = utils.edge_select_get_func(umesh)
 
-        face_align = False
+        face_mode = False
         if not umesh.is_edit_bm:
-            face_align = True
-        elif umesh.elem_mode in ('FACE', 'ISLAND'):
-            face_align = True
+            face_mode = True
+        elif umesh.elem_mode in ("FACE", "ISLAND"):
+            face_mode = True
         elif not utils.USE_GENERIC_UV_SYNC:
             if umesh.sync and umesh.total_face_sel:  # Preserve sync
-                face_align = True
+                face_mode = True
         else:
             if umesh.sync and not umesh.sync_valid and umesh.total_face_sel:
-                face_align = True
-
+                face_mode = True
 
         if umesh.is_edit_bm:
-            islands = AdvIslands.calc_visible_with_mark_seam(umesh)
+            islands = Islands.calc_visible(umesh, with_seams=with_seams)
         else:
-            islands = AdvIslands.calc_with_hidden_with_mark_seam(umesh)
+            islands = Islands.calc_with_hidden(umesh, with_seams=with_seams)
 
-        islands.indexing()
         for isl in islands:
             isl.apply_aspect_ratio()
 
-
             if has_selected_umeshes:
+
                 def corners_iter():
                     for crn_ in isl.corners_iter():
                         if get_edge_select(crn_):
                             yield crn_
-                        else:
-                            crn_.tag = False
 
-                if umesh.sync and face_align:
+                if umesh.sync and face_mode:
+
                     def corners_iter():
                         for crn_ in isl.corners_iter():
                             if get_edge_select(crn_):
-                                if get_face_select(crn_.face) or (
-                                        not is_boundary(crn_) and get_face_select(crn_.link_loop_prev.face)):
+                                if get_face_select(crn_.face):
                                     yield crn_
-                                else:
-                                    crn_.tag = False
-                            else:
-                                crn_.tag = False
+                                elif not is_boundary(crn_) and get_face_select(
+                                    crn_.link_loop_prev.face
+                                ):
+                                    yield crn_
+
             else:
+
                 def corners_iter():
                     return isl.corners_iter()
-
 
             to_segmenting_corners = []
             for crn in corners_iter():
@@ -528,12 +555,9 @@ class Align_by_Angle:
 
                 if a <= angle or a >= negative_ange:
                     to_segmenting_corners.append(crn)
-                    crn.tag = True
-                else:
-                    crn.tag = False
 
             if to_segmenting_corners:
-                segments = Segments.from_tagged_corners(to_segmenting_corners, umesh)
+                segments = Segments.from_corners(to_segmenting_corners, umesh)
                 segments = segments.break_by_cardinal_dir()
                 segments.segments.sort(key=lambda seg: seg.length)
                 segments.segments.sort(key=lambda seg: seg.weight_angle, reverse=True)
@@ -541,7 +565,6 @@ class Align_by_Angle:
                 yield cls.join_segments_by_angle(segments)
 
             isl.reset_aspect_ratio()
-
 
     @staticmethod
     def align_by_angle_ex(segments: Segments, x_axis=True):
@@ -652,15 +675,18 @@ class Align_by_Angle:
 
             try:
                 Align_by_Angle.join_segments_by_optimal_angle(
-                    grow_from_end, grow_from_start, new_segments, segments, tar_seg)
+                    grow_from_end, grow_from_start, new_segments, segments, tar_seg
+                )
             except ConnectionError:  # TODO: Fix this
-                print('UniV: Align by Angle: Zero edges found.')
+                print("UniV: Align by Angle: Zero edges found.")
                 continue
 
         return Segments(new_segments, segments.umesh)
 
     @staticmethod
-    def join_segments_by_optimal_angle(grow_from_end, grow_from_start, new_segments, segments, tar_seg):
+    def join_segments_by_optimal_angle(
+        grow_from_end, grow_from_start, new_segments, segments, tar_seg
+    ):
         """Connecting the segments at the optimal angle"""
         is_joined = False
         # Save the start and end variables in advance, as the segment may be joined and
@@ -687,7 +713,7 @@ class Align_by_Angle:
             Align_by_Angle.preserving_identical_oppositely_angles(grow_from_end, start_lock=True)
 
             min_seg = None
-            min_angle = float('inf')
+            min_angle = float("inf")
 
             for seg in grow_from_end:
                 if seg.is_start_lock:
@@ -733,7 +759,7 @@ class Align_by_Angle:
             Align_by_Angle.preserving_identical_oppositely_angles(grow_from_start, start_lock=False)
 
             min_seg = None
-            min_angle = float('inf')
+            min_angle = float("inf")
 
             for seg in grow_from_start:
                 if seg.is_end_lock:
@@ -780,8 +806,8 @@ class Align_by_Angle:
 
 
 class Collect(utils.OverlapHelper):
-    def collect_islands(self):
-        padding = bl_math.clamp(utils.get_pad(), 0.001, float('inf'))
+    def collect_islands(self, with_seams: bool):
+        padding = bl_math.clamp(utils.get_pad(), 0.001, float("inf"))
         padding *= 2
 
         umeshes = UMeshes()
@@ -792,41 +818,38 @@ class Collect(utils.OverlapHelper):
             umeshes = selected_umeshes if selected_umeshes else visible_umeshes
 
             if selected_umeshes:
-                islands_calc_type = AdvIslands.calc_selected_with_mark_seam
+                islands_calc_type = Islands.calc_extended
             else:
-                islands_calc_type = AdvIslands.calc_visible_with_mark_seam
+                islands_calc_type = Islands.calc_visible
         else:
             selected_umeshes = []
-            islands_calc_type = AdvIslands.calc_with_hidden_with_mark_seam
+            islands_calc_type = Islands.calc_with_hidden
             umeshes.ensure()
-
 
         view_box_sync_block = utils.ViewBoxSyncBlock.from_area(bpy.context.area)
         all_islands = []
         for umesh in umeshes:
             view_box_sync_block.skip_from_param(umesh, select=bool(selected_umeshes))
-            adv_islands = islands_calc_type(umesh)
+            adv_islands = islands_calc_type(umesh, with_seams=with_seams)
             view_box_sync_block.filter_by_isect_islands(adv_islands)
 
             if adv_islands:
-                if self.lock_overlap_mode == 'ANY':
+                if self.lock_overlap_mode == "ANY":
                     adv_islands.calc_tris()
                     adv_islands.calc_flat_uv_coords(save_triplet=True)
                 all_islands.extend(adv_islands)
             umesh.update_tag = bool(adv_islands)
 
-
         if not all_islands:
             view_box_sync_block.draw_if_blocked()
-            self.report({'WARNING'}, 'Islands not found')  # noqa
-            return {'FINISHED'}
+            self.report({"WARNING"}, "Islands not found")  # noqa
+            return {"FINISHED"}
         elif len(all_islands) == 1:
-            self.report({'WARNING'}, 'Expect two and more islands, given one.')  # noqa
-            return {'FINISHED'}
-
+            self.report({"WARNING"}, "Expect two and more islands, given one.")  # noqa
+            return {"FINISHED"}
 
         if self.lock_overlap:
-            threshold = self.threshold if self.lock_overlap_mode == 'EXACT' else None
+            threshold = self.threshold if self.lock_overlap_mode == "EXACT" else None
             all_islands = UnionIslands.calc_overlapped_island_groups(all_islands, threshold)
 
         general_bbox = BBox()
@@ -861,12 +884,14 @@ class Collect(utils.OverlapHelper):
 
         if failed_to_place:
             if not placed:
-                self.report({'WARNING'}, "Failed inplace packing")  # noqa
+                self.report({"WARNING"}, "Failed inplace packing")  # noqa
                 if not umeshes.is_edit_mode:
                     umeshes.free()
-                return {'FINISHED'}
+                return {"FINISHED"}
             else:
-                self.report({'INFO'}, "Some islands couldn't be packed and were placed to the right.")  # noqa
+                self.report(  # noqa
+                    {"INFO"}, "Some islands couldn't be packed and were placed to the right."
+                )
 
             placed_bbox = BBox()
             for isl in placed:
@@ -889,8 +914,8 @@ class Collect(utils.OverlapHelper):
         if not umeshes.is_edit_mode:
             umeshes.free()
             if umeshes.update_tag:
-                utils.update_area_by_type('VIEW_3D')
-        return {'FINISHED'}
+                utils.update_area_by_type("VIEW_3D")
+        return {"FINISHED"}
 
     @staticmethod
     def generate_search_positions(max_radius: float, step: float):
@@ -900,7 +925,7 @@ class Collect(utils.OverlapHelper):
             step = max_radius / new_r
             r = new_r
 
-        range_xy = np.arange(-r, r + 1)  # dtype='int16'
+        range_xy = np.arange(-r, r + 1)  # dtype="int16"
         grid_x, grid_y = np.meshgrid(range_xy, range_xy)
 
         dist = np.hypot(grid_x, grid_y)
@@ -908,8 +933,8 @@ class Collect(utils.OverlapHelper):
         coords = np.stack([grid_x, grid_y], axis=-1).reshape(-1, 2)
         distances = dist.flatten()
 
-        coords = coords[np.argsort(distances)].astype('float32')
-        coords *= np.float32(step)  # dtype='float32'
+        coords = coords[np.argsort(distances)].astype("float32")
+        coords *= np.float32(step)  # dtype="float32"
         return coords
 
     def pack_bboxes(self, rects: list[BBox], step, max_radius) -> list[BBox | None]:
@@ -937,8 +962,8 @@ class Collect(utils.OverlapHelper):
 
     @staticmethod
     def subtract_points_by_bbox(coords, bbox):
-        bb_min = np.array(bbox.min, dtype='float32')
-        bb_max = np.array(bbox.max, dtype='float32')
+        bb_min = np.array(bbox.min, dtype="float32")
+        bb_max = np.array(bbox.max, dtype="float32")
         mask = np.all((coords >= bb_min) & (coords <= bb_max), axis=1)
         return coords[~mask]
 
@@ -952,244 +977,250 @@ class Collect(utils.OverlapHelper):
 
 
 align_align_direction_items = (
-    ('UPPER', 'Upper', ''),
-    ('BOTTOM', 'Bottom', ''),
-    ('LEFT', 'Left', ''),
-    ('RIGHT', 'Right', ''),
-    ('CENTER', 'Center', ''),
-    ('HORIZONTAL', 'Horizontal', ''),
-    ('VERTICAL', 'Vertical', ''),
-    ('LEFT_UPPER', 'Left upper', ''),
-    ('RIGHT_UPPER', 'Right upper', ''),
-    ('LEFT_BOTTOM', 'Left bottom', ''),
-    ('RIGHT_BOTTOM', 'Right bottom', ''),
+    ("UPPER", "Upper", ""),
+    ("BOTTOM", "Bottom", ""),
+    ("LEFT", "Left", ""),
+    ("RIGHT", "Right", ""),
+    ("LEFT_UPPER", "Left upper", ""),
+    ("RIGHT_UPPER", "Right upper", ""),
+    ("LEFT_BOTTOM", "Left bottom", ""),
+    ("RIGHT_BOTTOM", "Right bottom", ""),
+    ("CENTER", "Center", ""),
+    ("HORIZONTAL", "Horizontal", ""),
+    ("VERTICAL", "Vertical", ""),
 )
 
 
-def draw(self, context):
-    pref = prefs()
-    is_pro = utils.is_pro_version_support()
-    is_trim = is_pro and pref.use_trims
-
-    if not is_trim:
-        if self.mode == 'MOVE_ANGLE_COLLECT':
-            if self.direction == 'CENTER':
-                self.layout.label(text='Collect')
-                self.draw_overlap()
-                self.layout.separator()
-            elif self.direction in ('HORIZONTAL', 'VERTICAL'):
-                self.layout.label(text='Align by Angle')
-                self.layout.prop(self, 'angle', slider=True)
-                self.layout.separator()
-
-    self.layout.prop(self, 'direction')
-
-    if not is_trim:
-        if context.mode == 'EDIT_MESH' and self.mode != 'MOVE_ANGLE_COLLECT':
-            row = self.layout.row(align=True)
-            row.prop(pref, 'align_island_mode', expand=True)
-
-        self.layout.column(align=True).prop(self, 'mode', expand=True)
-
-    if is_pro:
-        self.layout.separator()
-        self.layout.prop(pref, 'use_trims')
-
-
 class UNIV_OT_Align_pie(Operator, Collect, Align_by_Angle):
-    bl_idname = 'uv.univ_align_pie'
-    bl_label = 'Align'
+    bl_idname = "uv.univ_align_pie"
+    bl_label = "Align"
     bl_description = "Align verts, edges, faces, islands"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {"REGISTER", "UNDO"}
 
     # noinspection PyTypeHints
-    direction: EnumProperty(name="Direction", default='UPPER', items=align_align_direction_items)
-
+    direction: EnumProperty(name="Direction", default="UPPER", items=align_align_direction_items)
+    # noinspection PyTypeHints
+    ignore_seams: BoolProperty(
+        name="Ignore Seams",
+        default=False,
+        description="Seams do not split islands at connected edges.",
+    )
     # TODO: Add support Trim System: Move (Move by Trims)
 
     def draw(self, context):
         pref = prefs()
         is_pro = utils.is_pro_version_support()
-        is_trim = is_pro and pref.use_trims
+        is_trim = is_pro and pref.use_trims and pref.ot.Align_use_trims
+        layout = self.layout
+        if not is_trim:
+            if self.mode == "COLLECT":
+                self.draw_overlap()
+                layout.separator()
+            elif self.mode == "ALIGN_BY_ANGLE":
+                layout.prop(self, "angle", slider=True)
+                layout.separator()
+
+        if self.mode != "COLLECT":
+            if self.mode == "ALIGN_BY_ANGLE" and not is_trim:
+                row = layout.row(align=True)
+                row.prop_enum(self, "direction", "HORIZONTAL")
+                row.prop_enum(self, "direction", "VERTICAL")
+            else:
+                self.draw_align_buttons(self.layout)
 
         if not is_trim:
-            if self.mode == 'MOVE_ANGLE_COLLECT':
-                if self.direction == 'CENTER':
-                    self.layout.label(text='Collect')
-                    self.draw_overlap()
-                    self.layout.separator()
-                elif self.direction in ('HORIZONTAL', 'VERTICAL'):
-                    self.layout.label(text='Align by Angle')
-                    self.layout.prop(self, 'angle', slider=True)
-                    self.layout.separator()
-
-        self.layout.prop(self, 'direction')
-
-        if not is_trim:
-            if context.mode == 'EDIT_MESH' and self.mode != 'MOVE_ANGLE_COLLECT':
+            if (context.mode == "EDIT_MESH"
+                    and self.mode not in ("COLLECT", "ALIGN_BY_ANGLE", "MOVE")):
+                layout.separator()
                 row = self.layout.row(align=True)
-                row.prop(pref, 'align_island_mode', expand=True)
+                # TODO: Add support Individual and Union for trims
+                row.prop(pref, "align_island_mode", expand=True)
 
-            self.layout.column(align=True).prop(pref, 'align_mode', expand=True)
+            layout.separator()
+            layout.column(align=True).prop(pref, "align_mode", expand=True)
+
+        if self.mode != "ALIGN_BY_ANGLE":
+            layout.separator()
+            layout.prop(self, "ignore_seams")
 
         if is_pro:
-            self.layout.separator()
-            self.layout.prop(pref, 'use_trims')
+            if self.mode == "ALIGN_BY_ANGLE":
+                layout.separator()
 
+            row = layout.row(align=True)
+            if pref.use_trims:
+                row.prop(pref.ot, "Align_use_trims", text="")
+            row.prop(pref, "use_trims")
+
+    def draw_align_buttons(self, where):
+        def ly_wide_icon_op(layer, direct, icon):
+            row = layer.row(align=True)
+            row.ui_units_x = 3
+            row.scale_x = 2.1
+            row.prop_enum(self, "direction", direct, text=icon)
+
+        def ly_mid_mid_op(layer, direct, icon):
+            row = layer.row(align=True)
+            row.prop_enum(self, "direction", direct, text=icon)
+            row.scale_x = 2
+
+        col_main = where.column(align=True)
+        row_top = col_main.row(align=True)
+
+        ly_wide_icon_op(row_top, "LEFT_UPPER", "↖")  # arrow_top_left
+        ly_wide_icon_op(row_top.row(), "UPPER", "↑")  # arrow_top
+        ly_wide_icon_op(row_top, "RIGHT_UPPER", "↗")  # arrow_top_right
+
+        row_middle = col_main.row().row(align=True)
+        ly_wide_icon_op(row_middle, "LEFT", "← ")  # arrow_left
+
+        row_mid_middle = row_middle.row().row(align=True)
+        if self.mode == "MOVE":
+            row_mid_middle.active = False
+        ly_mid_mid_op(row_mid_middle, "HORIZONTAL", "—")  # horizontal_c
+        ly_mid_mid_op(row_mid_middle.row(), "CENTER", "+")  # center
+        ly_mid_mid_op(row_mid_middle.row(), "VERTICAL", "|")  # vertical_b
+        ly_wide_icon_op(row_middle, "RIGHT", "→")  # arrow_right
+
+        row_bottom = col_main.row(align=True)
+        ly_wide_icon_op(row_bottom, "LEFT_BOTTOM", "↙")  # arrow_bottom_left
+        ly_wide_icon_op(row_bottom.row(), "BOTTOM", "↓")  # arrow_bottom
+        ly_wide_icon_op(row_bottom, "RIGHT_BOTTOM", "↘")  # arrow_bottom_right
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.umeshes = None
         self.is_island_mode = False
 
     def execute(self, context):
-        self.umeshes = UMeshes(report=self.report)
-        settings = univ_settings()
-        self.mode = settings.align_mode  # noqa
-        if settings.align_island_mode == 'FOLLOW':
-            self.is_island_mode = self.get_is_island_mode()
+        umeshes = UMeshes(report=self.report)
+        self.mode = prefs().align_mode  # noqa
+        self.is_island_mode = self.get_is_island_mode()
+
+        if utils.is_pro_version_support() and prefs().use_trims and prefs().ot.Align_use_trims:
+            if self.mode != "ALIGN":
+                self.mode = "ALIGN"  # noqa
+                prefs().align_mode = "ALIGN"
+            if not utils.has_visible_active_trim(report=self.report):
+                return {"FINISHED"}
+            return self.align_by_trim(umeshes)
         else:
-            self.is_island_mode = settings.align_island_mode == 'ISLAND'
+            return self.align(umeshes)
 
-        if context.mode != 'EDIT_MESH':
-            self.is_island_mode = True
-
-        if utils.is_pro_version_support():
-            if prefs().use_trims:
-                self.is_island_mode = True
-
-                if not utils.has_visible_active_trim(report=self.report):
-                    return {'FINISHED'}
-
-                return self.align_by_trim()
-
-        return self.align()
-
-    def align(self):
+    def align(self, umeshes: UMeshes):
         match self.mode:
-            case 'ALIGN':
-                if self.umeshes.is_edit_mode:
+            case "ALIGN":
+                if umeshes.is_edit_mode:
                     if self.is_island_mode:
-                        selected, visible = self.umeshes.filtered_by_selected_and_visible_uv_faces()
+                        selected, visible = umeshes.filtered_by_selected_and_visible_uv_faces()
                     else:
-                        selected, visible = self.umeshes.filtered_by_selected_and_visible_uv_by_context()
-                    self.umeshes = selected if selected else visible
+                        selected, visible = umeshes.filtered_by_selected_and_visible_uv_by_context()
+                    umeshes = selected if selected else visible
                 else:
                     selected = []
 
-                self.align_ex(selected=bool(selected))
+                self.align_ex(umeshes, selected=bool(selected))
 
-            case 'ALIGN_TO_CURSOR':
+            case "ALIGN_TO_CURSOR":
                 cursor_loc = utils.get_cursor_location()
-                if self.umeshes.is_edit_mode:
+                if umeshes.is_edit_mode:
                     if self.is_island_mode:
-                        selected, visible = self.umeshes.filtered_by_selected_and_visible_uv_faces()
+                        selected, visible = umeshes.filtered_by_selected_and_visible_uv_faces()
                     else:
-                        selected, visible = self.umeshes.filtered_by_selected_and_visible_uv_by_context()
-                    self.umeshes = selected if selected else visible
+                        selected, visible = umeshes.filtered_by_selected_and_visible_uv_by_context()
+                    umeshes = selected if selected else visible
                 else:
                     selected = []
 
-                self.move_to_cursor_ex(cursor_loc, selected=bool(selected))
+                self.move_to_cursor_ex(umeshes, cursor_loc, selected=bool(selected))
 
-            case 'ALIGN_TO_CURSOR_UNION':
+            case "ALIGN_TO_CURSOR_UNION":
                 cursor_loc = utils.get_cursor_location()
 
-                if self.umeshes.is_edit_mode:
-                    selected, visible = self.umeshes.filtered_by_selected_and_visible_uv_faces()
-                    self.umeshes = selected if selected else visible
+                if umeshes.is_edit_mode:
+                    selected, visible = umeshes.filtered_by_selected_and_visible_uv_faces()
+                    umeshes = selected if selected else visible
                 else:
                     selected = []
 
-                self.move_to_cursor_union_ex(cursor_loc, selected=bool(selected))
+                self.move_to_cursor_union_ex(umeshes, cursor_loc, selected=bool(selected))
 
-            case 'MOVE_ANGLE_COLLECT':
+            case "ALIGN_BY_ANGLE":
+                if self.direction not in ("VERTICAL", "HORIZONTAL"):
+                    self.direction = "HORIZONTAL"
+                return self.align_edge_by_angle(
+                    is_x_axis=self.direction == "VERTICAL", with_seams=True
+                )
+            case "COLLECT":
                 # NOTE: Collect and Align by Axis processes errors and updates meshes.
                 # To avoid repeated updates and duplicate reports, the result is returned immediately from the function.
-                if self.direction == 'CENTER':
-                    return self.collect_islands()
-                elif self.direction in ('HORIZONTAL', 'VERTICAL'):
-                    return self.align_edge_by_angle(is_x_axis=self.direction == 'VERTICAL')
+                return self.collect_islands(with_seams=not self.ignore_seams)
+            case "MOVE":
+                if self.direction in ("CENTER", "VERTICAL", "HORIZONTAL"):
+                    self.direction = "RIGHT"
+                if umeshes.is_edit_mode:
+                    selected, visible = umeshes.filtered_by_selected_and_visible_uv_faces()
+                    umeshes = selected if selected else visible
+                    self.move_islands_ex(umeshes, selected=bool(selected))
                 else:
-                    if self.umeshes.is_edit_mode:
-                        selected, visible = self.umeshes.filtered_by_selected_and_visible_uv_faces()
-                        self.umeshes = selected if selected else visible
-                        self.move_islands_ex(selected=bool(selected))
-                    else:
-                        move_value = Vector(self.get_move_value(self.direction))
-                        for umesh in self.umeshes:
-                            uv = umesh.uv
-                            for f in umesh.bm.faces:
-                                for crn in f.loops:
-                                    crn[uv].uv += move_value
-                            umesh.update_tag = True
-
-            case 'INDIVIDUAL':
+                    move_value = Vector(self.get_move_value(self.direction))
+                    for umesh in umeshes:
+                        uv = umesh.uv
+                        for f in umesh.bm.faces:
+                            for crn in f.loops:
+                                crn[uv].uv += move_value
+                        umesh.update_tag = True
+            case "INDIVIDUAL":
                 selected = []
-                if self.umeshes.is_edit_mode:
+                if umeshes.is_edit_mode:
                     if self.is_island_mode:
-                        selected, visible = self.umeshes.filtered_by_selected_and_visible_uv_faces()
+                        selected, visible = umeshes.filtered_by_selected_and_visible_uv_faces()
                     else:
-                        selected, visible = self.umeshes.filtered_by_selected_and_visible_uv_by_context()
-                    self.umeshes = selected if selected else visible
+                        selected, visible = umeshes.filtered_by_selected_and_visible_uv_by_context()
+                    umeshes = selected if selected else visible
 
                 if selected:
-                    self.individual_scale_zero()
+                    self.individual_scale_zero(umeshes)
                 else:
-                    if self.direction not in {'CENTER', 'HORIZONTAL', 'VERTICAL'}:
-                        self.align_ex(selected=bool(selected))
-                    else:
-                        move_value = Vector(self.get_move_value(self.direction))
-                        for umesh in self.umeshes:
-                            uv = umesh.uv
-                            if self.umeshes.is_edit_mode:
-                                for crn in utils.calc_visible_uv_corners(umesh):
-                                    crn[uv].uv += move_value
-                            else:
-                                for f in umesh.bm.faces:
-                                    for crn in f.loops:
-                                        crn[uv].uv += move_value
-                            umesh.update_tag = True
+                    self.align_ex(umeshes, selected=False)
             case _:
                 raise NotImplementedError(self.mode)
 
-        self.umeshes.update()
-        if not self.umeshes.is_edit_mode:
-            self.umeshes.free()
-            if self.umeshes.update_tag:
-                utils.update_area_by_type('VIEW_3D')
-        return {'FINISHED'}
+        umeshes.update()
+        if not umeshes.is_edit_mode:
+            umeshes.free()
+            if umeshes.update_tag:
+                utils.update_area_by_type("VIEW_3D")
+        return {"FINISHED"}
 
-    def align_by_trim(self):
-        match self.mode:
-            # case 'ALIGN':
-            case _:
-                if self.umeshes.is_edit_mode:
-                    if self.is_island_mode:
-                        selected, visible = self.umeshes.filtered_by_selected_and_visible_uv_faces()
-                    else:
-                        selected, visible = self.umeshes.filtered_by_selected_and_visible_uv_by_context()
-                    self.umeshes = selected if selected else visible
-                else:
-                    selected = []
+    def align_by_trim(self, umeshes: UMeshes):
+        if umeshes.is_edit_mode:
+            if self.is_island_mode:
+                selected, visible = umeshes.filtered_by_selected_and_visible_uv_faces()
+            else:
+                selected, visible = umeshes.filtered_by_selected_and_visible_uv_by_context()
+            umeshes = selected if selected else visible
+        else:
+            selected = []
 
-                self.align_by_trim_ex(selected=bool(selected))
+        self.align_by_trim_ex(umeshes, selected=bool(selected))
 
-        self.umeshes.update()
-        if not self.umeshes.is_edit_mode:
-            self.umeshes.free()
-            if self.umeshes.update_tag:
-                utils.update_area_by_type('VIEW_3D')
-        return {'FINISHED'}
+        umeshes.update()
+        if not umeshes.is_edit_mode:
+            umeshes.free()
+            if umeshes.update_tag:
+                utils.update_area_by_type("VIEW_3D")
+        return {"FINISHED"}
 
-    def align_by_trim_ex(self, selected=True):
+    def align_by_trim_ex(self, umeshes: UMeshes, selected=True):
         tar_bb = utils.get_active_trim().to_bbox()
 
-        for umesh in self.umeshes:
+        for umesh in umeshes:
             if umesh.is_edit_bm:
-                islands = AdvIslands.calc_extended_or_visible_with_mark_seam(umesh, extended=selected)
+                islands = Islands.calc_extended_or_visible(
+                    umesh, extended=selected, with_seams=not self.ignore_seams
+                )
             else:
-                islands = AdvIslands.calc_with_hidden_with_mark_seam(umesh)
+                islands = Islands.calc_with_hidden(umesh, with_seams=not self.ignore_seams)
 
             if selected:
                 umesh.update_tag = bool(islands)
@@ -1202,20 +1233,25 @@ class UNIV_OT_Align_pie(Operator, Collect, Align_by_Angle):
                         found = True
                         self.align_islands([[island, island.bbox]], tar_bb)
                 if not found:
-                    self.report({'WARNING'}, "No islands were found that intersected to the active trim.")
+                    self.report(
+                        {"WARNING"}, "No islands were found that intersected to the active trim."
+                    )
 
-
-    def move_to_cursor_ex(self, cursor_loc, selected=True):
+    def move_to_cursor_ex(self, umeshes: UMeshes, cursor_loc, selected=True):
         all_groups = []  # islands, bboxes, uv or corners, uv
         general_bbox = BBox.init_from_minmax(cursor_loc, cursor_loc)
         view_box_sync_block = utils.ViewBoxSyncBlock.from_area(bpy.context.area)
-        if self.is_island_mode or (not selected and self.direction not in {'LEFT', 'RIGHT', 'BOTTOM', 'UPPER'}):
-            for umesh in self.umeshes:
+        if self.is_island_mode or (
+            not selected and self.direction not in {"LEFT", "RIGHT", "BOTTOM", "UPPER"}
+        ):
+            for umesh in umeshes:
                 view_box_sync_block.skip_from_param(umesh, selected)
                 if umesh.is_edit_bm:
-                    islands = AdvIslands.calc_extended_or_visible_with_mark_seam(umesh, extended=selected)
+                    islands = Islands.calc_extended_or_visible(
+                        umesh, extended=selected, with_seams=not self.ignore_seams
+                    )
                 else:
-                    islands = AdvIslands.calc_with_hidden_with_mark_seam(umesh)
+                    islands = Islands.calc_with_hidden(umesh, with_seams=not self.ignore_seams)
                 view_box_sync_block.filter_by_isect_islands(islands)
                 umesh.update_tag = bool(islands)
 
@@ -1224,23 +1260,25 @@ class UNIV_OT_Align_pie(Operator, Collect, Align_by_Angle):
 
             self.align_islands(all_groups, general_bbox, invert=True)
         else:
-            assert self.umeshes.is_edit_mode
-            for umesh in self.umeshes:
+            assert umeshes.is_edit_mode
+            for umesh in umeshes:
                 view_box_sync_block.skip_from_param(umesh, selected)
                 if selected and not umesh.sync_valid:
-                    if umesh.elem_mode == 'VERT':
+                    if umesh.elem_mode == "VERT":
                         corners = utils.calc_selected_uv_vert(umesh)
-                        corners = view_box_sync_block.filter_verts(corners, umesh.uv)
+                        corners = view_box_sync_block.filter_verts(corners, umesh)
                         corners = self.get_unique_linked_corners_from_crn_vert(umesh, corners)
-                    elif umesh.elem_mode == 'EDGE':
+                    elif umesh.elem_mode == "EDGE":
                         corners = utils.calc_selected_uv_edge(umesh)
                         corners = view_box_sync_block.filter_edges(corners, umesh)
                         corners = self.get_unique_linked_corners_from_crn_edge(umesh, corners)
                     else:
-                        corners = [crn for f in utils.calc_selected_uv_faces_iter(umesh) for crn in f.loops]
+                        corners = [
+                            crn for f in utils.calc_selected_uv_faces_iter(umesh) for crn in f.loops
+                        ]
                         tool_settings = bpy.context.scene.tool_settings
                         sticky_mode = tool_settings.uv_sticky_select_mode
-                        if sticky_mode != 'DISABLED':
+                        if sticky_mode != "DISABLED":
                             corners = self.get_unique_linked_corners_from_crn_vert(umesh, corners)
                 else:
                     corners = utils.calc_uv_corners(umesh, selected=selected)
@@ -1252,17 +1290,19 @@ class UNIV_OT_Align_pie(Operator, Collect, Align_by_Angle):
 
         view_box_sync_block.draw_if_blocked()
 
-    def move_to_cursor_union_ex(self, cursor_loc, selected=True):
+    def move_to_cursor_union_ex(self, umeshes: UMeshes, cursor_loc, selected=True):
         all_groups = []  # islands, bboxes, uv or corners, uv
         target_bbox = BBox.init_from_minmax(cursor_loc, cursor_loc)
         general_bbox = BBox()
         view_box_sync_block = utils.ViewBoxSyncBlock.from_area(bpy.context.area)
-        for umesh in self.umeshes:
+        for umesh in umeshes:
             view_box_sync_block.skip_from_param(umesh, selected)
             if umesh.is_edit_bm:
-                islands = AdvIslands.calc_extended_or_visible_with_mark_seam(umesh, extended=selected)
+                islands = Islands.calc_extended_or_visible(
+                    umesh, extended=selected, with_seams=not self.ignore_seams
+                )
             else:
-                islands = AdvIslands.calc_with_hidden_with_mark_seam(umesh)
+                islands = Islands.calc_with_hidden(umesh, with_seams=not self.ignore_seams)
             view_box_sync_block.filter_by_isect_islands(islands)
             umesh.update_tag = bool(islands)
 
@@ -1277,44 +1317,43 @@ class UNIV_OT_Align_pie(Operator, Collect, Align_by_Angle):
 
     @staticmethod
     def get_unique_linked_corners_from_crn_vert(umesh, corners):
-        sync = umesh.sync
-        uv = umesh.uv
+        get_linked_it_inc = utils.get_linked_crn_iter_fn(umesh, included=True)
         unique_linked_corners = set()
         for crn in corners:
             if crn not in unique_linked_corners:
-                unique_linked_corners.add(crn)
-                unique_linked_corners.update(utils.linked_crn_to_vert_pair_with_seam(crn, uv, sync))
+                unique_linked_corners.update(get_linked_it_inc(crn))
         return unique_linked_corners
 
     @staticmethod
     def get_unique_linked_corners_from_crn_edge(umesh, corners):
-        sync = umesh.sync
-        uv = umesh.uv
+        get_linked_it_inc = utils.get_linked_crn_iter_fn(umesh, included=True)
+
         unique_linked_corners = set()
         for crn in corners:
             if crn not in unique_linked_corners:
-                unique_linked_corners.add(crn)
-                unique_linked_corners.update(utils.linked_crn_to_vert_pair_with_seam(crn, uv, sync))
+                unique_linked_corners.update(get_linked_it_inc(crn))
+
             next_crn = crn.link_loop_next
             if next_crn not in unique_linked_corners:
-                unique_linked_corners.add(next_crn)
-                unique_linked_corners.update(utils.linked_crn_to_vert_pair_with_seam(next_crn, uv, sync))
+                unique_linked_corners.update(get_linked_it_inc(crn))
         return unique_linked_corners
 
-    def align_ex(self, selected=True):
+    def align_ex(self, umeshes: UMeshes, selected=True):
         all_groups = []  # islands, bboxes, uv or corners, uv
         general_bbox = BBox()
         view_box_sync_block = utils.ViewBoxSyncBlock.from_area(bpy.context.area)
 
         if self.is_island_mode or not selected:
-            for umesh in self.umeshes:
+            for umesh in umeshes:
                 view_box_sync_block.skip_from_param(umesh, selected)
 
                 if umesh.is_edit_bm:
-                    islands = AdvIslands.calc_extended_or_visible_with_mark_seam(umesh, extended=selected)
+                    islands = Islands.calc_extended_or_visible(
+                        umesh, extended=selected, with_seams=not self.ignore_seams
+                    )
                     view_box_sync_block.filter_by_isect_islands(islands)
                 else:
-                    islands = AdvIslands.calc_with_hidden_with_mark_seam(umesh)
+                    islands = Islands.calc_with_hidden(umesh, with_seams=not self.ignore_seams)
 
                 umesh.update_tag = bool(islands)
                 for island in islands:
@@ -1328,20 +1367,22 @@ class UNIV_OT_Align_pie(Operator, Collect, Align_by_Angle):
             return
 
         assert selected
-        assert self.umeshes.is_edit_mode
-        for umesh in self.umeshes:
+        assert umeshes.is_edit_mode
+        for umesh in umeshes:
             if umesh.sync:
-                if not umesh.sync_valid and umesh.elem_mode in ('VERT', 'EDGE'):
+                if not umesh.sync_valid and umesh.elem_mode in ("VERT", "EDGE"):
                     view_box_sync_block.skip_from_param(umesh, selected)
-                    if umesh.elem_mode == 'VERT':
+                    if umesh.elem_mode == "VERT":
                         corners = utils.calc_selected_uv_vert(umesh)
-                        corners = view_box_sync_block.filter_verts(corners, umesh.uv)
+                        corners = view_box_sync_block.filter_verts(corners, umesh)
                     else:
                         corners = utils.calc_selected_uv_edge(umesh)
                         corners = view_box_sync_block.filter_edges(corners, umesh)
                         corners = self.get_unique_linked_corners_from_crn_edge(umesh, corners)
-                elif umesh.elem_mode in ('FACE', 'ISLAND'):
-                    corners = [crn for f in utils.calc_selected_uv_faces_iter(umesh) for crn in f.loops]
+                elif umesh.elem_mode in ("FACE", "ISLAND"):
+                    corners = [
+                        crn for f in utils.calc_selected_uv_faces_iter(umesh) for crn in f.loops
+                    ]
                 else:
                     corners = utils.calc_selected_uv_vert(umesh)
             else:
@@ -1356,18 +1397,20 @@ class UNIV_OT_Align_pie(Operator, Collect, Align_by_Angle):
         self.align_corners(all_groups, general_bbox)
         view_box_sync_block.draw_if_blocked()
 
-    def move_islands_ex(self, selected=True):
-        assert self.direction not in {'CENTER', 'HORIZONTAL', 'VERTICAL'}
+    def move_islands_ex(self, umeshes: UMeshes, selected=True):
+        assert self.direction not in {"CENTER", "HORIZONTAL", "VERTICAL"}
 
         move_value = Vector(self.get_move_value(self.direction))
         view_box_sync_block = utils.ViewBoxSyncBlock.from_area(bpy.context.area)
 
-        for umesh in self.umeshes:
+        for umesh in umeshes:
             view_box_sync_block.skip_from_param(umesh, selected)
             if umesh.is_edit_bm:
-                islands = Islands.calc_extended_or_visible_with_mark_seam(umesh, extended=selected)
+                islands = Islands.calc_extended_or_visible(
+                    umesh, extended=selected, with_seams=not self.ignore_seams
+                )
             else:
-                islands = Islands.calc_with_hidden_with_mark_seam(umesh)
+                islands = Islands.calc_with_hidden(umesh, with_seams=not self.ignore_seams)
             view_box_sync_block.filter_by_isect_islands(islands)
 
             umesh.update_tag = bool(islands)
@@ -1376,33 +1419,32 @@ class UNIV_OT_Align_pie(Operator, Collect, Align_by_Angle):
                 isl.move(move_value)
         view_box_sync_block.draw_if_blocked()
 
-
-    def individual_scale_zero(self):
-        assert self.umeshes.is_edit_mode
+    def individual_scale_zero(self, umeshes: UMeshes):
+        assert umeshes.is_edit_mode
 
         view_box_sync_block = utils.ViewBoxSyncBlock.from_area(bpy.context.area)
-        if self.umeshes.elem_mode == 'FACE':
-            for umesh in self.umeshes:
+        if umeshes.elem_mode == "FACE":
+            for umesh in umeshes:
                 view_box_sync_block.skip_from_param(umesh, select=True)
-                islands = AdvIslands.calc_selected_with_mark_seam(umesh)
+                islands = Islands.calc_selected(umesh, with_seams=not self.ignore_seams)
                 view_box_sync_block.filter_by_isect_islands(islands)
                 umesh.update_tag = bool(islands)
                 for isl in islands:
                     self.align_corners(((isl.corners_iter(), umesh.uv),), isl.bbox)
         else:
-            for umesh in self.umeshes:
+            for umesh in umeshes:
                 umesh.update_tag = False
                 view_box_sync_block.skip_from_param(umesh, select=True)
 
                 uv = umesh.uv
-                lgs = LoopGroup.calc_dirt_loop_groups(umesh)
-                if lgs:
-                    umesh.tag_visible_corners()  # TODO: Delete, use pair linked with ms for extend from linked
-                    for lg in lgs:
-                        if view_box_sync_block.isect_lg(lg):
+                segments = utypes.Segments.from_corners(utils.calc_selected_uv_edge(umesh), umesh)
+                if segments:
+                    for seg in segments:
+                        if view_box_sync_block.isect_segment(seg):
 
-                            lg.extend_from_linked()
-                            self.align_corners(((lg, uv),), lg.calc_bbox())
+                            seg.calc_chain_linked_corners()
+                            flatted_linked_corners = (crn for linked in seg.chain_linked_corners for crn in linked)
+                            self.align_corners([[flatted_linked_corners, uv]], seg.calc_bbox())
                             umesh.update_tag = True
 
         view_box_sync_block.draw_if_blocked()
@@ -1411,30 +1453,50 @@ class UNIV_OT_Align_pie(Operator, Collect, Align_by_Angle):
         for island, bounds in groups:
             center = bounds.center
             match self.direction:
-                case 'UPPER':
-                    delta = (0, (general_bbox.min - bounds.min).y) if invert else (0, (general_bbox.max - bounds.max).y)
-                case 'BOTTOM':
-                    delta = (0, (general_bbox.max - bounds.max).y) if invert else (0, (general_bbox.min - bounds.min).y)
-                case 'LEFT':
-                    delta = ((general_bbox.max - bounds.max).x, 0) if invert else ((general_bbox.min - bounds.min).x, 0)
-                case 'RIGHT':
-                    delta = ((general_bbox.min - bounds.min).x, 0) if invert else ((general_bbox.max - bounds.max).x, 0)
-                case 'CENTER':
+                case "UPPER":
+                    delta = (
+                        (0, (general_bbox.min - bounds.min).y)
+                        if invert
+                        else (0, (general_bbox.max - bounds.max).y)
+                    )
+                case "BOTTOM":
+                    delta = (
+                        (0, (general_bbox.max - bounds.max).y)
+                        if invert
+                        else (0, (general_bbox.min - bounds.min).y)
+                    )
+                case "LEFT":
+                    delta = (
+                        ((general_bbox.max - bounds.max).x, 0)
+                        if invert
+                        else ((general_bbox.min - bounds.min).x, 0)
+                    )
+                case "RIGHT":
+                    delta = (
+                        ((general_bbox.min - bounds.min).x, 0)
+                        if invert
+                        else ((general_bbox.max - bounds.max).x, 0)
+                    )
+                case "CENTER":
                     delta = general_bbox.center - center
-                case 'HORIZONTAL':
+                case "HORIZONTAL":
                     delta = (0, (general_bbox.center - center).y)
-                case 'VERTICAL':
+                case "VERTICAL":
                     delta = (general_bbox.center - center).x, 0
-                case 'RIGHT_UPPER':
-                    delta = general_bbox.min - bounds.min if invert else general_bbox.max - bounds.max
-                case 'LEFT_UPPER':
+                case "RIGHT_UPPER":
+                    delta = (
+                        general_bbox.min - bounds.min if invert else general_bbox.max - bounds.max
+                    )
+                case "LEFT_UPPER":
                     if invert:
                         delta = (general_bbox.max - bounds.max).x, (general_bbox.min - bounds.min).y
                     else:
                         delta = (general_bbox.min - bounds.min).x, (general_bbox.max - bounds.max).y
-                case 'LEFT_BOTTOM':
-                    delta = general_bbox.max - bounds.max if invert else general_bbox.min - bounds.min
-                case 'RIGHT_BOTTOM':
+                case "LEFT_BOTTOM":
+                    delta = (
+                        general_bbox.max - bounds.max if invert else general_bbox.min - bounds.min
+                    )
+                case "RIGHT_BOTTOM":
                     if invert:
                         delta = (general_bbox.min - bounds.min).x, (general_bbox.max - bounds.max).y
                     else:
@@ -1445,10 +1507,10 @@ class UNIV_OT_Align_pie(Operator, Collect, Align_by_Angle):
 
     def align_corners(self, groups, general_bbox):
         match self.direction:
-            case 'LEFT' | 'RIGHT' | 'VERTICAL':
-                if self.direction == 'LEFT':
+            case "LEFT" | "RIGHT" | "VERTICAL":
+                if self.direction == "LEFT":
                     destination = general_bbox.min.x
-                elif self.direction == 'RIGHT':
+                elif self.direction == "RIGHT":
                     destination = general_bbox.max.x
                 else:
                     destination = general_bbox.center.x
@@ -1456,10 +1518,10 @@ class UNIV_OT_Align_pie(Operator, Collect, Align_by_Angle):
                 for luvs, uv in groups:
                     for luv in luvs:
                         luv[uv].uv.x = destination
-            case 'UPPER' | 'BOTTOM' | 'HORIZONTAL':
-                if self.direction == 'UPPER':
+            case "UPPER" | "BOTTOM" | "HORIZONTAL":
+                if self.direction == "UPPER":
                     destination = general_bbox.max.y
-                elif self.direction == 'BOTTOM':
+                elif self.direction == "BOTTOM":
                     destination = general_bbox.min.y
                 else:
                     destination = general_bbox.center.y
@@ -1468,15 +1530,15 @@ class UNIV_OT_Align_pie(Operator, Collect, Align_by_Angle):
                     for luv in luvs:
                         luv[uv].uv[1] = destination
             case _:
-                if self.direction == 'CENTER':
+                if self.direction == "CENTER":
                     destination = general_bbox.center
-                elif self.direction == 'LEFT_BOTTOM':
+                elif self.direction == "LEFT_BOTTOM":
                     destination = general_bbox.left_bottom
-                elif self.direction == 'RIGHT_UPPER':
+                elif self.direction == "RIGHT_UPPER":
                     destination = general_bbox.right_upper
-                elif self.direction == 'LEFT_UPPER':
+                elif self.direction == "LEFT_UPPER":
                     destination = general_bbox.left_upper
-                elif self.direction == 'RIGHT_BOTTOM':
+                elif self.direction == "RIGHT_BOTTOM":
                     destination = general_bbox.right_bottom
                 else:
                     raise NotImplementedError(self.direction)
@@ -1487,219 +1549,242 @@ class UNIV_OT_Align_pie(Operator, Collect, Align_by_Angle):
 
     @staticmethod
     def get_is_island_mode():
-        ts = bpy.context.scene.tool_settings
-        if ts.use_uv_select_sync:
-            return ts.mesh_select_mode[:] == (False, False, True)
-        return ts.uv_select_mode in ('FACE', 'ISLAND')
+        is_island_mode = True
 
+        if bpy.context.mode == "EDIT_MESH":
+            settings = univ_settings()
+            if settings.align_island_mode == "FOLLOW":
+                ts = bpy.context.scene.tool_settings
+                if ts.use_uv_select_sync:
+                    is_island_mode = ts.mesh_select_mode[:] == (False, False, True)
+                else:
+                    is_island_mode = ts.uv_select_mode in ("FACE", "ISLAND")
+            else:
+                is_island_mode = settings.align_island_mode == "ISLAND"
+
+        if utils.is_pro_version_support():
+            if prefs().use_trims:
+                is_island_mode = True
+        return is_island_mode
 
     @staticmethod
     def get_move_value(direction):
         match direction:
-            case 'UPPER':
+            case "UPPER":
                 return 0, 1
-            case 'BOTTOM':
+            case "BOTTOM":
                 return 0, -1
-            case 'LEFT':
+            case "LEFT":
                 return -1, 0
-            case 'RIGHT':
+            case "RIGHT":
                 return 1, 0
-            case 'RIGHT_UPPER':
+            case "RIGHT_UPPER":
                 return 1, 1
-            case 'LEFT_UPPER':
+            case "LEFT_UPPER":
                 return -1, 1
-            case 'LEFT_BOTTOM':
+            case "LEFT_BOTTOM":
                 return -1, -1
-            case 'RIGHT_BOTTOM':
+            case "RIGHT_BOTTOM":
                 return 1, -1
             case _:
                 raise NotImplementedError(direction)
 
 
-align_event_info_ex = \
-    "Default - Align verts/islands\n" \
-    "Shift - Move | Align by Angle | Collect verts/islands.\n" \
-    "\t\t\tArrows buttons move verts/islands.\n" \
-    "\t\t\tCenter button collects islands.\n" \
-    "\t\t\tH/V buttons - align edges by angle.\n" \
-    "Ctrl - Align to cursor.\n" \
-    "Alt - Individual align.\n" \
-    "Ctrl+Shift+Alt - Align to cursor union.\n\n" \
+align_event_info_ex = (
+    "Default - Align verts/islands\n"
+    "Shift - Move | Align by Angle | Collect verts/islands.\n"
+    "\t\t\tArrows buttons move verts/islands.\n"
+    "\t\t\tCenter button collects islands.\n"
+    "\t\t\tH/V buttons - align edges by angle.\n"
+    "Ctrl - Align to cursor.\n"
+    "Alt - Individual align.\n"
+    "Ctrl+Shift+Alt - Align to cursor union.\n\n"
     "In Non-Edit Mode, operations proceed as in Island Mode.\n"
+)
 # "Ctrl+Shift+LMB = Collision move (Not Implement)\n"
+
 
 # noinspection PyTypeHints
 class UNIV_OT_Align(UNIV_OT_Align_pie):
-    bl_idname = 'uv.univ_align'
+    bl_idname = "uv.univ_align"
     bl_description = "Align verts, edges, faces, islands and cursor \n\n" + align_event_info_ex
 
-    mode: EnumProperty(name="Mode", default='ALIGN', items=(
-        ('ALIGN', 'Align', ''),
-        ('MOVE_ANGLE_COLLECT', 'Move | Align by Angle | Collect', ''),
-        ('ALIGN_TO_CURSOR', 'Align to cursor', ''),
-        ('ALIGN_TO_CURSOR_UNION', 'Align to cursor union', ''),
-        ('INDIVIDUAL', 'Individual', ''),
-        # ('MOVE_COLLISION', 'Collision move', '')
-    ))
+    mode: EnumProperty(name="Align Mode", default="ALIGN", items=(
+        ("ALIGN", "Align", "Align", "EMPTY_SINGLE_ARROW", 0),
+        None,
+        ("ALIGN_TO_CURSOR", "Align to cursor", "Align to cursor", "ORIENTATION_CURSOR", 2),
+        ("ALIGN_TO_CURSOR_UNION", "Align to cursor union", "Align to cursor union", "EVENT_U", 3),
+        ("INDIVIDUAL", "Individual", "Individual Align", "PIVOT_INDIVIDUAL", 4),
+        None,
+        ("MOVE", "Move ", "Move in Island Mode.", "ORIENTATION_VIEW", 5),
+        ("ALIGN_BY_ANGLE", "Align by Angle", "HV applies align by edge angle in Island mode.", "GIZMO", 6),
+        ("COLLECT", "Collect", "Collect in Island mode when press Center.", "CURSOR", 7),
+    ))  # fmt: skip
 
 
     def invoke(self, context, event):
-        if event.value == 'PRESS':
+        if event.value == "PRESS":
             return self.execute(context)
 
         match event.ctrl, event.shift, event.alt:
             case False, False, False:
-                prefs().align_mode = 'ALIGN'
+                prefs().align_mode = "ALIGN"
             case True, False, False:
-                prefs().align_mode = 'ALIGN_TO_CURSOR'
+                prefs().align_mode = "ALIGN_TO_CURSOR"
             case True, True, True:
-                prefs().align_mode = 'ALIGN_TO_CURSOR_UNION'
+                prefs().align_mode = "ALIGN_TO_CURSOR_UNION"
             case False, True, False:
-                prefs().align_mode = 'MOVE_ANGLE_COLLECT'
+                if self.direction == "CENTER":
+                    prefs().align_mode = "COLLECT"
+                elif self.direction in ("HORIZONTAL", "VERTICAL"):
+                    prefs().align_mode = "ALIGN_BY_ANGLE"
+                else:
+                    prefs().align_mode = "MOVE"
             case False, False, True:
-                prefs().align_mode = 'INDIVIDUAL'
+                prefs().align_mode = "INDIVIDUAL"
             case _:
-                self.report({'INFO'}, f"Event: {utils.event_to_string(event)} not implement. \n\n"
-                            f"See all variations:\n\n{align_event_info_ex}")
-                return {'CANCELLED'}
+                self.report(
+                    {"INFO"},
+                    f"Event: {utils.event_to_string(event)} not implement. \n\n"
+                    f"See all variations:\n\n{align_event_info_ex}",
+                )
+                return {"CANCELLED"}
         return self.execute(context)
 
     def execute(self, context):
-        self.umeshes = UMeshes(report=self.report)
+        umeshes = UMeshes(report=self.report)
         settings = univ_settings()
-        if settings.align_island_mode == 'FOLLOW':
-            self.is_island_mode = self.get_is_island_mode()
-        else:
-            self.is_island_mode = settings.align_island_mode == 'ISLAND'
+        self.is_island_mode = self.get_is_island_mode()
 
         self.mode = settings.align_mode
-
-        if context.mode != 'EDIT_MESH':
-            self.is_island_mode = True
-
-        if utils.is_pro_version_support():
-            if prefs().use_trims:
-                self.is_island_mode = True
-
-                # if self.mode in ('DEFAULT', 'INDIVIDUAL'):
-                if not utils.has_visible_active_trim(report=self.report):
-                    return {'FINISHED'}
-
-                return self.align_by_trim()
-
-        return self.align()
+        if utils.is_pro_version_support() and prefs().use_trims and prefs().ot.Align_use_trims:
+            if self.mode != "ALIGN":
+                self.mode = "ALIGN"
+                prefs().align_mode = "ALIGN"
+            if not utils.has_visible_active_trim(report=self.report):
+                return {"FINISHED"}
+            return self.align_by_trim(umeshes)
+        else:
+            return self.align(umeshes)
 
 
-class UNIV_OT_Flip_VIEW3D(Operator):
-    bl_idname = 'mesh.univ_flip'
-    bl_label = 'Flip'
-    bl_options = {'REGISTER', 'UNDO'}
-    bl_description = "FlipX and FlipY.\n\n" \
-                     "Default - Flip island.\n" \
-                     "Shift - Individual flip.\n" \
-                     "Ctrl - Flip by cursor.\n" \
-                     "Alt - Flip by Y axis.\n\n" \
-                     "Shift and Ctrl conflict between them."
+class UNIV_OT_Flip_VIEW3D(utypes.RayCastAndPick):
+    bl_idname = "mesh.univ_flip"
+    bl_label = "Flip"
+    bl_options = {"REGISTER", "UNDO"}
+    bl_description = (
+        "FlipX and FlipY.\n\n"
+        "Default - Flip island.\n"
+        "Shift - Individual flip.\n"
+        "Ctrl - Flip by cursor.\n"
+        "Alt - Flip by Y axis.\n\n"
+        "Shift and Ctrl conflict between them."
+    )
 
     # noinspection PyTypeHints
-    mode: EnumProperty(name='Mode', default='DEFAULT', items=(
-        ('DEFAULT', 'Default', ''),
-        ('BY_CURSOR', 'By cursor', ''),
-        ('INDIVIDUAL', 'Individual', ''),
-        ('FLIPPED', 'Flipped', ''),
-    ))
+    mode: EnumProperty(
+        name="Mode",
+        default="DEFAULT",
+        items=(
+            ("DEFAULT", "Default", ""),
+            ("BY_CURSOR", "By cursor", ""),
+            ("INDIVIDUAL", "Individual", ""),
+            ("FLIPPED", "Flipped", ""),
+        ),
+    )
     # noinspection PyTypeHints
-    axis: EnumProperty(name='Axis', default='X', items=(('X', 'X', ''), ('Y', 'Y', '')))
+    axis: EnumProperty(name="Axis", default="X", items=(("X", "X", ""), ("Y", "Y", "")))
+    # noinspection PyTypeHints
+    ignore_seams: BoolProperty(
+        name="Ignore Seams",
+        default=False,
+        description="Seams do not split islands at connected edges.",
+    )
 
     def draw(self, context):
-        self.layout.row(align=True).prop(self, 'axis', expand=True)
-        self.layout.column(align=True).prop(self, 'mode', expand=True)
+        self.layout.row(align=True).prop(self, "axis", expand=True)
+        self.layout.column(align=True).prop(self, "mode", expand=True)
+        self.layout.prop(self, "ignore_seams")
 
     def invoke(self, context, event):
-        if event.value == 'PRESS':
-            if context.area.type == 'IMAGE_EDITOR' and context.area.ui_type == 'UV':
-                self.max_distance = utils.get_max_distance_from_px(prefs().max_pick_distance, context.region.view2d)
-                self.mouse_pos = Vector(context.region.view2d.region_to_view(
-                    event.mouse_region_x, event.mouse_region_y))
+        if self.store_mouse_pose_on_uv_and_max_distance_if_allowed(event):
             return self.execute(context)
-        self.axis = 'Y' if event.alt else 'X'
+
+        self.axis = "Y" if event.alt else "X"
         match event.ctrl, event.shift:
             case False, False:
-                self.mode = 'DEFAULT'
+                self.mode = "DEFAULT"
             case True, False:
-                self.mode = 'BY_CURSOR'
+                self.mode = "BY_CURSOR"
             case False, True:
-                self.mode = 'INDIVIDUAL'
+                self.mode = "INDIVIDUAL"
             case _:
-                self.report({'INFO'}, f"Event: {utils.event_to_string(event)} not implement. \n\n")
-                return {'CANCELLED'}
+                self.report({"INFO"}, f"Event: {utils.event_to_string(event)} not implement. \n\n")
+                return {"CANCELLED"}
         return self.execute(context)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.umeshes: UMeshes | None = None
         self.scale = Vector()
-        self.max_distance: float = 0.0
-        self.mouse_pos: Vector | None = None
-        self.calc_island_type = AdvIslands
+        self.calc_island_type: typing.Callable = Islands.calc_extended
 
     def execute(self, context):
-        self.umeshes = UMeshes(report=self.report)
-        self.scale = Vector((-1, 1)) if self.axis == 'X' else Vector((1, -1))
+        umeshes = UMeshes(report=self.report)
+        self.scale = Vector((-1, 1)) if self.axis == "X" else Vector((1, -1))
 
-        if self.umeshes.is_edit_mode:
-            if not self.bl_idname.startswith('UV'):
-                self.umeshes.set_sync()
-                self.umeshes.sync_invalidate()
+        if umeshes.is_edit_mode:
+            if not self.bl_idname.startswith("UV"):
+                umeshes.set_sync()
+                umeshes.sync_invalidate()
 
-            selected_umeshes, visible_umeshes = self.umeshes.filtered_by_selected_and_visible_uv_faces()
-            self.umeshes = selected_umeshes if selected_umeshes else visible_umeshes
+            selected_umeshes, visible_umeshes = umeshes.filtered_by_selected_and_visible_uv_faces()
+            umeshes = selected_umeshes if selected_umeshes else visible_umeshes
 
             if selected_umeshes:
-                self.calc_island_type = AdvIslands.calc_extended_with_mark_seam
-                if self.mode == 'FLIPPED':
-                    self.calc_island_type = self.calc_selected_flipped_islands_with_mark_seam
+                self.calc_island_type = Islands.calc_extended
+                if self.mode == "FLIPPED":
+                    self.calc_island_type = self.calc_selected_flipped_islands
             else:
-                self.calc_island_type = AdvIslands.calc_visible_with_mark_seam
-                if self.mode == 'FLIPPED':
-                    self.calc_island_type = self.calc_visible_flipped_islands_with_mark_seam
+                self.calc_island_type = Islands.calc_visible
+                if self.mode == "FLIPPED":
+                    self.calc_island_type = self.calc_visible_flipped_islands
 
-            if not self.umeshes:
-                return self.umeshes.update()
-            if not selected_umeshes and self.mouse_pos:
-                return self.pick_flip()
+            if not umeshes:
+                return umeshes.update()
+            if not selected_umeshes and self.mouse_position:
+                return self.pick_flip(umeshes)
         else:
-            if not self.umeshes:
-                return self.umeshes.update()
+            if not umeshes:
+                return umeshes.update()
 
-            self.umeshes.ensure()
-            self.calc_island_type = AdvIslands.calc_with_hidden_with_mark_seam
-            if self.mode == 'FLIPPED':
-                self.calc_island_type = self.calc_with_hidden_flipped_islands_with_mark_seam
+            umeshes.ensure()
+            self.calc_island_type = Islands.calc_with_hidden
+            if self.mode == "FLIPPED":
+                self.calc_island_type = self.calc_with_hidden_flipped_islands
 
         match self.mode:
-            case 'DEFAULT':
-                self.flip_default()
-            case 'BY_CURSOR':
-                self.flip_by_cursor(cursor=utils.get_cursor_location())
-            case 'INDIVIDUAL':
-                self.flip_individual()
-            case _:  # 'FLIPPED':
-                self.flip_flipped()
+            case "DEFAULT":
+                self.flip_default(umeshes)
+            case "BY_CURSOR":
+                self.flip_by_cursor(umeshes, cursor=utils.get_cursor_location())
+            case "INDIVIDUAL":
+                self.flip_individual(umeshes)
+            case _:  # "FLIPPED":
+                self.flip_flipped(umeshes)
 
-        self.umeshes.update()
+        umeshes.update()
 
-        if not self.umeshes.is_edit_mode:
-            self.umeshes.free()
-            utils.update_area_by_type('VIEW_3D')
+        if not umeshes.is_edit_mode:
+            umeshes.free()
+            utils.update_area_by_type("VIEW_3D")
 
-        return {'FINISHED'}
+        return {"FINISHED"}
 
-    def flip_default(self):
+    def flip_default(self, umeshes: UMeshes):
         islands_of_mesh = []
         general_bbox = BBox()
-        for umesh in self.umeshes:
-            islands = self.calc_island_type(umesh)
+        for umesh in umeshes:
+            islands = self.calc_island_type(umesh, with_seams=not self.ignore_seams)
             if islands:
                 general_bbox.union(islands.calc_bbox())
                 islands_of_mesh.append(islands)
@@ -1709,201 +1794,205 @@ class UNIV_OT_Flip_VIEW3D(Operator):
         for islands in islands_of_mesh:
             islands.scale(scale=self.scale, pivot=pivot)
 
-    def flip_by_cursor(self, cursor):
-        for umesh in self.umeshes:
-            islands = self.calc_island_type(umesh)
+    def flip_by_cursor(self, umeshes: UMeshes, cursor):
+        for umesh in umeshes:
+            islands = self.calc_island_type(umesh, with_seams=not self.ignore_seams)
             if islands:
                 islands.scale(scale=self.scale, pivot=cursor)
             umesh.update_tag = bool(islands)
 
-    def flip_individual(self):
-        for umesh in self.umeshes:
-            islands = self.calc_island_type(umesh)
+    def flip_individual(self, umeshes: UMeshes):
+        for umesh in umeshes:
+            islands = self.calc_island_type(umesh, with_seams=not self.ignore_seams)
             if islands:
                 for island in islands:
                     island.scale(scale=self.scale, pivot=island.calc_bbox().center)
             umesh.update_tag = bool(islands)
 
-    def flip_flipped(self):
-        for umesh in self.umeshes:
-            islands = self.calc_island_type(umesh)
+    def flip_flipped(self, umeshes: UMeshes):
+        for umesh in umeshes:
+            islands = self.calc_island_type(umesh, with_seams=not self.ignore_seams)
             if islands:
                 for island in islands:
                     island.scale(scale=self.scale, pivot=island.calc_bbox().center)
             umesh.update_tag = bool(islands)
 
-        if not self.umeshes.update_tag:
-            self.report({'INFO'}, 'Flipped islands not found')
+        if not umeshes.update_tag:
+            self.report({"INFO"}, "Flipped islands not found")
 
     @staticmethod
-    def calc_visible_flipped_islands_with_mark_seam(umesh):
+    def calc_visible_flipped_islands(umesh, *, with_seams=True):
         uv = umesh.uv
-        AdvIslands.tag_filter_visible(umesh)
+        Islands.tag_filter_visible(umesh)
 
         for f in umesh.bm.faces:
             if f.tag:
                 f.tag = utils.is_flipped_uv(f, uv)
 
-        islands_ = [AdvIslands.island_type(i, umesh) for i in AdvIslands.calc_with_markseam_iter_ex(umesh)]
-        return AdvIslands(islands_, umesh)
+        calc_iter_ex = Islands.calc_iter_ex if with_seams else Islands.calc_iter_without_ms_ex
+        islands_ = [AdvIsland(i, umesh) for i in calc_iter_ex(umesh)]
+        return Islands(islands_, umesh)
 
     @staticmethod
-    def calc_selected_flipped_islands_with_mark_seam(umesh):
+    def calc_selected_flipped_islands(umesh, *, with_seams=True):
         uv = umesh.uv
         if umesh.is_full_face_deselected:
-            return AdvIslands()
+            return Islands()
 
-        AdvIslands.tag_filter_selected(umesh)
+        Islands.tag_filter_selected(umesh)
 
         for f in umesh.bm.faces:
             if f.tag:
                 f.tag = utils.is_flipped_uv(f, uv)
 
-        islands = [AdvIslands.island_type(i, umesh) for i in AdvIslands.calc_with_markseam_iter_ex(umesh) if
-                    AdvIslands.island_filter_is_any_face_selected(i, umesh)]
-        return AdvIslands(islands, umesh)
+        calc_iter_ex = Islands.calc_iter_ex if with_seams else Islands.calc_iter_without_ms_ex
+        islands = [
+            AdvIsland(i, umesh)
+            for i in calc_iter_ex(umesh)
+            if Islands.island_filter_is_any_face_selected(i, umesh)
+        ]
+        return Islands(islands, umesh)
 
     @staticmethod
-    def calc_with_hidden_flipped_islands_with_mark_seam(umesh):
+    def calc_with_hidden_flipped_islands(umesh, *, with_seams=True):
         uv = umesh.uv
         for f in umesh.bm.faces:
             f.tag = utils.is_flipped_uv(f, uv)
 
-        islands = [AdvIslands.island_type(i, umesh) for i in AdvIslands.calc_with_markseam_iter_ex(umesh)]
-        return AdvIslands(islands, umesh)
+        calc_iter_ex = Islands.calc_iter_ex if with_seams else Islands.calc_iter_without_ms_ex
+        islands = [AdvIsland(i, umesh) for i in calc_iter_ex(umesh)]
+        return Islands(islands, umesh)
 
-    def pick_flip(self):
-        hit = IslandHit(self.mouse_pos, self.max_distance)
+    def pick_flip(self, umeshes: UMeshes):
+        hit = IslandHit(self.mouse_position, self.max_distance)
 
-        for umesh in self.umeshes:
+        for umesh in umeshes:
             for isl in self.calc_island_type(umesh):
                 hit.find_nearest_island_by_crn(isl)
 
         if not hit:
-            message = 'Island not found within a given radius'
-            if self.mode == 'FLIPPED':
-                self.report({'INFO'}, 'Flipped ' + message.lower())
+            message = "Island not found within a given radius"
+            if self.mode == "FLIPPED":
+                self.report({"INFO"}, "Flipped " + message.lower())
             else:
-                self.report({'INFO'}, message)
-            return {'CANCELLED'}
+                self.report({"INFO"}, message)
+            return {"CANCELLED"}
 
-        pivot = utils.get_cursor_location() if self.mode == 'BY_CURSOR' else hit.island.bbox.center
+        pivot = utils.get_cursor_location() if self.mode == "BY_CURSOR" else hit.island.bbox.center
         hit.island.scale(scale=self.scale, pivot=pivot)
         hit.island.umesh.update()
-        return {'FINISHED'}
+        return {"FINISHED"}
 
 
 class UNIV_OT_Flip(UNIV_OT_Flip_VIEW3D):
-    bl_idname = 'uv.univ_flip'
+    bl_idname = "uv.univ_flip"
     bl_description = UNIV_OT_Flip_VIEW3D.bl_description + "\n\nHas [F] keymap"
 
+
 # noinspection PyTypeHints
-class UNIV_OT_Rotate_VIEW3D(Operator):
-    bl_idname = 'mesh.univ_rotate'
-    bl_label = 'Rotate'
-    bl_options = {'REGISTER', 'UNDO'}
-    bl_description = "Rotate CW and Rotate CCW\n\n" \
-                     "Context keymaps on button:\n" \
-                     "\t\tDefault - Rotate\n" \
-                     "\t\tCtrl - By Cursor\n" \
-                     "\t\tShift - Individual\n" \
-                     "\t\tAlt - CCW"
+class UNIV_OT_Rotate_VIEW3D(utypes.RayCastAndPick):
+    bl_idname = "mesh.univ_rotate"
+    bl_label = "Rotate"
+    bl_options = {"REGISTER", "UNDO"}
+    bl_description = (
+        "Rotate CW and Rotate CCW\n\n"
+        "Context keymaps on button:\n"
+        "\t\tDefault - Rotate\n"
+        "\t\tCtrl - By Cursor\n"
+        "\t\tShift - Individual\n"
+        "\t\tAlt - CCW"
+    )
 
-
-    mode: EnumProperty(name='Mode',
-                       default='DEFAULT',
-                       items=(('DEFAULT', 'Default', ''),
-                              ('INDIVIDUAL', 'Individual', ''),
-                              ('BY_CURSOR', 'By Cursor', ''))
-                       )
-    rot_dir: EnumProperty(name='Direction of rotation', default='CW', items=(('CW', 'CW', ''), ('CCW', 'CCW', '')))
-    user_angle: FloatProperty(name='Angle', default=pi*0.5, min=0, max=pi, soft_min=math.radians(5.0), subtype='ANGLE')
-    use_correct_aspect: BoolProperty(name='Correct Aspect', default=True)
+    # fmt: off
+    mode: EnumProperty(name="Mode",
+                       default="DEFAULT",
+                       items=(("DEFAULT", "Default", ""),
+                              ("INDIVIDUAL", "Individual", ""),
+                              ("BY_CURSOR", "By Cursor", "")))
+    rot_dir: EnumProperty(name="Direction of rotation", default="CW", items=(("CW", "CW", ""), ("CCW", "CCW", "")))
+    user_angle: FloatProperty(name="Angle", default=pi * 0.5, min=0, max=pi, soft_min=math.radians(5.0), subtype="ANGLE")
+    use_correct_aspect: BoolProperty(name="Correct Aspect", default=True)
+    ignore_seams: BoolProperty(name="Ignore Seams", default=False, description="Seams do not split islands at connected edges.")
+    # fmt: on
 
     def draw(self, context):
-        self.layout.prop(self, 'user_angle', slider=True)
-        self.layout.prop(self, 'use_correct_aspect', toggle=1)
-        self.layout.row(align=True).prop(self, 'rot_dir', expand=True)
-        self.layout.row(align=True).prop(self, 'mode', expand=True)
+        self.layout.prop(self, "user_angle", slider=True)
+        self.layout.row(align=True).prop(self, "rot_dir", expand=True)
+        self.layout.row(align=True).prop(self, "mode", expand=True)
+        self.layout.prop(self, "ignore_seams")
+        self.layout.prop(self, "use_correct_aspect")
 
     def invoke(self, context, event):
-        if event.value == 'PRESS':
-            if context.area.type == 'IMAGE_EDITOR' and context.area.ui_type == 'UV':
-                self.max_distance = utils.get_max_distance_from_px(prefs().max_pick_distance, context.region.view2d)
-                self.mouse_pos = Vector(context.region.view2d.region_to_view(
-                    event.mouse_region_x, event.mouse_region_y))
+        if self.store_mouse_pose_on_uv_and_max_distance_if_allowed(event):
             return self.execute(context)
 
-        self.rot_dir = 'CCW' if event.alt else 'CW'
+        self.rot_dir = "CCW" if event.alt else "CW"
         if event.shift:
-            self.mode = 'INDIVIDUAL'
+            self.mode = "INDIVIDUAL"
         elif event.ctrl:
-            self.mode = 'BY_CURSOR'
+            self.mode = "BY_CURSOR"
         else:
-            self.mode = 'DEFAULT'
+            self.mode = "DEFAULT"
         return self.execute(context)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.umeshes: UMeshes | None = None
         self.angle = 0.0
-        self.max_distance: float = 0.0
-        self.mouse_pos: Vector | None = None
-        self.calc_island_type = AdvIslands
+        self.calc_island_type = Islands.calc_extended
 
     def execute(self, context):
-        self.angle = (-self.user_angle) if self.rot_dir == 'CCW' else self.user_angle
-        if not self.bl_idname.startswith('UV'):
+        self.angle = (-self.user_angle) if self.rot_dir == "CCW" else self.user_angle
+        if not self.bl_idname.startswith("UV"):
             self.angle = -self.angle
 
-        self.umeshes = UMeshes(report=self.report)
+        umeshes = UMeshes(report=self.report)
         if self.use_correct_aspect:
-            self.umeshes.calc_aspect_ratio(from_mesh=not self.bl_idname.startswith('UV'))
+            umeshes.calc_aspect_ratio(from_mesh=not self.bl_idname.startswith("UV"))
 
-        if self.umeshes.is_edit_mode:
-            if not self.bl_idname.startswith('UV'):
-                self.umeshes.set_sync()
-                self.umeshes.sync_invalidate()
+        if umeshes.is_edit_mode:
+            if not self.bl_idname.startswith("UV"):
+                umeshes.set_sync()
+                umeshes.sync_invalidate()
 
-            selected_umeshes, visible_umeshes = self.umeshes.filtered_by_selected_and_visible_uv_faces()
-            self.umeshes = selected_umeshes if selected_umeshes else visible_umeshes
+            selected_umeshes, visible_umeshes = umeshes.filtered_by_selected_and_visible_uv_faces()
+            umeshes = selected_umeshes if selected_umeshes else visible_umeshes
 
             if selected_umeshes:
-                self.calc_island_type = AdvIslands.calc_extended_with_mark_seam
+                self.calc_island_type = Islands.calc_extended
             else:
-                self.calc_island_type = AdvIslands.calc_visible_with_mark_seam
+                self.calc_island_type = Islands.calc_visible
 
-            if not self.umeshes:
-                return self.umeshes.update()
-            if not selected_umeshes and self.mouse_pos:
-                return self.pick_rotate()
+            if not umeshes:
+                return umeshes.update()
+            if not selected_umeshes and self.mouse_position:
+                return self.pick_rotate(umeshes)
         else:
-            if not self.umeshes:
-                return self.umeshes.update()
+            if not umeshes:
+                return umeshes.update()
 
-            self.umeshes.ensure()
-            self.calc_island_type = AdvIslands.calc_with_hidden_with_mark_seam
+            umeshes.ensure()
+            self.calc_island_type = Islands.calc_with_hidden
 
-        if self.mode == 'DEFAULT':
-            self.rotate()
-        elif self.mode == 'BY_CURSOR':
-            self.rotate_by_cursor()
+        if self.mode == "DEFAULT":
+            self.rotate(umeshes)
+        elif self.mode == "BY_CURSOR":
+            self.rotate_by_cursor(umeshes)
         else:
-            self.rotate_individual()
+            self.rotate_individual(umeshes)
 
-        self.umeshes.update()
+        umeshes.update()
 
-        if not self.umeshes.is_edit_mode:
-            self.umeshes.free()
-            utils.update_area_by_type('VIEW_3D')
+        if not umeshes.is_edit_mode:
+            umeshes.free()
+            utils.update_area_by_type("VIEW_3D")
 
-        return {'FINISHED'}
+        return {"FINISHED"}
 
-    def rotate(self):
+    def rotate(self, umeshes: UMeshes):
         islands_of_mesh = []
         general_bbox = BBox()
-        for umesh in self.umeshes:
-            islands = self.calc_island_type(umesh)
+        for umesh in umeshes:
+            islands = self.calc_island_type(umesh, with_seams=not self.ignore_seams)
             if islands:
                 general_bbox.union(islands.calc_bbox())
                 islands_of_mesh.append(islands)
@@ -1913,135 +2002,138 @@ class UNIV_OT_Rotate_VIEW3D(Operator):
         for islands in islands_of_mesh:
             islands.rotate(self.angle, pivot=pivot, aspect=islands.umesh.aspect)
 
-    def rotate_by_cursor(self):
+    def rotate_by_cursor(self, umeshes: UMeshes):
         cursor = utils.get_cursor_location()
-        for umesh in self.umeshes:
-            islands = self.calc_island_type(umesh)
+        for umesh in umeshes:
+            islands = self.calc_island_type(umesh, with_seams=not self.ignore_seams)
             if islands:
                 islands.rotate(self.angle, pivot=cursor, aspect=umesh.aspect)
             umesh.update_tag = bool(islands)
 
-    def rotate_individual(self):
-        for umesh in self.umeshes:
-            islands = self.calc_island_type(umesh)
+    def rotate_individual(self, umeshes: UMeshes):
+        for umesh in umeshes:
+            islands = self.calc_island_type(umesh, with_seams=not self.ignore_seams)
             if islands:
                 for island in islands:
-                    island.rotate(self.angle, pivot=island.calc_bbox().center, aspect=island.umesh.aspect)
+                    island.rotate(
+                        self.angle, pivot=island.calc_bbox().center, aspect=island.umesh.aspect
+                    )
             umesh.update_tag = bool(islands)
 
-    def pick_rotate(self):
-        hit = IslandHit(self.mouse_pos, self.max_distance)
-        for umesh in self.umeshes:
-            for isl in AdvIslands.calc_visible_with_mark_seam(umesh):
+    def pick_rotate(self, umeshes: UMeshes):
+        hit = IslandHit(self.mouse_position, self.max_distance)
+        for umesh in umeshes:
+            for isl in Islands.calc_visible(umesh):
                 hit.find_nearest_island_by_crn(isl)
 
         if not hit:
-            self.report({'INFO'}, 'Island not found within a given radius')
-            return {'CANCELLED'}
+            self.report({"INFO"}, "Island not found within a given radius")
+            return {"CANCELLED"}
 
-        pivot = utils.get_cursor_location() if self.mode == 'BY_CURSOR' else hit.island.bbox.center
+        pivot = utils.get_cursor_location() if self.mode == "BY_CURSOR" else hit.island.bbox.center
         hit.island.rotate(self.angle, pivot, hit.island.umesh.aspect)
         hit.island.umesh.update()
-        return {'FINISHED'}
+        return {"FINISHED"}
 
 
 class UNIV_OT_Rotate(UNIV_OT_Rotate_VIEW3D):
-    bl_idname = 'uv.univ_rotate'
+    bl_idname = "uv.univ_rotate"
     bl_description = UNIV_OT_Rotate_VIEW3D.bl_description + "\n\nHas [5, Alt+5, Shift+5] keymaps"
+
 
 # noinspection PyTypeHints
 class UNIV_OT_Sort(Operator, utils.OverlapHelper, utils.PaddingHelper):
-    bl_idname = 'uv.univ_sort'
-    bl_label = 'Sort'
-    bl_description = \
-        "Default - Sort islands\n" \
-        "Shift - Lock Overlaps.\n" \
-        "Ctrl - Start sort position to Cursor\n" \
-        "Alt - Disable orient"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_idname = "uv.univ_sort"
+    bl_label = "Sort"
+    bl_description = (
+        "Default - Sort islands\n" "Shift - Lock Overlaps.\n" "Ctrl - Start sort position to Cursor"
+    )
+    bl_options = {"REGISTER", "UNDO"}
 
-    axis: EnumProperty(name='Axis', default='AUTO', items=(('AUTO', 'Auto', ''), ('X', 'X', ''), ('Y', 'Y', '')))
-    sub_padding: FloatProperty(name='Sub Padding', default=0.1, min=0, soft_max=0.2,)
-    expected_area_subgroups: IntProperty(name='Expected Area Subgroups', default=4, min=1, max=200, soft_max=8)
-    reverse: BoolProperty(name='Reverse', default=True)
-    to_cursor: BoolProperty(name='To Cursor', default=False)
-    orient: BoolProperty(name='Orient', default=False)
-    use_correct_aspect: BoolProperty(name='Correct Aspect', default=True)
-    subgroup_type: EnumProperty(name='Subgroup Type', default='NONE', items=(
-        ('NONE', 'None', ''),
-        ('AREA', 'Area', ''),
-        ('OBJECTS', 'Objects', ''),
-        ('MATERIALS', 'Materials', '')))
+    # fmt: off
+    axis: EnumProperty(name="Axis", default="AUTO", items=(("AUTO", "Auto", ""), ("X", "X", ""), ("Y", "Y", "")))
+    sub_padding: FloatProperty(name="Sub Padding", default=0.1, min=0, soft_max=0.2,)
+    expected_area_subgroups: IntProperty(name="Expected Area Subgroups", default=4, min=1, max=200, soft_max=8)
+    reverse: BoolProperty(name="Reverse", default=True)
+    to_cursor: BoolProperty(name="To Cursor", default=False)
+    orient: BoolProperty(name="Orient", default=False)
+    use_correct_aspect: BoolProperty(name="Correct Aspect", default=True)
+    subgroup_type: EnumProperty(name="Subgroup Type", default="NONE", items=(
+        ("NONE", "None", ""),
+        ("AREA", "Area", ""),
+        ("OBJECTS", "Objects", ""),
+        ("MATERIALS", "Materials", "")))
+    # fmt: on
 
     def draw(self, context):
         layout = self.layout.row()
-        layout.prop(self, 'axis', expand=True)
+        layout.prop(self, "axis", expand=True)
         layout = self.layout
-        layout.prop(self, 'reverse')
-        layout.prop(self, 'to_cursor')
-        layout.prop(self, 'orient')
-        layout.prop(self, 'use_correct_aspect')
-        if self.subgroup_type == 'NONE':
+        layout.prop(self, "reverse")
+        layout.prop(self, "to_cursor")
+        layout.prop(self, "orient")
+        layout.prop(self, "use_correct_aspect")
+        if self.subgroup_type == "NONE":
             self.draw_overlap()
         self.draw_padding()
-        if self.subgroup_type != 'NONE':
-            layout.prop(self, 'sub_padding', slider=True)
-        if self.subgroup_type == 'AREA':
-            layout.prop(self, 'expected_area_subgroups')
+        if self.subgroup_type != "NONE":
+            layout.prop(self, "sub_padding", slider=True)
+        if self.subgroup_type == "AREA":
+            layout.prop(self, "expected_area_subgroups")
         layout = self.layout.row()
-        layout.prop(self, 'subgroup_type', expand=True)
+        layout.prop(self, "subgroup_type", expand=True)
 
     def invoke(self, context, event):
-        if event.value == 'PRESS':
+        if event.value == "PRESS":
             return self.execute(context)
         self.to_cursor = event.ctrl
         self.lock_overlap = event.shift
-        self.orient = not event.alt
         return self.execute(context)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.umeshes: UMeshes | None = None
         self.islands_calc_type = None
 
     def execute(self, context):
-        self.umeshes = UMeshes(report=self.report)
+        umeshes = UMeshes(report=self.report)
         if self.use_correct_aspect:
-            self.umeshes.calc_aspect_ratio(from_mesh=False)
+            umeshes.calc_aspect_ratio(from_mesh=False)
         self.calc_padding()
         self.report_padding()
 
-        if self.subgroup_type != 'NONE':
+        if self.subgroup_type != "NONE":
             self.lock_overlap = False
 
-        if self.umeshes.is_edit_mode:
-            selected_umeshes, unselected_umeshes = self.umeshes.filtered_by_selected_and_visible_uv_faces()
+        if umeshes.is_edit_mode:
+            selected_umeshes, unselected_umeshes = (
+                umeshes.filtered_by_selected_and_visible_uv_faces()
+            )
             if selected_umeshes:
-                self.umeshes = selected_umeshes
-                self.islands_calc_type = AdvIslands.calc_extended_with_mark_seam
+                umeshes = selected_umeshes
+                self.islands_calc_type = Islands.calc_extended
             else:
-                self.umeshes = unselected_umeshes
-                self.islands_calc_type = AdvIslands.calc_visible_with_mark_seam
+                umeshes = unselected_umeshes
+                self.islands_calc_type = Islands.calc_visible
         else:
-            self.islands_calc_type = AdvIslands.calc_with_hidden_with_mark_seam
-        if not self.umeshes:
-            return self.umeshes.update()
+            self.islands_calc_type = Islands.calc_with_hidden
+        if not umeshes:
+            return umeshes.update()
 
         if self.lock_overlap:
-            self.sort_overlapped_preprocessing()
+            self.sort_overlapped_preprocessing(umeshes)
         else:
-            self.sort_individual_preprocessing()
+            self.sort_individual_preprocessing(umeshes)
 
-        self.umeshes.update(info='Islands is sorted')
-        if not self.umeshes.is_edit_mode:
-            self.umeshes.free()
-            utils.update_area_by_type('VIEW_3D')
+        umeshes.update(info="Islands is sorted")
+        if not umeshes.is_edit_mode:
+            umeshes.free()
+            utils.update_area_by_type("VIEW_3D")
 
-        return {'FINISHED'}
+        return {"FINISHED"}
 
-    def sort_overlapped_preprocessing(self):
+    def sort_overlapped_preprocessing(self, umeshes: UMeshes):
         all_islands: list[AdvIsland] = []
-        for umesh in self.umeshes:
+        for umesh in umeshes:
             adv_islands = self.islands_calc_type(umesh)
             if adv_islands:
                 adv_islands.calc_tris()
@@ -2071,10 +2163,10 @@ class UNIV_OT_Sort(Operator, utils.OverlapHelper, utils.PaddingHelper):
         margin = utils.get_cursor_location() if self.to_cursor else general_bbox.min
         self.sort_islands(is_horizontal, margin, union_islands_groups)
 
-    def sort_individual_preprocessing(self):
-        all_islands: list[AdvIsland] | list[AdvIslands] = []
+    def sort_individual_preprocessing(self, umeshes: UMeshes):
+        all_islands: list[AdvIsland] | list[Islands] = []
         general_bbox = BBox()
-        for umesh in self.umeshes:
+        for umesh in umeshes:
             adv_islands = self.islands_calc_type(umesh)
             if adv_islands:
                 if self.orient:
@@ -2089,14 +2181,14 @@ class UNIV_OT_Sort(Operator, utils.OverlapHelper, utils.PaddingHelper):
                     for island in adv_islands:
                         general_bbox.union(island.bbox)
 
-                if self.subgroup_type == 'OBJECTS':
+                if self.subgroup_type == "OBJECTS":
                     all_islands.append(adv_islands)
-                elif self.subgroup_type == 'AREA':
+                elif self.subgroup_type == "AREA":
                     adv_islands.calc_tris()
                     adv_islands.calc_flat_coords()
                     adv_islands.calc_area_uv()
                     all_islands.extend(adv_islands)
-                else:  # 'NONE' or 'MATERIALS'
+                else:  # "NONE" or "MATERIALS"
                     all_islands.extend(adv_islands)
 
         if not all_islands:
@@ -2105,23 +2197,25 @@ class UNIV_OT_Sort(Operator, utils.OverlapHelper, utils.PaddingHelper):
         is_horizontal = self.is_horizontal(general_bbox, all_islands)
         margin = utils.get_cursor_location() if self.to_cursor else general_bbox.min
 
-        if self.subgroup_type == 'NONE':
+        if self.subgroup_type == "NONE":
             self.sort_islands(is_horizontal, margin, all_islands)
 
-        elif self.subgroup_type == 'OBJECTS':
+        elif self.subgroup_type == "OBJECTS":
             for islands in all_islands:
-                assert isinstance(islands, AdvIslands)
+                assert isinstance(islands, Islands)
                 self.sort_islands(is_horizontal, margin, islands.islands)
 
-        elif self.subgroup_type == 'MATERIALS':
+        elif self.subgroup_type == "MATERIALS":
             subgroups = defaultdict(list)
             for island in all_islands:
                 subgroups[island.get_materials()].append(island)
             for islands in subgroups.values():
                 self.sort_islands(is_horizontal, margin, islands)
 
-        else:  # 'AREA'
-            subgroups = self.split_islands_to_subgroups_by_area_uv(all_islands, self.expected_area_subgroups)
+        else:  # "AREA"
+            subgroups = self.split_islands_to_subgroups_by_area_uv(
+                all_islands, self.expected_area_subgroups
+            )
             if self.reverse:
                 subgroups = reversed(subgroups)
 
@@ -2145,16 +2239,22 @@ class UNIV_OT_Sort(Operator, utils.OverlapHelper, utils.PaddingHelper):
 
         return [g for g in groups if g]
 
-    def sort_islands(self, is_horizontal: bool, margin: Vector, islands: list[AdvIsland | UnionIslands] | AdvIslands):
+    def sort_islands(
+        self, is_horizontal: bool, margin: Vector, islands: list[AdvIsland | UnionIslands] | Islands
+    ):
         islands.sort(key=lambda x: x.bbox.max_length, reverse=self.reverse)
         if is_horizontal:
             for island in islands:
                 aspect = island.umesh.aspect
-                pad_mult_by_aspect = self.get_padding_multiplayer_from_aspect_by_axis(aspect, is_horizontal)
+                pad_mult_by_aspect = self.get_padding_multiplayer_from_aspect_by_axis(
+                    aspect, is_horizontal
+                )
 
                 width = island.bbox.width
-                if self.orient and island.bbox.height < (width*aspect):
-                    island.umesh.update_tag |= island.rotate(pi * 0.5, island.bbox.center, aspect=aspect)
+                if self.orient and island.bbox.height < (width * aspect):
+                    island.umesh.update_tag |= island.rotate(
+                        pi * 0.5, island.bbox.center, aspect=aspect
+                    )
                     island.calc_bbox()
                     width = island.bbox.width
                 island.umesh.update_tag |= island.set_position(margin, _from=island.bbox.min)
@@ -2163,11 +2263,15 @@ class UNIV_OT_Sort(Operator, utils.OverlapHelper, utils.PaddingHelper):
         else:
             for island in islands:
                 aspect = island.umesh.aspect
-                pad_mult_by_aspect = self.get_padding_multiplayer_from_aspect_by_axis(aspect, is_horizontal)
+                pad_mult_by_aspect = self.get_padding_multiplayer_from_aspect_by_axis(
+                    aspect, is_horizontal
+                )
 
                 height = island.bbox.height
-                if self.orient and (island.bbox.width*island.umesh.aspect) < height:
-                    island.umesh.update_tag |= island.rotate(pi * 0.5, island.bbox.center, aspect=aspect)
+                if self.orient and (island.bbox.width * island.umesh.aspect) < height:
+                    island.umesh.update_tag |= island.rotate(
+                        pi * 0.5, island.bbox.center, aspect=aspect
+                    )
                     island.calc_bbox()
                     height = island.bbox.height
                 island.umesh.update_tag |= island.set_position(margin, _from=island.bbox.min)
@@ -2178,13 +2282,13 @@ class UNIV_OT_Sort(Operator, utils.OverlapHelper, utils.PaddingHelper):
         if not islands:
             return True
 
-        if self.axis == 'AUTO':
+        if self.axis == "AUTO":
             if bbox.width * 1.5 > bbox.height:
                 return True
             else:
                 total_width = 0
                 total_height = 0
-                if type(islands[0]) == AdvIslands:
+                if type(islands[0]) == Islands:
                     islands = (isl_ for _islands in islands for isl_ in _islands)
 
                 for isl in islands:
@@ -2192,36 +2296,42 @@ class UNIV_OT_Sort(Operator, utils.OverlapHelper, utils.PaddingHelper):
                     total_height += isl.bbox.height
                 return total_width < total_height
         else:
-            return self.axis == 'X'
+            return self.axis == "X"
 
 
 # noinspection PyTypeHints
 class UNIV_OT_Distribute(Operator, utils.OverlapHelper, utils.PaddingHelper):
-    bl_idname = 'uv.univ_distribute'
-    bl_label = 'Distribute'
-    bl_description = "Distribute\n\n" \
-                     "Context keymaps on button:\n" \
-                     "\t\tDefault - Distribute\n" \
-                     "\t\tCtrl - To Cursor\n" \
-                     "\t\tShift - Overlapped"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_idname = "uv.univ_distribute"
+    bl_label = "Distribute"
+    bl_description = (
+        "Distribute\n\n"
+        "Context keymaps on button:\n"
+        "\t\tDefault - Distribute\n"
+        "\t\tCtrl - To Cursor\n"
+        "\t\tShift - Overlapped"
+    )
+    bl_options = {"REGISTER", "UNDO"}
 
-    axis: EnumProperty(name='Axis', default='AUTO', items=(('AUTO', 'Auto', ''), ('X', 'X', ''), ('Y', 'Y', '')))
-    space: EnumProperty(name='Space', default='ALIGN', items=(('ALIGN', 'Align', ''), ('SPACE', 'Space', '')),
-                        description='Distribution of islands at equal distances')
-    to_cursor: BoolProperty(name='To Cursor', default=False)
-    use_correct_aspect: BoolProperty(name='Correct Aspect', default=True)
-
+    # fmt: off
+    axis: EnumProperty(name="Axis", default="AUTO", items=(("AUTO", "Auto", ""), ("X", "X", ""), ("Y", "Y", "")))
+    space: EnumProperty(name="Space", default="ALIGN", items=(("ALIGN", "Align", ""), ("SPACE", "Space", "")),
+                        description="Distribution of islands at equal distances")
+    to_cursor: BoolProperty(name="To Cursor", default=False)
+    use_correct_aspect: BoolProperty(name="Correct Aspect", default=True)
+    ignore_seams: BoolProperty(name="Ignore Seams", default=False,
+                               description="Seams do not split islands at connected edges.")
+    # fmt: on
     def draw(self, context):
-        self.layout.row().prop(self, 'space', expand=True)
+        self.layout.row().prop(self, "space", expand=True)
         self.draw_overlap()
-        self.layout.prop(self, 'to_cursor')
-        self.layout.row().prop(self, 'axis', expand=True)
-        self.layout.row().prop(self, 'use_correct_aspect')
+        self.layout.prop(self, "to_cursor")
+        self.layout.row().prop(self, "axis", expand=True)
+        self.layout.row().prop(self, "use_correct_aspect")
+        self.layout.prop(self, "ignore_seams")
         self.draw_padding()
 
     def invoke(self, context, event):
-        if event.value == 'PRESS':
+        if event.value == "PRESS":
             return self.execute(context)
         self.to_cursor = event.ctrl
         self.lock_overlap = event.shift
@@ -2229,13 +2339,12 @@ class UNIV_OT_Distribute(Operator, utils.OverlapHelper, utils.PaddingHelper):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.umeshes: UMeshes | None = None
         self.cursor_loc: Vector | None = None
         self.islands_calc_type = None
         self.aspect: float = 1.0
 
     def execute(self, context):
-        self.umeshes = UMeshes(report=self.report)
+        umeshes = UMeshes(report=self.report)
         self.calc_padding()
         self.report_padding()
 
@@ -2247,60 +2356,59 @@ class UNIV_OT_Distribute(Operator, utils.OverlapHelper, utils.PaddingHelper):
         if self.to_cursor:
             self.cursor_loc = utils.get_cursor_location()
 
-
-        if self.umeshes.is_edit_mode:
-            selected_umeshes, unselected_umeshes = self.umeshes.filtered_by_selected_and_visible_uv_faces()
+        if umeshes.is_edit_mode:
+            selected_umeshes, unselected_umeshes = (
+                umeshes.filtered_by_selected_and_visible_uv_faces()
+            )
             if selected_umeshes:
-                self.umeshes = selected_umeshes
-                self.islands_calc_type = AdvIslands.calc_extended_with_mark_seam
+                umeshes = selected_umeshes
+                self.islands_calc_type = Islands.calc_extended
             else:
-                self.umeshes = unselected_umeshes
-                self.islands_calc_type = AdvIslands.calc_visible_with_mark_seam
+                umeshes = unselected_umeshes
+                self.islands_calc_type = Islands.calc_visible
         else:
-            self.islands_calc_type = AdvIslands.calc_with_hidden_with_mark_seam
-        if not self.umeshes:
-            return self.umeshes.update()
+            self.islands_calc_type = Islands.calc_with_hidden
+        if not umeshes:
+            return umeshes.update()
 
-        self.umeshes.update_tag = False
-
+        umeshes.update_tag = False
 
         if self.lock_overlap:
-            all_islands, general_bbox = self.distribute_preprocessing_overlap()
+            all_islands, general_bbox = self.distribute_preprocessing_overlap(umeshes)
         else:
-            all_islands, general_bbox = self.distribute_preprocessing()
+            all_islands, general_bbox = self.distribute_preprocessing(umeshes)
 
         if len(all_islands) <= 1:
             if len(all_islands) == 1:
-                self.report({'INFO'}, "The number of islands must be greater than one")
+                self.report({"INFO"}, "The number of islands must be greater than one")
             else:
-                self.umeshes.update()
+                umeshes.update()
 
-            if not self.umeshes.is_edit_mode:
-                self.umeshes.free()
-            return {'FINISHED'}
+            if not umeshes.is_edit_mode:
+                umeshes.free()
+            return {"FINISHED"}
 
-
-        if self.space == 'SPACE':
+        if self.space == "SPACE":
             if not self.distribute_space(all_islands, general_bbox):
-                self.report({'INFO'}, "No distance to place islands")
-                if not self.umeshes.is_edit_mode:
-                    self.umeshes.free()
-                return {'FINISHED'}
+                self.report({"INFO"}, "No distance to place islands")
+                if not umeshes.is_edit_mode:
+                    umeshes.free()
+                return {"FINISHED"}
         else:
             self.distribute_ex(all_islands, general_bbox)
 
-
-        self.umeshes.update(info='Islands is distributed')
-        if not self.umeshes.is_edit_mode:
-            self.umeshes.free()
-            utils.update_area_by_type('VIEW_3D')
-        return {'FINISHED'}
-
+        umeshes.update(info="Islands is distributed")
+        if not umeshes.is_edit_mode:
+            umeshes.free()
+            utils.update_area_by_type("VIEW_3D")
+        return {"FINISHED"}
 
     def distribute_ex(self, all_islands, general_bbox):
         cursor_offset = 0
         if self.is_horizontal(all_islands):
-            pad_mul = self.get_padding_multiplayer_from_aspect_by_axis(self.aspect, is_horizontal=True)
+            pad_mul = self.get_padding_multiplayer_from_aspect_by_axis(
+                self.aspect, is_horizontal=True
+            )
 
             all_islands.sort(key=lambda a: a.bbox.xmin)
             if self.cursor_loc is None:
@@ -2316,7 +2424,9 @@ class UNIV_OT_Distribute(Operator, utils.OverlapHelper, utils.PaddingHelper):
 
                 margin += self.padding * pad_mul + width
         else:
-            pad_mul = self.get_padding_multiplayer_from_aspect_by_axis(self.aspect, is_horizontal=False)
+            pad_mul = self.get_padding_multiplayer_from_aspect_by_axis(
+                self.aspect, is_horizontal=False
+            )
 
             all_islands.sort(key=lambda a: a.bbox.ymin)
             if self.cursor_loc is None:
@@ -2335,7 +2445,9 @@ class UNIV_OT_Distribute(Operator, utils.OverlapHelper, utils.PaddingHelper):
     def distribute_space(self, all_islands, general_bbox):
         cursor_offset = 0
         if self.is_horizontal(all_islands):
-            pad_mul = self.get_padding_multiplayer_from_aspect_by_axis(self.aspect, is_horizontal=True)
+            pad_mul = self.get_padding_multiplayer_from_aspect_by_axis(
+                self.aspect, is_horizontal=True
+            )
 
             all_islands.sort(key=lambda a: a.bbox.xmin)
 
@@ -2356,7 +2468,9 @@ class UNIV_OT_Distribute(Operator, utils.OverlapHelper, utils.PaddingHelper):
                 pos = Vector((space_point, isl.bbox.center_y - cursor_offset))
                 isl.umesh.update_tag |= isl.set_position(pos, _from=isl.bbox.center)
         else:
-            pad_mul = self.get_padding_multiplayer_from_aspect_by_axis(self.aspect, is_horizontal=False)
+            pad_mul = self.get_padding_multiplayer_from_aspect_by_axis(
+                self.aspect, is_horizontal=False
+            )
 
             all_islands.sort(key=lambda a: a.bbox.ymin)
             general_bbox.ymax += self.padding * pad_mul * (len(all_islands) - 1)
@@ -2382,20 +2496,20 @@ class UNIV_OT_Distribute(Operator, utils.OverlapHelper, utils.PaddingHelper):
                 isl.umesh.update_tag |= isl.set_position(pos, _from=isl.bbox.center)
         return True
 
-    def distribute_preprocessing(self):
+    def distribute_preprocessing(self, umeshes: UMeshes):
         all_islands: list[AdvIsland] = []
         general_bbox = BBox()
-        for umesh in self.umeshes:
-            adv_islands = self.islands_calc_type(umesh)
+        for umesh in umeshes:
+            adv_islands = self.islands_calc_type(umesh, with_seams=not self.ignore_seams)
             if adv_islands:
                 general_bbox.union(adv_islands.calc_bbox())
                 all_islands.extend(adv_islands)
         return all_islands, general_bbox
 
-    def distribute_preprocessing_overlap(self):
+    def distribute_preprocessing_overlap(self, umeshes: UMeshes):
         all_islands: list[AdvIsland] = []
-        for umesh in self.umeshes:
-            adv_islands = self.islands_calc_type(umesh)
+        for umesh in umeshes:
+            adv_islands = self.islands_calc_type(umesh, with_seams=not self.ignore_seams)
             if adv_islands:
                 adv_islands.calc_tris()
                 adv_islands.calc_flat_coords()
@@ -2408,10 +2522,10 @@ class UNIV_OT_Distribute(Operator, utils.OverlapHelper, utils.PaddingHelper):
         return union_islands_groups, general_bbox
 
     def is_horizontal(self, islands):
-        if self.axis == 'AUTO':
+        if self.axis == "AUTO":
             total_width = 0
             total_height = 0
-            if type(islands[0]) == AdvIslands:
+            if type(islands[0]) == Islands:
                 islands = (isl_ for _islands in islands for isl_ in _islands)
 
             for isl in islands:
@@ -2420,37 +2534,39 @@ class UNIV_OT_Distribute(Operator, utils.OverlapHelper, utils.PaddingHelper):
                 total_height += bbox_.height
             return total_width < total_height
         else:
-            return self.axis == 'X'
+            return self.axis == "X"
+
 
 # noinspection PyTypeHints
 class UNIV_OT_Break(Operator, utils.PaddingHelper):
-    bl_idname = 'uv.univ_break'
-    bl_label = 'Break'
+    bl_idname = "uv.univ_break"
+    bl_label = "Break"
     bl_description = "Break"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {"REGISTER", "UNDO"}
 
-    padding_multiplayer: FloatProperty(name='Padding Multiplayer', default=0.5, min=-32, soft_min=0, soft_max=4, max=32)
-    axis: EnumProperty(name='Axis', default='AUTO', items=(('AUTO', 'Auto', ''), ('X', 'X', ''), ('Y', 'Y', '')))
-    angle: FloatProperty(name='Smooth Angle', default=math.radians(
-        66.0), subtype='ANGLE', min=math.radians(5.0), max=math.radians(180.0))
-    use_correct_aspect: BoolProperty(name='Correct Aspect', default=True)
+    # fmt: off
+    padding_multiplayer: FloatProperty(name="Padding Multiplayer", default=0.5, min=-32, soft_min=0, soft_max=4, max=32)
+    axis: EnumProperty(name="Axis", default="AUTO", items=(("AUTO", "Auto", ""), ("X", "X", ""), ("Y", "Y", "")))
+    angle: FloatProperty(name="Smooth Angle", default=math.radians(
+        66.0), subtype="ANGLE", min=math.radians(5.0), max=math.radians(180.0))
+    use_correct_aspect: BoolProperty(name="Correct Aspect", default=True)
+    # fmt: on
 
     def draw(self, context):
-        self.layout.prop(self, 'angle', slider=True)
+        self.layout.prop(self, "angle", slider=True)
         row = self.layout.row()
-        row.prop(self, 'axis', expand=True)
-        self.layout.prop(self, 'use_correct_aspect')
+        row.prop(self, "axis", expand=True)
+        self.layout.prop(self, "use_correct_aspect")
         self.draw_padding()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.umeshes: UMeshes | None = None
         self.islands_calc_type = None
-        self.report_info =  'Not found islands'
+        self.report_info = "Not found islands"
         self.aspect = 1.0
 
     def execute(self, context):
-        self.umeshes = UMeshes(report=self.report)
+        umeshes = UMeshes(report=self.report)
         self.calc_padding()
         self.report_padding()
 
@@ -2458,38 +2574,40 @@ class UNIV_OT_Break(Operator, utils.PaddingHelper):
         if self.use_correct_aspect:
             self.aspect = utils.get_aspect_ratio()
 
-        if self.umeshes.is_edit_mode:
-            selected_umeshes, unselected_umeshes = self.umeshes.filtered_by_selected_and_visible_uv_faces()
+        if umeshes.is_edit_mode:
+            selected_umeshes, unselected_umeshes = (
+                umeshes.filtered_by_selected_and_visible_uv_faces()
+            )
             if selected_umeshes:
-                self.umeshes = selected_umeshes
-                self.islands_calc_type = AdvIslands.calc_extended
+                umeshes = selected_umeshes
+                self.islands_calc_type = Islands.calc_extended
             else:
-                self.umeshes = unselected_umeshes
-                self.islands_calc_type = AdvIslands.calc_visible
+                umeshes = unselected_umeshes
+                self.islands_calc_type = Islands.calc_visible
         else:
-            self.islands_calc_type = AdvIslands.calc_with_hidden
-        if not self.umeshes:
-            return self.umeshes.update()
+            self.islands_calc_type = Islands.calc_with_hidden
+        if not umeshes:
+            return umeshes.update()
 
-        self.umeshes.update_tag = False
+        umeshes.update_tag = False
 
-        max_angle = max(umesh.smooth_angle for umesh in self.umeshes)
+        max_angle = max(umesh.smooth_angle for umesh in umeshes)
         self.angle = min(self.angle, max_angle)  # clamp for angle
 
-        self.break_distribute()
+        self.break_distribute(umeshes)
 
-        self.umeshes.update(info="Not found islands for break")
-        if not self.umeshes.is_edit_mode:
-            self.umeshes.free()
-            utils.update_area_by_type('VIEW_3D')
-        return {'FINISHED'}
+        umeshes.update(info="Not found islands for break")
+        if not umeshes.is_edit_mode:
+            umeshes.free()
+            utils.update_area_by_type("VIEW_3D")
+        return {"FINISHED"}
 
-    def break_distribute(self):
-        for umesh in self.umeshes:
+    def break_distribute(self, umeshes: UMeshes):
+        for umesh in umeshes:
             angle = min(self.angle, umesh.smooth_angle)
-            umesh.value = angle  #  need for AdvIslands.calc_all_ex
+            umesh.value = angle  #  need for Islands.calc_all_ex
 
-            for isl in self.islands_calc_type(umesh):  # noqa
+            for isl in self.islands_calc_type(umesh, with_seam=False):  # noqa
                 if len(isl) < 2:
                     continue
 
@@ -2498,46 +2616,56 @@ class UNIV_OT_Break(Operator, utils.PaddingHelper):
                     continue
 
                 if self.is_horizontal(isl.bbox):
-                    pad_mul = self.get_padding_multiplayer_from_aspect_by_axis(self.aspect, is_horizontal=True)
+                    pad_mul = self.get_padding_multiplayer_from_aspect_by_axis(
+                        self.aspect, is_horizontal=True
+                    )
                     sub_islands.sort(key=lambda a: a.bbox.xmin)
                     margin = isl.bbox.min.x
 
                     for sub_isl in sub_islands:
                         bb = sub_isl.bbox
-                        umesh.update_tag |= sub_isl.set_position(Vector((margin, bb.ymin)), _from=bb.min)
+                        umesh.update_tag |= sub_isl.set_position(
+                            Vector((margin, bb.ymin)), _from=bb.min
+                        )
                         margin += self.padding * pad_mul + bb.width
                 else:
-                    pad_mul = self.get_padding_multiplayer_from_aspect_by_axis(self.aspect, is_horizontal=False)
+                    pad_mul = self.get_padding_multiplayer_from_aspect_by_axis(
+                        self.aspect, is_horizontal=False
+                    )
                     sub_islands.sort(key=lambda a: a.bbox.ymin)
                     margin = isl.bbox.min.y
 
                     for sub_isl in sub_islands:
                         bb = sub_isl.bbox
-                        umesh.update_tag |= sub_isl.set_position(Vector((bb.xmin, margin)), _from=bb.min)
+                        umesh.update_tag |= sub_isl.set_position(
+                            Vector((bb.xmin, margin)), _from=bb.min
+                        )
                         margin += self.padding * pad_mul + bb.height
 
     def is_horizontal(self, bbox):
         # TODO: Get axis by break boundary corner edges direction (orthogonal)
-        if self.axis == 'AUTO':
+        if self.axis == "AUTO":
             return bbox.width * self.aspect > bbox.height
         else:
-            return self.axis == 'X'
+            return self.axis == "X"
 
 
 class UNIV_OT_Home(Operator):
-    bl_idname = 'uv.univ_home'
-    bl_label = 'Home'
-    bl_description = "Move island to base tile without changes in the textured object\n\n" \
-                     "Default - Move island to base tile\n" \
-                     "Ctrl - Move island to cursor.\n\n" \
-                     "Removes attributes and modifiers from Shift operator, " \
-                     "resets uv offset of Array, Mirror, UVWarp modifiers"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_idname = "uv.univ_home"
+    bl_label = "Home"
+    bl_description = (
+        "Move island to base tile without changes in the textured object\n\n"
+        "Default - Move island to base tile\n"
+        "Ctrl - Move island to cursor.\n\n"
+        "Removes attributes and modifiers from Shift operator, "
+        "resets uv offset of Array, Mirror, UVWarp modifiers"
+    )
+    bl_options = {"REGISTER", "UNDO"}
     # noinspection PyTypeHints
-    to_cursor: BoolProperty(name='To Cursor', default=False)
+    to_cursor: BoolProperty(name="To Cursor", default=False)
 
     def invoke(self, context, event):
-        if event.value == 'PRESS':
+        if event.value == "PRESS":
             return self.execute(context)
         self.to_cursor = event.ctrl
         return self.execute(context)
@@ -2548,7 +2676,6 @@ class UNIV_OT_Home(Operator):
         self.gn_mod_counter = 0
         self.shift_attrs_counter = 0
         self.islands_calc_type: Callable = Callable
-        self.umeshes: UMeshes | None = None
         self.no_change_info = "Not found islands for move and modifiers for reset uv offsets"
 
     def execute(self, context):
@@ -2559,61 +2686,65 @@ class UNIV_OT_Home(Operator):
         if self.to_cursor:
             cursor_loc_delta = utils.get_tile_from_cursor()
 
-        self.umeshes = UMeshes.calc_any_unique(verify_uv=False)
+        umeshes = UMeshes.calc_with_no_uv_and_no_faces(verify_uv=False)
 
-        mod_counter, attr_counter = self.remove_shift_md()  # remove_shift_md changes update tag
-        changed_modifiers_count = self.uv_shift_reset_array_and_mirror_and_warp()
+        mod_counter, attr_counter = self.remove_shift_md(
+            umeshes
+        )  # remove_shift_md changes update tag
+        changed_modifiers_count = self.uv_shift_reset_array_and_mirror_and_warp(umeshes)
         changed_modifiers_count += mod_counter
 
-        report_info = ''
+        report_info = ""
         if changed_modifiers_count:
             report_info += f"Changed {changed_modifiers_count} modifiers."
         if attr_counter:
             report_info += f"Deleted {attr_counter} shift attributes."
 
-        self.umeshes = UMeshes()
-        self.umeshes.update_tag = False
+        umeshes = UMeshes()
+        umeshes.update_tag = False
 
-        if not self.bl_idname.startswith('UV'):
-            self.umeshes.set_sync()
-            self.umeshes.sync_invalidate()
+        if not self.bl_idname.startswith("UV"):
+            umeshes.set_sync()
+            umeshes.sync_invalidate()
 
-        if self.umeshes.is_edit_mode:
-            selected_umeshes, unselected_umeshes = self.umeshes.filtered_by_selected_and_visible_uv_faces()
+        if umeshes.is_edit_mode:
+            selected_umeshes, unselected_umeshes = (
+                umeshes.filtered_by_selected_and_visible_uv_faces()
+            )
         else:
-            selected_umeshes = self.umeshes
+            selected_umeshes = umeshes
             unselected_umeshes = []
 
         if selected_umeshes:
-            self.umeshes = selected_umeshes
-            self.islands_calc_type = AdvIslands.calc_extended_with_mark_seam
+            umeshes = selected_umeshes
+            self.islands_calc_type = Islands.calc_extended
         elif unselected_umeshes:
-            self.umeshes = unselected_umeshes
-            self.islands_calc_type = AdvIslands.calc_visible_with_mark_seam
+            umeshes = unselected_umeshes
+            self.islands_calc_type = Islands.calc_visible
         else:
             if report_info:
-                self.report({'INFO'}, report_info)
-                return {'FINISHED'}
+                self.report({"INFO"}, report_info)
+                return {"FINISHED"}
             else:
-                self.report({'INFO'}, self.no_change_info)
-                return {'CANCELLED'}
+                self.report({"INFO"}, self.no_change_info)
+                return {"CANCELLED"}
 
-        if not self.umeshes.is_edit_mode:
-            self.islands_calc_type = AdvIslands.calc_with_hidden_with_mark_seam
+        if not umeshes.is_edit_mode:
+            self.islands_calc_type = Islands.calc_with_hidden
 
         counter = 0
-        for umesh in self.umeshes:
+        for umesh in umeshes:
             for island in self.islands_calc_type(umesh):  # noqa
                 counter += self.home(island, cursor_loc_delta)
 
         if counter or report_info:
             if report_info:
-                self.report({'INFO'}, report_info)
+                self.report({"INFO"}, report_info)
         else:
-            self.report({'INFO'}, self.no_change_info)
-        self.umeshes.silent_update()
-        self.umeshes.free()
-        return {'FINISHED'}
+            self.report({"INFO"}, self.no_change_info)
+        umeshes.silent_update()
+        umeshes.free()
+        return {"FINISHED"}
 
     @staticmethod
     def home(island, cursor):
@@ -2623,14 +2754,15 @@ class UNIV_OT_Home(Operator):
         island.umesh.update_tag |= tag
         return tag
 
-    def remove_shift_md(self):
-        all_object = set(obj for obj in bpy.data.objects if obj.type == 'MESH')
-        all_object = all_object - set(umesh.obj for umesh in self.umeshes)
+    @staticmethod
+    def remove_shift_md(umeshes: UMeshes):
+        all_object = set(obj for obj in bpy.data.objects if obj.type == "MESH")
+        all_object = all_object - set(umesh.obj for umesh in umeshes)
         mod_counter = 0
         attr_counter = 0
-        for umesh in self.umeshes:
+        for umesh in umeshes:
             for mod in reversed(umesh.obj.modifiers):
-                if isinstance(mod, bpy.types.NodesModifier) and mod.name.startswith('UniV Shift'):
+                if isinstance(mod, bpy.types.NodesModifier) and mod.name.startswith("UniV Shift"):
                     umesh.obj.modifiers.remove(mod)
                     mod_counter += 1
 
@@ -2639,39 +2771,44 @@ class UNIV_OT_Home(Operator):
             has_inst_with_shift_mod = False
             for inst_obj in instances:
                 for mod in inst_obj.modifiers:
-                    if isinstance(mod, bpy.types.NodesModifier) and mod.name.startswith('UniV Shift'):
+                    if isinstance(mod, bpy.types.NodesModifier) and mod.name.startswith(
+                        "UniV Shift"
+                    ):
                         has_inst_with_shift_mod = True
                         break
 
             if not has_inst_with_shift_mod:
-                if self.umeshes.is_edit_mode:
+                if umeshes.is_edit_mode:
                     for attr in reversed(umesh.bm.faces.layers.int.values()):
-                        if attr.name.startswith('univ_shift'):
+                        if attr.name.startswith("univ_shift"):
                             umesh.bm.faces.layers.int.remove(attr)
                             umesh.update_tag = True
                             attr_counter += 1
                 else:
                     for attr in reversed(umesh.obj.data.attributes):
-                        if attr.name.startswith('univ_shift'):
+                        if attr.name.startswith("univ_shift"):
                             umesh.obj.data.attributes.remove(attr)
                             umesh.update_tag = True
                             attr_counter += 1
 
         # Remove modifiers without univ_shift attr
         for other_umesh in all_object:
-            if any(other_umesh.data == umesh.obj.data for umesh in self.umeshes):
+            if any(other_umesh.data == umesh.obj.data for umesh in umeshes):
                 attributes = other_umesh.data.attributes
-                if not any(attr.name.startswith('univ_shift') for attr in attributes):
+                if not any(attr.name.startswith("univ_shift") for attr in attributes):
                     for mod in reversed(other_umesh.modifiers):
-                        if isinstance(mod, bpy.types.NodesModifier) and mod.name.startswith('UniV Shift'):
+                        if isinstance(mod, bpy.types.NodesModifier) and mod.name.startswith(
+                            "UniV Shift"
+                        ):
                             other_umesh.modifiers.remove(mod)
                             mod_counter += 1
 
         return mod_counter, attr_counter
 
-    def uv_shift_reset_array_and_mirror_and_warp(self):
+    @staticmethod
+    def uv_shift_reset_array_and_mirror_and_warp(umeshes: UMeshes):
         counter = 0
-        for umesh in self.umeshes:
+        for umesh in umeshes:
             for mod in umesh.obj.modifiers:
                 if isinstance(mod, bpy.types.ArrayModifier):
                     if any((mod.offset_u, mod.offset_v)):
@@ -2692,103 +2829,97 @@ class UNIV_OT_Home(Operator):
 
 
 class UNIV_OT_Home_VIEW3D(UNIV_OT_Home):
-    bl_idname = 'mesh.univ_home'
+    bl_idname = "mesh.univ_home"
+
 
 # noinspection PyTypeHints
 class UNIV_OT_Shift(Operator):
     bl_idname = "uv.univ_shift"
-    bl_label = 'Shift'
+    bl_label = "Shift"
     bl_description = "Moving overlapped islands to an adjacent tile, to avoid artifacts when baking"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    lock_overlap_mode: EnumProperty(name='Lock Overlaps Mode', default='ANY',
-                                    items=(('ANY', 'Any', ''), ('EXACT', 'Exact', '')))
-    threshold: FloatProperty(name='Distance', default=0.001, min=0, soft_min=0.00005, soft_max=0.00999)
-    shift_smaller: BoolProperty(name='Shift Smaller', default=False,
+    bl_options = {"REGISTER", "UNDO"}
+    # fmt: off
+    lock_overlap_mode: EnumProperty(name="Lock Overlaps Mode", default="ANY",
+                                    items=(("ANY", "Any", ""), ("EXACT", "Exact", "")))
+    threshold: FloatProperty(name="Distance", default=0.001, min=0, soft_min=0.00005, soft_max=0.00999)
+    shift_smaller: BoolProperty(name="Shift Smaller", default=False,
                                 description="Sets a higher priority for shifting, for small islands")
 
-    with_modifier: BoolProperty(name='Use Modifiers', default=False,
+    with_modifier: BoolProperty(name="Use Modifiers", default=False,
                                 description="Non-destructively through a modifier shifts islands. To remove a modifier, use the Home operator.")
-    gn_shift: BoolProperty(name='GN Shift', default=True, description="Add Shift Geometry Node Modifier.")
-    array_shift: BoolProperty(name='Array', default=True, description='U Offset')
-    mirror_shift: BoolProperty(name='Mirror', default=True, description='U Offset')
-    warp_shift: BoolProperty(name='Warp', default=True, description='U Offset')
-
+    gn_shift: BoolProperty(name="GN Shift", default=True, description="Add Shift Geometry Node Modifier.")
+    array_shift: BoolProperty(name="Array", default=True, description="U Offset")
+    mirror_shift: BoolProperty(name="Mirror", default=True, description="U Offset")
+    warp_shift: BoolProperty(name="Warp", default=True, description="U Offset")
+    # fmt: on
     def invoke(self, context, event):
-        if event.value == 'PRESS':
+        if event.value == "PRESS":
             return self.execute(context)
         self.with_modifier = event.alt
         return self.execute(context)
 
     def draw(self, context):
         layout = self.layout
-        if self.lock_overlap_mode == 'EXACT':
-            layout.prop(self, 'threshold', slider=True)
+        if self.lock_overlap_mode == "EXACT":
+            layout.prop(self, "threshold", slider=True)
         else:
-            layout.prop(self, 'shift_smaller')
-        layout.row().prop(self, 'lock_overlap_mode', expand=True)
+            layout.prop(self, "shift_smaller")
+        layout.row().prop(self, "lock_overlap_mode", expand=True)
         if self.with_modifier:
             row = layout.row(align=True)
-            row.prop(self, 'gn_shift', toggle=1)
-            row.prop(self, 'array_shift', toggle=1)
-            row.prop(self, 'mirror_shift', toggle=1)
-            row.prop(self, 'warp_shift', toggle=1)
-        layout.prop(self, 'with_modifier', toggle=1)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.has_selected = True
-        self.islands_calc_type: Callable = Callable
-        self.umeshes: UMeshes | None = None
+            row.prop(self, "gn_shift")
+            row.prop(self, "array_shift")
+            row.prop(self, "mirror_shift")
+            row.prop(self, "warp_shift")
+        layout.prop(self, "with_modifier")
 
     def execute(self, context):
-        self.umeshes = UMeshes.calc_any_unique(verify_uv=False)
-        changed_modifiers = self.shift_array_and_mirror_and_warp()
+        umeshes = UMeshes.calc_with_no_uv_and_no_faces(verify_uv=False)
+        changed_modifiers = self.shift_array_and_mirror_and_warp(umeshes)
 
         # TODO: Remove gn modifier when shift without modifier
-        self.umeshes = UMeshes()
-        if not self.bl_idname.startswith('UV'):
-            self.umeshes.set_sync()
-            self.umeshes.sync_invalidate()
+        umeshes = UMeshes()
+        if not self.bl_idname.startswith("UV"):
+            umeshes.set_sync()
+            umeshes.sync_invalidate()
 
-        if self.umeshes.is_edit_mode:
-            selected_umeshes, unselected_umeshes = self.umeshes.filtered_by_selected_and_visible_uv_faces()
+        if umeshes.is_edit_mode:
+            selected_umeshes, unselected_umeshes = (
+                umeshes.filtered_by_selected_and_visible_uv_faces()
+            )
         else:
-            selected_umeshes = self.umeshes
+            selected_umeshes = umeshes
             unselected_umeshes = []
 
         if selected_umeshes:
-            self.has_selected = True
-            self.umeshes = selected_umeshes
-
-            self.islands_calc_type = AdvIslands.calc_extended_with_mark_seam
+            umeshes = selected_umeshes
+            islands_calc_type = Islands.calc_extended
         elif unselected_umeshes:
-            self.has_selected = False
-            self.umeshes = unselected_umeshes
-            self.islands_calc_type = AdvIslands.calc_visible_with_mark_seam
+            umeshes = unselected_umeshes
+            islands_calc_type = Islands.calc_visible
         else:
             if changed_modifiers:
-                self.report({'INFO'}, f"Changed {changed_modifiers} modifiers")
-                return {'FINISHED'}
+                self.report({"INFO"}, f"Changed {changed_modifiers} modifiers")
+                return {"FINISHED"}
             else:
-                self.report({'WARNING'}, 'Islands not found')
-                return {'CANCELLED'}
+                self.report({"WARNING"}, "Islands not found")
+                return {"CANCELLED"}
 
-        if not self.umeshes.is_edit_mode:
-            self.islands_calc_type = AdvIslands.calc_with_hidden_with_mark_seam
+        if not umeshes.is_edit_mode:
+            islands_calc_type = Islands.calc_with_hidden
 
         umeshes_without_attributes = []
         if self.with_modifier and self.gn_shift:
-            for umesh in self.umeshes:
-                if 'univ_shift' not in umesh.obj.data.attributes:
-                    umesh.bm.faces.layers.int.new('univ_shift')
+            for umesh in umeshes:
+                if "univ_shift" not in umesh.obj.data.attributes:
+                    umesh.bm.faces.layers.int.new("univ_shift")
                     umeshes_without_attributes.append(umesh)
 
         all_islands = []
-        self.umeshes.update_tag = False
+        umeshes.update_tag = False
 
-        for umesh in self.umeshes:
-            adv_islands = self.islands_calc_type(umesh)  # noqa
+        for umesh in umeshes:
+            adv_islands = islands_calc_type(umesh)
             for isl in reversed(adv_islands):
                 if isl.has_flip_with_noflip():
                     adv_islands.islands.remove(isl)
@@ -2796,14 +2927,14 @@ class UNIV_OT_Shift(Operator):
                     adv_islands.islands.extend(noflip)
                     adv_islands.islands.extend(flipped)  # TODO: Add info about flip and no flip
 
-            if self.lock_overlap_mode == 'ANY':
+            if self.lock_overlap_mode == "ANY":
                 adv_islands.calc_tris()
                 adv_islands.calc_flat_uv_coords(save_triplet=True)
             all_islands.extend(adv_islands)
 
         counter = 0
         deleted_attr_counter = 0
-        threshold = None if self.lock_overlap_mode == 'ANY' else self.threshold
+        threshold = None if self.lock_overlap_mode == "ANY" else self.threshold
 
         overlapped_islands = UnionIslands.calc_overlapped_island_groups(all_islands, threshold)
         for over_isl in reversed(overlapped_islands):
@@ -2811,7 +2942,7 @@ class UNIV_OT_Shift(Operator):
                 overlapped_islands.remove(over_isl)
                 continue
 
-            if self.shift_smaller and self.lock_overlap_mode == 'ANY':
+            if self.shift_smaller and self.lock_overlap_mode == "ANY":
                 for sub_isl in over_isl:
                     sub_isl.calc_area_uv()
                 f_island = over_isl.islands[0]
@@ -2823,13 +2954,16 @@ class UNIV_OT_Shift(Operator):
                         f_island = sub_isl
                         index_for_bigger = idx_
                 if index_for_bigger:
-                    over_isl[0], over_isl[index_for_bigger] = over_isl[index_for_bigger], over_isl[0]
+                    over_isl[0], over_isl[index_for_bigger] = (
+                        over_isl[index_for_bigger],
+                        over_isl[0],
+                    )
 
             for idx, isl in enumerate(over_isl):
                 isl.umesh.value = 1
                 if self.with_modifier and self.gn_shift:
                     if idx:
-                        shift_attr = isl.umesh.bm.faces.layers.int.get('univ_shift')
+                        shift_attr = isl.umesh.bm.faces.layers.int.get("univ_shift")
                         if not all(f[shift_attr] for f in isl):
                             for f in isl:
                                 f[shift_attr] = 1
@@ -2837,8 +2971,8 @@ class UNIV_OT_Shift(Operator):
                             isl.umesh.update_tag = True
                             counter += 1
                     else:
-                        if 'univ_shift' in isl.umesh.obj.data.attributes:
-                            shift_attr = isl.umesh.bm.faces.layers.int.get('univ_shift')
+                        if "univ_shift" in isl.umesh.obj.data.attributes:
+                            shift_attr = isl.umesh.bm.faces.layers.int.get("univ_shift")
                             if any(f[shift_attr] for f in isl):
                                 for f in isl:
                                     f[shift_attr] = 0
@@ -2851,46 +2985,50 @@ class UNIV_OT_Shift(Operator):
 
         if self.with_modifier and self.gn_shift:
             node_group = self.get_shift_node_group()
-            for umesh in self.umeshes:
+            for umesh in umeshes:
                 if umesh.update_tag or isinstance(umesh.value, int):
-                    utils.remove_univ_duplicate_modifiers(umesh.obj, 'UniV Shift')
+                    utils.remove_univ_duplicate_modifiers(umesh.obj, "UniV Shift")
                     self.create_gn_shift_modifier(umesh, node_group)
 
         # Sanitize
-        for umesh in self.umeshes:
+        for umesh in umeshes:
             for attr in reversed(umesh.bm.faces.layers.int.values()):
-                if attr.name.startswith('univ_shift'):
+                if attr.name.startswith("univ_shift"):
                     if not any(f[attr] for f in umesh.bm.faces):
                         umesh.bm.faces.layers.int.remove(attr)
                         umesh.update_tag = True
                         if umesh not in umeshes_without_attributes:
                             deleted_attr_counter += 1
-            if not any(attr.name.startswith('univ_shift') for attr in umesh.bm.faces.layers.int.values()):
+            if not any(
+                attr.name.startswith("univ_shift") for attr in umesh.bm.faces.layers.int.values()
+            ):
                 for mod in reversed(umesh.obj.modifiers):
-                    if isinstance(mod, bpy.types.NodesModifier) and mod.name.startswith('UniV Shift'):
+                    if isinstance(mod, bpy.types.NodesModifier) and mod.name.startswith(
+                        "UniV Shift"
+                    ):
                         umesh.obj.modifiers.remove(mod)
                         changed_modifiers += 1
 
-        report_info = ''
+        report_info = ""
         if changed_modifiers:
             report_info += f"Changed {changed_modifiers} modifiers."
         if deleted_attr_counter:
             report_info += f"Deleted {deleted_attr_counter} unused attributes."
 
         if report_info:
-            self.report({'INFO'}, report_info)
+            self.report({"INFO"}, report_info)
         elif not counter:
-            self.report({'WARNING'}, 'Not found islands and modifiers for shift')
+            self.report({"WARNING"}, "Not found islands and modifiers for shift")
 
-        self.umeshes.silent_update()
-        self.umeshes.free()
-        return {'FINISHED'}
+        umeshes.silent_update()
+        umeshes.free()
+        return {"FINISHED"}
 
-    def shift_array_and_mirror_and_warp(self):
+    def shift_array_and_mirror_and_warp(self, umeshes: UMeshes):
         if not self.with_modifier:
             return 0
         counter = 0
-        for umesh in self.umeshes:
+        for umesh in umeshes:
             for mod in umesh.obj.modifiers:
                 if self.array_shift and isinstance(mod, bpy.types.ArrayModifier):
                     if mod.offset_u != 1.0:
@@ -2915,7 +3053,7 @@ class UNIV_OT_Shift(Operator):
         if len(nodes) != 7:
             return True
 
-        output_node = [n for n in nodes if n.bl_idname == 'NodeGroupOutput']
+        output_node = [n for n in nodes if n.bl_idname == "NodeGroupOutput"]
         if not output_node or not output_node[0].inputs:
             return True
 
@@ -2924,29 +3062,34 @@ class UNIV_OT_Shift(Operator):
             return True
 
         store_attr_node = output_links[0].from_node
-        if store_attr_node.bl_idname != 'GeometryNodeStoreNamedAttribute':
+        if store_attr_node.bl_idname != "GeometryNodeStoreNamedAttribute":
             return True
 
-        if store_attr_node.data_type != 'FLOAT2' or store_attr_node.domain != 'CORNER':
+        if store_attr_node.data_type != "FLOAT2" or store_attr_node.domain != "CORNER":
             return True
 
         store_attr_node_geometry_links = store_attr_node.inputs[0].links
-        if not store_attr_node_geometry_links or (store_attr_node_geometry_links[0].from_node.bl_idname != 'NodeGroupInput'):
+        if not store_attr_node_geometry_links or (
+            store_attr_node_geometry_links[0].from_node.bl_idname != "NodeGroupInput"
+        ):
             return True
 
-        store_attr_node_name_links = store_attr_node.inputs['Name'].links
-        if not store_attr_node_name_links or store_attr_node_name_links[0].from_node.bl_idname != 'NodeGroupInput':
+        store_attr_node_name_links = store_attr_node.inputs["Name"].links
+        if (
+            not store_attr_node_name_links
+            or store_attr_node_name_links[0].from_node.bl_idname != "NodeGroupInput"
+        ):
             return True
 
-        store_attr_node_value_links = store_attr_node.inputs['Value'].links
+        store_attr_node_value_links = store_attr_node.inputs["Value"].links
         if not store_attr_node_value_links:
             return True
 
         vector_node = store_attr_node_value_links[0].from_node
-        if vector_node.bl_idname != 'ShaderNodeVectorMath':
+        if vector_node.bl_idname != "ShaderNodeVectorMath":
             return True
 
-        if vector_node.operation != 'ADD':
+        if vector_node.operation != "ADD":
             return True
 
         vector_node_a_links = vector_node.inputs[0].links
@@ -2958,35 +3101,40 @@ class UNIV_OT_Shift(Operator):
             return True
 
         uvmap_node = vector_node_a_links[0].from_node
-        if uvmap_node.bl_idname != 'GeometryNodeInputNamedAttribute':
+        if uvmap_node.bl_idname != "GeometryNodeInputNamedAttribute":
             return True
 
-        uvmap_name_links = uvmap_node.inputs['Name'].links
-        if (not uvmap_name_links or
-                uvmap_name_links[0].from_node.bl_idname != 'NodeGroupInput' or
-                uvmap_node.data_type != 'FLOAT_VECTOR'):
+        uvmap_name_links = uvmap_node.inputs["Name"].links
+        if (
+            not uvmap_name_links
+            or uvmap_name_links[0].from_node.bl_idname != "NodeGroupInput"
+            or uvmap_node.data_type != "FLOAT_VECTOR"
+        ):
             return True
 
         combine_xyz_node = vector_node_b_links[0].from_node
-        if combine_xyz_node.bl_idname != 'ShaderNodeCombineXYZ':
+        if combine_xyz_node.bl_idname != "ShaderNodeCombineXYZ":
             return True
 
-        x_links = combine_xyz_node.inputs['X'].links
+        x_links = combine_xyz_node.inputs["X"].links
         if not x_links:
             return True
 
         shift_node = x_links[0].from_node
-        if shift_node.bl_idname != 'GeometryNodeInputNamedAttribute':
+        if shift_node.bl_idname != "GeometryNodeInputNamedAttribute":
             return True
 
-        if shift_node.data_type != 'BOOLEAN' or shift_node.inputs['Name'].default_value != 'univ_shift':
+        if (
+            shift_node.data_type != "BOOLEAN"
+            or shift_node.inputs["Name"].default_value != "univ_shift"
+        ):
             return True
 
         return False
 
     @staticmethod
     def create_shift_node_group():
-        node_group = bpy.data.node_groups.new(name='UniV Shift', type='GeometryNodeTree')
+        node_group = bpy.data.node_groups.new(name="UniV Shift", type="GeometryNodeTree")
 
         create_node = node_group.nodes.new
         input_node = create_node(type="NodeGroupInput")
@@ -2997,17 +3145,17 @@ class UNIV_OT_Shift(Operator):
 
         store_attr_node = create_node(type="GeometryNodeStoreNamedAttribute")
         store_attr_node.location = (0, 0)
-        store_attr_node.data_type = 'FLOAT2'
-        store_attr_node.domain = 'CORNER'
+        store_attr_node.data_type = "FLOAT2"
+        store_attr_node.domain = "CORNER"
 
         shift_node = create_node(type="GeometryNodeInputNamedAttribute")
         shift_node.location = (-600, -330)
-        shift_node.data_type = 'BOOLEAN'
-        shift_node.inputs['Name'].default_value = 'univ_shift'
+        shift_node.data_type = "BOOLEAN"
+        shift_node.inputs["Name"].default_value = "univ_shift"
 
         uvmap_node = create_node(type="GeometryNodeInputNamedAttribute")
         uvmap_node.location = (-600, -180)
-        uvmap_node.data_type = 'FLOAT_VECTOR'
+        uvmap_node.data_type = "FLOAT_VECTOR"
 
         combine_xyz_node = create_node(type="ShaderNodeCombineXYZ")
         combine_xyz_node.location = (-380, -330)
@@ -3015,34 +3163,40 @@ class UNIV_OT_Shift(Operator):
         vector_add_node = create_node(type="ShaderNodeVectorMath")
         vector_add_node.location = (-180, -180)
 
-        iface = getattr(node_group, 'interface', None)
+        iface = getattr(node_group, "interface", None)
         if iface:
-            iface.new_socket('Input', description="", in_out='INPUT', socket_type='NodeSocketGeometry')
-            iface.new_socket('UVMap', description="", in_out='INPUT', socket_type='NodeSocketString')
-            iface.new_socket('Output', description="", in_out='OUTPUT', socket_type='NodeSocketGeometry')
+            iface.new_socket(
+                "Input", description="", in_out="INPUT", socket_type="NodeSocketGeometry"
+            )
+            iface.new_socket(
+                "UVMap", description="", in_out="INPUT", socket_type="NodeSocketString"
+            )
+            iface.new_socket(
+                "Output", description="", in_out="OUTPUT", socket_type="NodeSocketGeometry"
+            )
         else:
-            node_group.inputs.new('NodeSocketGeometry', 'Input')
-            node_group.inputs.new('NodeSocketString', 'UVMap')
-            node_group.outputs.new('NodeSocketGeometry', 'Output')
+            node_group.inputs.new("NodeSocketGeometry", "Input")
+            node_group.inputs.new("NodeSocketString", "UVMap")
+            node_group.outputs.new("NodeSocketGeometry", "Output")
 
         link = node_group.links.new
 
-        link(input_node.outputs['Input'], store_attr_node.inputs['Geometry'])
-        link(store_attr_node.outputs['Geometry'], output_node.inputs['Output'])
-        link(input_node.outputs['UVMap'], store_attr_node.inputs['Name'])
-        link(input_node.outputs['UVMap'], uvmap_node.inputs['Name'])
+        link(input_node.outputs["Input"], store_attr_node.inputs["Geometry"])
+        link(store_attr_node.outputs["Geometry"], output_node.inputs["Output"])
+        link(input_node.outputs["UVMap"], store_attr_node.inputs["Name"])
+        link(input_node.outputs["UVMap"], uvmap_node.inputs["Name"])
 
         for attr_output in shift_node.outputs:
-            if attr_output.name == 'Attribute' and not attr_output.is_unavailable:
+            if attr_output.name == "Attribute" and not attr_output.is_unavailable:
                 link(attr_output, combine_xyz_node.inputs[0])
                 break
-        link(combine_xyz_node.outputs['Vector'], vector_add_node.inputs[1])
+        link(combine_xyz_node.outputs["Vector"], vector_add_node.inputs[1])
 
         for attr_output in uvmap_node.outputs:
-            if attr_output.name == 'Attribute' and not attr_output.is_unavailable:
+            if attr_output.name == "Attribute" and not attr_output.is_unavailable:
                 link(attr_output, vector_add_node.inputs[0])
                 break
-        link(vector_add_node.outputs['Vector'], store_attr_node.inputs['Value'])
+        link(vector_add_node.outputs["Vector"], store_attr_node.inputs["Value"])
 
         return node_group
 
@@ -3053,30 +3207,30 @@ class UNIV_OT_Shift(Operator):
         for m in umesh.obj.modifiers:
             if not isinstance(m, bpy.types.NodesModifier):
                 continue
-            if m.name.startswith('UniV Shift'):
+            if m.name.startswith("UniV Shift"):
                 has_checker_modifier = True
                 if m.node_group != node_group:
                     m.node_group = node_group
 
                 gn_mod = utils.GN(m, print_missed_socket=True)
-                if 'Socket_1' in gn_mod:
-                    if gn_mod['Socket_1'] != uv_name:
-                        gn_mod['Socket_1'] = uv_name
+                if "Socket_1" in gn_mod:
+                    if gn_mod["Socket_1"] != uv_name:
+                        gn_mod["Socket_1"] = uv_name
                 umesh.update_tag = True
                 break
         if not has_checker_modifier:
-            m = umesh.obj.modifiers.new(name='UniV Shift', type='NODES')
+            m = umesh.obj.modifiers.new(name="UniV Shift", type="NODES")
             m.node_group = node_group
 
             gn_mod = utils.GN(m, print_missed_socket=True)
-            if 'Socket_1' in gn_mod:
-                gn_mod['Socket_1'] = uv_name
+            if "Socket_1" in gn_mod:
+                gn_mod["Socket_1"] = uv_name
             umesh.update_tag = True
 
     def get_shift_node_group(self):
         """Get exist checker material"""
         for ng in reversed(bpy.data.node_groups):
-            if ng.name.startswith('UniV Shift'):
+            if ng.name.startswith("UniV Shift"):
                 if self.shift_node_group_is_changed(ng):
                     if ng.users == 0:
                         bpy.data.node_groups.remove(ng)
@@ -3094,129 +3248,133 @@ class UNIV_OT_Random(Operator, utils.OverlapHelper):
     bl_idname = "uv.univ_random"
     bl_label = "Random"
     bl_description = "Randomize selected UV islands or faces"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {"REGISTER", "UNDO"}
 
-    between: BoolProperty(name='Shaffle', default=False)
-    bound_between: EnumProperty(name='Bound Shaffle', default='OFF', items=(
-        ('OFF', 'Off', ''), ('CROP', 'Crop', ''), ('CLAMP', 'Clamp', '')))
-    steps: IntVectorProperty(name='Steps', default=(0, 0), min=0, max=1024, soft_max=10, size=2, subtype='XYZ',
-                             description='Rounds the movement step: Rounded Movement = 1 / Steps')
+    # fmt: off
+    between: BoolProperty(name="Shaffle", default=False)
+    bound_between: EnumProperty(name="Bound Shaffle", default="OFF", items=(
+        ("OFF", "Off", ""), ("CROP", "Crop", ""), ("CLAMP", "Clamp", "")))
+    steps: IntVectorProperty(name="Steps", default=(0, 0), min=0, max=1024, soft_max=10, size=2, subtype="XYZ",
+                             description="Rounds the movement step: Rounded Movement = 1 / Steps")
 
-    strength: FloatVectorProperty(name='Strength', default=(1, 1), min=-10, max=10,
-                                  soft_min=0, soft_max=1, size=2, subtype='XYZ')
-    flip_strength: FloatVectorProperty(name='Flip', default=(0, 0), min=0, max=1, size=2, subtype='XYZ')
-    use_correct_aspect: BoolProperty(name='Correct Aspect', default=True)
-    rotation: FloatProperty(name='Rotation Range', default=0, min=0, soft_max=math.pi * 2, subtype='ANGLE',
-                            update=lambda self_, _: setattr(self_, 'rotation_steps', self_.rotation) if self_.rotation < self_.rotation_steps else None)
-    rotation_steps: FloatProperty(name='Rotation Steps', default=0, min=0, max=math.pi, soft_max=math.pi/2, subtype='ANGLE',
-                                  update=lambda self_, _: setattr(self_, 'rotation', self_.rotation_steps) if self_.rotation < self_.rotation_steps else None)
-    scale_factor: FloatProperty(name="Scale Factor", default=0, min=0, soft_max=1, subtype='FACTOR')
-    min_scale: FloatProperty(name='Min Scale', default=0.5, min=0, max=10, soft_min=0.1, soft_max=2,
-                             update=lambda self_, _: setattr(self_, 'max_scale', self_.min_scale) if self_.max_scale < self_.min_scale else None)
-    max_scale: FloatProperty(name='Max Scale', default=2, min=0, max=10, soft_min=0.1, soft_max=2,
-                             update=lambda self_, _: setattr(self_, 'min_scale', self_.max_scale) if self_.max_scale < self_.min_scale else None)
+    strength: FloatVectorProperty(name="Strength", default=(1, 1), min=-10, max=10,
+                                  soft_min=0, soft_max=1, size=2, subtype="XYZ")
+    flip_strength: FloatVectorProperty(name="Flip", default=(0, 0), min=0, max=1, size=2, subtype="XYZ")
+    use_correct_aspect: BoolProperty(name="Correct Aspect", default=True)
+    rotation: FloatProperty(name="Rotation Range", default=0, min=0, soft_max=math.pi * 2, subtype="ANGLE",
+                            update=lambda self_, _: setattr(self_, "rotation_steps", self_.rotation) if self_.rotation < self_.rotation_steps else None)
+    rotation_steps: FloatProperty(name="Rotation Steps", default=0, min=0, max=math.pi, soft_max=math.pi/2, subtype="ANGLE",
+                                  update=lambda self_, _: setattr(self_, "rotation", self_.rotation_steps) if self_.rotation < self_.rotation_steps else None)
+    scale_factor: FloatProperty(name="Scale Factor", default=0, min=0, soft_max=1, subtype="FACTOR")
+    min_scale: FloatProperty(name="Min Scale", default=0.5, min=0, max=10, soft_min=0.1, soft_max=2,
+                             update=lambda self_, _: setattr(self_, "max_scale", self_.min_scale) if self_.max_scale < self_.min_scale else None)
+    max_scale: FloatProperty(name="Max Scale", default=2, min=0, max=10, soft_min=0.1, soft_max=2,
+                             update=lambda self_, _: setattr(self_, "min_scale", self_.max_scale) if self_.max_scale < self_.min_scale else None)
     bool_bounds: BoolProperty(name="Within Image Bounds", default=False,
                               description="Keep the UV faces/islands within the 0-1 UV domain.", )
-    rand_seed: IntProperty(name='Seed', default=0)
+    rand_seed: IntProperty(name="Seed", default=0)
+    # fmt: on
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(self, 'rand_seed')
+        layout.prop(self, "rand_seed")
 
         if not self.between:
-            layout.prop(self, 'strength', slider=True)
-        layout.prop(self, 'flip_strength', slider=True)
+            layout.prop(self, "strength", slider=True)
+        layout.prop(self, "flip_strength", slider=True)
 
         if not self.between:
-            layout.prop(self, 'steps', slider=True)
+            layout.prop(self, "steps", slider=True)
 
-        if self.bound_between != 'CROP':
-            layout.label(text='Scale:')
-            layout.prop(self, 'scale_factor', slider=True)
+        if self.bound_between != "CROP":
+            layout.label(text="Scale:")
+            layout.prop(self, "scale_factor", slider=True)
             if self.scale_factor != 0:
-                layout.prop(self, 'min_scale', slider=True)
-                layout.prop(self, 'max_scale', slider=True)
+                layout.prop(self, "min_scale", slider=True)
+                layout.prop(self, "max_scale", slider=True)
 
-        layout.label(text='Rotation:')
-        layout.prop(self, 'rotation', slider=True)
+        layout.label(text="Rotation:")
+        layout.prop(self, "rotation", slider=True)
         if self.rotation != 0:
-            layout.prop(self, 'rotation_steps', slider=True)
+            layout.prop(self, "rotation_steps", slider=True)
             layout.separator()
-            layout.prop(self, 'use_correct_aspect')  # TODO: Implement for crop and clamp
+            layout.prop(self, "use_correct_aspect")  # TODO: Implement for crop and clamp
         else:
             layout.separator()
 
         if not self.between:
-            layout.prop(self, 'bool_bounds')
+            layout.prop(self, "bool_bounds")
 
         if self.between:
-            self.layout.row().prop(self, 'bound_between', expand=True)
-        layout.prop(self, 'between')
+            self.layout.row().prop(self, "bound_between", expand=True)
+        layout.prop(self, "between")
 
         self.draw_overlap(False)
 
     def invoke(self, context, event):
-        if event.value == 'PRESS':
+        if event.value == "PRESS":
             return self.execute(context)
         self.lock_overlap = event.shift
         self.between = event.alt
-        self.bound_between = 'CROP' if event.ctrl else 'OFF'
+        self.bound_between = "CROP" if event.ctrl else "OFF"
         return self.execute(context)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.seed = 1000
         self.non_valid_counter = 0
-        self.umeshes: UMeshes | None = None
-        self.is_edit_mode: bool = bpy.context.mode == 'EDIT_MESH'
+        self.is_edit_mode: bool = bpy.context.mode == "EDIT_MESH"
         self.all_islands: list[UnionIslands | AdvIsland] | None = None
         self.sync = bpy.context.scene.tool_settings.use_uv_select_sync
 
     def execute(self, context):
         self.non_valid_counter = 0
-        self.umeshes = UMeshes(report=self.report)
-        if not self.umeshes:
-            self.report({'WARNING'}, 'Objects not found')
-            return {'CANCELLED'}
+        umeshes = UMeshes(report=self.report)
+        if not umeshes:
+            self.report({"WARNING"}, "Objects not found")
+            return {"CANCELLED"}
 
         if self.use_correct_aspect:
-            self.umeshes.calc_aspect_ratio(from_mesh=not self.bl_idname.startswith('UV'))
+            umeshes.calc_aspect_ratio(from_mesh=not self.bl_idname.startswith("UV"))
 
         if self.is_edit_mode:
-            if not self.bl_idname.startswith('UV'):
-                self.umeshes.set_sync()
-                self.umeshes.sync_invalidate()
+            if not self.bl_idname.startswith("UV"):
+                umeshes.set_sync()
+                umeshes.sync_invalidate()
         else:
-            self.umeshes.ensure(face=True)
+            umeshes.ensure(face=True)
 
-        self.random_preprocessing()
+        self.random_preprocessing(umeshes)
         if self.is_edit_mode:
             if not self.all_islands:
-                self.random_preprocessing(extended=False)
+                self.random_preprocessing(umeshes, extended=False)
 
         if self.between:
             self.random_between()
         else:
             self.random()
         if self.non_valid_counter:
-            self.report({'INFO'}, f"Found {self.non_valid_counter} zero-sized islands that will not be affected by some effects")
-        self.umeshes.update(info="No object for randomize.")
+            self.report(
+                {"INFO"},
+                f"Found {self.non_valid_counter} zero-sized islands that will not be affected by some effects",
+            )
+        umeshes.update(info="No object for randomize.")
 
         if not self.is_edit_mode:
-            self.umeshes.free()
-            utils.update_area_by_type('VIEW_3D')
-        return {'FINISHED'}
+            umeshes.free()
+            utils.update_area_by_type("VIEW_3D")
+        return {"FINISHED"}
 
-    def random_preprocessing(self, extended=True):
-        self.seed = sum(id(umesh.obj) for umesh in self.umeshes) // len(self.umeshes) + self.rand_seed
+    def random_preprocessing(self, umeshes: UMeshes, extended=True):
+        self.seed = sum(id(umesh.obj) for umesh in umeshes) // len(umeshes) + self.rand_seed
 
         self.all_islands = []
         _islands = []
-        for umesh in self.umeshes:
+        for umesh in umeshes:
             if self.is_edit_mode:
-                islands = AdvIslands.calc_extended_or_visible_with_mark_seam(umesh, extended=extended)
+                islands = Islands.calc_extended_or_visible(umesh, extended=extended)
             else:
-                islands = AdvIslands.calc_with_hidden_with_mark_seam(umesh)
+                islands = Islands.calc_with_hidden(umesh)
             if islands:
                 if self.lock_overlap:
                     islands.calc_tris()
@@ -3236,11 +3394,19 @@ class UNIV_OT_Random(Operator, utils.OverlapHelper):
             rand_rotation = random.uniform(-self.rotation, self.rotation)
             random.seed(seed + 1000)
             rand_scale = random.uniform(self.min_scale, self.max_scale)
-            flip_x = random.choices([-1, 1], weights=[self.flip_strength[0], 1 - self.flip_strength[0]], k=1)[0]
-            flip_y = random.choices([-1, 1], weights=[self.flip_strength[1], 1 - self.flip_strength[1]], k=1)[0]
+            flip_x = random.choices(
+                [-1, 1], weights=[self.flip_strength[0], 1 - self.flip_strength[0]], k=1
+            )[0]
+            flip_y = random.choices(
+                [-1, 1], weights=[self.flip_strength[1], 1 - self.flip_strength[1]], k=1
+            )[0]
 
-            if (self.bool_bounds or self.rotation or
-                    self.scale_factor != 0 or -1 in (flip_x, flip_y)):
+            if (
+                self.bool_bounds
+                or self.rotation
+                or self.scale_factor != 0
+                or -1 in (flip_x, flip_y)
+            ):
 
                 bb = island.bbox
                 if bb.min_length == 0:
@@ -3305,9 +3471,20 @@ class UNIV_OT_Random(Operator, utils.OverlapHelper):
             else:
                 min_bb_prev = island.bbox.get_tile_start_pos_from_center()
                 bb = island.calc_bbox()
-                wrap_x = utils.wrap_line(bb.xmin+randmove.x, bb.width, min_bb_prev.x, min_bb_prev.x+1, default=bb.min.x)
-                wrap_y = utils.wrap_line(bb.ymin+randmove.y, bb.height, min_bb_prev.y,
-                                         min_bb_prev.y+1, default=bb.min.y)
+                wrap_x = utils.wrap_line(
+                    bb.xmin + randmove.x,
+                    bb.width,
+                    min_bb_prev.x,
+                    min_bb_prev.x + 1,
+                    default=bb.min.x,
+                )
+                wrap_y = utils.wrap_line(
+                    bb.ymin + randmove.y,
+                    bb.height,
+                    min_bb_prev.y,
+                    min_bb_prev.y + 1,
+                    default=bb.min.y,
+                )
 
                 # TODO: Crop island if max_length > 1.0
                 delta = Vector((wrap_x, wrap_y))
@@ -3325,8 +3502,12 @@ class UNIV_OT_Random(Operator, utils.OverlapHelper):
             random.seed(seed + 1000)
             rand_scale = random.uniform(self.min_scale, self.max_scale)
 
-            flip_x = random.choices([-1, 1], weights=[self.flip_strength[0], 1 - self.flip_strength[0]], k=1)[0]
-            flip_y = random.choices([-1, 1], weights=[self.flip_strength[1], 1 - self.flip_strength[1]], k=1)[0]
+            flip_x = random.choices(
+                [-1, 1], weights=[self.flip_strength[0], 1 - self.flip_strength[0]], k=1
+            )[0]
+            flip_y = random.choices(
+                [-1, 1], weights=[self.flip_strength[1], 1 - self.flip_strength[1]], k=1
+            )[0]
 
             bb = island.bbox
             if -1 in (flip_x, flip_y):
@@ -3352,16 +3533,16 @@ class UNIV_OT_Random(Operator, utils.OverlapHelper):
                     island.rotate(angle, vec_origin, island.umesh.aspect)
                     # if island.rotate(angle, vec_origin):
                     #     bb.rotate_expand(angle)
-                if self.bound_between != 'CROP':
+                if self.bound_between != "CROP":
                     scale = bl_math.lerp(1.0, rand_scale, self.scale_factor)
                     vector_scale = Vector((scale, scale))
                     island.scale(vector_scale, vec_origin)
                     # bb.scale(vector_scale, vec_origin)
 
-            protege = shaffle_island_bboxes[e_seed-100]
+            protege = shaffle_island_bboxes[e_seed - 100]
             island.set_position(protege.center, _from=island.bbox.center)
 
-            if self.bound_between == 'OFF':
+            if self.bound_between == "OFF":
                 continue
 
             bb = island.calc_bbox()
@@ -3370,7 +3551,7 @@ class UNIV_OT_Random(Operator, utils.OverlapHelper):
                 self.non_valid_counter += 1
                 continue
 
-            if self.bound_between == 'CLAMP':
+            if self.bound_between == "CLAMP":
                 if bb.width <= protege.width:
                     width_scale = 1
                 else:
@@ -3380,7 +3561,7 @@ class UNIV_OT_Random(Operator, utils.OverlapHelper):
                     height_scale = 1
                 else:
                     height_scale = protege.height / bb.height
-            else:  # 'CROP'
+            else:  # "CROP"
                 width_scale = protege.width / bb.width
                 height_scale = protege.height / bb.height
 
@@ -3391,33 +3572,42 @@ class UNIV_OT_Random(Operator, utils.OverlapHelper):
 class UNIV_OT_Random_VIEW3D(UNIV_OT_Random):
     bl_idname = "mesh.univ_random"
 
+
 # noinspection PyTypeHints
 class UNIV_OT_Orient(Operator, utils.OverlapHelper):
-    bl_idname = 'uv.univ_orient'
-    bl_label = 'Orient'
-    bl_description = "Rotated to a minimal rectangle, either vertical or horizontal\n\n" \
-                     "Shift - Lock Overlaps\n" \
-                     "Has [O] keymap"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_idname = "uv.univ_orient"
+    bl_label = "Orient"
+    bl_description = (
+        "Rotated to a minimal rectangle, either vertical or horizontal\n\n"
+        "Shift - Lock Overlaps\n"
+        "Has [O] keymap"
+    )
+    bl_options = {"REGISTER", "UNDO"}
 
-    edge_dir: EnumProperty(name='Direction', default='HORIZONTAL', items=(
-        ('BOTH', 'Both', ''),
-        ('HORIZONTAL', 'Horizontal', ''),
-        ('VERTICAL', 'Vertical', ''),
-    ))
-    use_correct_aspect: BoolProperty(name='Correct Aspect', default=True)
+    edge_dir: EnumProperty(
+        name="Direction",
+        default="HORIZONTAL",
+        items=(
+            ("BOTH", "Both", ""),
+            ("HORIZONTAL", "Horizontal", ""),
+            ("VERTICAL", "Vertical", ""),
+        ),
+    )
+    use_correct_aspect: BoolProperty(name="Correct Aspect", default=True)
 
     def draw(self, context):
         layout = self.layout
-        layout.row().prop(self, 'edge_dir', expand=True)
-        layout.prop(self, 'use_correct_aspect')
+        layout.row().prop(self, "edge_dir", expand=True)
+        layout.prop(self, "use_correct_aspect")
         self.draw_overlap()
 
     def invoke(self, context, event):
-        self.max_distance = utils.get_max_distance_from_px(prefs().max_pick_distance, context.region.view2d)
+        self.max_distance = utils.get_max_distance_from_px(
+            prefs().max_pick_distance, context.region.view2d
+        )
         self.mouse_pos = None
-        if event.value == 'PRESS':
-            if context.area.ui_type == 'UV':
+        if event.value == "PRESS":
+            if context.area.ui_type == "UV":
                 self.mouse_pos = utils.get_mouse_pos(context, event)
             return self.execute(context)
 
@@ -3427,80 +3617,78 @@ class UNIV_OT_Orient(Operator, utils.OverlapHelper):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.aspect: float = 1.0
-        # WARNING: Possible potential error when calling via bpy.ops.uv.univ_orient('DEFAULT') when an old value is used
+        # WARNING: Possible potential error when calling via bpy.ops.uv.univ_orient("DEFAULT") when an old value is used
         self.mouse_pos: Vector | None = None
         self.max_distance: float | None = None
-        self.umeshes: UMeshes | None = None
         self.view_box_sync_block = utils.ViewBoxSyncBlock(None)
 
     def execute(self, context):
         self.aspect = utils.get_aspect_ratio() if self.use_correct_aspect else 1.0
-        self.umeshes = UMeshes(report=self.report)
-        self.umeshes.update_tag = False
+        umeshes = UMeshes(report=self.report)
+        umeshes.update_tag = False
         self.view_box_sync_block = utils.ViewBoxSyncBlock.from_area(context.area)
 
-        if self.umeshes.is_edit_mode:
-            if not self.bl_idname.startswith('UV'):
-                self.umeshes.set_sync()
-                self.umeshes.sync_invalidate()
+        if umeshes.is_edit_mode:
+            if not self.bl_idname.startswith("UV"):
+                umeshes.set_sync()
+                umeshes.sync_invalidate()
 
             selected_edges = []
-            selected_faces, visible = self.umeshes.filtered_by_selected_and_visible_uv_faces()
-            self.umeshes = selected_faces if selected_faces else visible
+            selected_faces, visible = umeshes.filtered_by_selected_and_visible_uv_faces()
+            umeshes = selected_faces if selected_faces else visible
             if not selected_faces:
                 selected_edges, visible = visible.filtered_by_selected_and_visible_uv_edges()
-                self.umeshes = selected_edges if selected_edges else visible
+                umeshes = selected_edges if selected_edges else visible
 
-            if not self.umeshes:
-                return self.umeshes.update()
+            if not umeshes:
+                return umeshes.update()
 
             if self.lock_overlap:
                 if selected_faces:
-                    self.orient_islands_with_selected_faces_overlap(extended=True)
+                    self.orient_islands_with_selected_faces_overlap(umeshes, extended=True)
                 elif selected_edges:
-                    self.orient_islands_with_selected_edges_overlap()
+                    self.orient_islands_with_selected_edges_overlap(umeshes)
                 else:
-                    self.orient_islands_with_selected_faces_overlap(extended=False)
+                    self.orient_islands_with_selected_faces_overlap(umeshes, extended=False)
             else:
                 if selected_faces:
-                    self.orient_islands_with_selected_faces()
+                    self.orient_islands_with_selected_faces(umeshes)
                 elif selected_edges:
-                    self.orient_islands_with_selected_edges()
+                    self.orient_islands_with_selected_edges(umeshes)
                 else:
-                    return self.orient_pick_or_visible()
+                    return self.orient_pick_or_visible(umeshes)
         else:
-            if not self.umeshes:
-                return self.umeshes.update()
+            if not umeshes:
+                return umeshes.update()
 
-            self.umeshes.set_sync()
-            self.umeshes.ensure()  # TODO: Check without ensure
+            umeshes.set_sync()
+            umeshes.ensure()  # TODO: Check without ensure
             if self.lock_overlap:
-                self.orient_islands_overlap_obj_mode()
+                self.orient_islands_overlap_obj_mode(umeshes)
             else:
-                self.orient_islands_obj_mode()
+                self.orient_islands_obj_mode(umeshes)
 
-        self.umeshes.update(info="All islands oriented")
+        umeshes.update(info="All islands oriented")
         self.view_box_sync_block.draw_if_blocked()
 
-        if not self.umeshes.is_edit_mode:
-            self.umeshes.free()
-            utils.update_area_by_type('VIEW_3D')
+        if not umeshes.is_edit_mode:
+            umeshes.free()
+            utils.update_area_by_type("VIEW_3D")
 
-        return {'FINISHED'}
+        return {"FINISHED"}
 
-    def orient_islands_with_selected_faces(self):
-        for umesh in self.umeshes:
+    def orient_islands_with_selected_faces(self, umeshes: UMeshes):
+        for umesh in umeshes:
             self.view_box_sync_block.skip_from_param(umesh, True)
-            islands = AdvIslands.calc_extended_with_mark_seam(umesh)
+            islands = Islands.calc_extended(umesh)
             self.view_box_sync_block.filter_by_isect_islands(islands)
             for island in islands:
                 self.orient_island(island)
 
-
-    def orient_islands_with_selected_edges(self):
-        for umesh in self.umeshes:
+    def orient_islands_with_selected_edges(self, umeshes: UMeshes):
+        for umesh in umeshes:
             self.view_box_sync_block.skip_from_param(umesh, True)
-            islands = Islands.calc_extended_any_edge_with_markseam(umesh)
+            islands = Islands.calc_extended_any_edge(umesh)
 
             for isl in islands:
                 corners = isl.calc_selected_edge_corners_iter()
@@ -3511,11 +3699,10 @@ class UNIV_OT_Orient(Operator, utils.OverlapHelper):
             for island in islands:
                 self.orient_edge(island)
 
-
-    def orient_pick_or_visible(self):
+    def orient_pick_or_visible(self, umeshes: UMeshes):
         hit = IslandHit(self.mouse_pos, self.max_distance)
-        for umesh in self.umeshes:
-            for isl in Islands.calc_visible_with_mark_seam(umesh):
+        for umesh in umeshes:
+            for isl in Islands.calc_visible(umesh):
                 if self.mouse_pos:
                     hit.find_nearest_island_by_crn(isl)
                 else:
@@ -3530,24 +3717,26 @@ class UNIV_OT_Orient(Operator, utils.OverlapHelper):
 
                 length = (v1 - v2).length
                 if length:
-                    return self.umeshes.update(info="Island oriented")
+                    return umeshes.update(info="Island oriented")
                 else:
                     hit.crn[uv].select = True
                     hit.crn[uv].select_edge = True
                     hit.crn.link_loop_next[uv].select = True
                     hit.crn.face.select = True
                     hit.island.umesh.update_tag = True
-                    self.report({'WARNING'}, "Island has zero length edge")
-                    return self.umeshes.update()
-            return self.umeshes.update(info_type={'WARNING'}, info="Island not found within a given radius")
+                    self.report({"WARNING"}, "Island has zero length edge")
+                    return umeshes.update()
+            return umeshes.update(
+                info_type={"WARNING"}, info="Island not found within a given radius"
+            )
 
-        return self.umeshes.update(info="All islands oriented")
+        return umeshes.update(info="All islands oriented")
 
-    def orient_islands_with_selected_faces_overlap(self, extended):
+    def orient_islands_with_selected_faces_overlap(self, umeshes: UMeshes, extended):
         islands_of_mesh = []
-        for umesh in self.umeshes:
+        for umesh in umeshes:
             self.view_box_sync_block.skip_from_param(umesh, extended)
-            islands = AdvIslands.calc_extended_or_visible_with_mark_seam(umesh, extended=extended)
+            islands = Islands.calc_extended_or_visible(umesh, extended=extended)
             self.view_box_sync_block.filter_by_isect_islands(islands)
 
             if islands:
@@ -3558,10 +3747,10 @@ class UNIV_OT_Orient(Operator, utils.OverlapHelper):
         for overlapped_isl in self.calc_overlapped_island_groups(islands_of_mesh):
             self.orient_island(overlapped_isl)
 
-    def orient_islands_overlap_obj_mode(self):
+    def orient_islands_overlap_obj_mode(self, umeshes: UMeshes):
         islands_of_mesh = []
-        for umesh in self.umeshes:
-            islands = AdvIslands.calc_with_hidden_with_mark_seam(umesh)
+        for umesh in umeshes:
+            islands = Islands.calc_with_hidden(umesh)
 
             if islands:
                 islands.calc_tris()
@@ -3571,18 +3760,18 @@ class UNIV_OT_Orient(Operator, utils.OverlapHelper):
         for overlapped_isl in self.calc_overlapped_island_groups(islands_of_mesh):
             self.orient_island(overlapped_isl)
 
-    def orient_islands_obj_mode(self):
-        for umesh in self.umeshes:
-            for isl in AdvIslands.calc_with_hidden_with_mark_seam(umesh):
+    def orient_islands_obj_mode(self, umeshes: UMeshes):
+        for umesh in umeshes:
+            for isl in Islands.calc_with_hidden(umesh):
                 self.orient_island(isl)
 
-    def orient_islands_with_selected_edges_overlap(self):
+    def orient_islands_with_selected_edges_overlap(self, umeshes: UMeshes):
         islands_of_mesh = []
 
-        for umesh in self.umeshes:
+        for umesh in umeshes:
             self.view_box_sync_block.skip_from_param(umesh, True)
 
-            islands = AdvIslands.calc_extended_any_edge_with_markseam(umesh)
+            islands = Islands.calc_extended_any_edge(umesh)
             for isl in islands:
                 corners = isl.calc_selected_edge_corners_iter()
                 if not self.view_box_sync_block.skip:
@@ -3612,11 +3801,11 @@ class UNIV_OT_Orient(Operator, utils.OverlapHelper):
         if not any(edge_vec):  # TODO: Use inspect (Zero)
             return
 
-        if self.edge_dir == 'BOTH':
+        if self.edge_dir == "BOTH":
             current_angle = atan2(*edge_vec)
             angle_to_rotate = -utils.find_min_rotate_angle(current_angle)
 
-        elif self.edge_dir == 'HORIZONTAL':
+        elif self.edge_dir == "HORIZONTAL":
             left_dir = Vector((-1, 0))
             right_dir = Vector((1, 0))
             a = edge_vec.angle_signed(left_dir)
@@ -3635,10 +3824,11 @@ class UNIV_OT_Orient(Operator, utils.OverlapHelper):
 
     def orient_island(self, island: AdvIsland | UnionIslands):
         from collections import Counter
+
         angles: Counter[float | float] = Counter()
         boundary_coords_for_pivot = []
 
-        iter_isl = island if isinstance(island, UnionIslands) else (island, )
+        iter_isl = island if isinstance(island, UnionIslands) else (island,)
         for isl in iter_isl:
             uv = isl.umesh.uv
             vec_aspect = Vector((self.aspect, 1.0))
@@ -3665,109 +3855,116 @@ class UNIV_OT_Orient(Operator, utils.OverlapHelper):
         island.umesh.update_tag |= island.rotate(angle, bbox.center, self.aspect)
 
         bbox = BBox.calc_bbox(boundary_coords_for_pivot)
-        if self.edge_dir == 'HORIZONTAL':
-            if bbox.width*self.aspect < bbox.height:
-                final_angle = pi/2 if angle < 0 else -pi/2
+        if self.edge_dir == "HORIZONTAL":
+            if bbox.width * self.aspect < bbox.height:
+                final_angle = pi / 2 if angle < 0 else -pi / 2
                 island.umesh.update_tag |= island.rotate(final_angle, bbox.center, self.aspect)
 
-        elif self.edge_dir == 'VERTICAL':
-            if bbox.width*self.aspect > bbox.height:
-                final_angle = pi/2 if angle < 0 else -pi/2
+        elif self.edge_dir == "VERTICAL":
+            if bbox.width * self.aspect > bbox.height:
+                final_angle = pi / 2 if angle < 0 else -pi / 2
                 island.umesh.update_tag |= island.rotate(final_angle, bbox.center, self.aspect)
 
 
 class UNIV_OT_Orient_VIEW3D(UNIV_OT_Orient):
-    bl_idname = 'mesh.univ_orient'
-    bl_description = "Rotated to a minimal rectangle, either vertical or horizontal\n\n" \
-                     "Shift - Lock Overlaps"
+    bl_idname = "mesh.univ_orient"
+    bl_description = (
+        "Rotated to a minimal rectangle, either vertical or horizontal\n\n" "Shift - Lock Overlaps"
+    )
 
 
 # The code was taken and modified from the TexTools addon:
 # https://github.com/Oxicid/TexTools-Blender/blob/master/op_island_align_world.py
 # noinspection PyTypeHints
 class UNIV_OT_Gravity_VIEW2D(Operator):
-    bl_idname = 'uv.univ_gravity'
-    bl_label = 'Gravity'
+    bl_idname = "uv.univ_gravity"
+    bl_label = "World Align"
     bl_description = "Align selected UV islands or faces to world / gravity directions"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {"REGISTER", "UNDO"}
 
-    axis: bpy.props.EnumProperty(name="Axis", default='Z', items=(
-                                    ('Z', 'Up', ''),
-                                    ('X', 'Side', ''),
-                                    ('Y', 'Front', '')))
-    flip: BoolProperty(name='Flip', default=False)
-    additional_angle: FloatProperty(name='Additional Angle', default=0.0, soft_min=-pi/2, soft_max=pi, subtype='ANGLE')
-    use_correct_aspect: BoolProperty(name='Correct Aspect', default=True,
-                                     description='Gets Aspect Correct from the active image from the shader node editor')
+    axis: bpy.props.EnumProperty(
+        name="Axis", default="Z", items=(("Z", "Up", ""), ("X", "Side", ""), ("Y", "Front", ""))
+    )
+    flip: BoolProperty(name="Flip", default=False)
+    additional_angle: FloatProperty(
+        name="Additional Angle", default=0.0, soft_min=-pi / 2, soft_max=pi, subtype="ANGLE"
+    )
+    use_correct_aspect: BoolProperty(
+        name="Correct Aspect",
+        default=True,
+        description="Gets Aspect Correct from the active image from the shader node editor",
+    )
 
     def draw(self, context):
-        self.layout.prop(self, 'flip')
-        self.layout.prop(self, 'use_correct_aspect')
-        self.layout.prop(self, 'additional_angle', slider=True)
-        self.layout.row().prop(self, 'axis', expand=True)
+        self.layout.prop(self, "flip")
+        self.layout.prop(self, "use_correct_aspect")
+        self.layout.prop(self, "additional_angle", slider=True)
+        self.layout.row().prop(self, "axis", expand=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.skip_count: int = 0
         self.skip_zero = 0
         self.count_flipped = 0
-        self.is_edit_mode: bool = bpy.context.mode == 'EDIT_MESH'
-        self.umeshes: UMeshes | None = None
+        self.is_edit_mode: bool = bpy.context.mode == "EDIT_MESH"
 
     def execute(self, context):
-        self.umeshes = UMeshes(report=self.report)
+        umeshes = UMeshes(report=self.report)
 
         if self.is_edit_mode:
-            if not self.bl_idname.startswith('UV'):
-                self.umeshes.set_sync(True)
-                self.umeshes.sync_invalidate()
+            if not self.bl_idname.startswith("UV"):
+                umeshes.set_sync(True)
+                umeshes.sync_invalidate()
 
-            self.world_orient(extended=True)
-            if self.skip_count == len(self.umeshes):
-                self.world_orient(extended=False)
-                if self.skip_count == len(self.umeshes):
-                    return self.umeshes.update(info="No uv for manipulate")
+            self.world_orient(umeshes, extended=True)
+            if self.skip_count == len(umeshes):
+                self.world_orient(umeshes, extended=False)
+                if self.skip_count == len(umeshes):
+                    return umeshes.update(info="No uv for manipulate")
         else:
-            self.umeshes.ensure(face=True)
-            self.world_orient(extended=False)
-            if self.skip_count == len(self.umeshes):
-                self.umeshes.free()
-                return self.umeshes.update(info="Faces not found")
+            umeshes.ensure(face=True)
+            self.world_orient(umeshes, extended=False)
+            if self.skip_count == len(umeshes):
+                umeshes.free()
+                return umeshes.update(info="Faces not found")
 
-        self.umeshes.update(info="All islands oriented")
+        umeshes.update(info="All islands oriented")
 
         if self.skip_zero:
-            self.report({'WARNING'}, f"Found {self.skip_zero} zero area islands")
+            self.report({"WARNING"}, f"Found {self.skip_zero} zero area islands")
         if self.count_flipped:
-            self.report({'WARNING'}, f"Found {self.count_flipped} islands with flipped faces, the result may be incorrect")
+            self.report(
+                {"WARNING"},
+                f"Found {self.count_flipped} islands with flipped faces, the result may be incorrect",
+            )
 
         if not self.is_edit_mode:
-            self.umeshes.free()
+            umeshes.free()
             bpy.context.area.tag_redraw()
 
-        return {'FINISHED'}
+        return {"FINISHED"}
 
-    def world_orient(self, extended):
+    def world_orient(self, umeshes: UMeshes, extended: bool):
         self.skip_count = 0
         self.skip_zero = 0
         self.count_flipped = 0
 
         flip_angle = pi if self.flip else 0
-        if self.axis == 'Z':
-            axis_mtx = Matrix.Rotation(flip_angle, 3, (1,0,0))
-        elif self.axis == 'Y':
-            axis_mtx = Matrix.Rotation((pi/2.0) + flip_angle, 3, (1,0,0))
+        if self.axis == "Z":
+            axis_mtx = Matrix.Rotation(flip_angle, 3, (1, 0, 0))
+        elif self.axis == "Y":
+            axis_mtx = Matrix.Rotation((pi / 2.0) + flip_angle, 3, (1, 0, 0))
         else:
-            axis_mtx = Matrix.Rotation((-pi/2.0) + flip_angle, 3, (0,1,0))
+            axis_mtx = Matrix.Rotation((-pi / 2.0) + flip_angle, 3, (0, 1, 0))
 
-        for umesh in self.umeshes:
+        for umesh in umeshes:
             get_face_select = utils.face_select_get_func(umesh)
             aspect = utils.get_aspect_ratio(umesh) if self.use_correct_aspect else 1.0
             umesh.update_tag = False
             if self.is_edit_mode:
-                islands = AdvIslands.calc_extended_or_visible_with_mark_seam(umesh, extended=extended)
+                islands = Islands.calc_extended_or_visible(umesh, extended=extended)
             else:
-                islands = AdvIslands.calc_with_hidden_with_mark_seam(umesh)
+                islands = Islands.calc_with_hidden(umesh)
 
             if islands:
                 uv = islands.umesh.uv
@@ -3804,20 +4001,30 @@ class UNIV_OT_Gravity_VIEW2D(Operator):
                     max_size = max(avg_normal, key=lambda v: abs(v))
 
                     if avg_normal.z == max_size:
-                        angle = self.calc_world_orient_angle(uv, mtx, calc_loops, x, y, False, avg_normal.z < 0, aspect)
+                        angle = self.calc_world_orient_angle(
+                            uv, mtx, calc_loops, x, y, False, avg_normal.z < 0, aspect
+                        )
                     elif avg_normal.y == max_size:
-                        angle = self.calc_world_orient_angle(uv, mtx, calc_loops, x, z, avg_normal.y > 0, False, aspect)
+                        angle = self.calc_world_orient_angle(
+                            uv, mtx, calc_loops, x, z, avg_normal.y > 0, False, aspect
+                        )
                     else:  # avg_normal.x == max_size:
-                        angle = self.calc_world_orient_angle(uv, mtx, calc_loops, y, z, avg_normal.x < 0, False, aspect)
+                        angle = self.calc_world_orient_angle(
+                            uv, mtx, calc_loops, y, z, avg_normal.x < 0, False, aspect
+                        )
 
-                    angle = (angle + self.additional_angle)
+                    angle = angle + self.additional_angle
                     if angle:
-                        umesh.update_tag |= island.rotate(angle, pivot=island.bbox.center, aspect=aspect)
+                        umesh.update_tag |= island.rotate(
+                            angle, pivot=island.bbox.center, aspect=aspect
+                        )
             else:
                 self.skip_count += 1
 
     @staticmethod
-    def calc_world_orient_angle(uv, mtx, loops, x: int, y: int, flip_x: bool, flip_y: bool, aspect: float):
+    def calc_world_orient_angle(
+        uv, mtx, loops, x: int, y: int, flip_x: bool, flip_y: bool, aspect: float
+    ):
         vec_aspect = Vector((aspect, 1.0))
         eps = pi - 1e-8
         n_edges = 0
@@ -3850,164 +4057,177 @@ class UNIV_OT_Gravity_VIEW2D(Operator):
                     avg_angle = sum_angle / (n_edges - 1)
                     if abs(avg_angle - angle) > eps:
                         if angle > 0:
-                            sum_angle += (angle - pi * 2)
+                            sum_angle += angle - pi * 2
                         else:
-                            sum_angle += (angle + pi * 2)
+                            sum_angle += angle + pi * 2
                     else:
                         sum_angle += angle
                 else:
                     sum_angle += angle
 
-        return sum_angle / n_edges
+        return utils.safe_divide(sum_angle, n_edges)
 
 
 class UNIV_OT_Gravity_VIEW3D(UNIV_OT_Gravity_VIEW2D):
-    bl_idname = 'mesh.univ_gravity'
+    bl_idname = "mesh.univ_gravity"
 
 
 class UNIV_OT_Pack(Operator):
-    bl_idname = 'uv.univ_pack'
-    bl_label = 'Pack'
-    bl_options = {'REGISTER', 'UNDO'}
-    bl_description = f"Pack selected islands\n\n" \
-        f"Has [P] keymap, but it conflicts with the 'Pin' operator"
+    bl_idname = "uv.univ_pack"
+    bl_label = "Pack"
+    bl_options = {"REGISTER", "UNDO"}
+    bl_description = (
+        f"Pack selected islands"
+    )
 
     # def invoke(self, context, event):
     #     return self.execute(context)
 
     @classmethod
     def poll(cls, context):
-        return context.mode == 'EDIT_MESH'
+        return context.mode == "EDIT_MESH"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.pack_op_type = '0'
+        self.pack_op_type = "0"
 
     def execute(self, context):
-        if univ_settings().use_uvpm:
-            if hasattr(context.scene, 'uvpm4_props') or hasattr(context.scene, 'uvpm3_props'):
+        if "NOT_BL_EXT" and univ_settings().use_uvpm:
+            if hasattr(context.scene, "uvpm4_props") or hasattr(context.scene, "uvpm3_props"):
                 return self.pack_uvpm()
             else:
                 univ_settings().use_uvpm = False
-                self.report({'WARNING'}, 'UVPackmaster not found')
-                return {'CANCELLED'}
+                self.report({"WARNING"}, "UVPackmaster not found")
+                return {"CANCELLED"}
         else:
             return self.pack_native()
 
+    if "NOT_BL_EXT":
 
-    def pack_uvpm(self):
-        # TODO: Add Info about unselected and hidden faces
-        # TODO: Use UniV orient (instead Pre-Rotation) and remove AXIS_ALIGNED method
-        # TODO: Use UniV normalize
-        # TODO: Add for Exact Overlap Mode threshold
-        # TODO: Add scale checker for packed meshes
+        def pack_uvpm(self):
+            # TODO: Add Info about unselected and hidden faces
+            # TODO: Use UniV orient (instead Pre-Rotation) and remove AXIS_ALIGNED method
+            # TODO: Use UniV normalize
+            # TODO: Add for Exact Overlap Mode threshold
+            # TODO: Add scale checker for packed meshes
 
-        settings = univ_settings()
-        uvpm_addon_prefs = None
+            settings = univ_settings()
+            uvpm_addon_prefs = None
 
-        if hasattr(bpy.context.scene, 'uvpm4_props'):
-            uvpm_settings = bpy.context.scene.uvpm4_props
-            uvpm_package = 'bl_ext.user_default.uvpackmaster4'
-        else:
-            uvpm_settings = bpy.context.scene.uvpm3_props
-            uvpm_package = 'bl_ext.user_default.uvpackmaster3'
+            if hasattr(bpy.context.scene, "uvpm4_props"):
+                uvpm_settings = bpy.context.scene.uvpm4_props
+                uvpm_package = "bl_ext.user_default.uvpackmaster4"
+            else:
+                uvpm_settings = bpy.context.scene.uvpm3_props
+                uvpm_package = "bl_ext.user_default.uvpackmaster3"
 
-        try:
-            uvpm_addon_prefs = bpy.context.preferences.addons[uvpm_package].preferences
-        except:  # noqa
-            import traceback
-            traceback.print_exc()
-            from ..preferences import debug
-            if debug():
-                self.report({'ERROR'}, 'Not found UVPackMaster addon preferences')
+            try:
+                uvpm_addon_prefs = bpy.context.preferences.addons[uvpm_package].preferences
+            except:  # noqa
+                import traceback
 
+                traceback.print_exc()
+                from ..preferences import debug
 
-        if uvpm_addon_prefs:
-            if getattr(uvpm_addon_prefs, 'dont_transform_pinned_uvs', False):
-                uvpm_addon_prefs.dont_transform_pinned_uvs = False
+                if debug():
+                    self.report({"ERROR"}, "Not found UVPackMaster addon preferences")
 
+            if uvpm_addon_prefs:
+                if getattr(uvpm_addon_prefs, "dont_transform_pinned_uvs", False):
+                    uvpm_addon_prefs.dont_transform_pinned_uvs = False
 
-        if hasattr(uvpm_settings, 'default_main_props'):
-            uvpm_settings = uvpm_settings.default_main_props
+            if hasattr(uvpm_settings, "default_main_props"):
+                uvpm_settings = uvpm_settings.default_main_props
 
-        if hasattr(uvpm_settings, 'scale_mode'):
-            uvpm_settings.scale_mode = '0' if settings.scale else '1'
-        else:
-            uvpm_settings.fixed_scale = not settings.scale
+            if hasattr(uvpm_settings, "scale_mode"):
+                uvpm_settings.scale_mode = "0" if settings.scale else "1"
+            else:
+                uvpm_settings.fixed_scale = not settings.scale
 
-        uvpm_settings.pixel_margin_enable = True
-        uvpm_settings.pixel_margin_tex_size = min(int(settings.size_x), int(settings.size_y))
-        uvpm_settings.pixel_margin = settings.padding
+            uvpm_settings.pixel_margin_enable = True
+            uvpm_settings.pixel_margin_tex_size = min(int(settings.size_x), int(settings.size_y))
+            uvpm_settings.pixel_margin = settings.padding
 
-        uvpm_settings.heuristic_enable = True
-        total_selected = sum(umesh.total_face_sel for umesh in UMeshes.calc(verify_uv=False))
-        if total_selected > 50_000:
-            time_in_sec = 8
-        elif total_selected > 10_000:
-            time_in_sec = 4
-        else:
-            time_in_sec = 2
-        uvpm_settings.heuristic_max_wait_time = time_in_sec
-        uvpm_settings.heuristic_search_time = time_in_sec * 4
+            uvpm_settings.heuristic_enable = True
+            total_selected = sum(
+                umesh.total_face_sel for umesh in UMeshes.calc_with_no_uv(verify_uv=False)
+            )
+            if total_selected > 50_000:
+                time_in_sec = 8
+            elif total_selected > 10_000:
+                time_in_sec = 4
+            else:
+                time_in_sec = 2
+            uvpm_settings.heuristic_max_wait_time = time_in_sec
+            uvpm_settings.heuristic_search_time = time_in_sec * 4
 
-        size = utils.get_active_image_size()
-        if size:
-            uvpm_settings.tex_ratio = size[0] != size[1]
-        else:
-            uvpm_settings.tex_ratio = False
+            size = utils.get_active_image_size()
+            if not size:
+                size = (128, 128)
 
-        if uvpm_settings.precision == 500:
-            uvpm_settings.precision = 800
+            if hasattr(uvpm_settings, "non_square_packing"):  # for UVPM4 version
+                uvpm_settings.non_square_packing = size[0] != size[1]
+            else:
+                uvpm_settings.tex_ratio = size[0] != size[1]
 
+            if uvpm_settings.precision == 500:
+                uvpm_settings.precision = 800
 
-        if hasattr(bpy.context.scene, 'uvpm4_props'):
-            pack = bpy.ops.uvpackmaster4.pack  # noqa
-        else:
-            pack = bpy.ops.uvpackmaster3.pack  # noqa
-        return pack('INVOKE_REGION_WIN', mode_id="pack.single_tile", pack_op_type=self.pack_op_type)
+            if hasattr(bpy.context.scene, "uvpm4_props"):
+                pack = bpy.ops.uvpackmaster4.pack  # noqa
+            else:
+                pack = bpy.ops.uvpackmaster3.pack  # noqa
+            return pack(
+                "INVOKE_REGION_WIN", mode_id="pack.single_tile", pack_op_type=self.pack_op_type
+            )
 
     def pack_native(self):
-        umeshes = UMeshes.calc(verify_uv=False)
+        umeshes = UMeshes.calc_with_no_uv(verify_uv=False)
         umeshes.fix_context()
 
         settings = univ_settings()
         args = {
-            'udim_source': settings.udim_source,
-            'rotate': settings.rotate,
-            'margin': settings.padding / 2 / min(int(settings.size_x), int(settings.size_y))}
+            "udim_source": settings.udim_source,
+            "rotate": settings.rotate,
+            "margin": settings.padding / 2 / min(int(settings.size_x), int(settings.size_y)),
+        }
         if bpy.app.version >= (3, 5, 0):
-            args['margin_method'] = 'FRACTION'
+            args["margin_method"] = "FRACTION"
         is_360v = bpy.app.version >= (3, 6, 0)
         if is_360v:
-            args['scale'] = settings.scale
-            args['rotate_method'] = settings.rotate_method
-            args['pin'] = settings.pin
-            args['merge_overlap'] = settings.merge_overlap
-            args['pin_method'] = settings.pin_method
-            args['shape_method'] = settings.shape_method
-
+            args["scale"] = settings.scale
+            args["rotate_method"] = settings.rotate_method
+            args["pin"] = settings.pin
+            args["merge_overlap"] = settings.merge_overlap
+            args["pin_method"] = settings.pin_method
+            args["shape_method"] = settings.shape_method
 
         import platform
-        if is_360v and settings.shape_method != 'AABB' and platform.system() == 'Windows':
+
+        if is_360v and settings.shape_method != "AABB" and platform.system() == "Windows":
             bpy.app.timers.register(self.press_enter_key)
-            return bpy.ops.uv.pack_islands('INVOKE_DEFAULT', **args)  # noqa
+            return bpy.ops.uv.pack_islands("INVOKE_DEFAULT", **args)  # noqa
         else:
-            return bpy.ops.uv.pack_islands('EXEC_DEFAULT', **args)  # noqa
+            return bpy.ops.uv.pack_islands("EXEC_DEFAULT", **args)  # noqa
 
     @staticmethod
     def press_enter_key():
         import ctypes
+
         VK_RETURN = 0x0D  # Enter  # noqa
         KEYDOWN = 0x0000  # Press  # noqa
         KEYUP = 0x0002  # Release  # noqa
         ctypes.windll.user32.keybd_event(VK_RETURN, 0, KEYDOWN, 0)  # noqa
         ctypes.windll.user32.keybd_event(VK_RETURN, 0, KEYUP, 0)  # noqa
 
+
 class UNIV_OT_PackOther(UNIV_OT_Pack):
-    bl_idname = 'uv.univ_pack_other'
-    bl_label = 'Others'
-    bl_description = "Pack selected islands into empty space, taking unselected islands into account"
+    bl_idname = "uv.univ_pack_other"
+    bl_label = "Others"
+    bl_description = (
+        "Pack selected islands into empty space, taking unselected islands into account"
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.pack_op_type = '1'
+        self.pack_op_type = "1"

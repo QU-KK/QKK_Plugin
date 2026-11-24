@@ -1,9 +1,6 @@
-# SPDX-FileCopyrightText: 2024 Oxicid
+# SPDX-FileCopyrightText: 2026 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-if 'bpy' in locals():
-    from .. import reload
-    reload.reload(globals())
 
 import bpy
 
@@ -24,14 +21,14 @@ class TransferObj:
 
     def _had_checker_modifier(self):
         for m in self.umesh.obj.modifiers:
-            if m.name.startswith('UniV Checker'):
+            if m.name.startswith("UniV Checker"):
                 self.had_checker_modifier = True
                 break
 
     def remove_added_checker(self):
         if not self.had_checker_modifier:
             for m in reversed(self.umesh.obj.modifiers):
-                if m.name.startswith('UniV Checker'):
+                if m.name.startswith("UniV Checker"):
                     self.umesh.obj.modifiers.remove(m)
                     break
 
@@ -40,12 +37,12 @@ class TransferObj:
             self.umesh.obj.data.uv_layers.remove(self.umesh.obj.data.uv_layers[0])
 
     def set_bound_display_type(self):
-        if self.umesh.obj.display_type != 'BOUNDS':
-            self.umesh.obj.display_type = 'BOUNDS'
+        if self.umesh.obj.display_type != "BOUNDS":
+            self.umesh.obj.display_type = "BOUNDS"
 
     def set_textured_display_type(self):
-        if self.umesh.obj.display_type != 'TEXTURED':
-            self.umesh.obj.display_type = 'TEXTURED'
+        if self.umesh.obj.display_type != "TEXTURED":
+            self.umesh.obj.display_type = "TEXTURED"
 
     def restore_display_type(self):
         if self.umesh.obj.display_type != self.first_display_type:
@@ -69,17 +66,19 @@ class TransferObj:
                 pass
 
     def add_mod(self, source_obj: UMesh, loop_mapping):
-        mod = self.umesh.obj.modifiers.new(name='UniV DataTransfer', type='DATA_TRANSFER')
+        mod = self.umesh.obj.modifiers.new(
+            name="UniV DataTransfer", type="DATA_TRANSFER"
+        )
         mod.object = source_obj.obj
         mod.use_loop_data = True
-        mod.data_types_loops = {'UV'}
+        mod.data_types_loops = {"UV"}
         mod.loop_mapping = loop_mapping
         self.transfer_mod = mod
         self.umesh.obj.update_tag()
 
     def remove_mod(self):
         for m in reversed(self.umesh.obj.modifiers):
-            if m.name.startswith('UniV DataTransfer'):
+            if m.name.startswith("UniV DataTransfer"):
                 self.umesh.obj.modifiers.remove(m)
         self.transfer_mod = None
 
@@ -104,18 +103,21 @@ class TransferObj:
 
 
 class UNIV_OT_Transfer(bpy.types.Operator):
-    bl_idname = 'mesh.univ_transfer'
-    bl_label = 'Transfer'
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_idname = "mesh.univ_transfer"
+    bl_label = "Transfer"
+    bl_options = {"REGISTER", "UNDO"}
 
     # noinspection PyTypeHints
-    mapping_type: bpy.props.EnumProperty(name='Mapping Type', default='POLYINTERP_NEAREST',
-                                         items=(
-                                             #  Data Transfer: source mesh data is not ready - dependency cycle?
-                                             # ('NEAREST_NORMAL', 'Nearest Normal', ''),  # TODO: Check new in versions
-                                             ('POLYINTERP_NEAREST', 'Nearest', ''),
-                                             ('POLYINTERP_LNORPROJ', 'Project', ''))
-                                         )
+    mapping_type: bpy.props.EnumProperty(
+        name="Mapping Type",
+        default="POLYINTERP_NEAREST",
+        items=(
+            #  Data Transfer: source mesh data is not ready - dependency cycle?
+            # ('NEAREST_NORMAL', 'Nearest Normal', ''),  # TODO: Check new in versions
+            ("POLYINTERP_NEAREST", "Nearest", ""),
+            ("POLYINTERP_LNORPROJ", "Project", ""),
+        ),
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -128,100 +130,121 @@ class UNIV_OT_Transfer(bpy.types.Operator):
         self._cancel: bool = False
 
     def invoke(self, context, event):
-        self.umeshes = UMeshes.calc(verify_uv=False)
+        self.umeshes = UMeshes.calc_with_no_uv(verify_uv=False)
         self.umeshes.active_to_first()
         self.active_obj = context.active_object
 
         if not self.preprocessing():
             self.umeshes.free()
-            return {'CANCELLED'}
+            return {"CANCELLED"}
 
         for u in self.umeshes:
             if not u.obj.data.uv_layers:
                 u.obj.data.uv_layers.new(do_init=False)
 
         # Temporary apply checker texture.
-        if not self.source_obj.had_checker_modifier or not all(t.had_checker_modifier for t in self.transfer_objs):
+        if not self.source_obj.had_checker_modifier or not all(
+            t.had_checker_modifier for t in self.transfer_objs
+        ):
             from .. import preferences
 
             checker.UNIV_OT_Checker.update_views()
             prev_toggle = preferences.prefs().checker_toggle
-            preferences.prefs().checker_toggle = 'TOGGLE'
+            preferences.prefs().checker_toggle = "TOGGLE"
             bpy.ops.mesh.univ_checker()  # noqa
             preferences.prefs().checker_toggle = prev_toggle
 
-        context.area.header_text_set('UniV: 1 - Nearest. 2 - Project. I - Invert. Esc - cancel.')
+        context.area.header_text_set(
+            "UniV: 1 - Nearest. 2 - Project. I - Invert. Esc - cancel."
+        )
         wm = context.window_manager
         wm.modal_handler_add(self)
-        return {'RUNNING_MODAL'}
+        return {"RUNNING_MODAL"}
 
     def modal(self, context, event):
         try:
             return self.modal_ex(context, event)
         except Exception as e:  # noqa
             import traceback
+
             traceback.print_exc()
-            self.report({'ERROR'}, str(e))
+            self.report({"ERROR"}, str(e))
             self.exit()
-            return {'FINISHED'}
+            return {"FINISHED"}
 
     def modal_ex(self, context, event):
-        if event.type not in {'ESC', 'I', 'ONE', 'TWO', 'LEFTMOUSE', 'RIGHTMOUSE', 'ENTER', 'WHEELUPMOUSE', 'WHEELDOWNMOUSE', 'MIDDLEMOUSE'}:
-            return {'RUNNING_MODAL'}
+        if event.type not in {
+            "ESC",
+            "I",
+            "ONE",
+            "TWO",
+            "LEFTMOUSE",
+            "RIGHTMOUSE",
+            "ENTER",
+            "WHEELUPMOUSE",
+            "WHEELDOWNMOUSE",
+            "MIDDLEMOUSE",
+        }:
+            return {"RUNNING_MODAL"}
 
-        if event.value == 'PRESS':
+        if event.value == "PRESS":
             match event.type:
-                case 'I':
+                case "I":
                     if self.invertible:
-                        self.source_obj, self.transfer_objs = self.transfer_objs[0], [self.source_obj]
+                        self.source_obj, self.transfer_objs = self.transfer_objs[0], [
+                            self.source_obj
+                        ]
                         self.sourcing()
                         self.transferring()
                     else:
-                        self.report({'WARNING'}, f'Unable to invert transfer operation, '
-                                                 f'{"no UV-Map" if len(self.umeshes) == 2 else "more than 2 objects selected"}')
+                        self.report(
+                            {"WARNING"},
+                            f"Unable to invert transfer operation, "
+                            f'{"no UV-Map" if len(self.umeshes) == 2 else "more than 2 objects selected"}',
+                        )
                 # case 'ONE':
                 #     self.mapping_type = 'NEAREST_NORMAL'
                 #     for t in self.transfer_objs:
                 #         if t.transfer_mod.loop_mapping != self.mapping_type:
                 #             t.transfer_mod.loop_mapping = self.mapping_type
-                case 'ONE':
-                    self.mapping_type = 'POLYINTERP_NEAREST'
+                case "ONE":
+                    self.mapping_type = "POLYINTERP_NEAREST"
                     for t in self.transfer_objs:
                         if t.transfer_mod.loop_mapping != self.mapping_type:
                             t.transfer_mod.loop_mapping = self.mapping_type
-                case 'TWO':
-                    self.mapping_type = 'POLYINTERP_LNORPROJ'
+                case "TWO":
+                    self.mapping_type = "POLYINTERP_LNORPROJ"
                     for t in self.transfer_objs:
                         if t.transfer_mod.loop_mapping != self.mapping_type:
                             t.transfer_mod.loop_mapping = self.mapping_type
         match event.type:
-            case 'ESC' | 'RIGHTMOUSE':
+            case "ESC" | "RIGHTMOUSE":
                 self._cancel = True
                 return self.exit()
-            case 'LEFTMOUSE' | 'ENTER':
+            case "LEFTMOUSE" | "ENTER":
                 self.apply_transfer_modifier()
                 return self.exit()
-            case 'WHEELUPMOUSE' | 'WHEELDOWNMOUSE' | 'MIDDLEMOUSE':
-                if event.type == 'MIDDLEMOUSE':
-                    return {'PASS_THROUGH'}
+            case "WHEELUPMOUSE" | "WHEELDOWNMOUSE" | "MIDDLEMOUSE":
+                if event.type == "MIDDLEMOUSE":
+                    return {"PASS_THROUGH"}
                 elif not any((event.alt, event.ctrl, event.shift)):
-                    return {'PASS_THROUGH'}
+                    return {"PASS_THROUGH"}
 
         context.area.tag_redraw()
-        return {'RUNNING_MODAL'}
+        return {"RUNNING_MODAL"}
 
     def preprocessing(self):
         if not self.umeshes:
-            self.report({'WARNING'}, 'Objects not found')
+            self.report({"WARNING"}, "Objects not found")
             return False
         elif len(self.umeshes) == 1:
-            self.report({'WARNING'}, 'More than 1 mesh object must be selected')
+            self.report({"WARNING"}, "More than 1 mesh object must be selected")
             return False
         elif len(self.umeshes) == 2:
             if not self.umeshes[0].obj.data.uv_layers:
                 self.invertible = False
                 if not self.umeshes[1].obj.data.uv_layers:
-                    self.report({'WARNING'}, 'UV layers not found')
+                    self.report({"WARNING"}, "UV layers not found")
                     return False
                 self.umeshes.umeshes.reverse()
             self.source_obj = TransferObj(self.umeshes[0])
@@ -229,7 +252,7 @@ class UNIV_OT_Transfer(bpy.types.Operator):
         else:
             self.invertible = False
             if not self.umeshes[0].obj.data.uv_layers:
-                self.report({'WARNING'}, 'Active object has not uv')
+                self.report({"WARNING"}, "Active object has not uv")
                 return False
 
             self.source_obj = TransferObj(self.umeshes[0])
@@ -251,7 +274,7 @@ class UNIV_OT_Transfer(bpy.types.Operator):
             t.set_textured_display_type()
 
     def apply_transfer_modifier(self):
-        is_edit_mode = bpy.context.mode == 'EDIT_MESH'
+        is_edit_mode = bpy.context.mode == "EDIT_MESH"
         if is_edit_mode:
             bpy.ops.object.editmode_toggle()
 
@@ -274,7 +297,7 @@ class UNIV_OT_Transfer(bpy.types.Operator):
         self.source_obj.remove_added_checker()
         self.umeshes.free()
 
-        for area in utils.get_areas_by_type('VIEW_3D'):
+        for area in utils.get_areas_by_type("VIEW_3D"):
             area.tag_redraw()
 
-        return {'FINISHED'}
+        return {"FINISHED"}

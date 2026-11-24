@@ -1,9 +1,6 @@
-# SPDX-FileCopyrightText: 2024 Oxicid
+# SPDX-FileCopyrightText: 2026 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-if 'bpy' in locals():
-    from .. import reload
-    reload.reload(globals())
 
 import bpy
 from mathutils import Vector
@@ -12,7 +9,10 @@ from bmesh.types import BMLoop
 from .. import utypes
 from .. import utils
 from ..preferences import prefs, univ_settings
-from ..utils import linked_crn_uv_by_island_index_unordered_included
+
+from importlib.util import find_spec
+
+found_univ_pro = find_spec(f"{__package__.rpartition('.')[0]}.univ_pro") is not None
 
 
 class UnwrapData:
@@ -28,93 +28,94 @@ UNIQUE_NUMBER_FOR_MULTIPLY = -1
 
 
 # noinspection PyTypeHints
-class UNIV_OT_Unwrap(bpy.types.Operator):
+class UNIV_OT_Unwrap(utypes.RayCastAndPick):
     bl_idname = "uv.univ_unwrap"
     bl_label = "Unwrap"
-    bl_description = ("Inplace unwrap the mesh of object being edited\n\n "
-                      "Organic Mode has incorrect behavior with pinned and flipped islands")
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_description = (
+        "Inplace unwrap the mesh of object being edited\n\n "
+        "Organic Mode has incorrect behavior with pinned and flipped islands"
+    )
+    bl_options = {"REGISTER", "UNDO"}
 
-    unwrap: bpy.props.EnumProperty(name='Unwrap', default='ANGLE_BASED',
-                                   items=(('ANGLE_BASED', 'Hard Surface', ''),
-                                          ('CONFORMAL', 'Conformal', ''),
-                                          ('MINIMUM_STRETCH', 'Organic', '')))
-    blend_factor: bpy.props.FloatProperty(name='Blend Factor', default=1, soft_min=0, soft_max=1)
-    fill_holes: bpy.props.BoolProperty(name='Fill Holes', default=True)
-    mark_seam_inner_island: bpy.props.BoolProperty(name='Mark Seam Self Borders', default=True,
-                                    description='Marking seams where there are split edges within the same island.')
-    use_correct_aspect: bpy.props.BoolProperty(name='Correct Aspect', default=True)
-    constraints_weight: bpy.props.FloatProperty(name='Constraints Weight', default=0, min=0, max=0, options={'HIDDEN'})
+    unwrap: bpy.props.EnumProperty(
+        name="Unwrap",
+        default="ANGLE_BASED",
+        items=(
+            ("ANGLE_BASED", "Hard Surface", ""),
+            ("CONFORMAL", "Conformal", ""),
+            ("MINIMUM_STRETCH", "Organic", ""),
+        ),
+    )
+    blend_factor: bpy.props.FloatProperty(name="Blend Factor", default=1, soft_min=0, soft_max=1)
+    fill_holes: bpy.props.BoolProperty(name="Fill Holes", default=True)
+    mark_seams_only_with_other_islands: bpy.props.BoolProperty(
+        name="Mark Seam Only With Other Islands", default=False
+    )
+    use_correct_aspect: bpy.props.BoolProperty(name="Correct Aspect", default=True)
+    constr_weight: bpy.props.FloatProperty(
+        name="Constraints Weight", default=0, min=0, max=0, options={"HIDDEN"}
+    )
 
     @classmethod
     def poll(cls, context):
-        return context.mode == 'EDIT_MESH'
+        return context.mode == "EDIT_MESH"
 
     def draw(self, context):
-        self.layout.prop(univ_settings(), 'use_texel')
-        self.layout.prop(self, 'fill_holes')
+        self.layout.prop(univ_settings(), "use_texel")
+        self.layout.prop(self, "fill_holes")
 
-        self.layout.prop(self, 'use_correct_aspect')
-        self.layout.prop(self, 'mark_seam_inner_island')
-        self.layout.prop(self, 'blend_factor', slider=True)
-        self.layout.row(align=True).prop(self, 'unwrap', expand=True)
+        self.layout.prop(self, "use_correct_aspect")
+        self.layout.prop(self, "mark_seams_only_with_other_islands")
+        self.layout.prop(self, "blend_factor", slider=True)
+        self.layout.row(align=True).prop(self, "unwrap", expand=True)
 
     def invoke(self, context, event):
-        if self.bl_idname.startswith('UV'):
-            if event.value == 'PRESS':
-                self.max_distance = utils.get_max_distance_from_px(prefs().max_pick_distance, context.region.view2d)
-                self.mouse_pos = utils.get_mouse_pos(context, event)
-            else:
-                self.max_distance = None
+        self.store_mouse_pose_on_uv_and_max_distance_if_allowed(event)
         return self.execute(context)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.mouse_pos = Vector((0, 0))
-        self.max_distance: float | None = None
-        self.umeshes: utypes.UMeshes | None = None
-
     def execute(self, context):
-        self.umeshes = utypes.UMeshes()
-        self.umeshes.fix_context()
-        if self.unwrap == 'MINIMUM_STRETCH' and bpy.app.version < (4, 3, 0):
-            self.unwrap = 'ANGLE_BASED'
-            self.report({'WARNING'}, 'Organic Mode is not supported in Blender versions below 4.3')
+        umeshes = utypes.UMeshes()
+        umeshes.fix_context()
+        if self.unwrap == "MINIMUM_STRETCH" and bpy.app.version < (4, 3, 0):
+            self.unwrap = "ANGLE_BASED"
+            self.report({"WARNING"}, "Organic Mode is not supported in Blender versions below 4.3")
 
-        selected_umeshes, unselected_umeshes = self.umeshes.filtered_by_selected_and_visible_uv_by_context()
-        self.umeshes = selected_umeshes if selected_umeshes else unselected_umeshes
-        if not self.umeshes:
-            return self.umeshes.update()
+        selected_umeshes, unselected_umeshes = (
+            umeshes.filtered_by_selected_and_visible_uv_by_context()
+        )
+        umeshes = selected_umeshes if selected_umeshes else unselected_umeshes
+        if not umeshes:
+            return umeshes.update()
 
-        if not selected_umeshes and self.max_distance is not None and context.area.ui_type == 'UV':
-            return self.pick_unwrap()
+        if (
+            not selected_umeshes
+            and self.mouse_position is not None
+            and context.area.ui_type == "UV"
+        ):
+            return self.pick_unwrap(umeshes)
         else:
             if not selected_umeshes:
-                self.report({'WARNING'}, 'Need selected geometry')
-                return {'CANCELLED'}
+                self.report({"WARNING"}, "Need selected geometry")
+                return {"CANCELLED"}
 
-            if self.umeshes.sync:
-                if self.umeshes.elem_mode == 'FACE':
-                    self.unwrap_sync_faces()
+            if umeshes.sync:
+                if umeshes.elem_mode == "FACE":
+                    self.unwrap_sync_faces(umeshes)
                 else:
-                    self.unwrap_sync_verts_or_edges()
+                    self.unwrap_sync_verts_or_edges(umeshes)
             else:
-                self.unwrap_non_sync()
+                self.unwrap_non_sync(umeshes)
+            return umeshes.update()
 
-            # for umesh in self.umeshes:
-            #     if not umesh.sync_valid:
-            #         umesh.bm.select_flush_mode()
-            return self.umeshes.update()
-
-    def pick_unwrap(self, **unwrap_kwargs):
-        hit = utypes.IslandHit(self.mouse_pos, self.max_distance)
-        for umesh in self.umeshes:
-            for isl in utypes.AdvIslands.calc_visible_with_mark_seam(umesh):
+    def pick_unwrap(self, umeshes, **unwrap_kwargs):
+        hit = utypes.IslandHit(self.mouse_position, self.max_distance)
+        for umesh in umeshes:
+            for isl in utypes.Islands.calc_visible(umesh):
                 hit.find_nearest_island(isl)
 
         if not hit or (self.max_distance < hit.min_dist):
-            self.report({'WARNING'}, 'Island not found within a given radius')
-            return {'CANCELLED'}
+            self.report({"WARNING"}, "Island not found within a given radius")
+            return {"CANCELLED"}
 
         isl = hit.island
         unique_number_for_multiply = hash(isl[0])  # multiplayer
@@ -123,19 +124,16 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
         isl.umesh.value = isl.umesh.check_uniform_scale(report=self.report)
         isl.umesh.aspect = utils.get_aspect_ratio() if self.use_correct_aspect else 1.0
 
-
         # Constraints system
         ##################################################
-        from importlib.util import find_spec
-        found_univ_pro = find_spec(f"{__package__.rpartition('.')[0]}.univ_pro") is not None
 
-        if found_univ_pro and self.bl_label == 'Unwrap' and self.constraints_weight and isl.has_constraints_edge():
-            self.pick_unwrap_by_constraints(isl)
-            return {'FINISHED'}
+        if self.use_constraints(isl):
+            self.pick_unwrap_by_constraints_ex(isl)
+            return {"FINISHED"}
         ##################################################
 
         if utils.USE_GENERIC_UV_SYNC and isl.umesh.sync:
-            if isl.umesh.elem_mode in ('VERT', 'EDGE'):
+            if isl.umesh.elem_mode in ("VERT", "EDGE"):
                 isl.umesh.sync_from_mesh_if_needed()
 
         isl.select = True
@@ -146,23 +144,19 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
             for f in accidentally_selected_faces:
                 f.hide = True
 
-        isl.apply_aspect_ratio()
-        save_t = isl.save_transform(flip_if_needed=True)
-        save_t.save_coords(self.blend_factor)
+        with isl.temp_aspect():
+            save_t = isl.save_transform(flip_if_needed=True)
+            save_t.save_coords(self.blend_factor)
 
-        if self.mark_seam_inner_island:
-            isl.mark_seam(additional=True)
-        else:
-            islands = utypes.AdvIslands([isl], isl.umesh)
-            islands.indexing()
-            isl.mark_seam_by_index(additional=True)
+            if self.mark_seams_only_with_other_islands:
+                isl.mark_seams_only_with_other_islands()
+            else:
+                isl.mark_seam(additional=True)
 
-        bpy.ops.uv.unwrap(method=self.unwrap, fill_holes=self.fill_holes, correct_aspect=False, **unwrap_kwargs)
+            bpy.ops.uv.unwrap(method=self.unwrap, fill_holes=self.fill_holes, correct_aspect=False, **unwrap_kwargs)  # fmt: skip
 
-        save_t.inplace(flip_if_needed=False)
-        save_t.apply_saved_coords(self.blend_factor, flip_if_needed=True)
-
-        isl.reset_aspect_ratio()
+            save_t.inplace(flip_if_needed=False)
+            save_t.apply_saved_coords(self.blend_factor, flip_if_needed=True)
 
         if save_t.rotate:
             utils.set_global_texel(save_t.island)
@@ -170,7 +164,7 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
         isl.select = False
 
         if utils.USE_GENERIC_UV_SYNC and isl.umesh.sync:
-            if isl.umesh.elem_mode in ('VERT', 'EDGE'):
+            if isl.umesh.elem_mode in ("VERT", "EDGE"):
                 isl.umesh.bm.uv_select_sync_valid = False
 
         for f in accidentally_selected_faces:
@@ -178,9 +172,17 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
             f.select = False
 
         isl.umesh.update()
-        return {'FINISHED'}
+        return {"FINISHED"}
 
-    def pick_unwrap_by_constraints(self, isl):
+    def use_constraints(self, isl, *, selected=False):
+        return (
+            found_univ_pro
+            and self.bl_label == "Unwrap"
+            and self.constr_weight
+            and isl.has_constraints_edge(selected=selected)
+        )
+
+    def pick_unwrap_by_constraints_ex(self, isl):
         raise
 
     @staticmethod
@@ -189,7 +191,7 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
         In the old sync system, extra faces could be accidentally selected.
         They are pinned to prevent any effect, and the elements are saved so their flags can be restored.
         """
-        if isl.umesh.elem_mode in ('VERT', 'EDGE'):
+        if isl.umesh.elem_mode in ("VERT", "EDGE"):
             if isl.umesh.total_face_sel != len(isl):  # Fast check if island single.
                 faces_set = set(isl)
                 return [f for f in isl.umesh.bm.faces if f.select and f not in faces_set]
@@ -216,10 +218,7 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                 return True
         return False
 
-
-    def unwrap_sync_verts_or_edges(self, **unwrap_kwargs):
-        from importlib.util import find_spec
-        found_univ_pro = find_spec(f"{__package__.rpartition('.')[0]}.univ_pro") is not None
+    def unwrap_sync_verts_or_edges(self, umeshes, **unwrap_kwargs):
 
         has_native_unwrapped = 0
         failed_total = 0
@@ -231,29 +230,29 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
         all_pins = []
 
         # TODO: Add update tag
-        for umesh in self.umeshes:
+        for umesh in umeshes:
             has_full_selected_uv_faces = umesh.has_full_selected_uv_faces()
             if has_full_selected_uv_faces:
                 full_selected_meshes.append(umesh)
 
             uv = umesh.uv
-            sync = umesh.sync
 
             crn_select_get = utils.vert_select_get_func(umesh)
             face_select_get = utils.face_select_get_func(umesh)
+            get_linked_it = utils.get_linked_crn_iter_fn(umesh)
+            get_linked_it_inc = utils.get_linked_crn_iter_fn(umesh, included=True)
 
             umesh.value = umesh.check_uniform_scale(report=self.report)
             umesh.aspect = utils.get_aspect_ratio() if self.use_correct_aspect else 1.0
             # TODO: Full select unselected verts (with pins) of island for avoid incorrect behavior for relax OT
-            islands = utypes.AdvIslands.calc_extended_any_elem_with_mark_seam(umesh)
-            islands.indexing()
+            islands = utypes.Islands.calc_extended_any_elem(umesh)
 
             for isl in islands:
                 unique_number_for_multiply += hash(isl[0])  # multiplayer
-                if self.mark_seam_inner_island:
-                    isl.mark_seam(additional=True)
+                if self.mark_seams_only_with_other_islands:
+                    isl.mark_seams_only_with_other_islands()
                 else:
-                    isl.mark_seam_by_index(additional=True)
+                    isl.mark_seam(additional=True)
 
             unpin_uvs = set()
             faces_to_select = set()
@@ -261,12 +260,13 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
 
             # Extend selection
 
-            for idx, isl in enumerate(islands):
-                isl.tag = False  # tagged = native unwrap
-
+            for isl in islands:
                 # Constraints system
                 ##################################################
-                if found_univ_pro and self.bl_label == 'Unwrap' and self.constraints_weight and isl.has_constraints_edge(selected=True):
+                if self.use_constraints(isl, selected=True):
+                    isl.tag = False  # Non-native unwrap.
+                    to_lock_constraints_islands.append(isl)
+
                     if utils.USE_GENERIC_UV_SYNC and umesh.sync_valid:
                         for f in isl:
                             if face_select_get(f):
@@ -277,8 +277,7 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                                     if crn[uv].pin_uv:
                                         crn.tag = False
                                     else:
-                                        linked = utils.linked_crn_to_vert_pair_with_seam(crn, uv, sync)
-                                        crn.tag = any(crn_select_get(cc) for cc in linked)
+                                        crn.tag = any(crn_select_get(cc) for cc in get_linked_it(crn))
                     elif has_full_selected_uv_faces:
                         for crn in isl.corners_iter():
                             crn.tag = not crn[uv].pin_uv
@@ -295,25 +294,27 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                                     else:
                                         crn.tag = not self.is_accidentally_selected_crn(crn)
 
-                    is_static = self.is_static_island(isl)
-
+                    is_static = self.is_static_island_for_non_native_unwrap_by_tag(isl)
+                    isl.apply_aspect_ratio()
                     with utils.uv_parametrizer.unwrap_time_report(self.report):
-                        failed_total += utils.uv_parametrizer.unwrap_isl_by_tag(isl,
-                                                                            unwrap_along=self.unwrap_along,  # noqa
-                                                                            use_abf=self.unwrap == 'ANGLE_BASED',
-                                                                            topology_from_uvs=self.mark_seam_inner_island,
-                                                                            blend_factor=self.blend_factor,
-                                                                            fill_holes=self.fill_holes,
-                                                                            constraints_factor=self.constraints_weight * 100)
-                    to_lock_constraints_islands.append(isl)
+                        failed_total += utils.uv_parametrizer.unwrap_isl_by_tag(
+                            isl,
+                            unwrap_along=getattr(self, "unwrap_along", "UV"),
+                            use_abf=self.unwrap == "ANGLE_BASED",
+                            topology_from_uvs=not self.mark_seams_only_with_other_islands,
+                            blend_factor=self.blend_factor,
+                            fill_holes=self.fill_holes,
+                            constraints_factor=self.constr_weight * 100,
+                            constr_correction_weight=getattr(self, "constr_correction_weight", 1.0),
+                            constr_d_edge_factor=getattr(self, "constr_d_edge_factor", 0.05),
+                        )
                     isl.reset_aspect_ratio()
-
                     if not is_static:
                         utils.set_global_texel(isl)
 
                 ##################################################
                 else:
-                    isl.tag = True
+                    isl.tag = True  # Native Unwrap.
                     if has_full_selected_uv_faces:
                         continue
 
@@ -325,7 +326,7 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                             verts_to_lock.update(crn for crn in f.loops if not crn.uv_select_vert)
                     else:
                         # TODO: Add this to 'has_constraints_edge'
-                        if umesh.elem_mode == 'VERT':
+                        if umesh.elem_mode == "VERT":
                             for f in isl:
                                 # Skip full selected and full unselected
                                 if f.select:
@@ -336,7 +337,7 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
 
                                     if self.is_accidentally_selected_crn(crn):
                                         # If only the unlinked face is selected, then pin it.
-                                        for l_crn in linked_crn_uv_by_island_index_unordered_included(crn, uv, idx):
+                                        for l_crn in get_linked_it_inc(crn):
                                             crn_uv = l_crn[uv]
                                             if not crn_uv.pin_uv:
                                                 crn_uv.pin_uv = True
@@ -347,6 +348,7 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                                         faces_to_select.add(f)
                                         verts_to_lock.update(v for v in f.verts if not v.select)
                         else:
+
                             def has_special_selected_edges(linked_crn):
                                 # When there is a linked selected face, do not pin this crn.
                                 if linked_crn.face.select:
@@ -367,7 +369,9 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                                         return True
                                 return False
 
-                            linked_to_vert = utils.linked_crn_to_vert_without_coord_check_with_seam_for_sync_unwrap
+                            linked_to_vert = (
+                                utils.linked_crn_to_vert_without_coord_check_with_seam_for_sync_unwrap
+                            )
 
                             for f in isl:
                                 # Skip full selected and full unselected
@@ -377,19 +381,29 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                                 static_corners = set()
                                 unwrap_corners = set()
                                 for crn in f.loops:
-                                    if not crn.vert.select or crn in unwrap_corners or crn in static_corners:
+                                    if (
+                                        not crn.vert.select
+                                        or crn in unwrap_corners
+                                        or crn in static_corners
+                                    ):
                                         continue
 
                                     # Single vertex select case
                                     if not crn.edge.select:
                                         if not crn.link_loop_prev.edge.select:
-                                            if any(has_special_selected_edges(l_crn) for l_crn in linked_to_vert(crn)):
+                                            if any(
+                                                has_special_selected_edges(l_crn)
+                                                for l_crn in linked_to_vert(crn)
+                                            ):
                                                 unwrap_corners.add(crn)
                                             else:
                                                 static_corners.add(crn)
 
                                     else:  # Edge select case
-                                        if any(has_special_selected_edges(l_crn) for l_crn in [crn]+linked_to_vert(crn)):
+                                        if any(
+                                            has_special_selected_edges(l_crn)
+                                            for l_crn in [crn] + linked_to_vert(crn)
+                                        ):
                                             unwrap_corners.add(crn)
                                         else:
                                             static_corners.add(crn)
@@ -400,7 +414,10 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                                         if next_crn in static_corners:
                                             continue
 
-                                        if any(has_special_selected_edges(l_crn) for l_crn in [next_crn]+linked_to_vert(next_crn)):
+                                        if any(
+                                            has_special_selected_edges(l_crn)
+                                            for l_crn in [next_crn] + linked_to_vert(next_crn)
+                                        ):
                                             unwrap_corners.add(crn)
                                         else:
                                             static_corners.add(crn)
@@ -415,7 +432,6 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                                     faces_to_select.add(f)
                                     verts_to_lock.update(v for v in f.verts if not v.select)
 
-
             to_restore_selection = set()
             if not has_full_selected_uv_faces:
                 if umesh.sync_valid:
@@ -428,10 +444,14 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                             crn_uv.pin_uv = True
                             unpin_uvs.add(crn_uv)
                 else:
-                    if self.umeshes.elem_mode == 'EDGE':
-                        to_restore_selection = {e for f in faces_to_select for e in f.edges if e.select}
+                    if umeshes.elem_mode == "EDGE":
+                        to_restore_selection = {
+                            e for f in faces_to_select for e in f.edges if e.select
+                        }
                     else:
-                        to_restore_selection = {v for f in faces_to_select for v in f.verts if v.select}
+                        to_restore_selection = {
+                            v for f in faces_to_select for v in f.verts if v.select
+                        }
 
                     for f in faces_to_select:
                         f.select = True
@@ -444,13 +464,26 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                                 crn_uv.pin_uv = True
                                 unpin_uvs.add(crn_uv)
 
-
-
             save_transform_islands = []
             for isl in islands:
                 if isl.tag:
-                    has_non_static_face = any(not all(c[uv].pin_uv for c in f.loops) for f in isl if f.select)
-                    if has_non_static_face:
+                    has_non_static_elem = False
+                    if umesh.elem_mode == "VERT":
+                        get_vert_select = utils.vert_select_get_func(umesh)
+                        for crn in isl.corners_iter():
+                            if get_vert_select(crn):
+                                if not crn[uv].pin_uv:
+                                    has_non_static_elem = True
+                                    break
+                    else:
+                        get_edge_select = utils.edge_select_get_func(umesh)
+                        for crn in isl.corners_iter():
+                            if get_edge_select(crn):
+                                if not crn[uv].pin_uv or not crn.link_loop_next[uv].pin_uv:
+                                    has_non_static_elem = True
+                                    break
+
+                    if has_non_static_elem:
                         isl.apply_aspect_ratio()
                         save_t = isl.save_transform(flip_if_needed=True)
                         save_t.save_coords(self.blend_factor)
@@ -460,7 +493,9 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                 has_native_unwrapped = True
 
             all_pins.append(unpin_uvs)
-            unwrap_data.append(UnwrapData(umesh, faces_to_select, save_transform_islands, to_restore_selection))
+            unwrap_data.append(
+                UnwrapData(umesh, faces_to_select, save_transform_islands, to_restore_selection)
+            )
 
         self.multiply_relax(unique_number_for_multiply, unwrap_kwargs)
 
@@ -468,7 +503,12 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
             for to_lock_isl in to_lock_constraints_islands:
                 to_lock_isl.sequence = self.lock_island_from_unwrap_and_get_pins_sync(to_lock_isl)
 
-            bpy.ops.uv.unwrap(method=self.unwrap, fill_holes=self.fill_holes, correct_aspect=False, **unwrap_kwargs)
+            bpy.ops.uv.unwrap(
+                method=self.unwrap,
+                fill_holes=self.fill_holes,
+                correct_aspect=False,
+                **unwrap_kwargs,
+            )
 
             for to_lock_isl in to_lock_constraints_islands:
                 for crn_uv in to_lock_isl.sequence:
@@ -497,24 +537,24 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                         for v_or_e in to_restore:
                             v_or_e.select = True
 
-        for isl in to_lock_constraints_islands:
-            isl.reset_aspect_ratio()
-
         for pins in all_pins:
             for pin in pins:
                 pin.pin_uv = False
 
         if failed_total:
-            self.report({'WARNING'}, f"It is not possible to unwrap {failed_total!r} islands. "
-                                     f"Try again by setting at least one pin or by partially selecting the island.")
-
+            self.report(
+                {"WARNING"},
+                f"It is not possible to unwrap {failed_total!r} islands. "
+                f"Try again by setting at least one pin or by partially selecting the island.",
+            )
 
     @staticmethod
-    def unwrap_sync_faces_extend_select_and_set_pins(isl):
+    def extend_select_and_set_pins_for_sync_face_mode(isl):
         to_select = []
         unpinned = []
         uv = isl.umesh.uv
-        sync = isl.umesh.sync
+        get_linked_it = utils.get_linked_crn_iter_fn(isl.umesh)
+
         for f in isl:
             if f.select:
                 continue
@@ -522,8 +562,7 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
             has_selected_linked_faces = False
             temp_static = []
             for crn in f.loops:
-                linked = utils.linked_crn_to_vert_pair_with_seam(crn, uv, sync)
-                if any(cc.face.select for cc in linked):
+                if any(cc.face.select for cc in get_linked_it(crn)):
                     has_selected_linked_faces = True
                 else:
                     temp_static.append(crn)
@@ -551,36 +590,32 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                 f.select = True
         isl.sequence = (unpinned, to_select)
 
-
-    def unwrap_sync_faces(self, **unwrap_kwargs):
-        assert self.umeshes.elem_mode == 'FACE'
-        from importlib.util import find_spec
-        found_univ_pro = find_spec(f"{__package__.rpartition('.')[0]}.univ_pro") is not None
+    def unwrap_sync_faces(self, umeshes, **unwrap_kwargs):
+        assert umeshes.elem_mode == "FACE"
 
         failed_total = 0
         unique_number_for_multiply = 0
         hidden_constraints_islands: list[utypes.AdvIsland] = []
         all_transform_islands = []
-        for umesh in reversed(self.umeshes):
+        for umesh in reversed(umeshes):
             umesh.value = umesh.check_uniform_scale(report=self.report)
             umesh.aspect = utils.get_aspect_ratio() if self.use_correct_aspect else 1.0
-            islands_extended = utypes.AdvIslands.calc_extended_with_mark_seam(umesh)
-            islands_extended.indexing()
+            get_linked_it = utils.get_linked_crn_iter_fn(umesh)
 
+            islands_extended = utypes.Islands.calc_extended(umesh)
             for isl in islands_extended:
                 unique_number_for_multiply += hash(isl[0])  # multiplayer
 
-                if self.mark_seam_inner_island:
-                    isl.mark_seam(additional=True)
+                if self.mark_seams_only_with_other_islands:
+                    isl.mark_seams_only_with_other_islands()
                 else:
-                    isl.mark_seam_by_index(additional=True)
+                    isl.mark_seam(additional=True)
                 isl.apply_aspect_ratio()
 
                 # Constraints system
                 ##################################################
-                if found_univ_pro and self.bl_label == 'Unwrap' and self.constraints_weight and isl.has_constraints_edge():
+                if self.use_constraints(isl):
                     uv = isl.umesh.uv
-                    sync = isl.umesh.sync
                     for f in isl:
                         if f.select:
                             for crn in f.loops:
@@ -590,31 +625,32 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                                 if crn[uv].pin_uv:
                                     crn.tag = False
                                 else:
-                                    linked = utils.linked_crn_to_vert_pair_with_seam(crn, uv, sync)
-                                    crn.tag =  any(cc.face.select for cc in linked)
+                                    crn.tag = any(cc.face.select for cc in get_linked_it(crn))
 
-                    is_static = self.is_static_island(isl)
+                    is_static = self.is_static_island_for_non_native_unwrap_by_tag(isl)
                     with utils.uv_parametrizer.unwrap_time_report(self.report):
-                        failed_total += utils.uv_parametrizer.unwrap_isl_by_tag(isl,
-                                                                            unwrap_along=self.unwrap_along,  # noqa
-                                                                            use_abf=self.unwrap == 'ANGLE_BASED',
-                                                                            topology_from_uvs=self.mark_seam_inner_island,
-                                                                            blend_factor=self.blend_factor,
-                                                                            fill_holes=self.fill_holes,
-                                                                            constraints_factor=self.constraints_weight * 100)
+                        failed_total += utils.uv_parametrizer.unwrap_isl_by_tag(
+                            isl,
+                            unwrap_along=getattr(self, "unwrap_along", "UV"),
+                            use_abf=self.unwrap == "ANGLE_BASED",
+                            topology_from_uvs=not self.mark_seams_only_with_other_islands,
+                            blend_factor=self.blend_factor,
+                            fill_holes=self.fill_holes,
+                            constraints_factor=self.constr_weight * 100,
+                            constr_correction_weight=getattr(self, "constr_correction_weight", 1.0),
+                            constr_d_edge_factor=getattr(self, "constr_d_edge_factor", 0.05),
+                        )
                     hidden_constraints_islands.append(isl)
                     isl.reset_aspect_ratio()
 
                     if not is_static:
                         utils.set_global_texel(isl)
-                    continue
-                ##################################################
+                else:
+                    self.extend_select_and_set_pins_for_sync_face_mode(isl)
 
-                self.unwrap_sync_faces_extend_select_and_set_pins(isl)
-
-                save_t = isl.save_transform(flip_if_needed=True)
-                save_t.save_coords(self.blend_factor)
-                all_transform_islands.append(save_t)
+                    save_t = isl.save_transform(flip_if_needed=True)
+                    save_t.save_coords(self.blend_factor)
+                    all_transform_islands.append(save_t)
 
         self.multiply_relax(unique_number_for_multiply, unwrap_kwargs)
 
@@ -622,7 +658,12 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
             for hidden_isl in hidden_constraints_islands:
                 hidden_isl.sequence = hidden_isl.set_pins(with_pinned=True)
 
-            bpy.ops.uv.unwrap(method=self.unwrap, fill_holes=self.fill_holes, correct_aspect=False, **unwrap_kwargs)
+            bpy.ops.uv.unwrap(
+                method=self.unwrap,
+                fill_holes=self.fill_holes,
+                correct_aspect=False,
+                **unwrap_kwargs,
+            )
 
             for hidden_isl in hidden_constraints_islands:
                 for crn_uv in hidden_isl.sequence:
@@ -647,48 +688,44 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                 utils.set_global_texel(isl.island)
 
         if failed_total:
-            self.report({'WARNING'}, f"It is not possible to unwrap {failed_total!r} islands. "
-                                     f"Try again by setting at least one pin or by partially selecting the island.")
+            self.report(
+                {"WARNING"},
+                f"It is not possible to unwrap {failed_total!r} islands. "
+                f"Try again by setting at least one pin or by partially selecting the island.",
+            )
 
-
-    def unwrap_non_sync(self, **unwrap_kwargs):
+    def unwrap_non_sync(self, umeshes, **unwrap_kwargs):
         save_transform_islands = []
         hidden_constraints_islands = []
         failed_total = 0
         unique_number_for_multiply = 0
         tool_settings = bpy.context.scene.tool_settings
-        is_sticky_mode_disabled = tool_settings.uv_sticky_select_mode == 'DISABLED'
+        is_sticky_mode_disabled = tool_settings.uv_sticky_select_mode == "DISABLED"
 
-        from importlib.util import find_spec
-        found_univ_pro = find_spec(f"{__package__.rpartition('.')[0]}.univ_pro") is not None
-
-        for umesh in reversed(self.umeshes):
+        for umesh in reversed(umeshes):
             uv = umesh.uv
+            get_linked_it = utils.get_linked_crn_iter_fn(umesh)
             face_select_get = utils.face_select_get_func(umesh)
             crn_select_get = utils.vert_select_get_func(umesh)
 
             umesh.value = umesh.check_uniform_scale(report=self.report)
             umesh.aspect = utils.get_aspect_ratio() if self.use_correct_aspect else 1.0
-            islands = utypes.AdvIslands.calc_extended_any_elem_with_mark_seam(umesh)
-
-            if not self.mark_seam_inner_island or umesh.bm.edges.layers.int.get('univ_constraints'):
-                islands.indexing()
+            islands = utypes.Islands.calc_extended_any_elem(umesh)
 
             for isl in islands:
                 unique_number_for_multiply += hash(isl[0])  # multiplayer
 
-                if self.mark_seam_inner_island:
-                    isl.mark_seam(additional=True)
+                if self.mark_seams_only_with_other_islands:
+                    isl.mark_seams_only_with_other_islands()
                 else:
-                    isl.mark_seam_by_index(additional=True)
+                    isl.mark_seam(additional=True)
 
                 isl.apply_aspect_ratio()
 
                 # Constraints system
                 ##################################################
-                if found_univ_pro and self.bl_label == 'Unwrap' and self.constraints_weight and isl.has_constraints_edge():
+                if self.use_constraints(isl):
                     uv = isl.umesh.uv
-                    sync = isl.umesh.sync
                     for f in isl:
                         if face_select_get(f):
                             for crn in f.loops:
@@ -698,25 +735,27 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                                 if crn[uv].pin_uv:
                                     crn.tag = False
                                 else:
-                                    linked = utils.linked_crn_to_vert_pair_with_seam(crn, uv, sync)
-                                    crn.tag = any(crn_select_get(cc) for cc in linked)
+                                    crn.tag = any(crn_select_get(cc) for cc in get_linked_it(crn))
 
-                    is_static = self.is_static_island(isl)
+                    is_static = self.is_static_island_for_non_native_unwrap_by_tag(isl)
 
                     with utils.uv_parametrizer.unwrap_time_report(self.report):
-                        failed_total += utils.uv_parametrizer.unwrap_isl_by_tag(isl,
-                                                                            unwrap_along=self.unwrap_along,  # noqa
-                                                                            use_abf=self.unwrap == 'ANGLE_BASED',
-                                                                            topology_from_uvs=self.mark_seam_inner_island,
-                                                                            blend_factor=self.blend_factor,
-                                                                            fill_holes=self.fill_holes,
-                                                                            constraints_factor=self.constraints_weight * 100)
+                        failed_total += utils.uv_parametrizer.unwrap_isl_by_tag(
+                            isl,
+                            unwrap_along=getattr(self, "unwrap_along", "UV"),
+                            use_abf=self.unwrap == "ANGLE_BASED",
+                            topology_from_uvs=not self.mark_seams_only_with_other_islands,
+                            blend_factor=self.blend_factor,
+                            fill_holes=self.fill_holes,
+                            constraints_factor=self.constr_weight * 100,
+                            constr_correction_weight=getattr(self, "constr_correction_weight", 1.0),
+                            constr_d_edge_factor=getattr(self, "constr_d_edge_factor", 0.05),
+                        )
                     hidden_constraints_islands.append(isl)
                     isl.reset_aspect_ratio()
 
                     if not is_static:
                         utils.set_global_texel(isl)
-                    continue
                 ##################################################
                 else:
                     # Extend selection for avoid unlink unwrap
@@ -733,8 +772,7 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                             for crn in f.loops:
                                 if crn_select_get(crn):
                                     continue
-                                linked = utils.linked_crn_to_vert_pair_with_seam(crn, umesh.uv, umesh.sync)
-                                if any(crn_select_get(c) for c in linked):
+                                if any(crn_select_get(c) for c in get_linked_it(crn)):
                                     has_selected = True
                                     corners_to_select.add(crn)
                                 else:
@@ -766,7 +804,12 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
             for hidden_isl in hidden_constraints_islands:
                 hidden_isl.hide_for_unwrap()
 
-            bpy.ops.uv.unwrap(method=self.unwrap, fill_holes=self.fill_holes, correct_aspect=False, **unwrap_kwargs)
+            bpy.ops.uv.unwrap(
+                method=self.unwrap,
+                fill_holes=self.fill_holes,
+                correct_aspect=False,
+                **unwrap_kwargs,
+            )
 
             for hidden_isl in hidden_constraints_islands:
                 hidden_isl.unhide_for_unwrap()
@@ -794,8 +837,11 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                             unsel_crn[uv].select = False
 
         if failed_total:
-            self.report({'WARNING'}, f"It is not possible to unwrap {failed_total!r} islands. "
-                                     f"Try again by setting at least one pin or by partially selecting the island.")
+            self.report(
+                {"WARNING"},
+                f"It is not possible to unwrap {failed_total!r} islands. "
+                f"Try again by setting at least one pin or by partially selecting the island.",
+            )
 
     @staticmethod
     def multiply_relax(unique_number_for_multiply, unwrap_kwargs):
@@ -804,13 +850,13 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
             global UNIQUE_NUMBER_FOR_MULTIPLY
             if UNIQUE_NUMBER_FOR_MULTIPLY == unique_number_for_multiply:
                 MULTIPLAYER += 1
-                unwrap_kwargs['iterations'] *= MULTIPLAYER
+                unwrap_kwargs["iterations"] *= MULTIPLAYER
             else:
                 MULTIPLAYER = 1
                 UNIQUE_NUMBER_FOR_MULTIPLY = unique_number_for_multiply
 
     @staticmethod
-    def is_static_island(isl):
+    def is_static_island_for_non_native_unwrap_by_tag(isl):
         uv = isl.umesh.uv
         it = isl.corners_iter()
         for crn_a in it:
@@ -845,102 +891,112 @@ class UNIV_OT_Unwrap(bpy.types.Operator):
                         pinned.append(crn_uv)
         return pinned
 
+
 # noinspection PyTypeHints
-class UNIV_OT_Unwrap_VIEW3D(bpy.types.Operator, utypes.RayCast):
+class UNIV_OT_Unwrap_VIEW3D(utypes.RayCastAndPick):
     bl_idname = "mesh.univ_unwrap"
     bl_label = "Unwrap"
-    bl_description = ("Inplace unwrap the mesh of object being edited\n\n "
-                      "Organic Mode has incorrect behavior with pinned and flipped islands")
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_description = (
+        "Inplace unwrap the mesh of object being edited\n\n "
+        "Organic Mode has incorrect behavior with pinned and flipped islands"
+    )
+    bl_options = {"REGISTER", "UNDO"}
 
-    unwrap: bpy.props.EnumProperty(name='Unwrap',
-                                   default='ANGLE_BASED',
-                                   items=(('ANGLE_BASED', 'Hard Surface', ''),
-                                          ('CONFORMAL', 'Conformal', ''),
-                                          ('MINIMUM_STRETCH', 'Organic', '')))
+    unwrap: bpy.props.EnumProperty(
+        name="Unwrap",
+        default="ANGLE_BASED",
+        items=(
+            ("ANGLE_BASED", "Hard Surface", ""),
+            ("CONFORMAL", "Conformal", ""),
+            ("MINIMUM_STRETCH", "Organic", ""),
+        ),
+    )
 
-    fill_holes: bpy.props.BoolProperty(name='Fill Holes', default=True)
-    use_correct_aspect: bpy.props.BoolProperty(name='Correct Aspect', default=True)
+    fill_holes: bpy.props.BoolProperty(name="Fill Holes", default=True)
+    use_correct_aspect: bpy.props.BoolProperty(name="Correct Aspect", default=True)
 
     @classmethod
     def poll(cls, context):
-        return context.mode == 'EDIT_MESH'
+        return context.mode == "EDIT_MESH"
 
     def draw(self, context):
-        self.layout.prop(univ_settings(), 'use_texel')
-        self.layout.prop(self, 'fill_holes')
-        self.layout.prop(self, 'use_correct_aspect')
-        self.layout.row(align=True).prop(self, 'unwrap', expand=True)
+        self.layout.prop(univ_settings(), "use_texel")
+        self.layout.prop(self, "fill_holes")
+        self.layout.prop(self, "use_correct_aspect")
+        self.layout.row(align=True).prop(self, "unwrap", expand=True)
 
     def invoke(self, context, event):
-        if event.value == 'PRESS':
+        if event.value == "PRESS":
             self.init_data_for_ray_cast(event)
             return self.execute(context)
         return self.execute(context)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        utypes.RayCast.__init__(self)
-        self.umeshes: utypes.UMeshes | None = None
         self.texel = -1
         self.texture_size = -1
 
     def execute(self, context):
-        self.umeshes = utypes.UMeshes.calc(self.report, verify_uv=False)
+        umeshes = utypes.UMeshes.calc_with_no_uv(self.report, verify_uv=False)
 
-        self.umeshes.fix_context()
-        self.umeshes.set_sync()
-        self.umeshes.sync_invalidate()
+        umeshes.fix_context()
+        umeshes.set_sync()
+        umeshes.sync_invalidate()
 
         from ..preferences import univ_settings
+
         self.texel = univ_settings().texel_density
         self.texture_size = (int(univ_settings().size_x) + int(univ_settings().size_y)) / 2
 
         if self.use_correct_aspect:
-            self.umeshes.calc_aspect_ratio(from_mesh=True)
+            umeshes.calc_aspect_ratio(from_mesh=True)
 
-        if self.unwrap == 'MINIMUM_STRETCH' and bpy.app.version < (4, 3, 0):
-            self.unwrap = 'ANGLE_BASED'
-            self.report({'WARNING'}, 'Organic Mode is not supported in Blender versions below 4.3')
+        if self.unwrap == "MINIMUM_STRETCH" and bpy.app.version < (4, 3, 0):
+            self.unwrap = "ANGLE_BASED"
+            self.report({"WARNING"}, "Organic Mode is not supported in Blender versions below 4.3")
 
-        selected_umeshes, unselected_umeshes = self.umeshes.filtered_by_selected_and_visible_uv_by_context()
-        self.umeshes = selected_umeshes if selected_umeshes else unselected_umeshes
-        if not self.umeshes:
-            return self.umeshes.update()
+        selected_umeshes, unselected_umeshes = (
+            umeshes.filtered_by_selected_and_visible_uv_by_context()
+        )
+        umeshes = selected_umeshes if selected_umeshes else unselected_umeshes
+        if not umeshes:
+            return umeshes.update()
 
         if not selected_umeshes and self.mouse_pos_from_3d:
-            return self.pick_unwrap()
+            return self.pick_unwrap(umeshes)
         else:
             if not selected_umeshes:
-                self.report({'WARNING'}, 'Need selected geometry')
-                return {'CANCELLED'}
+                self.report({"WARNING"}, "Need selected geometry")
+                return {"CANCELLED"}
 
-            for u in reversed(self.umeshes):
+            for u in reversed(umeshes):
                 if not u.has_uv and not u.total_face_sel:
-                    self.umeshes.umeshes.remove(u)
-            if not self.umeshes:
-                self.report({'WARNING'}, 'Need selected faces for objects without uv')
-                return {'CANCELLED'}
+                    umeshes.umeshes.remove(u)
+            if not umeshes:
+                self.report({"WARNING"}, "Need selected faces for objects without uv")
+                return {"CANCELLED"}
 
-            self.unwrap_selected()
-            self.umeshes.update()
-            return {'FINISHED'}
+            self.unwrap_selected(umeshes)
+            umeshes.update()
+            return {"FINISHED"}
 
-    def pick_unwrap(self, **unwrap_kwargs):
-        hit = self.ray_cast(prefs().max_pick_distance)
+    def pick_unwrap(self, umeshes, **unwrap_kwargs):
+        hit = self.ray_cast(umeshes, prefs().max_pick_distance)
         if not hit:
-            return {'CANCELLED'}
+            return {"CANCELLED"}
 
         umesh = hit.umesh
         umesh.value = umesh.check_uniform_scale(report=self.report)
         if umesh.has_uv:
             umesh.verify_uv()
-            mesh_island = hit.calc_mesh_island_with_seam()
+            mesh_island, _ = hit.calc_visible_mesh_island()
             adv_subislands = mesh_island.calc_adv_subislands_with_mark_seam()
             for isl in adv_subislands:
                 isl.select = True
 
-            accidentally_selected_faces = UNIV_OT_Unwrap.prepare_accidentally_selected_islands_for_pick(mesh_island)
+            accidentally_selected_faces = (
+                UNIV_OT_Unwrap.prepare_accidentally_selected_islands_for_pick(mesh_island)
+            )
             for f in accidentally_selected_faces:
                 f.hide = True
 
@@ -951,7 +1007,12 @@ class UNIV_OT_Unwrap_VIEW3D(bpy.types.Operator, utypes.RayCast):
                 isl.apply_aspect_ratio()
             save_t = utypes.SaveTransform(adv_subislands, flip_if_needed=True)
 
-            bpy.ops.uv.unwrap(method=self.unwrap, fill_holes=self.fill_holes, correct_aspect=False, **unwrap_kwargs)
+            bpy.ops.uv.unwrap(
+                method=self.unwrap,
+                fill_holes=self.fill_holes,
+                correct_aspect=False,
+                **unwrap_kwargs,
+            )
 
             adv_island = mesh_island.to_adv_island()
             save_t.island = adv_island
@@ -968,11 +1029,16 @@ class UNIV_OT_Unwrap_VIEW3D(bpy.types.Operator, utypes.RayCast):
                 f.hide = False
                 f.select = False
         else:
-            mesh_island = hit.calc_mesh_island_with_seam()
+            mesh_island, _ = hit.calc_visible_mesh_island()
             adv_island = mesh_island.to_adv_island()
             adv_island.select = True
 
-            bpy.ops.uv.unwrap(method=self.unwrap, fill_holes=self.fill_holes, correct_aspect=False, **unwrap_kwargs)
+            bpy.ops.uv.unwrap(
+                method=self.unwrap,
+                fill_holes=self.fill_holes,
+                correct_aspect=False,
+                **unwrap_kwargs,
+            )
 
             umesh.verify_uv()
             unique_number_for_multiply = hash(mesh_island[0])  # multiplayer
@@ -992,25 +1058,25 @@ class UNIV_OT_Unwrap_VIEW3D(bpy.types.Operator, utypes.RayCast):
             adv_island.select = False
 
         umesh.update()
-        return {'FINISHED'}
+        return {"FINISHED"}
 
-    def unwrap_selected(self, **unwrap_kwargs):
+    def unwrap_selected(self, umeshes, **unwrap_kwargs):
         meshes_with_uvs = []
         meshes_without_uvs = []
         unique_number = 0
-        for umesh in self.umeshes:
+        for umesh in umeshes:
             umesh.value = umesh.check_uniform_scale(report=self.report)
             if not umesh.has_uv:
                 meshes_without_uvs.append(umesh)
             else:
                 umesh.verify_uv()
                 meshes_with_uvs.append(umesh)
-                if self.umeshes.elem_mode == 'VERT':
+                if umeshes.elem_mode == "VERT":
                     if umesh.total_face_sel:
                         unique_number += self.unwrap_selected_faces_preprocess_vert_edge_mode(umesh)
                     else:
                         unique_number += self.unwrap_selected_verts_preprocess(umesh)
-                elif self.umeshes.elem_mode == 'EDGE':
+                elif umeshes.elem_mode == "EDGE":
                     if umesh.total_face_sel:
                         unique_number += self.unwrap_selected_faces_preprocess_vert_edge_mode(umesh)
                     else:
@@ -1019,7 +1085,9 @@ class UNIV_OT_Unwrap_VIEW3D(bpy.types.Operator, utypes.RayCast):
                     unique_number += self.unwrap_selected_faces_preprocess(umesh)
 
         UNIV_OT_Unwrap.multiply_relax(unique_number % (1 << 62), unwrap_kwargs)
-        bpy.ops.uv.unwrap(method=self.unwrap, fill_holes=self.fill_holes, correct_aspect=False, **unwrap_kwargs)
+        bpy.ops.uv.unwrap(
+            method=self.unwrap, fill_holes=self.fill_holes, correct_aspect=False, **unwrap_kwargs
+        )
 
         for umesh in meshes_with_uvs:
             self.unwrap_selected_faces_postprocess(umesh)
@@ -1027,10 +1095,14 @@ class UNIV_OT_Unwrap_VIEW3D(bpy.types.Operator, utypes.RayCast):
 
         self.unwrap_without_uvs_postprocess(meshes_without_uvs)
 
-    def unwrap_selected_faces_preprocess_vert_edge_mode(self, umesh):
+    @staticmethod
+    def unwrap_selected_faces_preprocess_vert_edge_mode(umesh):
         assert umesh.total_face_sel
-        assert self.umeshes.elem_mode in ('VERT', 'EDGE')
-        mesh_islands = utypes.MeshIslands.calc_visible_with_mark_seam(umesh)
+        assert umesh.elem_mode in ("VERT", "EDGE")
+
+        linked_crn_to_vert_it = utils.get_linked_crn_3d_iter_fn()
+
+        mesh_islands = utypes.MeshIslands.calc_visible(umesh)
         unique_number = 0
         pinned = []
         to_select = []
@@ -1059,13 +1131,13 @@ class UNIV_OT_Unwrap_VIEW3D(bpy.types.Operator, utypes.RayCast):
 
                     if crn.vert.select:
                         # If linked faces are selected, then crn should unwrap as well
-                        if any(crn_.face.select for crn_ in utils.linked_crn_to_vert_with_seam_3d_iter(crn)):
+                        if any(crn_.face.select for crn_ in linked_crn_to_vert_it(crn)):
                             continue
                     crn_uv.pin_uv = True
                     pinned.append(crn_uv)
 
         expected_total_selected_faces = umesh.total_face_sel + len(to_select)
-        if self.umeshes.elem_mode == 'VERT':
+        if umesh.elem_mode == "VERT":
             to_deselect_elements = [v for f in to_select for v in f.verts if not v.select]
         else:
             to_deselect_elements = [e for f in to_select for e in f.edges if not e.select]
@@ -1087,10 +1159,11 @@ class UNIV_OT_Unwrap_VIEW3D(bpy.types.Operator, utypes.RayCast):
         umesh.other = UnwrapData(None, pinned, save_transform_islands, to_deselect_elements)
         return unique_number
 
-    def unwrap_selected_verts_preprocess(self, umesh):
+    @staticmethod
+    def unwrap_selected_verts_preprocess(umesh):
         assert not umesh.total_face_sel
-        assert self.umeshes.elem_mode == 'VERT'
-        mesh_islands = utypes.MeshIslands.calc_visible_with_mark_seam(umesh)
+        assert umesh.elem_mode == "VERT"
+        mesh_islands = utypes.MeshIslands.calc_visible(umesh)
         unique_number = 0
         pinned = []
         to_select = []
@@ -1142,10 +1215,13 @@ class UNIV_OT_Unwrap_VIEW3D(bpy.types.Operator, utypes.RayCast):
         umesh.other = UnwrapData(None, pinned, save_transform_islands, to_deselect_elements)
         return unique_number
 
-    def unwrap_selected_edges_preprocess(self, umesh):
+    @staticmethod
+    def unwrap_selected_edges_preprocess(umesh):
         assert not umesh.total_face_sel
-        assert self.umeshes.elem_mode == 'EDGE'
-        mesh_islands = utypes.MeshIslands.calc_visible_with_mark_seam(umesh)
+        assert umesh.elem_mode == "EDGE"
+        linked_crn_to_vert_it = utils.get_linked_crn_3d_iter_fn()
+
+        mesh_islands = utypes.MeshIslands.calc_visible(umesh)
         unique_number = 0
         pinned = []
         to_select = []
@@ -1186,7 +1262,7 @@ class UNIV_OT_Unwrap_VIEW3D(bpy.types.Operator, utypes.RayCast):
                         continue
 
                     if crn.vert.select:
-                        if any(crn_.edge.select for crn_ in utils.linked_crn_to_vert_with_seam_3d_iter(crn)):
+                        if any(crn_.edge.select for crn_ in linked_crn_to_vert_it(crn)):
                             continue
                         # Over check after linked_crn_to_vert_with_seam_3d_iter,
                         # because it returns nothing for vertices without linked faces (see note).
@@ -1219,7 +1295,8 @@ class UNIV_OT_Unwrap_VIEW3D(bpy.types.Operator, utypes.RayCast):
     @staticmethod
     def unwrap_selected_faces_preprocess(umesh):
         assert umesh.total_face_sel
-        mesh_islands = utypes.MeshIslands.calc_extended_with_mark_seam(umesh)
+        linked_crn_to_vert_it = utils.get_linked_crn_3d_iter_fn()
+        mesh_islands = utypes.MeshIslands.calc_extended(umesh)
         unique_number = 0
         pinned = []
         to_select = []
@@ -1244,7 +1321,7 @@ class UNIV_OT_Unwrap_VIEW3D(bpy.types.Operator, utypes.RayCast):
 
                     if crn.vert.select:
                         # If linked faces are selected, then crn should unwrap as well
-                        if any(crn_.face.select for crn_ in utils.linked_crn_to_vert_with_seam_3d_iter(crn)):
+                        if any(crn_.face.select for crn_ in linked_crn_to_vert_it(crn)):
                             continue
                     crn_uv.pin_uv = True
                     pinned.append(crn_uv)
@@ -1275,7 +1352,7 @@ class UNIV_OT_Unwrap_VIEW3D(bpy.types.Operator, utypes.RayCast):
 
     def unwrap_without_uvs_postprocess(self, umeshes):
         for umesh in umeshes:
-            mesh_islands = utypes.MeshIslands.calc_extended_with_mark_seam(umesh)
+            mesh_islands = utypes.MeshIslands.calc_extended(umesh)
             umesh.verify_uv()
 
             adv_islands = mesh_islands.to_adv_islands()

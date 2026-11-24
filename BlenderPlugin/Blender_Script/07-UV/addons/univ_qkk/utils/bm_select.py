@@ -1,66 +1,84 @@
-# SPDX-FileCopyrightText: 2024 Oxicid
+# SPDX-FileCopyrightText: 2026 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # NOTE: Use functions after sync validation
 # NOTE: To avoid using flush, in order to correct defective face selections, first need deselect and then select
 
-if 'bpy' in locals():
-    from .. import reload
-    reload.reload(globals())
 
-import bpy  # noqa
 import bmesh
 import typing
 
 from .. import utypes
 from bmesh.types import BMFace, BMLoop
 
-USE_GENERIC_UV_SYNC = hasattr(bmesh.types.BMesh, 'uv_select_sync_valid')
+USE_GENERIC_UV_SYNC = hasattr(bmesh.types.BMesh, "uv_select_sync_valid")
 
 if USE_GENERIC_UV_SYNC:
-    def face_select_func(umesh: 'utypes.UMesh') -> typing.Callable[[BMFace], None]:  # noqa
+
+    def face_select_func(umesh: "utypes.UMesh") -> typing.Callable[[BMFace], None]:  # noqa
         if umesh.sync and not umesh.sync_valid:
+
             def select_set(f):
                 f.select = True
+
         else:
+
             def select_set(f):
                 f.select = True
                 f.uv_select = True
                 for crn in f.loops:
                     crn.uv_select_vert = True
                     crn.uv_select_edge = True
+
         return select_set
+
 else:
-    def face_select_func(umesh: 'utypes.UMesh') -> typing.Callable[[BMFace], None]:  # noqa
+
+    def face_select_func(umesh: "utypes.UMesh") -> typing.Callable[[BMFace], None]:  # noqa
         def inner(uv, sync):
             if sync:
+
                 def select_set(f):
                     f.select = True
+
             else:
+
                 def select_set(f):
                     for crn in f.loops:
                         crn_uv = crn[uv]
                         crn_uv.select = True
                         crn_uv.select_edge = True
+
             return select_set
+
         return inner(umesh.uv, umesh.sync)
 
+
 if USE_GENERIC_UV_SYNC:
-    def face_deselect_func(umesh: 'utypes.UMesh') -> typing.Callable[[BMFace], None]:  # noqa
+
+    def face_deselect_func(umesh: "utypes.UMesh") -> typing.Callable[[BMFace], None]:  # noqa
         if umesh.sync:
             if not umesh.sync_valid:
+
                 def select_set(f: BMFace):
                     f.select = False
+
             else:
-                if umesh.elem_mode == 'VERT':
+                if umesh.elem_mode == "VERT":
+
                     def select_set(f: BMFace):
                         f.uv_select = False
                         for crn in f.loops:
                             crn.uv_select_vert = False
                             crn.uv_select_edge = False
-                            crn.vert.select = any(crn_b.uv_select_vert for crn_b in crn.vert.link_loops if not crn_b.face.hide)
+                            crn.vert.select = any(
+                                crn_b.uv_select_vert
+                                for crn_b in crn.vert.link_loops
+                                if not crn_b.face.hide
+                            )
 
-                elif umesh.elem_mode == 'EDGE':
+                elif umesh.elem_mode == "EDGE":
+
                     def select_set(f: BMFace):
                         f.uv_select = False
                         for crn in f.loops:
@@ -69,106 +87,150 @@ if USE_GENERIC_UV_SYNC:
                             pair = crn.link_loop_radial_prev
                             if pair.face.hide or not pair.uv_select_edge:
                                 crn.edge.select = False
+
                 else:
+
                     def select_set(f: BMFace):
                         f.select = False
                         f.uv_select = False
                         for crn in f.loops:
                             crn.uv_select_vert = False
                             crn.uv_select_edge = False
+
         else:
+
             def select_set(f: BMFace):
                 f.uv_select = False
                 for crn in f.loops:
                     crn.uv_select_vert = False
                     crn.uv_select_edge = False
+
         return select_set
+
 else:
-    def face_deselect_func(umesh: 'utypes.UMesh') -> typing.Callable[[BMFace], None]:  # noqa
+
+    def face_deselect_func(umesh: "utypes.UMesh") -> typing.Callable[[BMFace], None]:  # noqa
         def inner(uv, sync):
             if sync:
+
                 def select_set(f):
                     f.select = False
+
             else:
+
                 def select_set(f):
                     for crn in f.loops:
                         crn_uv = crn[uv]
                         crn_uv.select = False
                         crn_uv.select_edge = False
+
             return select_set
+
         return inner(umesh.uv, umesh.sync)
 
+
 if USE_GENERIC_UV_SYNC:
-    def face_select_set_func(umesh: 'utypes.UMesh') -> typing.Callable[[BMFace, bool], None]:  # noqa
+
+    def face_select_set_func(
+        umesh: "utypes.UMesh",
+    ) -> typing.Callable[[BMFace, bool], None]:  # noqa
         if umesh.sync and not umesh.sync_valid:
             select_set = BMFace.select.__set__
         else:
             if umesh.sync:
+
                 def select_set(f, state):
                     f.select = state
                     f.uv_select = state
                     for crn in f.loops:
                         crn.uv_select_vert = state
                         crn.uv_select_edge = state
+
             else:
+
                 def select_set(f, state):
                     f.uv_select = state
                     for crn in f.loops:
                         crn.uv_select_vert = state
                         crn.uv_select_edge = state
+
         return select_set
+
 else:
-    def face_select_set_func(umesh: 'types.UMesh') -> typing.Callable[[BMFace, bool], None]:  # noqa
+
+    def face_select_set_func(umesh: "types.UMesh") -> typing.Callable[[BMFace, bool], None]:  # noqa
         def inner(uv, sync):
             if sync:
                 select_set = BMFace.select.__set__
             else:
+
                 def select_set(f, state):
                     for crn in f.loops:
                         crn_uv = crn[uv]
                         crn_uv.select = state
                         crn_uv.select_edge = state
+
             return select_set
+
         return inner(umesh.uv, umesh.sync)
 
+
 if USE_GENERIC_UV_SYNC:
-    def face_select_get_func(umesh: 'utypes.UMesh') -> typing.Callable[[BMFace], bool]:
+
+    def face_select_get_func(umesh: "utypes.UMesh") -> typing.Callable[[BMFace], bool]:
         if umesh.sync and not umesh.sync_valid:
             select_get = BMFace.select.__get__
         else:
             if umesh.sync:
+
                 def select_get(f):
                     return (not f.hide) and f.uv_select
+
             else:
+
                 def select_get(f):
                     return (not f.hide) and f.select and f.uv_select
+
         return select_get
+
 else:
-    def face_select_get_func(umesh: 'utypes.UMesh') -> typing.Callable[[BMFace], bool]:
+
+    def face_select_get_func(umesh: "utypes.UMesh") -> typing.Callable[[BMFace], bool]:
         def catcher(uv):
             if umesh.sync:
                 select_get = BMFace.select.__get__
             else:
-                if umesh.elem_mode == 'EDGE':
+                if umesh.elem_mode == "EDGE":
+
                     def select_get(f):
                         return f.select and all(crn[uv].select_edge for crn in f.loops)
+
                 else:
+
                     def select_get(f):
                         return f.select and all(crn[uv].select for crn in f.loops)
+
             return select_get
 
         return catcher(umesh.uv)
 
+
 if USE_GENERIC_UV_SYNC:
-    def face_select_linked_func(umesh: 'utypes.UMesh', force=False, clamp_by_seams=False) -> typing.Callable[[BMFace], None]:  # noqa
+
+    def face_select_linked_func(
+        umesh: "utypes.UMesh", force=False, clamp_by_seams=False
+    ) -> typing.Callable[[BMFace], None]:  # noqa
         def inner_catcher(uv, sync_invalid, face_is_invisible):
             if force or clamp_by_seams:
                 raise NotImplementedError()
 
             if sync_invalid:
+
                 def select_set(f: BMFace):
                     f.select = True
+
             else:
+
                 def select_set(f: BMFace):
                     f.select = True  # useless for no-sync
                     f.uv_select = True
@@ -187,20 +249,34 @@ if USE_GENERIC_UV_SYNC:
 
                             pair_crn = crn.link_loop_radial_prev
                             if not pair_crn.uv_select_edge and not face_is_invisible(pair_crn.face):
-                                if crn.link_loop_next[uv].uv == pair_crn[uv].uv and vert_co == pair_crn.link_loop_next[uv].uv:
+                                if (
+                                    crn.link_loop_next[uv].uv == pair_crn[uv].uv
+                                    and vert_co == pair_crn.link_loop_next[uv].uv
+                                ):
                                     pair_crn.uv_select_edge = True
+
             return select_set
-        return inner_catcher(umesh.uv, (umesh.sync and not umesh.sync_valid), face_invisible_get_func(umesh))
+
+        return inner_catcher(
+            umesh.uv, (umesh.sync and not umesh.sync_valid), face_invisible_get_func(umesh)
+        )
+
 else:
-    def face_select_linked_func(umesh: 'utypes.UMesh', force=False, clamp_by_seams=False) -> typing.Callable[[BMFace], None]:  # noqa
+
+    def face_select_linked_func(
+        umesh: "utypes.UMesh", force=False, clamp_by_seams=False
+    ) -> typing.Callable[[BMFace], None]:  # noqa
         def inner(uv, sync):
             if force or clamp_by_seams:
                 raise NotImplementedError()
 
             if sync:
+
                 def select_set(f):  # noqa
                     f.select = True
+
             else:
+
                 def select_set(f):
                     for crn in f.loops:
                         crn_uv = crn[uv]
@@ -222,20 +298,25 @@ else:
                             if pair_crn.face.select:
                                 pair_crn_uv = pair_crn[uv]
                                 if not pair_crn_uv.select_edge:
-                                    if v2_co == pair_crn_uv.uv and vert_co_a == pair_crn.link_loop_next[uv].uv:
+                                    if (
+                                        v2_co == pair_crn_uv.uv
+                                        and vert_co_a == pair_crn.link_loop_next[uv].uv
+                                    ):
                                         pair_crn_uv.select_edge = True
+
             return select_set
 
         return inner(umesh.uv, umesh.sync)
 
-def face_visible_get_func(umesh: 'utypes.UMesh') -> typing.Callable[[BMFace], bool]:
+
+def face_visible_get_func(umesh: "utypes.UMesh") -> typing.Callable[[BMFace], bool]:
     if umesh.sync:
         return lambda f: not f.hide
     else:
         return BMFace.select.__get__
 
 
-def face_invisible_get_func(umesh: 'utypes.UMesh') -> typing.Callable[[BMFace], bool]:
+def face_invisible_get_func(umesh: "utypes.UMesh") -> typing.Callable[[BMFace], bool]:
     if umesh.sync:
         return BMFace.hide.__get__
     else:
@@ -244,13 +325,16 @@ def face_invisible_get_func(umesh: 'utypes.UMesh') -> typing.Callable[[BMFace], 
 
 if USE_GENERIC_UV_SYNC:
     # TODO: Add support clamp by seams (need for edge grow)
-    def edge_select_linked_set_func(umesh: 'utypes.UMesh', force=False,
-                                    clamp_by_seams=False) -> typing.Callable[[BMLoop, bool], None]:
+    def edge_select_linked_set_func(
+        umesh: "utypes.UMesh", force=False, clamp_by_seams=False
+    ) -> typing.Callable[[BMLoop, bool], None]:
         # NOTE: UV_SELECT_FLUSH_MODE_NEEDED and UV_SELECT_SYNC_TO_MESH_NEEDED for deselect
         def inner(uv, sync, sync_invalid, face_is_invisible, is_edge_mode):
             if sync_invalid:
+
                 def select_set(crn, state):
                     crn.edge.select = state
+
             else:
                 if force or clamp_by_seams:
                     raise NotImplementedError()
@@ -298,7 +382,10 @@ if USE_GENERIC_UV_SYNC:
                             if not face_is_invisible(linked_crn.face):
                                 if linked_crn[uv].uv == v1_co:
                                     to_deselect.append(linked_crn)
-                                    if linked_crn.uv_select_edge or linked_crn.link_loop_prev.uv_select_edge:
+                                    if (
+                                        linked_crn.uv_select_edge
+                                        or linked_crn.link_loop_prev.uv_select_edge
+                                    ):
                                         to_deselect.clear()  # Has linked selected edge.
                                         break
 
@@ -309,7 +396,10 @@ if USE_GENERIC_UV_SYNC:
                         if not is_edge_mode and sync:
                             if len(to_deselect) == len(link_loops):
                                 crn.vert.select = False
-                            elif not any(crn.uv_select_vert and not face_is_invisible(crn.face) for crn in link_loops):
+                            elif not any(
+                                crn.uv_select_vert and not face_is_invisible(crn.face)
+                                for crn in link_loops
+                            ):
                                 crn.vert.select = False
 
                         to_deselect.clear()
@@ -320,7 +410,10 @@ if USE_GENERIC_UV_SYNC:
                             if not face_is_invisible(linked_crn.face):
                                 if linked_crn[uv].uv == v2_co:
                                     to_deselect.append(linked_crn)
-                                    if linked_crn.uv_select_edge or linked_crn.link_loop_prev.uv_select_edge:
+                                    if (
+                                        linked_crn.uv_select_edge
+                                        or linked_crn.link_loop_prev.uv_select_edge
+                                    ):
                                         to_deselect.clear()  # Has linked selected edge.
                                         break
 
@@ -331,18 +424,33 @@ if USE_GENERIC_UV_SYNC:
                         if not is_edge_mode and sync:
                             if len(to_deselect) == len(link_loops):
                                 crn.link_loop_next.vert.select = False
-                            elif not any(crn.uv_select_vert and not face_is_invisible(crn.face) for crn in link_loops):
+                            elif not any(
+                                crn.uv_select_vert and not face_is_invisible(crn.face)
+                                for crn in link_loops
+                            ):
                                 crn.link_loop_next.vert.select = False
 
             return select_set
-        return inner(umesh.uv, umesh.sync, (umesh.sync and not umesh.sync_valid), face_invisible_get_func(umesh), umesh.elem_mode == 'EDGE')
+
+        return inner(
+            umesh.uv,
+            umesh.sync,
+            (umesh.sync and not umesh.sync_valid),
+            face_invisible_get_func(umesh),
+            umesh.elem_mode == "EDGE",
+        )
+
 else:
-    def edge_select_linked_set_func(umesh: 'utypes.UMesh', force=False,
-                                    clamp_by_seams=False) -> typing.Callable[[BMLoop, bool], None]:
+
+    def edge_select_linked_set_func(
+        umesh: "utypes.UMesh", force=False, clamp_by_seams=False
+    ) -> typing.Callable[[BMLoop, bool], None]:
         def inner(uv, sync):
             if sync:
+
                 def select_set(crn, state):
                     crn.edge.select = state
+
             else:
                 if force or clamp_by_seams:
                     raise NotImplementedError()
@@ -361,7 +469,10 @@ else:
                         if pair_crn.face.select:
                             pair_crn_uv = pair_crn[uv]
                             if not pair_crn_uv.select_edge:
-                                if v2_co == pair_crn_uv.uv and v1_co == pair_crn.link_loop_next[uv].uv:
+                                if (
+                                    v2_co == pair_crn_uv.uv
+                                    and v1_co == pair_crn.link_loop_next[uv].uv
+                                ):
                                     pair_crn_uv.select_edge = True
 
                         # Select A
@@ -381,7 +492,10 @@ else:
                         if pair_crn.face.select:
                             pair_crn_uv = pair_crn[uv]
                             if pair_crn_uv.select_edge:
-                                if v2_co == pair_crn_uv.uv and v1_co == pair_crn.link_loop_next[uv].uv:
+                                if (
+                                    v2_co == pair_crn_uv.uv
+                                    and v1_co == pair_crn.link_loop_next[uv].uv
+                                ):
                                     pair_crn_uv.select_edge = False
 
                         to_deselect = []
@@ -392,7 +506,10 @@ else:
                                 linked_crn_uv_ = linked_crn_[uv]
                                 if linked_crn_uv_.uv == v1_co:
                                     to_deselect.append(linked_crn_uv_)
-                                    if linked_crn_uv_.select_edge or linked_crn_.link_loop_prev[uv].select_edge:
+                                    if (
+                                        linked_crn_uv_.select_edge
+                                        or linked_crn_.link_loop_prev[uv].select_edge
+                                    ):
                                         has_linked_selected_edge = True
                                         break
                         if not has_linked_selected_edge:
@@ -407,47 +524,236 @@ else:
                                 linked_crn_uv_ = linked_crn_[uv]
                                 if linked_crn_uv_.uv == v2_co:
                                     to_deselect.append(linked_crn_uv_)
-                                    if linked_crn_uv_.select_edge or linked_crn_.link_loop_prev[uv].select_edge:
+                                    if (
+                                        linked_crn_uv_.select_edge
+                                        or linked_crn_.link_loop_prev[uv].select_edge
+                                    ):
                                         has_linked_selected_edge = True
                                         break
                         if not has_linked_selected_edge:
                             for crn_uv in to_deselect:
                                 crn_uv.select = False
+
             return select_set
 
         return inner(umesh.uv, umesh.sync)
 
+
 if USE_GENERIC_UV_SYNC:
-    def edge_select_get_func(umesh: 'utypes.UMesh') -> typing.Callable[[BMLoop], bool]:
+
+    def edge_select_linked_full_func(umesh: "utypes.UMesh", with_seam=True) -> typing.Callable[[BMLoop], None]:
+        """Selected linked vertices, with correct edge and face selection.
+        NOTE: Only for edge mode.
+        """
+        from . import get_linked_crn_iter_fn, is_boundary_func
+
+        def catcher(sync, sync_invalid, is_boundary_, get_linked_it_inc_):
+            if sync_invalid:
+                # TODO: Split logic to VERT and EDGE elem mode, and add assert for face mode
+                def select_set(crn):
+                    crn.edge.select = True
+                    f = crn.face
+                    if not f.select:
+                        if all(e.select for e in f.edges):
+                            f.select = True
+
+                    if not is_boundary_(crn):
+                        pair_face = crn.link_loop_radial_prev.face
+                        if not pair_face.select:
+                            if all(e.select for e in pair_face.edges):
+                                pair_face.select = True
+
+            else:
+                if sync:
+                    if umesh.elem_mode == "EDGE":
+                        def select_set(crn: BMLoop):
+                            crn.edge.select = True
+                            crn.uv_select_edge = True
+
+                            # Select Face.
+                            f = crn.face
+                            if not f.uv_select:
+                                if all(f_crn.uv_select_edge for f_crn in f.loops):
+                                    f.select = True
+                                    f.uv_select = True
+
+                            if not is_boundary_(crn):
+                                pair = crn.link_loop_radial_prev
+                                pair.uv_select_edge = True
+                                f = pair.face
+                                if not f.uv_select:
+                                    if all(f_crn.uv_select_edge for f_crn in f.loops):
+                                        f.select = True
+                                        f.uv_select = True
+
+                            linked = get_linked_it_inc_(crn)
+                            for l_crn in linked:
+                                l_crn.uv_select_vert = True
+
+                            linked = get_linked_it_inc_(crn.link_loop_next)
+                            for l_crn in linked:
+                                l_crn.uv_select_vert = True
+                    else:
+
+                        def select_set(crn: BMLoop):
+                            crn.edge.select = True
+                            crn.uv_select_edge = True
+                            if not is_boundary_(crn):
+                                crn.link_loop_radial_prev.uv_select_edge = True
+
+                            linked_faces = set()
+                            for l_crn in get_linked_it_inc_(crn):
+                                l_crn.uv_select_vert = True
+                                linked_faces.add(l_crn.face)
+
+                            for l_crn in get_linked_it_inc_(crn.link_loop_next):
+                                l_crn.uv_select_vert = True
+                                linked_faces.add(l_crn.face)
+
+                            # Select Face.
+                            for f in linked_faces:
+                                if not f.uv_select:
+                                    if all(f_crn.uv_select_vert for f_crn in f.loops):
+                                        f.select = True
+                                        f.uv_select = True
+                                for crn in f.loops:
+                                    if not crn.uv_select_edge:
+                                        if crn.uv_select_vert and crn.link_loop_next.uv_select_vert:
+                                            crn.uv_select_edge = True
+
+                else:
+                    def select_set(crn: BMLoop):
+                        crn.uv_select_edge = True
+
+                        if not is_boundary_(crn):
+                            pair = crn.link_loop_radial_prev
+                            pair.uv_select_edge = True
+
+                        for l_crn in get_linked_it_inc_(crn):
+                            l_crn.uv_select_vert = True
+
+                        for l_crn in get_linked_it_inc_(crn.link_loop_next):
+                            l_crn.uv_select_vert = True
+
+            return select_set
+
+        return catcher(
+            umesh.sync,
+            (umesh.sync and not umesh.sync_valid),
+            is_boundary_func(umesh, with_seam=with_seam),
+            get_linked_crn_iter_fn(umesh, included=True, with_seam=with_seam)
+        )
+
+else:
+
+    def edge_select_linked_full_func(umesh: "utypes.UMesh", with_seam=True) -> typing.Callable[[BMLoop], None]:
+
+        from . import get_linked_crn_iter_fn, is_boundary_func
+
+        def catcher(uv, sync, is_boundary_, get_linked_it_inc_):
+            if sync:
+                # TODO: Split logic to VERT and EDGE elem mode, and add assert for face mode
+                def select_set(crn):
+                    crn.edge.select = True
+
+                    f = crn.face
+                    if not f.select:
+                        if all(e.select for e in f.edges):
+                            f.select = True
+
+                    if not is_boundary_(crn):
+                        pair_face = crn.link_loop_radial_prev.face
+                        if not pair_face.select:
+                            if all(e.select for e in pair_face.edges):
+                                pair_face.select = True
+
+            else:
+                if umesh.elem_mode == "EDGE":
+                    def select_set(crn: BMLoop):
+                        crn[uv].select_edge = True
+                        if not is_boundary_(crn):
+                            crn.link_loop_radial_prev[uv].select_edge = True
+
+                        for l_crn in get_linked_it_inc_(crn):
+                            l_crn[uv].select = True
+                        for l_crn in get_linked_it_inc_(crn.link_loop_next):
+                            l_crn[uv].select = True
+                else:
+
+                    def select_set(crn: BMLoop):
+                        crn[uv].select_edge = True
+                        if not is_boundary_(crn):
+                            crn.link_loop_radial_prev[uv].select_edge = True
+
+                        linked_faces = set()
+                        for l_crn in get_linked_it_inc_(crn):
+                            l_crn[uv].select = True
+                            linked_faces.add(l_crn.face)
+
+                        for l_crn in get_linked_it_inc_(crn.link_loop_next):
+                            l_crn[uv].select = True
+                            linked_faces.add(l_crn.face)
+
+                        for f in linked_faces:
+                            for crn in f.loops:
+                                crn_uv = crn[uv]
+                                if not crn_uv.select_edge:
+                                    if crn_uv.select and crn.link_loop_next[uv].select:
+                                        crn_uv.select_edge = True
+
+            return select_set
+
+        return catcher(umesh.uv,
+                       umesh.sync,
+                       is_boundary_func(umesh, with_seam=with_seam),
+                       get_linked_crn_iter_fn(umesh, included=True, with_seam=with_seam))
+
+
+if USE_GENERIC_UV_SYNC:
+
+    def edge_select_get_func(umesh: "utypes.UMesh") -> typing.Callable[[BMLoop], bool]:
         def inner(sync, sync_valid):
-            def select_get(crn):  # noqa
-                return crn.uv_select_edge
+            select_get = BMLoop.uv_select_edge.__get__
             if sync and not sync_valid:
+
                 def select_get(crn):  # noqa
                     return crn.edge.select
+
             return select_get
+
         return inner(umesh.sync, umesh.sync_valid)
+
 else:
-    def edge_select_get_func(umesh: 'utypes.UMesh') -> typing.Callable[[BMLoop], bool]:
+
+    def edge_select_get_func(umesh: "utypes.UMesh") -> typing.Callable[[BMLoop], bool]:
         def inner(uv, sync):
             if sync:
+
                 def select_get(crn):
                     return crn.edge.select
+
             else:
+
                 def select_get(crn):
                     return crn[uv].select_edge
+
             return select_get
+
         return inner(umesh.uv, umesh.sync)
 
-def edge_deselect_safe_3d_func(umesh: 'utypes.UMesh') -> typing.Callable[[BMLoop], None]:
+
+def edge_deselect_safe_3d_func(umesh: "utypes.UMesh") -> typing.Callable[[BMLoop], None]:
     """In VERTEX sync mode, deselecting an edge also affects neighboring edges - this preserves that behavior, even for unintended edges."""
     assert umesh.sync
-    assert umesh.elem_mode in ('VERT', 'EDGE')
+    assert umesh.elem_mode in ("VERT", "EDGE")
 
-    if umesh.elem_mode == 'EDGE':
+    if umesh.elem_mode == "EDGE":
+
         def deselect_edge(crn):
             crn.edge.select = False
+
     else:
+
         def deselect_edge(crn):
             next_vert = crn.link_loop_next.vert
             more_one_selected_edges_a = sum(e.select for e in crn.vert.link_edges) > 1
@@ -458,114 +764,177 @@ def edge_deselect_safe_3d_func(umesh: 'utypes.UMesh') -> typing.Callable[[BMLoop
                 crn.edge.select = False
                 crn.vert.select = more_one_selected_edges_a
                 next_vert.select = more_one_selected_edges_b
+
     return deselect_edge
 
+
 if USE_GENERIC_UV_SYNC:
-    def vert_select_func(umesh: 'utypes.UMesh') -> typing.Callable[[BMLoop], None]:  # noqa
+
+    def vert_select_func(umesh: "utypes.UMesh") -> typing.Callable[[BMLoop], None]:  # noqa
         if umesh.sync and not umesh.sync_valid:
+
             def select_set(crn):
                 crn.vert.select = True
+
         else:
+
             def select_set(crn):
                 crn.vert.select = True
                 crn.uv_select_vert = True
+
         return select_set
+
 else:
-    def vert_select_func(umesh: 'utypes.UMesh') -> typing.Callable[[BMLoop], None]:  # noqa
+
+    def vert_select_func(umesh: "utypes.UMesh") -> typing.Callable[[BMLoop], None]:  # noqa
         def catcher(uv, sync):
             if sync:
+
                 def select_set(crn):
                     crn.vert.select = True
+
             else:
+
                 def select_set(crn):
                     crn[uv].select = True
+
             return select_set
+
         return catcher(umesh.uv, umesh.sync)
 
+
 if USE_GENERIC_UV_SYNC:
-    def vert_select_get_func(umesh: 'utypes.UMesh') -> typing.Callable[[BMLoop], bool]:
+
+    def vert_select_get_func(umesh: "utypes.UMesh") -> typing.Callable[[BMLoop], bool]:
         def inner(sync, sync_valid):
-            def select_get(crn):  # noqa
-                return crn.uv_select_vert
+            select_get = BMLoop.uv_select_vert.__get__
             if sync and not sync_valid:
+
                 def select_get(crn):  # noqa
                     return crn.vert.select
+
             return select_get
+
         return inner(umesh.sync, umesh.sync_valid)
+
 else:
-    def vert_select_get_func(umesh: 'utypes.UMesh') -> typing.Callable[[BMLoop], bool]:
+
+    def vert_select_get_func(umesh: "utypes.UMesh") -> typing.Callable[[BMLoop], bool]:
         def inner(uv, sync):
             if sync:
+
                 def select_get(crn):  # noqa
                     return crn.vert.select
+
             else:
+
                 def select_get(crn):
                     return crn[uv].select
+
             return select_get
+
         return inner(umesh.uv, umesh.sync)
 
+
 if USE_GENERIC_UV_SYNC:
-    def select_crn_uv_edge_with_shared_by_idx(crn: BMLoop, uv, force=False):
-        idx = crn.face.index
-        from .bm_tag import shared_is_linked
-        from .bm_walk import linked_crn_uv_by_island_index_unordered_included
 
-        shared = crn.link_loop_radial_prev
-        if shared != crn:
-            if shared.face.index == idx:
-                if shared_is_linked(crn, shared, uv):
-                    shared.uv_select_edge = True
+    def vert_select_linked_full_func(umesh: "utypes.UMesh") -> typing.Callable[[BMLoop], None]:
+        """Selected linked vertices, with correct edge and face selection.
+        NOTE: Only for vertex mode.
+        """
 
-        crn.edge.select = True
-        crn.uv_select_edge = True
+        from . import get_linked_crn_iter_fn
+        def catcher(sync, sync_invalid, get_linked_it_inc_: typing.Callable[[BMLoop], typing.Generator]):
 
-        if force:
-            for crn_a in linked_crn_uv_by_island_index_unordered_included(crn, uv, idx):
-                crn_a.uv_select_vert = True
+            if sync_invalid:
 
-            crn_uv_next = crn.link_loop_next
-            for crn_b in linked_crn_uv_by_island_index_unordered_included(crn_uv_next, uv, idx):
-                crn_b.uv_select_vert = True
-        else:
-            if not crn.uv_select_vert:
-                for crn_a in linked_crn_uv_by_island_index_unordered_included(crn, uv, idx):
-                    crn_a.uv_select_vert = True
+                def select_set(crn):
+                    crn.vert.select = True
+                    for l_crn in get_linked_it_inc_(crn):
+                        if not l_crn.face.select:
+                            if all(v.select for v in l_crn.face.verts):
+                                l_crn.face.select = True
 
-            crn_uv_next = crn.link_loop_next
-            if not crn_uv_next.uv_select_vert:
-                for crn_b in linked_crn_uv_by_island_index_unordered_included(crn_uv_next, uv, idx):
-                    crn_b.uv_select_vert = True
+            else:
+                if sync:
+
+                    def select_set(crn: BMLoop):
+                        crn.vert.select = True
+
+                        for l_crn in get_linked_it_inc_(crn):
+                            l_crn.uv_select_vert = True
+                            next_crn = l_crn.link_loop_next
+                            if not next_crn.uv_select_edge and next_crn.uv_select_vert:
+                                next_crn.uv_select_edge = True
+                                next_crn.edge.select = True
+
+                            prev_crn = l_crn.link_loop_next
+                            if not prev_crn.uv_select_edge and prev_crn.uv_select_vert:
+                                prev_crn.uv_select_edge = True
+                                prev_crn.edge.select = True
+
+                            f = l_crn.face
+                            if not f.uv_select:
+                                if all(f_crn.uv_select_vert for f_crn in f.loops):
+                                    f.select = True
+                                    f.uv_select = True
+
+                else:
+
+                    def select_set(crn: BMLoop):
+                        for l_crn in get_linked_it_inc_(crn):
+                            l_crn.uv_select_vert = True
+                            next_crn = l_crn.link_loop_next
+                            if not next_crn.uv_select_edge and next_crn.uv_select_vert:
+                                next_crn.uv_select_edge = True
+
+                            prev_crn = l_crn.link_loop_next
+                            if not prev_crn.uv_select_edge and prev_crn.uv_select_vert:
+                                prev_crn.uv_select_edge = True
+
+                            f = l_crn.face
+                            if not f.uv_select:
+                                if all(f_crn.uv_select_vert for f_crn in f.loops):
+                                    f.uv_select = True
+
+            return select_set
+
+        return catcher(umesh.sync, (umesh.sync and not umesh.sync_valid), get_linked_crn_iter_fn(umesh, included=True))
+
 else:
-    def select_crn_uv_edge_with_shared_by_idx(crn: BMLoop, uv, force=False):
-        idx = crn.face.index
-        from .bm_tag import shared_is_linked
-        from .bm_walk import linked_crn_uv_by_island_index_unordered_included
 
-        shared = crn.link_loop_radial_prev
-        if shared != crn:
-            if shared.face.index == idx:
-                if shared_is_linked(crn, shared, uv):
-                    shared[uv].select_edge = True
+    def vert_select_linked_full_func(umesh: "utypes.UMesh") -> typing.Callable[[BMLoop], None]:
+        from . import get_linked_crn_iter_fn
 
-        crn_uv_a = crn[uv]
-        crn_uv_a.select_edge = True
+        def catcher(uv, sync, get_linked_it_inc_: typing.Callable[[BMLoop], typing.Generator]):
 
-        if force:
-            for crn_a in linked_crn_uv_by_island_index_unordered_included(crn, uv, idx):
-                crn_a[uv].select = True
+            if sync:
 
-            crn_uv_next = crn.link_loop_next
-            for crn_b in linked_crn_uv_by_island_index_unordered_included(crn_uv_next, uv, idx):
-                crn_b[uv].select = True
-        else:
-            if not crn_uv_a.select:
-                for crn_a in linked_crn_uv_by_island_index_unordered_included(crn, uv, idx):
-                    crn_a[uv].select = True
+                def select_set(crn):
+                    crn.vert.select = True
+                    for l_crn in get_linked_it_inc_(crn):
+                        if not l_crn.face.select:
+                            if all(v.select for v in l_crn.face.verts):
+                                l_crn.face.select = True
 
-            crn_uv_next = crn.link_loop_next
-            if not crn_uv_next[uv].select:
-                for crn_b in linked_crn_uv_by_island_index_unordered_included(crn_uv_next, uv, idx):
-                    crn_b[uv].select = True
+            else:
+
+                def select_set(crn: BMLoop):
+                    linked = get_linked_it_inc_(crn)
+                    for l_crn in linked:
+                        l_crn[uv].select = True
+                        next_crn = l_crn.link_loop_next[uv]
+                        if not next_crn.select_edge and next_crn.select:
+                            next_crn.select = True
+
+                        prev_crn = l_crn.link_loop_next[uv]
+                        if not prev_crn.select_edge and prev_crn.select:
+                            prev_crn.select_edge = True
+
+            return select_set
+
+        return catcher(umesh.uv, umesh.sync, get_linked_crn_iter_fn(umesh, included=True))
+
 
 def select_edge_processing(umesh, to_deselect, to_select):
     if USE_GENERIC_UV_SYNC:
@@ -591,8 +960,406 @@ def select_edge_processing(umesh, to_deselect, to_select):
         for crn in to_select:
             set_edge_select(crn, True)
 
+
+def _select_inbetween_faces(faces, get_linked_it, is_boundary, umesh):
+    inbetween_potentially_unselected_faces: set[BMFace] = set()
+    for f in faces:
+        f.select = True
+        for crn in f.loops:
+            if not is_boundary(crn):
+                pair_crn = crn.link_loop_radial_prev
+                if not pair_crn.uv_select_edge:
+                    pair_crn.uv_select_edge = True
+
+                    for l_crn in get_linked_it(crn):
+                        l_crn.uv_select_vert = True
+                        inbetween_potentially_unselected_faces.add(l_crn.face)
+                    for l_crn in get_linked_it(crn.link_loop_next):
+                        l_crn.uv_select_vert = True
+                        inbetween_potentially_unselected_faces.add(l_crn.face)
+
+    new_to_select_faces = []
+    if umesh.elem_mode == "VERT":
+        for f in inbetween_potentially_unselected_faces:
+            if not f.uv_select:
+                if all(crn.uv_select_vert for crn in f.loops):
+                    new_to_select_faces.append(f)
+    else:
+        for f in inbetween_potentially_unselected_faces:
+            if not f.uv_select:
+                if all(crn.uv_select_edge for crn in f.loops):
+                    new_to_select_faces.append(f)
+    return new_to_select_faces
+
+
+def batch_select_faces(umesh, faces: typing.Sequence[BMFace], select_linked: bool, with_seam=True):
+    # NOTE: "SHARED_LOCATION" cannot be passed to `uv_select_foreach_set_from_mesh` because seams are not taken into account.
+    # NOTE: `select_linked` not affect in sync mode for Blender 4.5 and below.
+    if not faces:
+        return
+
+    from . import is_boundary_func, get_linked_crn_iter_fn
+    is_boundary = is_boundary_func(umesh, with_seam=with_seam)
+    get_linked_it = get_linked_crn_iter_fn(umesh, with_seam=with_seam)
+
+    if USE_GENERIC_UV_SYNC:
+        def simple_select_(faces_):
+            for f_ in faces_:
+                f_.uv_select = True
+                for crn_ in f_.loops:
+                    crn_.uv_select_vert = True
+                    crn_.uv_select_edge = True
+
+        if umesh.elem_mode in ("VERT", "EDGE"):
+            if umesh.sync:
+                if not umesh.sync_valid:
+                    umesh.bm.uv_select_sync_valid = True
+                umesh.bm.uv_select_foreach_set_from_mesh(True, faces=faces, sticky_select_mode="DISABLED")
+
+                if select_linked:
+                    new_to_select_faces = _select_inbetween_faces(faces, get_linked_it, is_boundary, umesh)
+                    if new_to_select_faces:
+                        umesh.bm.uv_select_foreach_set_from_mesh(True, faces=new_to_select_faces, sticky_select_mode="DISABLED")  # fmt: skip
+                        for f in new_to_select_faces:
+                            f.select = True
+            else:
+                simple_select_(faces)
+
+                if select_linked:
+                    new_to_select_faces = _select_inbetween_faces(faces, get_linked_it, is_boundary, umesh)
+                    for f in new_to_select_faces:
+                        f.uv_select = True
+                        for crn in f.loops:
+                            crn.uv_select_vert = True
+                            crn.uv_select_edge = True
+
+        else:
+            if umesh.sync:
+                if umesh.sync_valid:
+                    umesh.bm.uv_select_foreach_set_from_mesh(True, faces=faces, sticky_select_mode="DISABLED")
+
+                    if not select_linked:
+                        for f in faces:
+                            f.select = True
+                    else:
+                        for f in faces:
+                            f.select = True
+                            for crn in f.loops:
+                                if not is_boundary(crn):
+                                    pair_crn = crn.link_loop_radial_prev
+                                    if not pair_crn.uv_select_edge:
+                                        pair_crn.uv_select_edge = True
+
+                                        for l_crn in get_linked_it(crn):
+                                            l_crn.uv_select_vert = True
+                                        for l_crn in get_linked_it(crn.link_loop_next):
+                                            l_crn.uv_select_vert = True
+
+                else:
+                    for f in faces:
+                        f.select = True
+            else:
+                simple_select_(faces)
+                if select_linked:
+                    for f in faces:
+                        for crn in f.loops:
+                            if not is_boundary(crn):
+                                pair_crn = crn.link_loop_radial_prev
+                                if not pair_crn.uv_select_edge:
+                                    pair_crn.uv_select_edge = True
+
+                                    for l_crn in get_linked_it(crn):
+                                        l_crn.uv_select_vert = True
+                                    for l_crn in get_linked_it(crn.link_loop_next):
+                                        l_crn.uv_select_vert = True
+    else:  # Legacy
+        if umesh.sync:
+            for f in faces:
+                f.select = True
+        else:
+            uv = umesh.uv
+            for f in faces:
+                for crn in f.loops:
+                    crn_uv = crn[uv]
+                    crn_uv.select = True
+                    crn_uv.select_edge = True
+
+            if select_linked:
+                inbetween_potentially_unselected_faces: set[BMFace] = set()
+                for f in faces:
+                    for crn in f.loops:
+                        if not is_boundary(crn):
+                            pair_crn = crn.link_loop_radial_prev
+                            if not pair_crn[uv].select_edge:
+                                pair_crn[uv].select_edge = True
+
+                                for l_crn in get_linked_it(crn):
+                                    l_crn[uv].select = True
+                                    inbetween_potentially_unselected_faces.add(l_crn.face)
+                                for l_crn in get_linked_it(crn.link_loop_next):
+                                    l_crn[uv].select = True
+                                    inbetween_potentially_unselected_faces.add(l_crn.face)
+
+                if umesh.elem_mode == "VERT":
+                    for f in inbetween_potentially_unselected_faces:
+                        if all(crn[uv].select for crn in f.loops):
+                            for crn in f.loops:
+                                crn[uv].select_edge = True
+
+
+def deselect_uv_edges_with_preserve_around_edges(umesh, to_deselect: list[BMLoop]):
+    """NOTE: Not deselect faces!!!"""
+    uv = umesh.uv
+    from . import is_pair, linked_crn_uv_to_vert_unordered_included_func, is_visible_func
+
+    # TODO: Use set() for find deselect edges.
+    is_visible = is_visible_func(umesh)
+    if USE_GENERIC_UV_SYNC:
+        if umesh.sync:
+            # TODO: Not validate or make optional
+            if umesh.sync:
+                umesh.sync_from_mesh_if_needed()
+
+            if umesh.elem_mode == "VERT":
+                get_linked = linked_crn_uv_to_vert_unordered_included_func(umesh)
+                for crn in to_deselect:
+                    pair_crn: BMLoop | None = crn.link_loop_radial_prev
+                    if is_visible(pair_crn.face) and pair_crn.uv_select_edge:
+                        if not is_pair(crn, pair_crn, uv):
+                            pair_crn = None
+                    else:
+                        pair_crn = None
+
+                    # TODO: Deduplicate this
+                    linked = get_linked(crn)
+                    has_selected_linked_first = False
+                    for l_crn in linked:
+                        if l_crn not in (crn, pair_crn) and l_crn.uv_select_edge:
+                            has_selected_linked_first = True
+                            break
+                        prev = l_crn.link_loop_prev
+                        if prev not in (crn, pair_crn) and prev.uv_select_edge:
+                            has_selected_linked_first = True
+                            break
+
+                    if not has_selected_linked_first:
+                        for l_crn in linked:
+                            l_crn.uv_select_vert = False
+
+                    linked = get_linked(crn.link_loop_next)
+                    has_selected_linked_second = False
+                    for l_crn in linked:
+                        if l_crn not in (crn, pair_crn) and l_crn.uv_select_edge:
+                            has_selected_linked_second = True
+                            break
+                        prev = l_crn.link_loop_prev
+                        if prev not in (crn, pair_crn) and prev.uv_select_edge:
+                            has_selected_linked_second = True
+                            break
+                    if not has_selected_linked_second:
+                        for l_crn in linked:
+                            l_crn.uv_select_vert = False
+
+                    if not has_selected_linked_first or not has_selected_linked_second:
+                        crn.uv_select_edge = False
+                        if pair_crn is not None:
+                            pair_crn.uv_select_edge = False  # noqa pycharm moment
+
+                for crn in to_deselect:
+                    if not any(
+                        l_crn.uv_select_vert
+                        for l_crn in crn.vert.link_loops
+                        if is_visible(l_crn.face)
+                    ):
+                        crn.vert.select = False
+                    if not any(
+                        l_crn.uv_select_vert
+                        for l_crn in crn.link_loop_next.vert.link_loops
+                        if is_visible(l_crn.face)
+                    ):
+                        crn.link_loop_next.vert.select = False
+
+            else:  # umesh.elem_mode == "EDGE"
+                for crn in to_deselect:
+                    crn.uv_select_edge = False
+
+                    pair_crn = crn.link_loop_radial_prev
+                    if pair_crn.uv_select_edge:
+                        if is_pair(crn, pair_crn, uv):
+                            pair_crn.uv_select_edge = False
+                            crn.edge.select = False
+                    else:
+                        crn.edge.select = False
+
+                get_linked = linked_crn_uv_to_vert_unordered_included_func(umesh)
+                for crn in to_deselect:
+                    linked = get_linked(crn)
+                    has_selected_edges_in_linked = any(
+                        l_crn.uv_select_edge or l_crn.link_loop_prev.uv_select_edge
+                        for l_crn in linked
+                    )
+                    if not has_selected_edges_in_linked:
+                        for l_crn in linked:
+                            l_crn.uv_select_vert = False
+
+                    linked = get_linked(crn.link_loop_next)
+                    has_selected_edges_in_linked = any(
+                        l_crn.uv_select_edge or l_crn.link_loop_prev.uv_select_edge
+                        for l_crn in linked
+                    )
+                    if not has_selected_edges_in_linked:
+                        for l_crn in linked:
+                            l_crn.uv_select_vert = False
+
+        else:
+            if umesh.elem_mode != "VERTEX":
+                for crn in to_deselect:
+                    crn.uv_select_edge = False
+
+                    pair_crn = crn.link_loop_radial_prev
+                    if pair_crn.uv_select_edge:
+                        if is_pair(crn, pair_crn, uv):
+                            pair_crn.uv_select_edge = False
+
+                get_linked = linked_crn_uv_to_vert_unordered_included_func(umesh)
+                for crn in to_deselect:
+                    linked = get_linked(crn)
+                    has_selected_edges_in_linked = any(
+                        l_crn.uv_select_edge or l_crn.link_loop_prev.uv_select_edge
+                        for l_crn in linked
+                    )
+                    if not has_selected_edges_in_linked:
+                        for l_crn in linked:
+                            l_crn.uv_select_vert = False
+
+                    linked = get_linked(crn.link_loop_next)
+                    has_selected_edges_in_linked = any(
+                        l_crn.uv_select_edge or l_crn.link_loop_prev.uv_select_edge
+                        for l_crn in linked
+                    )
+
+                    if not has_selected_edges_in_linked:
+                        for l_crn in linked:
+                            l_crn.uv_select_vert = False
+            else:  # umesh.elem_mode == "EDGE"
+                for crn in to_deselect:
+                    crn.uv_select_edge = False
+
+                    pair_crn = crn.link_loop_radial_prev
+                    if pair_crn.uv_select_edge:
+                        if is_pair(crn, pair_crn, uv):
+                            pair_crn.uv_select_edge = False
+
+                get_linked = linked_crn_uv_to_vert_unordered_included_func(umesh)
+                for crn in to_deselect:
+                    linked = get_linked(crn)
+                    has_selected_edges_in_linked = any(
+                        l_crn.uv_select_edge or l_crn.link_loop_prev.uv_select_edge
+                        for l_crn in linked
+                    )
+                    if not has_selected_edges_in_linked:
+
+                        for l_crn in linked:
+                            l_crn.uv_select_vert = False
+
+                    linked = get_linked(crn.link_loop_next)
+                    has_selected_edges_in_linked = any(
+                        l_crn.uv_select_edge or l_crn.link_loop_prev.uv_select_edge
+                        for l_crn in linked
+                    )
+                    if not has_selected_edges_in_linked:
+                        for l_crn in linked:
+                            l_crn.uv_select_vert = False
+
+    else:  # Old version support.
+        if umesh.sync:
+            if umesh.elem_mode == "VERT":
+                edge_deselect = edge_deselect_safe_3d_func(umesh)
+                for crn in to_deselect:
+                    edge_deselect(crn)
+            else:
+                for crn in to_deselect:
+                    crn.edge.select = False
+
+        else:
+            if umesh.elem_mode == "VERT":
+                # TODO: Fix for old version
+                get_linked = linked_crn_uv_to_vert_unordered_included_func(umesh)
+                for crn in to_deselect:
+                    pair_crn: BMLoop | None = crn.link_loop_radial_prev
+                    if pair_crn.face.select and pair_crn[uv].select_edge:
+                        if not is_pair(crn, pair_crn, uv):
+                            pair_crn = None
+                    else:
+                        pair_crn = None
+
+                    linked = get_linked(crn)
+                    has_selected_linked_first = False
+                    for l_crn in linked:
+                        if l_crn not in (crn, pair_crn) and l_crn[uv].select_edge:
+                            has_selected_linked_first = True
+                            break
+                        prev = l_crn.link_loop_prev
+                        if prev not in (crn, pair_crn) and prev[uv].select_edge:
+                            has_selected_linked_first = True
+                            break
+
+                    if not has_selected_linked_first:
+                        for l_crn in linked:
+                            l_crn[uv].select = False
+
+                    linked = get_linked(crn.link_loop_next)
+                    has_selected_linked_second = False
+                    for l_crn in linked:
+                        if l_crn not in (crn, pair_crn) and l_crn[uv].select_edge:
+                            has_selected_linked_second = True
+                            break
+                        prev = l_crn.link_loop_prev
+                        if prev not in (crn, pair_crn) and prev[uv].select_edge:
+                            has_selected_linked_second = True
+                            break
+
+                    if not has_selected_linked_second:
+                        for l_crn in linked:
+                            l_crn[uv].select = False
+
+                    if not has_selected_linked_first or not has_selected_linked_second:
+                        crn[uv].select_edge = False
+                        if pair_crn is not None:
+                            pair_crn[uv].select_edge = False  # noqa pycharm moment
+            else:  # umesh.elem_mode == "EDGE"
+                for crn in to_deselect:
+                    crn[uv].select_edge = False
+
+                    pair_crn = crn.link_loop_radial_prev
+                    if is_pair(crn, pair_crn, uv):
+                        pair_crn[uv].select_edge = False
+
+                get_linked = linked_crn_uv_to_vert_unordered_included_func(umesh)
+                for crn in to_deselect:
+                    linked = get_linked(crn)
+                    has_selected_edges_in_linked = any(
+                        l_crn[uv].select_edge or l_crn.link_loop_prev[uv].select_edge
+                        for l_crn in linked
+                    )
+                    if not has_selected_edges_in_linked:
+
+                        for l_crn in linked:
+                            l_crn[uv].select = False
+
+                    linked = get_linked(crn.link_loop_next)
+                    has_selected_edges_in_linked = any(
+                        l_crn[uv].select_edge or l_crn.link_loop_prev[uv].select_edge
+                        for l_crn in linked
+                    )
+                    if not has_selected_edges_in_linked:
+                        for l_crn in linked:
+                            l_crn[uv].select = False
+
+
 if USE_GENERIC_UV_SYNC:
-    def has_any_vert_select_func(umesh: 'utypes.UMesh'):
+
+    def has_any_vert_select_func(umesh: "utypes.UMesh"):
         def catcher():
             def func(f):
                 # Unroll any
@@ -602,6 +1369,7 @@ if USE_GENERIC_UV_SYNC:
                 return False
 
             if not umesh.sync_valid and umesh.sync:
+
                 def func(f):
                     # Unroll any
                     for v in f.verts:
@@ -610,16 +1378,20 @@ if USE_GENERIC_UV_SYNC:
                     return False
 
             return func
+
         return catcher()
+
 else:
-    def has_any_vert_select_func(umesh: 'utypes.UMesh'):
+
+    def has_any_vert_select_func(umesh: "utypes.UMesh"):
         def catcher(uv):
             if umesh.sync:
-                if umesh.elem_mode in ('VERT', 'EDGE'):
+                if umesh.elem_mode in ("VERT", "EDGE"):
                     return lambda f: any(v.select for v in f.verts)
                 else:
                     return lambda f: f.select
             else:
+
                 def func(f):
                     # Unroll any
                     for crn in f.loops:
@@ -628,16 +1400,18 @@ else:
                     return False
 
                 return func
+
         return catcher(umesh.uv)
+
 
 def fast_deselect(umesh):
     # TODO: Add more info and add uv_select_to_mesh
     umesh.sync_valid = True
     bm = umesh.bm
-    bm.uv_select_foreach_set(False, faces=bm.faces, sticky_select_mode='DISABLED')
+    bm.uv_select_foreach_set(False, faces=bm.faces, sticky_select_mode="DISABLED")
 
     # Deselect verts/edges.
     saved_mode = bm.select_mode
-    bm.select_mode = {'FACE'}
+    bm.select_mode = {"FACE"}
     bm.uv_select_flush_mode(flush_down=True)
     bm.select_mode = saved_mode

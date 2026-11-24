@@ -1,59 +1,27 @@
-# SPDX-FileCopyrightText: 2025 Oxicid
+# SPDX-FileCopyrightText: 2026 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 bl_info = {
     "name": "UniV",
-    "description": "Advanced UV tools",
+    "description": "Smart UV tools",
     "author": "Oxicid",
-    "version": (4, 0, 0, 'beta'),
+    "version": (4, 3, 1, "experimental"),
     "blender": (3, 2, 0),
     "category": "UV",
-    "location": "N-panel in 2D and 3D view"
+    "location": "N-panel in 2D and 3D view",
 }
 
 import bpy
 import typing
 import traceback
 
-from . import utypes        # noqa: F401 # pylint:disable=unused-import
-from . import preferences  # noqa: F401 # pylint:disable=unused-import
-from .utils import bench   # noqa: F401 # pylint:disable=unused-import
-from .utils import other   # noqa: F401 # pylint:disable=unused-import
-from .utils import ubm     # noqa: F401 # pylint:disable=unused-import
-from .utils import umath   # noqa: F401 # pylint:disable=unused-import
-from .utypes import bbox    # noqa: F401 # pylint:disable=unused-import
-from .utypes import btypes  # noqa: F401 # pylint:disable=unused-import
-from .utypes import island  # noqa: F401 # pylint:disable=unused-import
-from .utypes import mesh_island  # noqa: F401 # pylint:disable=unused-import
-from .operators import checker
-from .operators import inspect
-from .operators import misc
-from .operators import project
-from .operators import quadrify
-from .operators import quick_snap
-from .operators import relax
-from .operators import mark
-from .operators import select
-from .operators import stitch_and_weld
-from .operators import stack
-from .operators import straight
-from .operators import symmetrize
-from .operators import texel
-from .operators import toggle
-from .operators import transform
-from .operators import unwrap
-from . import ui
-from . import draw
-from . import icons
-from . import keymaps
-from . import fastapi
-from . import preferences
+from importlib.util import find_spec
 
-# univ_pro: "type[bpy?] | None"
-try:
-    from . import univ_pro
-except ImportError:
-    univ_pro = None
+univ_pro_exist = find_spec(f"{__package__}.univ_pro") is not None
+del find_spec
+
+if "NOT_BL_EXT":
+    from . import fastapi
 
 classes: list[bpy.types.Operator | bpy.types.Panel | bpy.types.Macro | typing.Any] = []
 classes_workspace = []
@@ -61,260 +29,287 @@ classes_workspace = []
 
 def load_register_types():
     global classes
+
+    from . import preferences
+    from . import operators
+    from . import ui
+    from . import icons
+    from . import keymaps
+
     try:
-        classes.extend([
-            preferences.UNIV_UV_Layers,
-            preferences.UNIV_TrimPreset,
-            preferences.UNIV_TrimPresetsSlot,
-            preferences.UNIV_TexelPreset,
-            preferences.UNIV_AddonPreferences,
-            preferences.UNIV_OT_ShowAddonPreferences,
-            keymaps.UNIV_RestoreKeymaps,
-            # Checker System
-            checker.UNIV_OT_CheckerCleanup,
-            # Inspect
-            inspect.UNIV_OT_BatchInspectFlags,
-            inspect.UNIV_OT_BatchInspect,
-            inspect.UNIV_OT_Check_Zero,
-            inspect.UNIV_OT_Check_Flipped,
-            inspect.UNIV_OT_Check_Non_Splitted,
-            inspect.UNIV_OT_Check_Overlap,
-            inspect.UNIV_OT_Check_Over,
-            inspect.UNIV_OT_Check_Other,
-            inspect.UNIV_OT_Check_Lib,
-            # Stitch and Weld
-            stitch_and_weld.UNIV_OT_Weld_VIEW3D,
-            stitch_and_weld.UNIV_OT_Weld,
-            stitch_and_weld.UNIV_OT_Stitch_VIEW3D,
-            stitch_and_weld.UNIV_OT_Stitch,
-            # Transforms
-            transform.UNIV_OT_Orient_VIEW3D,
-            transform.UNIV_OT_Orient,
-            transform.UNIV_OT_Gravity_VIEW3D,
-            transform.UNIV_OT_Gravity_VIEW2D,
-            transform.UNIV_OT_Align,
-            transform.UNIV_OT_Align_pie,
-            transform.UNIV_OT_Fill,
-            transform.UNIV_OT_Fit,
-            transform.UNIV_OT_SnapToPixels,
-            transform.UNIV_OT_Flip,
-            transform.UNIV_OT_Flip_VIEW3D,
-            transform.UNIV_OT_Rotate,
-            transform.UNIV_OT_Rotate_VIEW3D,
-            transform.UNIV_OT_Sort,
-            transform.UNIV_OT_Distribute,
-            transform.UNIV_OT_Break,
-            transform.UNIV_OT_Home_VIEW3D,
-            transform.UNIV_OT_Home,
-            transform.UNIV_OT_Shift_VIEW3D,
-            transform.UNIV_OT_Shift,
-            transform.UNIV_OT_Random_VIEW3D,
-            transform.UNIV_OT_Random,
-            transform.UNIV_OT_PackOther,
-            transform.UNIV_OT_Pack,
-            # Texel
-            texel.UNIV_OT_ResetScale_VIEW3D,
-            texel.UNIV_OT_ResetScale,
-            texel.UNIV_OT_AdjustScale,
-            texel.UNIV_OT_AdjustScale_VIEW3D,
-            texel.UNIV_OT_Normalize,
-            texel.UNIV_OT_Normalize_VIEW3D,
-            texel.UNIV_OT_TexelDensitySet,
-            texel.UNIV_OT_TexelDensitySet_VIEW3D,
-            texel.UNIV_OT_TexelDensityGet,
-            texel.UNIV_OT_TexelDensityGet_VIEW3D,
-            texel.UNIV_OT_TexelDensityFromTexture,
-            texel.UNIV_OT_TexelDensityFromPhysicalSize,
-            texel.UNIV_OT_CalcUDIMsFrom_3DArea_VIEW3D,
-            texel.UNIV_OT_CalcUDIMsFrom_3DArea,
-            texel.UNIV_OT_Calc_UV_Area_VIEW3D,
-            texel.UNIV_OT_Calc_UV_Area,
-            texel.UNIV_OT_Calc_UV_Coverage_VIEW3D,
-            texel.UNIV_OT_Calc_UV_Coverage,
-            # Symmetrize
-            symmetrize.UNIV_OT_Symmetrize,
-            # Quadrify
-            quadrify.UNIV_OT_Quadrify,
-            # Straight
-            straight.UNIV_OT_Straight,
-            # Relax
-            relax.UNIV_OT_Relax,
-            relax.UNIV_OT_Relax_VIEW3D,
-            # Unwrap
-            unwrap.UNIV_OT_Unwrap_VIEW3D,
-            # Toggles
-            toggle.UNIV_OT_SplitUVToggle,
-            toggle.UNIV_OT_TogglePivot,
-            toggle.UNIV_OT_TogglePanelsByCursor,
-            toggle.UNIV_OT_SyncUVToggle,
-            toggle.UNIV_OT_StretchUVToggle,
-            toggle.UNIV_OT_ShowModifiedUVEdgeToggle,
-            toggle.UNIV_OT_WorkspaceToggle,
-            # Modifier Toggle
-            toggle.UNIV_OT_ModifiersToggle,
-
-            # Selects
-            select.UNIV_OT_SelectLinked,
-            select.UNIV_OT_SelectLinked_VIEW3D,
-            select.UNIV_OT_Select_By_Cursor,
-            select.UNIV_OT_Select_Square_Island,
-            select.UNIV_OT_Select_Border,
-            select.UNIV_OT_Select_Pick,
-            select.UNIV_OT_SelectLinkedPick_VIEW3D,
-            select.UNIV_OT_DeselectLinkedPick_VIEW3D,
-            select.UNIV_OT_Select_Grow_VIEW3D,
-            select.UNIV_OT_Select_Grow,
-            select.UNIV_OT_Select_Edge_Grow_VIEW2D,
-            select.UNIV_OT_Select_Edge_Grow_VIEW3D,
-            select.UNIV_OT_SelectTexelDensity,
-            select.UNIV_OT_SelectTexelDensity_VIEW3D,
-            select.UNIV_OT_SelectByArea,
-            select.UNIV_OT_Stacked,
-            select.UNIV_OT_SelectByVertexCount_VIEW2D,
-            select.UNIV_OT_SelectByVertexCount_VIEW3D,
-            select.UNIV_OT_SelectMode,
-            select.UNIV_OT_Tests,
-            # QuickSnap
-            quick_snap.UNIV_OT_QuickSnap,
-            # UI
-            ui.UNIV_PT_TD_LayersManager,
-            ui.UNIV_UL_TD_PresetsManager,
-            ui.UNIV_PT_TD_PresetsManager,
-            ui.UNIV_PT_TD_PresetsManager_VIEW3D,
-            ui.UNIV_UL_UV_LayersManager,
-            ui.UNIV_UL_UV_LayersManagerV2,
-            ui.UNIV_PT_General_VIEW_3D,
-            ui.UNIV_PT_General,
-            ui.UNIV_PT_GlobalSettings,
-            ui.UNIV_PT_PackSettings,
-            ui.UNIV_PT_BatchInspectSettings,
-            # Pie Menus
-            ui.IMAGE_MT_PIE_univ_inspect,
-            ui.IMAGE_MT_PIE_univ_align,
-            ui.IMAGE_MT_PIE_univ_misc,
-            ui.VIEW3D_MT_PIE_univ_misc,
-            ui.VIEW3D_MT_PIE_univ_obj,
-            ui.IMAGE_MT_PIE_univ_edit,
-            ui.VIEW3D_MT_PIE_univ_edit,
-            ui.VIEW3D_MT_PIE_univ_favorites_edit,
-            ui.IMAGE_MT_PIE_univ_favorites_edit,
-            ui.VIEW3D_MT_PIE_univ_projection,
-            ui.IMAGE_MT_PIE_univ_texel,
-            ui.VIEW3D_MT_PIE_univ_texel,
-            ui.IMAGE_MT_PIE_univ_transform,
-            # Icons Generator
-            icons.UNIV_OT_IconsGenerator,
-            # Seam
-            mark.UNIV_OT_Pin,
-            mark.UNIV_OT_Mark_VIEW2D,
-            mark.UNIV_OT_Mark_VIEW3D,
-            mark.UNIV_OT_Cut_VIEW2D,
-            mark.UNIV_OT_Cut_VIEW3D,
-            mark.UNIV_OT_Angle,
-            mark.UNIV_OT_SeamBorder,
-            mark.UNIV_OT_SeamBorder_VIEW3D,
-            # Project
-            project.UNIV_OT_Normal,
-            project.UNIV_OT_ViewProject,
-            project.UNIV_OT_SmartProject,
-            # Misc
-            misc.UNIV_OT_RandomColor,
-            misc.UNIV_OT_LinearGradient,
-            misc.UNIV_OT_Hide,
-            misc.UNIV_OT_Focus,
-            misc.UNIV_OT_SetCursor2D,
-            misc.UNIV_OT_TD_PresetsProcessing,
-            misc.UNIV_OT_FixUVs,
-            misc.UNIV_OT_Join,
-            misc.UNIV_OT_Add,
-            misc.UNIV_OT_Remove,
-            misc.UNIV_OT_MoveUp,
-            misc.UNIV_OT_MoveDown,
-            misc.UNIV_OT_CopyToLayer,
-            misc.UNIV_OT_SetActiveRender,
-            misc.UNIV_OT_SmartScaleApply,
-            misc.UNIV_OT_AlignBorderVerts,
-            # Mesh
-            misc.UNIV_OT_Flatten,
-            misc.UNIV_OT_FlattenCleanup,
-        ])
-
-        if univ_pro:
-            classes.extend((
-                # UI
-                ui.UNIV_UL_TrimPresetsManager,
-                ui.UNIV_UL_TrimSlotsManager,
-                ui.UNIV_PT_TrimManager,
-                ui.UNIV_PT_CheckerSettings,
-                ui.UNIV_PT_CheckerTextures,
-
+        classes.extend(
+            [
+                preferences.UNIV_UV_Layers,
+                preferences.UNIV_TrimPreset,
+                preferences.UNIV_TrimPresetsSlot,
+                preferences.UNIV_TexelPreset,
+                preferences.ExcludedOperator,
+                preferences.UNIV_OperatorsSettings,
+                preferences.UNIV_AddonPreferences,
+                preferences.UNIV_OT_ShowAddonPreferences,
+                keymaps.UNIV_RestoreKeymaps,
                 # Checker System
-                univ_pro.checker.UNIV_OT_Checker,
-                univ_pro.checker.UNIV_OT_CheckerSave,
-                univ_pro.checker.UNIV_OT_CheckerUpdate,
-                univ_pro.checker.UNIV_OT_CheckerShowFolder,
-                univ_pro.checker.UNIV_OT_CheckerGenerator,
-                # Trim
-                univ_pro.trim.UNIV_OT_TrimPresetsProcessing,
-                univ_pro.trim.UNIV_OT_TrimSlotsProcessing,
-                univ_pro.trim.UNIV_OT_TrimPresetLoad,
-                univ_pro.trim.UNIV_OT_TrimPresetSave,
-                univ_pro.trim.UNIV_OT_TrimFromMesh,
-                univ_pro.trim.UNIV_OT_TrimEditor,
-                # Stack
-                univ_pro.stack.UNIV_OT_Stack,
-                univ_pro.stack.UNIV_OT_Stack_VIEW3D,
-                # Select
-                univ_pro.select.UNIV_OT_Select_Flat_VIEW3D,
-                univ_pro.select.UNIV_OT_Select_Flat,
-                univ_pro.select.UNIV_OT_SelectSimilar_VIEW2D,
-                univ_pro.select.UNIV_OT_SelectSimilar_VIEW3D,
-
-                univ_pro.select.UNIV_OT_Select_Loop_Pick_VIEW3D,
-                univ_pro.select.UNIV_OT_Select_Loop_VIEW3D,
-                univ_pro.select.UNIV_OT_Select_Loop_VIEW2D,
-                # Transform
-                univ_pro.drag.UNIV_OT_Drag,
-                # Transfer
-                univ_pro.transfer.UNIV_OT_Transfer,
-                # Mark
-                univ_pro.mark.UNIV_OT_Constraint,
-                univ_pro.mark.UNIV_OT_ConstraintByAngle,
-                # Misc
-                univ_pro.rectify.UNIV_OT_Rectify,
-                univ_pro.projection.UNIV_OT_BoxProject,
+                operators.checker.UNIV_OT_CheckerCleanup,
+                # Inspect
+                operators.uv_inspect.UNIV_OT_BatchInspectFlags,
+                operators.uv_inspect.UNIV_OT_BatchInspect,
+                operators.uv_inspect.UNIV_OT_Check_Zero,
+                operators.uv_inspect.UNIV_OT_Check_Flipped,
+                operators.uv_inspect.UNIV_OT_Check_Non_Splitted,
+                operators.uv_inspect.UNIV_OT_Check_Overlap,
+                operators.uv_inspect.UNIV_OT_Check_Over,
+                operators.uv_inspect.UNIV_OT_Check_Other,
+                operators.uv_inspect.UNIV_OT_Check_Lib,
+                # Stitch and Weld
+                operators.stitch_and_weld.UNIV_OT_Weld_VIEW3D,
+                operators.stitch_and_weld.UNIV_OT_Weld,
+                operators.stitch_and_weld.UNIV_OT_Stitch_VIEW3D,
+                operators.stitch_and_weld.UNIV_OT_Stitch,
+                # Transforms
+                operators.transform.UNIV_OT_Orient_VIEW3D,
+                operators.transform.UNIV_OT_Orient,
+                operators.transform.UNIV_OT_Gravity_VIEW3D,
+                operators.transform.UNIV_OT_Gravity_VIEW2D,
+                operators.transform.UNIV_OT_Align,
+                operators.transform.UNIV_OT_Align_pie,
+                operators.transform.UNIV_OT_Fill,
+                operators.transform.UNIV_OT_Fit,
+                operators.transform.UNIV_OT_SnapToPixels,
+                operators.transform.UNIV_OT_Flip,
+                operators.transform.UNIV_OT_Flip_VIEW3D,
+                operators.transform.UNIV_OT_Rotate,
+                operators.transform.UNIV_OT_Rotate_VIEW3D,
+                operators.transform.UNIV_OT_Sort,
+                operators.transform.UNIV_OT_Distribute,
+                operators.transform.UNIV_OT_Break,
+                operators.transform.UNIV_OT_Home_VIEW3D,
+                operators.transform.UNIV_OT_Home,
+                operators.transform.UNIV_OT_Shift_VIEW3D,
+                operators.transform.UNIV_OT_Shift,
+                operators.transform.UNIV_OT_Random_VIEW3D,
+                operators.transform.UNIV_OT_Random,
+                operators.transform.UNIV_OT_PackOther,
+                operators.transform.UNIV_OT_Pack,
+                # Texel
+                operators.texel.UNIV_OT_ResetScale_VIEW3D,
+                operators.texel.UNIV_OT_ResetScale,
+                operators.texel.UNIV_OT_AdjustScale,
+                operators.texel.UNIV_OT_AdjustScale_VIEW3D,
+                operators.texel.UNIV_OT_Normalize,
+                operators.texel.UNIV_OT_Normalize_VIEW3D,
+                operators.texel.UNIV_OT_TexelDensitySet,
+                operators.texel.UNIV_OT_TexelDensitySet_VIEW3D,
+                operators.texel.UNIV_OT_TexelDensityGet,
+                operators.texel.UNIV_OT_TexelDensityGet_VIEW3D,
+                operators.texel.UNIV_OT_TexelDensityFromPhysicalSize,
+                operators.texel.UNIV_OT_CalcUDIMsFrom_3DArea_VIEW3D,
+                operators.texel.UNIV_OT_CalcUDIMsFrom_3DArea,
+                operators.texel.UNIV_OT_Calc_UV_Area_VIEW3D,
+                operators.texel.UNIV_OT_Calc_UV_Area,
+                operators.texel.UNIV_OT_Calc_UV_Coverage_VIEW3D,
+                operators.texel.UNIV_OT_Calc_UV_Coverage,
+                # Symmetrize
+                operators.symmetrize.UNIV_OT_Symmetrize,
+                # Quadrify
+                operators.quadrify.UNIV_OT_Quadrify,
+                # Relax
+                operators.relax.UNIV_OT_Relax,
+                operators.relax.UNIV_OT_Relax_VIEW3D,
                 # Unwrap
-                univ_pro.unwrap.UNIV_OT_Unwrap,
+                operators.unwrap.UNIV_OT_Unwrap_VIEW3D,
+                # Toggles
+                operators.toggle.UNIV_OT_SplitUVToggle,
+                operators.toggle.UNIV_OT_TogglePivot,
+                operators.toggle.UNIV_OT_TogglePivot_VIEW3D,
+                operators.toggle.UNIV_OT_TogglePanelsByCursor,
+                operators.toggle.UNIV_OT_SyncUVToggle,
+                operators.toggle.UNIV_OT_StretchUVToggle,
+                operators.toggle.UNIV_OT_ShowModifiedUVEdgeToggle,
+                operators.toggle.UNIV_OT_WorkspaceToggle,
+                # Modifier Toggle
+                operators.toggle.UNIV_OT_ModifiersToggle,
+                # Selects
+                operators.select.UNIV_OT_SelectLinked,
+                operators.select.UNIV_OT_SelectLinked_VIEW3D,
+                operators.select.UNIV_OT_Select_By_Cursor,
+                operators.select.UNIV_OT_Select_Square_Island,
+                operators.select.UNIV_OT_Select_Border,
+                operators.select.UNIV_OT_Select_Pick,
+                operators.select.UNIV_OT_SelectLinkedPick_VIEW3D,
+                operators.select.UNIV_OT_DeselectLinkedPick_VIEW3D,
+                operators.select.UNIV_OT_Select_Grow_VIEW3D,
+                operators.select.UNIV_OT_Select_Grow,
+                operators.select.UNIV_OT_Select_Edge_Grow_VIEW2D,
+                operators.select.UNIV_OT_Select_Edge_Grow_VIEW3D,
+                operators.select.UNIV_OT_SelectTexelDensity,
+                operators.select.UNIV_OT_SelectTexelDensity_VIEW3D,
+                operators.select.UNIV_OT_SelectByArea,
+                operators.select.UNIV_OT_Stacked,
+                operators.select.UNIV_OT_SelectByVertexCount_VIEW2D,
+                operators.select.UNIV_OT_SelectByVertexCount_VIEW3D,
+                operators.select.UNIV_OT_SelectMode,
+                operators.select.UNIV_OT_LocalInvertSelection,
+                operators.select.UNIV_OT_LocalInvertSelection_VIEW3D,
+                operators.select.UNIV_OT_Tests,
+                # QuickSnap
+                operators.quick_snap.UNIV_OT_QuickSnap,
+                # UI
+                ui.UNIV_PT_TD_LayersManager,
+                ui.UNIV_UL_TD_PresetsManager,
+                ui.UNIV_PT_TD_PresetsManager,
+                ui.UNIV_PT_TD_PresetsManager_VIEW3D,
+                ui.UNIV_UL_UV_LayersManager,
+                ui.UNIV_UL_UV_LayersManagerV2,
+                ui.UNIV_PT_General_VIEW_3D,
+                ui.UNIV_PT_General,
+                ui.UNIV_PT_GlobalSettings,
+                ui.UNIV_PT_PackSettings,
+                ui.UNIV_PT_BatchInspectSettings,
+                # Pie Menus
+                ui.IMAGE_MT_PIE_univ_inspect,
+                ui.IMAGE_MT_PIE_univ_align,
+                ui.IMAGE_MT_PIE_univ_misc,
+                ui.VIEW3D_MT_PIE_univ_misc,
+                ui.VIEW3D_MT_PIE_univ_obj,
+                ui.IMAGE_MT_PIE_univ_edit,
+                ui.VIEW3D_MT_PIE_univ_edit,
+                ui.VIEW3D_MT_PIE_univ_favorites_edit,
+                ui.IMAGE_MT_PIE_univ_favorites_edit,
+                ui.VIEW3D_MT_PIE_univ_projection,
+                ui.IMAGE_MT_PIE_univ_texel,
+                ui.VIEW3D_MT_PIE_univ_texel,
+                ui.IMAGE_MT_PIE_univ_transform,
+                # Icons Generator
+                icons.UNIV_OT_IconsGenerator,
+                # Seam
+                operators.mark.UNIV_OT_Pin,
+                operators.mark.UNIV_OT_Mark_VIEW2D,
+                operators.mark.UNIV_OT_Mark_VIEW3D,
+                operators.mark.UNIV_OT_Cut_VIEW2D,
+                operators.mark.UNIV_OT_Cut_VIEW3D,
+                operators.mark.UNIV_OT_Angle,
+                operators.mark.UNIV_OT_SeamBorder,
+                operators.mark.UNIV_OT_SeamBorder_VIEW3D,
+                operators.mark.UNIV_OT_SeamBorderSimple_VIEW2D,
+                operators.mark.UNIV_OT_SeamBorderSimple_VIEW3D,
+                # Project
+                operators.project.UNIV_OT_Normal,
+                operators.project.UNIV_OT_ViewProject,
+                operators.project.UNIV_OT_SmartProject,
+                operators.project.UNIV_OT_Flatten,
+                operators.project.UNIV_OT_FlattenCleanup,
+                operators.project.UNIV_OT_WrapProject,
+                # Misc
+                operators.misc.UNIV_OT_RandomColor,
+                operators.misc.UNIV_OT_LinearGradient,
+                operators.misc.UNIV_OT_Hide,
+                operators.misc.UNIV_OT_Focus,
+                operators.misc.UNIV_OT_SetCursor2D,
+                operators.misc.UNIV_OT_SetCursor_VIEW3D,
+                operators.misc.UNIV_OT_TD_PresetsProcessing,
+                operators.misc.UNIV_OT_FixUVs,
+                operators.misc.UNIV_OT_Join,
+                operators.misc.UNIV_OT_Add,
+                operators.misc.UNIV_OT_Remove,
+                operators.misc.UNIV_OT_MoveUp,
+                operators.misc.UNIV_OT_MoveDown,
+                operators.misc.UNIV_OT_CopyToLayer,
+                operators.misc.UNIV_OT_SetActiveRender,
+                operators.misc.UNIV_OT_ExcludedOperatorsForOverlayProcessing,
+                operators.misc.UNIV_OT_SmartScaleApply,
+                operators.misc.UNIV_OT_AlignBorderVerts,
+            ]
+        )
 
-            ))
+        if univ_pro_exist:
+            from . import univ_pro
+
+            classes.extend(
+                (
+                    # UI
+                    ui.UNIV_UL_TrimPresetsManager,
+                    ui.UNIV_UL_TrimSlotsManager,
+                    ui.UNIV_PT_TrimManager,
+                    ui.UNIV_PT_CheckerSettings,
+                    ui.UNIV_PT_CheckerTextures,
+                    ui.UNIV_MT_ConstraintsHVD,
+                    ui.IMAGE_MT_PIE_constraints,
+                    # Checker System
+                    univ_pro.checker.UNIV_OT_Checker,
+                    univ_pro.checker.UNIV_OT_CheckerSave,
+                    univ_pro.checker.UNIV_OT_CheckerUpdate,
+                    univ_pro.checker.UNIV_OT_CheckerShowFolder,
+                    univ_pro.checker.UNIV_OT_CheckerGenerator,
+                    # Trim
+                    univ_pro.trim.UNIV_OT_TrimPresetsProcessing,
+                    univ_pro.trim.UNIV_OT_TrimSlotsProcessing,
+                    univ_pro.trim.UNIV_OT_TrimPresetLoad,
+                    univ_pro.trim.UNIV_OT_TrimPresetSave,
+                    univ_pro.trim.UNIV_OT_TrimFromMesh,
+                    univ_pro.trim.UNIV_OT_TrimEditor,
+                    # Stack
+                    univ_pro.stack.UNIV_OT_Stack,
+                    univ_pro.stack.UNIV_OT_Stack_VIEW3D,
+                    # Select
+                    univ_pro.select.UNIV_OT_Select_Flat_VIEW3D,
+                    univ_pro.select.UNIV_OT_Select_Flat,
+                    univ_pro.select.UNIV_OT_SelectSimilar_VIEW2D,
+                    univ_pro.select.UNIV_OT_SelectSimilar_VIEW3D,
+                    univ_pro.select.UNIV_OT_SelectConstraints,
+                    univ_pro.select.UNIV_OT_Select_Loop_Pick_VIEW3D,
+                    univ_pro.select.UNIV_OT_Select_Loop_VIEW3D,
+                    univ_pro.select.UNIV_OT_Select_Loop_Pick_VIEW2D,
+                    univ_pro.select.UNIV_OT_Select_Loop_VIEW2D,
+                    # Transform
+                    univ_pro.drag.UNIV_OT_Drag,
+                    # Isolate
+                    univ_pro.isolate.UNIV_OT_Isolate_VIEW3D,
+                    univ_pro.isolate.UNIV_OT_Isolate,
+                    # Transfer
+                    univ_pro.transfer.UNIV_OT_Transfer,
+                    # Mark
+                    univ_pro.mark.UNIV_OT_MarkConstraints,
+                    univ_pro.mark.UNIV_OT_ClearConstraints,
+                    univ_pro.mark.UNIV_OT_MarkConstraintsByAngle,
+                    # Misc
+                    univ_pro.misc.UNIV_OT_TexelDensityFromTexture,
+                    univ_pro.rectify.UNIV_OT_Rectify,
+                    univ_pro.projection.UNIV_OT_BoxProject,
+                    # Unwrap
+                    univ_pro.unwrap.UNIV_OT_Unwrap,
+                    # Straight
+                    univ_pro.straight.UNIV_OT_Straight,
+                )
+            )
 
         else:
-            classes.extend((
-                # Checker System
-                checker.UNIV_OT_Checker,
-                # Project
-                project.UNIV_OT_BoxProject,
-                # Stack
-                stack.UNIV_OT_Stack,
-                stack.UNIV_OT_Stack_VIEW3D,
-                # Unwrap
-                unwrap.UNIV_OT_Unwrap
-            ))
+            classes.extend(
+                (
+                    # Checker System
+                    operators.checker.UNIV_OT_Checker,
+                    # Project
+                    operators.project.UNIV_OT_BoxProject,
+                    # Stack
+                    operators.stack.UNIV_OT_Stack,
+                    operators.stack.UNIV_OT_Stack_VIEW3D,
+                    # Unwrap
+                    operators.unwrap.UNIV_OT_Unwrap,
+                    # Straight
+                    operators.straight.UNIV_OT_Straight,
+                )
+            )
     except AttributeError:
         traceback.print_exc()
         classes = []
 
 
-load_register_types()
-
-
 def load_workspace_types():
-    classes_workspace.extend([
-        ui.UNIV_WT_edit_VIEW3D,
-        ui.UNIV_WT_object_VIEW3D]
-    )
+    from . import ui
+
+    classes_workspace.extend([ui.UNIV_WT_edit_VIEW3D, ui.UNIV_WT_object_VIEW3D])
 
 
+load_register_types()
 load_workspace_types()
 
 is_enabled = False
@@ -323,10 +318,13 @@ is_enabled = False
 def univ_load_post_for_timer():
     """For avoid context restrict"""
     # TODO: Add to inspect
-    draw.shaders.Shaders.init_shaders()
-    misc.UNIV_OT_UV_Layers_Manager.uv_layers_watcher_append_handler()
+    from . import operators
+    from . import draw
 
-    if univ_pro:
+    draw.shaders.Shaders.init_shaders()
+    operators.misc.UNIV_OT_UV_Layers_Manager.uv_layers_watcher_append_handler()
+
+    if univ_pro_exist:
         draw.DrawerSubscribeRNA.register_handler()
         # TODO: Check why this double called ?
         # This was called before without persist (why???)
@@ -335,6 +333,7 @@ def univ_load_post_for_timer():
         draw.Drawer2D.append_handler_with_delay()
         draw.Drawer3D.append_handler_with_delay()
         draw.TrimDrawer.append_handler_with_delay()
+
 
 @bpy.app.handlers.persistent
 def univ_load_post(_):
@@ -346,21 +345,23 @@ def register():
         print("UniV: Skipping registration in background mode")
         return
 
-    global is_enabled
-    if is_enabled or not classes:
-        from . import reload
-        reload.reload(globals())
+    from . import operators
+    from . import icons
+    from . import keymaps
+    from . import preferences
 
+    global is_enabled
+
+    if is_enabled or not classes or not classes_workspace:
         if not classes:
-            load_register_types()
-            if not classes:
-                raise AttributeError('UniV: Failed to load operators, try re-enabling or restarting Blender')
+            raise AttributeError(
+                "UniV: Failed to load operators, try re-enabling or restarting Blender"
+            )
 
         if not classes_workspace:
-            load_workspace_types()
-            if not classes_workspace:
-                raise AttributeError('UniV: Failed to load workspace tool, try re-enabling or restarting Blender')
-
+            raise AttributeError(
+                "UniV: Failed to load workspace tool, try re-enabling or restarting Blender"
+            )
     is_enabled = True
 
     for c in classes:
@@ -368,16 +369,23 @@ def register():
             bpy.utils.register_class(c)
 
             # Register Macros
-            if c.__name__ == 'UNIV_OT_SelectLinkedPick_VIEW3D':
+            if c.__name__ == "UNIV_OT_SelectLinkedPick_VIEW3D":
                 item = c.define("MESH_OT_select_linked_pick")
                 item.properties.deselect = False
-            elif c.__name__ == 'UNIV_OT_DeselectLinkedPick_VIEW3D':
+            elif c.__name__ == "UNIV_OT_DeselectLinkedPick_VIEW3D":
                 item = c.define("MESH_OT_select_linked_pick")
                 item.properties.deselect = True
 
         except Exception:  # noqa
             print(f"UniV: Failed to register a class {c.__name__}")
             traceback.print_exc()
+
+    edit_ws = classes_workspace[0]
+    object_ws = classes_workspace[1]
+    edit_ws.bl_keymap = keymaps.WSKeymapGenerator.add_keymaps_ws_edit()
+    object_ws.bl_keymap = keymaps.WSKeymapGenerator.add_keymaps_ws_object()
+    edit_ws.bl_icon = str(icons.icons.get_expected_filepath_for_dat_())
+    object_ws.bl_icon = str(icons.icons.get_expected_filepath_for_dat_())
 
     for c in classes_workspace:
         try:
@@ -388,11 +396,11 @@ def register():
 
     # Icons register.
     try:
+        icons.icons.register_ws_icons_()
         icons.icons.register_icons_()  # NOTE: Need registered AddonPreferences.
     except:  # noqa
-        print('UniV: Icons not loaded.')
+        print("UniV: Icons not loaded.")
         traceback.print_exc()
-
 
     # WARNING: When modules are reloaded, classes are overwritten and have no registration.
     # To avoid this, it is necessary to use initially registered classes.
@@ -404,41 +412,49 @@ def register():
     # so you can load it without any delay
     # bpy.app.handlers.load_post.append(univ_load_post)
     from bpy.app.timers import register
-    register(univ_load_post_for_timer, first_interval = 0.0, persistent = True)
 
-    bpy.types.VIEW3D_HT_header.prepend(toggle.univ_header_split_btn)
-    bpy.types.IMAGE_HT_header.prepend(toggle.univ_header_sync_btn)
-    bpy.types.IMAGE_HT_header.prepend(toggle.univ_header_split_btn)
+    register(univ_load_post_for_timer, first_interval=0.0, persistent=True)
 
-    bpy.types.VIEW3D_MT_object_apply.prepend(misc.draw_smart_scale_menu)
+    bpy.types.VIEW3D_HT_header.prepend(operators.toggle.univ_header_split_btn)
+    bpy.types.IMAGE_HT_header.prepend(operators.toggle.univ_header_sync_btn)
+    bpy.types.IMAGE_HT_header.prepend(operators.toggle.univ_header_split_btn)
 
-    import platform
-    if platform.system() in ('Windows', 'Linux'):
-        try:
-            fastapi.clib.FastAPI.load()
-        except:  # noqa
-            pass
-            # if univ_pro:
-            #     print('UniV: Cannot load fastapi.')
-            #     traceback.print_exc()
+    bpy.types.VIEW3D_MT_object_apply.prepend(operators.misc.draw_smart_scale_menu)
+
+    if "NOT_BL_EXT":
+        import platform
+
+        # TODO: Load with checking `prefs().use_fastapi`.
+        if platform.system() in ("Windows", "Linux"):
+            try:
+                fastapi.clib.FastAPI.load()
+            except:  # noqa
+                pass
+                # if univ_pro:
+                #     print('UniV: Cannot load fastapi.')
+                #     traceback.print_exc()
 
     try:
-        keymaps.add_keymaps()
-        keymaps.add_keymaps_ws()
+        keymaps.UKeymap.add_keymaps()
     except AttributeError:
         traceback.print_exc()
 
     preferences.update_panel(None, None)
-    toggle.ToggleHandlers.register_handler()
+    operators.toggle.ToggleHandlers.register_handler()
 
 
 def unregister():
     if bpy.app.background:
         return
 
-    keymaps.remove_keymaps()
-    keymaps.remove_keymaps_ws()
+    from . import operators
+    from . import draw
+    from . import icons
+    from . import keymaps
+
+    keymaps.UKeymap.remove_keymaps()
     icons.icons.unregister_icons_()
+    # icons.icons.unregister_ws_icons_()
 
     draw.DrawerSubscribeRNA.unregister_handler()
     draw.Drawer2D.unregister()
@@ -446,7 +462,7 @@ def unregister():
     draw.TrimDrawer.unregister()
 
     for handle in reversed(bpy.app.handlers.depsgraph_update_post):
-        if handle.__name__.startswith('univ_'):
+        if handle.__name__.startswith("univ_"):
             bpy.app.handlers.depsgraph_update_post.remove(handle)
 
     # del bpy.types.WindowManager.univ_settings  # noqa
@@ -466,22 +482,35 @@ def unregister():
         try:
             bpy.utils.unregister_class(c)
         except RuntimeError:
-            if not hasattr(c, 'rna_type'):
+            if not hasattr(c, "rna_type"):
                 continue
             traceback.print_exc()
 
-    bpy.types.VIEW3D_HT_header.remove(toggle.univ_header_split_btn)
-    bpy.types.IMAGE_HT_header.remove(toggle.univ_header_split_btn)
-    bpy.types.IMAGE_HT_header.remove(toggle.univ_header_sync_btn)
-    bpy.types.VIEW3D_MT_object_apply.remove(misc.draw_smart_scale_menu)
+    bpy.types.VIEW3D_HT_header.remove(operators.toggle.univ_header_split_btn)
+    bpy.types.IMAGE_HT_header.remove(operators.toggle.univ_header_split_btn)
+    bpy.types.IMAGE_HT_header.remove(operators.toggle.univ_header_sync_btn)
+    bpy.types.VIEW3D_MT_object_apply.remove(operators.misc.draw_smart_scale_menu)
 
-    texel.UNIV_OT_TexelDensityFromTexture.store_poliigon_physical_size_cache()
+    if univ_pro_exist:
+        from . import univ_pro
 
-    toggle.ToggleHandlers.unregister_handler()
+        univ_pro.misc.UNIV_OT_TexelDensityFromTexture.store_poliigon_physical_size_cache()
+
+    operators.toggle.ToggleHandlers.unregister_handler()
 
     for handler in reversed(bpy.app.handlers.load_post):
         if handler.__name__ == univ_load_post.__name__:
             bpy.app.handlers.load_post.remove(handler)
+
+    if "NOT_BL_EXT":
+        import platform
+
+        if platform.system() in ("Windows", "Linux"):
+            try:
+                fastapi.clib.FastAPI.close()
+            except:  # noqa
+                pass
+
 
 if __name__ == "__main__":
     register()

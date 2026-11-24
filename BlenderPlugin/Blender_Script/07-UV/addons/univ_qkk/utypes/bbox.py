@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 Oxicid
+# SPDX-FileCopyrightText: 2026 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import math
@@ -50,12 +50,14 @@ class BBox:
         return cls(xmin, xmax, ymin, ymax)
 
     @classmethod
-    def calc_bbox_with_extrema_corners(cls, corners, uv: BMLayerItem) -> 'tuple[BBox, tuple[BMLoop, ...]]':
+    def calc_bbox_with_extrema_corners(
+        cls, corners: "typing.Iterable[BMLoop]", uv: BMLayerItem
+    ) -> "tuple[BBox, tuple[BMLoop, ...]]":
         xmin = math.inf
         xmax = -math.inf
         ymin = math.inf
         ymax = -math.inf
-        xmin_crn = xmax_crn = ymin_crn = ymax_crn = corners[0]
+        xmin_crn = xmax_crn = ymin_crn = ymax_crn = None
         for crn in corners:
             x, y = crn[uv].uv
             if x < xmin:
@@ -71,10 +73,15 @@ class BBox:
                 ymax = y
                 ymax_crn = crn
 
+        assert isinstance(xmin_crn, BMLoop)
+        assert isinstance(xmax_crn, BMLoop)
+        assert isinstance(ymin_crn, BMLoop)
+        assert isinstance(ymax_crn, BMLoop)
+
         return cls(xmin, xmax, ymin, ymax), (xmin_crn, xmax_crn, ymin_crn, ymax_crn)
 
     @classmethod
-    def calc_bbox_with_extrema_coords(cls, coords: list[Vector]) -> 'tuple[BBox, list[Vector]]':
+    def calc_bbox_with_extrema_coords(cls, coords: list[Vector]) -> "tuple[BBox, list[Vector]]":
         xmin = math.inf
         xmax = -math.inf
         ymin = math.inf
@@ -124,11 +131,12 @@ class BBox:
         return bbox
 
     def __init__(
-            self,
-            xmin: float = math.inf,
-            xmax: float = -math.inf,
-            ymin: float = math.inf,
-            ymax: float = -math.inf):
+        self,
+        xmin: float = math.inf,
+        xmax: float = -math.inf,
+        ymin: float = math.inf,
+        ymax: float = -math.inf,
+    ):
         self.xmin = xmin
         self.xmax = xmax
         self.ymin = ymin
@@ -206,7 +214,7 @@ class BBox:
     def from_center(cls, center: Vector | tuple[float, float]):
         xmin = floor(center[0])
         ymin = floor(center[1])
-        return cls(xmin, xmin+1.0, ymin, ymin+1.0)
+        return cls(xmin, xmin + 1.0, ymin, ymin + 1.0)
 
     @center.setter
     def center(self, new_center):
@@ -222,8 +230,8 @@ class BBox:
 
     def moved(self, new_center: Vector):
         half_size = (self.max - self.min) * 0.5
-        xmin, ymin = (new_center - half_size)
-        xmax, ymax = (new_center + half_size)
+        xmin, ymin = new_center - half_size
+        xmax, ymax = new_center + half_size
         return BBox(xmin, xmax, ymin, ymax)
 
     @property
@@ -280,7 +288,7 @@ class BBox:
 
     @property
     def diagonal(self):
-        return math.sqrt(self.width ** 2 + self.height ** 2)
+        return math.sqrt(self.width**2 + self.height**2)
 
     def union(self, other):
         if self.xmin > other.xmin:
@@ -311,6 +319,7 @@ class BBox:
         if xy[1] > self.ymax:
             self.ymax = xy[1]
 
+    # TODO: Remove `*.add` method.
     def add(self, co):
         x, y = co
         if self.xmin > x:
@@ -445,6 +454,7 @@ class BBox:
 
     def isect_triangles(self, tris):
         from mathutils.geometry import intersect_tri_tri_2d
+
         assert tris
         a0, a1, a2, a3, a4, a5 = self.draw_data_tris()
         if isinstance(tris[0], tuple):
@@ -495,24 +505,13 @@ class BBox:
         if dx == 0.0 and dy == 0.0:
             # Inner
             if with_center:
-                center = Vector((xmin+xmax, ymin+ymax))
+                center = Vector((xmin + xmax, ymin + ymax))
                 center *= 0.5
                 dist_to_center = (Vector((x, y)) - center).length
 
-                return min(
-                    x - xmin,
-                    xmax - x,
-                    y - ymin,
-                    ymax - y,
-                    dist_to_center
-                )
+                return min(x - xmin, xmax - x, y - ymin, ymax - y, dist_to_center)
             else:
-                return min(
-                    x - xmin,
-                    xmax - x,
-                    y - ymin,
-                    ymax - y,
-                )
+                return min(x - xmin, xmax - x, y - ymin, ymax - y)
 
         # Outer
         return (dx * dx + dy * dy) ** 0.5
@@ -523,10 +522,15 @@ class BBox:
 
     def isect_segment(self, s1: Vector, s2: Vector) -> bool:
         from mathutils.geometry import intersect_line_line_2d as ll_isect
-        return any((ll_isect(s1, s2, self.left_bottom, self.left_upper),
-                    ll_isect(s1, s2, self.left_upper, self.right_upper),
-                    ll_isect(s1, s2, self.right_upper, self.right_bottom),
-                    ll_isect(s1, s2, self.right_bottom, self.left_bottom)))
+
+        return any(
+            (
+                ll_isect(s1, s2, self.left_bottom, self.left_upper),
+                ll_isect(s1, s2, self.left_upper, self.right_upper),
+                ll_isect(s1, s2, self.right_upper, self.right_bottom),
+                ll_isect(s1, s2, self.right_bottom, self.left_bottom),
+            )
+        )  # fmr: skip
 
     def isect_circle(self, xy: Vector, radius: float) -> bool:
         if self.xmin <= xy.x <= self.xmax:
@@ -541,17 +545,17 @@ class BBox:
 
         return dx * dx + dy * dy <= radius * radius
 
-    def transform_pt_v(self, dst: 'BBox', xy_src: list[float]) -> list[float]:
+    def transform_pt_v(self, dst: "BBox", xy_src: list[float]) -> list[float]:
         xy_dst = [0.0, 0.0]
-        xy_dst[0] = ((xy_src[0] - self.xmin) / (self.xmax - self.xmin))
+        xy_dst[0] = (xy_src[0] - self.xmin) / (self.xmax - self.xmin)
         xy_dst[0] = dst.xmin + ((dst.xmax - dst.xmin) * xy_dst[0])
 
-        xy_dst[1] = ((xy_src[1] - self.ymin) / (self.ymax - self.ymin))
+        xy_dst[1] = (xy_src[1] - self.ymin) / (self.ymax - self.ymin)
         xy_dst[1] = dst.ymin + ((dst.ymax - dst.ymin) * xy_dst[1])
 
         return xy_dst
 
-    def transform_calc_m4_pivot_min(self, dst: 'BBox') -> Matrix:
+    def transform_calc_m4_pivot_min(self, dst: "BBox") -> Matrix:
         matrix = Matrix.Identity(4)
         matrix[0][0] = self.width / dst.width
         matrix[1][1] = self.height / dst.height
@@ -567,9 +571,9 @@ class BBox:
         self.ymax += pad[1]
 
     def pad_y(self, boundary_size, pad_min, pad_max):
-        assert (pad_max >= 0.0)
-        assert (pad_min >= 0.0)
-        assert (boundary_size > 0.0)
+        assert pad_max >= 0.0
+        assert pad_min >= 0.0
+        assert boundary_size > 0.0
 
         total_pad = pad_max + pad_min
         if total_pad == 0.0:
@@ -579,7 +583,7 @@ class BBox:
         self.ymax += total_extend * (pad_max / total_pad)
         self.ymin -= total_extend * (pad_min / total_pad)
 
-    def interp(self, bbox_b: 'BBox', fac):
+    def interp(self, bbox_b: "BBox", fac):
         ifac = 1.0 - fac
         bbox_r = BBox()
         bbox_r.xmin = self.xmin * ifac + bbox_b.xmin * fac
@@ -608,7 +612,7 @@ class BBox:
 
         return changed
 
-    def clamp_other(self, rect_bounds: 'BBox', r_xy: Vector | list[float]):
+    def clamp_other(self, rect_bounds: "BBox", r_xy: Vector | list[float]):
         changed = False
 
         r_xy[0] = 0.0
@@ -644,7 +648,7 @@ class BBox:
 
         return changed
 
-    def compare(self, other: 'BBox', threshold):
+    def compare(self, other: "BBox", threshold):
         if abs(self.xmin - other.xmin) < threshold:
             if abs(self.xmax - other.xmax) < threshold:
                 if abs(self.ymin - other.ymin) < threshold:
@@ -652,11 +656,11 @@ class BBox:
                         return True
         return False
 
-    def overlap(self, other: 'BBox') -> bool:
-        return not (self.xmax <= other.xmin or other.xmax <= self.xmin or
-                    self.ymax <= other.ymin or other.ymax <= self.ymin)
+    def overlap(self, other: "BBox") -> bool:
+        return not (self.xmax <= other.xmin or other.xmax <= self.xmin
+                    or self.ymax <= other.ymin or other.ymax <= self.ymin)  # fmt: skip
 
-    def isect(self, other: 'BBox') -> 'BBox | None':
+    def isect(self, other: "BBox") -> "BBox | None":
         xmin = self.xmin if (self.xmin > other.xmin) else other.xmin
         xmax = self.xmax if (self.xmax < other.xmax) else other.xmax
         ymin = self.ymin if (self.ymin > other.ymin) else other.ymin
@@ -666,7 +670,7 @@ class BBox:
             return BBox(xmin, xmax, ymin, ymax)
         return None
 
-    def is_isect(self, other: 'BBox') -> bool:
+    def is_isect(self, other: "BBox") -> bool:
         xmin = self.xmin if (self.xmin > other.xmin) else other.xmin
         xmax = self.xmax if (self.xmax < other.xmax) else other.xmax
         ymin = self.ymin if (self.ymin > other.ymin) else other.ymin
@@ -674,7 +678,7 @@ class BBox:
 
         return xmax >= xmin and ymax >= ymin
 
-    def isect_rect_y(self, other: 'BBox') -> 'tuple[float, float] | None':
+    def isect_rect_y(self, other: "BBox") -> "tuple[float, float] | None":
         ymin = self.ymin if (self.ymin > other.ymin) else other.ymin
         ymax = self.ymax if (self.ymax < other.ymax) else other.ymax
 
@@ -682,7 +686,7 @@ class BBox:
             return ymin, ymax
         return None
 
-    def isect_rect_x(self, other: 'BBox') -> 'tuple[float, float] | None':
+    def isect_rect_x(self, other: "BBox") -> "tuple[float, float] | None":
         xmin = self.xmin if (self.xmin > other.xmin) else other.xmin
         xmax = self.xmax if (self.xmax < other.xmax) else other.xmax
 
@@ -728,14 +732,13 @@ class BBox:
     def __contains__(self, pt_or_bbox) -> bool:
         if isinstance(pt_or_bbox, BBox):
             bbox = pt_or_bbox
-            return (self.xmin <= bbox.xmin) and (self.xmax >= bbox.xmax) and \
-                   (self.ymin <= bbox.ymin) and (self.ymax >= bbox.ymax)  # noqa
+            return ((self.xmin <= bbox.xmin) and (self.xmax >= bbox.xmax)
+                     and (self.ymin <= bbox.ymin) and (self.ymax >= bbox.ymax))  # fmt: skip
 
         x, y = pt_or_bbox
-        return self.xmin <= x <= self.xmax and \
-               self.ymin <= y <= self.ymax  # noqa
+        return self.xmin <= x <= self.xmax and self.ymin <= y <= self.ymax
 
-    def __eq__(self, other: 'BBox'):
+    def __eq__(self, other: "BBox"):
         if not isinstance(other, BBox):
             return NotImplemented
         return self.min == other.min and self.max == other.max
@@ -743,10 +746,10 @@ class BBox:
     def __hash__(self):
         return hash(self.xmin + self.ymin + self.xmax + self.ymax)
 
-    def __and__(self, other: 'BBox'):
+    def __and__(self, other: "BBox"):
         return self.isect(other)
 
-    def __or__(self, other: 'BBox'):
+    def __or__(self, other: "BBox"):
         return self.union(other)
 
 
@@ -756,13 +759,16 @@ class BBox3D:
         self.max = xyz_max
 
     @classmethod
-    def get_from_umesh(cls, umesh):
-        return cls(Vector(umesh.obj.bound_box[0]), Vector(umesh.obj.bound_box[6]))
+    def from_umesh(cls, umesh, *, from_original_bbox=False):
+        """ Get bounds with avoid shape keys."""
+        if from_original_bbox:
+            return cls(Vector(umesh.obj.bound_box[0]), Vector(umesh.obj.bound_box[6]))
+        return cls.calc_bbox(v.co for v in umesh.obj.data.vertices)
 
-    def to_bbox_2d(self, axis: typing.Literal['x', 'y', 'z']):
-        if axis == 'z':
+    def to_bbox_2d(self, axis: typing.Literal["x", "y", "z"]):
+        if axis == "z":
             return BBox(self.min.x, self.max.x, self.min.y, self.max.y)
-        elif axis == 'y':
+        elif axis == "x":
             return BBox(self.min.y, self.max.y, self.min.z, self.max.z)
         else:
             return BBox(self.min.x, self.max.x, self.min.z, self.max.z)

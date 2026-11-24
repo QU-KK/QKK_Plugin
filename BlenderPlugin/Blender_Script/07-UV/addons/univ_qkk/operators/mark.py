@@ -1,9 +1,5 @@
-# SPDX-FileCopyrightText: 2024 Oxicid
+# SPDX-FileCopyrightText: 2026 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
-
-if 'bpy' in locals():
-    from .. import reload
-    reload.reload(globals())
 
 import bpy
 import math
@@ -14,23 +10,22 @@ from bpy.props import *
 
 from .. import utils
 from .. import utypes
-from ..utypes import UMeshes, AdvIslands
+from ..utypes import UMeshes, Islands
 from ..preferences import prefs, univ_settings
 
 
-
 class UNIV_OT_Mark_VIEW2D(Operator):
-    bl_idname = 'uv.univ_mark'
-    bl_label = 'Mark'
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_idname = "uv.univ_mark"
+    bl_label = "Mark"
+    bl_options = {"REGISTER", "UNDO"}
     bl_description = "Set/Clear mark seam"
 
     def draw(self, context):
-        if context.mode == 'EDIT_MESH':
-            self.layout.prop(prefs(), 'invert_toggle_logic')
+        if context.mode == "EDIT_MESH":
+            self.layout.prop(prefs(), "invert_toggle_logic")
 
     def execute(self, context):
-        if context.mode != 'EDIT_MESH':
+        if context.mode != "EDIT_MESH":
             return self.remove_seams_in_object_mode(self.report)
 
         umeshes = UMeshes(report=self.report)
@@ -75,7 +70,6 @@ class UNIV_OT_Mark_VIEW2D(Operator):
                     for crn in umesh.sequence:
                         crn.edge.seam = False
 
-
         res = umeshes.update()
         if not umeshes.is_edit_mode:
             umeshes.free()
@@ -87,37 +81,36 @@ class UNIV_OT_Mark_VIEW2D(Operator):
         attr_counter = 0
         for obj in utils.calc_any_unique_obj():
             for attr in reversed(obj.data.attributes):
-                if attr.name.startswith(('uv_seam', '.uv_seam')):
+                if attr.name.startswith(("uv_seam", ".uv_seam")):
                     obj.data.attributes.remove(attr)
                     obj.update_tag()
                     attr_counter += 1
         if attr_counter:
-            report({'INFO'}, f"Cleaned seams from {attr_counter!r} objects.")
-            return {'FINISHED'}
+            report({"INFO"}, f"Cleaned seams from {attr_counter!r} objects.")
+            return {"FINISHED"}
         else:
-            report({'INFO'}, 'All seams from all selected objects was cleaned.')
-            return {'CANCELLED'}
+            report({"INFO"}, "All seams from all selected objects was cleaned.")
+            return {"CANCELLED"}
 
 
 class UNIV_OT_Mark_VIEW3D(Operator):
-    bl_idname = 'mesh.univ_mark'
-    bl_label = 'Mark'
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_idname = "mesh.univ_mark"
+    bl_label = "Mark"
+    bl_options = {"REGISTER", "UNDO"}
     bl_description = "Set/Clear mark seam"
 
     def draw(self, context):
-        if context.mode == 'EDIT_MESH':
-            self.layout.prop(prefs(), 'invert_toggle_logic')
+        if context.mode == "EDIT_MESH":
+            self.layout.prop(prefs(), "invert_toggle_logic")
 
     def execute(self, context):
-        if context.mode != 'EDIT_MESH':
+        if context.mode != "EDIT_MESH":
             return UNIV_OT_Mark_VIEW2D.remove_seams_in_object_mode(self.report)
 
-        umeshes = UMeshes.calc_all_objects(verify_uv=False)
+        umeshes = UMeshes.calc_all_objects_in_file(verify_uv=False)
         umeshes.set_sync()
         umeshes.sync_invalidate()
         umeshes.update_tag = False
-
 
         selected, visible = umeshes.filtered_by_selected_and_visible_3d_edges()
         umeshes = selected if selected else visible
@@ -126,7 +119,6 @@ class UNIV_OT_Mark_VIEW3D(Operator):
                 umesh.sequence = [e for e in umesh.bm.edges if e.select]
             else:
                 umesh.sequence = [e for e in umesh.bm.edges if not e.hide]
-
 
         if not prefs().invert_toggle_logic:
             all_marked = all(all(e.seam for e in u.sequence) for u in umeshes)
@@ -159,9 +151,8 @@ class UNIV_OT_Mark_VIEW3D(Operator):
                     for e in umesh.sequence:
                         e.seam = False
 
-
         if not umeshes.update_tag:
-            self.report({'WARNING'}, "Edges not found.")
+            self.report({"WARNING"}, "Edges not found.")
 
         res = umeshes.update()
         if not umeshes.is_edit_mode:
@@ -170,20 +161,32 @@ class UNIV_OT_Mark_VIEW3D(Operator):
         return res
 
 
-class UNIV_OT_Pin(Operator):
-    bl_idname = 'uv.univ_pin'
-    bl_label = 'Pin'
-    bl_options = {'REGISTER', 'UNDO'}
-    bl_description = f"Set/Clear selected UV vertices as anchored between multiple unwrap operations\n\n" \
+class UNIV_OT_Pin(utypes.RayCastAndPick):
+    bl_idname = "uv.univ_pin"
+    bl_label = "Pin"
+    bl_options = {"REGISTER", "UNDO"}
+    bl_description = (
+        f"Set/Clear selected UV vertices as anchored between multiple unwrap operations\n\n"
         f"This button is used to free the 'P' button for the Pack operator"
+    )
 
     def draw(self, context):
-        if context.mode == 'EDIT_MESH':
-            self.layout.prop(prefs(), 'invert_toggle_logic')
+        if context.mode == "EDIT_MESH":
+            self.layout.prop(prefs(), "invert_toggle_logic")
+
+    def invoke(self, context, event):
+        self.store_mouse_pose_on_uv_and_max_distance_if_allowed(event)
+        return self.execute(context)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.max_distance: float = 0.0
+        self.mouse_pos: Vector | None = None
 
     def execute(self, context):
-        if context.mode != 'EDIT_MESH':
+        if context.mode != "EDIT_MESH":
             import numpy as np
+
             attr_counter = 0
             for obj in utils.calc_any_unique_obj():
                 uv = obj.data.uv_layers.active
@@ -200,31 +203,61 @@ class UNIV_OT_Pin(Operator):
                         attr_counter += 1
 
             if attr_counter:
-                self.report({'INFO'}, f"Cleaned pins from {attr_counter!r} objects.")
-                return {'FINISHED'}
+                self.report({"INFO"}, f"Cleaned pins from {attr_counter!r} objects.")
+                return {"FINISHED"}
             else:
-                self.report({'INFO'}, 'All pins from all selected objects was cleaned.')
-                return {'CANCELLED'}
-
+                self.report({"INFO"}, "All pins from all selected objects was cleaned.")
+                return {"CANCELLED"}
 
         from .transform import UNIV_OT_Align_pie
+
         umeshes = UMeshes(report=self.report)
         umeshes.update_tag = False
         selected, visible = umeshes.filtered_by_selected_and_visible_uv_by_context()
         umeshes = selected if selected else visible
         if selected:
             for umesh in umeshes:
-                if umesh.elem_mode == 'VERT':
+                if umesh.elem_mode == "VERT":
                     umesh.sequence = utils.calc_selected_uv_vert(umesh)
-                elif umesh.elem_mode == 'EDGE':
+                elif umesh.elem_mode == "EDGE":
                     corners = utils.calc_selected_uv_edge_iter(umesh)
-                    umesh.sequence = UNIV_OT_Align_pie.get_unique_linked_corners_from_crn_edge(umesh, corners)
+                    umesh.sequence = UNIV_OT_Align_pie.get_unique_linked_corners_from_crn_edge(
+                        umesh, corners
+                    )
                 else:
-                    corners = (crn for f in utils.calc_selected_uv_faces_iter(umesh) for crn in f.loops)
-                    umesh.sequence = UNIV_OT_Align_pie.get_unique_linked_corners_from_crn_vert(umesh, corners)
+                    corners = (
+                        crn for f in utils.calc_selected_uv_faces_iter(umesh) for crn in f.loops
+                    )
+                    umesh.sequence = UNIV_OT_Align_pie.get_unique_linked_corners_from_crn_vert(
+                        umesh, corners
+                    )
         else:
             for umesh in umeshes:
                 umesh.sequence = utils.calc_visible_uv_corners(umesh)
+
+            # Pick pinning.
+            if self.mouse_pos:
+                hit = utypes.CrnEdgeHit(self.mouse_pos, self.max_distance)
+                for umesh in umeshes:
+                    hit.find_nearest_vert_by_visible_faces(umesh)
+
+                if not hit:
+                    self.report({"WARNING"}, "Vertex not found within a given radius")
+                    return {"CANCELLED"}
+                else:
+                    uv = hit.umesh.uv
+
+                    get_linked_inc = utils.get_linked_crn_fn(hit.umesh, included=True)
+                    linked = get_linked_inc(hit.crn)
+                    if all(crn[uv].pin_uv for crn in linked):
+                        for crn in linked:
+                            crn[uv].pin_uv = False
+                    else:
+                        for crn in linked:
+                            crn[uv].pin_uv = True
+                    hit.umesh.update_tag = True
+                    hit.umesh.update()
+                    return {"FINISHED"}
 
         if not prefs().invert_toggle_logic:
             all_pinned = True
@@ -267,7 +300,6 @@ class UNIV_OT_Pin(Operator):
                     for crn in umesh.sequence:
                         crn[uv].pin_uv = False
 
-
         res = umeshes.update()
         if not umeshes.is_edit_mode:
             umeshes.free()
@@ -276,82 +308,78 @@ class UNIV_OT_Pin(Operator):
 
 
 # noinspection PyTypeHints
-class UNIV_OT_Cut_VIEW2D(Operator):
+class UNIV_OT_Cut_VIEW2D(utypes.RayCastAndPick):
     bl_idname = "uv.univ_cut"
     bl_label = "Cut"
     bl_description = "Cut selected"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {"REGISTER", "UNDO"}
 
-    addition: BoolProperty(name='Addition', default=True)
-    use_correct_aspect: bpy.props.BoolProperty(name='Correct Aspect', default=True)
-    unwrap: EnumProperty(name='Unwrap', default='ANGLE_BASED',
-                         items=(
-                             ('NONE', 'None', ''),
-                             ('ANGLE_BASED', 'Hard Surface', ''),
-                             ('CONFORMAL', 'Conformal', ''),
-                             ('MINIMUM_STRETCH', 'Organic', '')
-                         ))
+    addition: BoolProperty(name="Addition", default=True)
+    use_correct_aspect: bpy.props.BoolProperty(name="Correct Aspect", default=True)
+    unwrap: EnumProperty(
+        name="Unwrap",
+        default="ANGLE_BASED",
+        items=(
+            ("NONE", "None", ""),
+            ("ANGLE_BASED", "Hard Surface", ""),
+            ("CONFORMAL", "Conformal", ""),
+            ("MINIMUM_STRETCH", "Organic", ""),
+        ),
+    )
 
     @classmethod
     def poll(cls, context):
-        return context.mode == 'EDIT_MESH'
+        return context.mode == "EDIT_MESH"
 
     def draw(self, context):
-        self.layout.prop(univ_settings(), 'use_texel')
-        self.layout.prop(self, 'addition')
-        self.layout.prop(self, 'use_correct_aspect')
-        self.layout.column(align=True).prop(self, 'unwrap', expand=True)
+        self.layout.prop(univ_settings(), "use_texel")
+        self.layout.prop(self, "addition")
+        self.layout.prop(self, "use_correct_aspect")
+        self.layout.column(align=True).prop(self, "unwrap", expand=True)
 
     def invoke(self, context, event):
-        if not (context.area.type == 'IMAGE_EDITOR' and context.area.ui_type == 'UV'):
-            self.report({'WARNING'}, 'Active area must be UV type')
-            return {'CANCELLED'}
+        if not (context.area.type == "IMAGE_EDITOR" and context.area.ui_type == "UV"):
+            self.report({"WARNING"}, "Active area must be UV type")
+            return {"CANCELLED"}
 
-        if event.value == 'PRESS':
-            self.max_distance = utils.get_max_distance_from_px(prefs().max_pick_distance, context.region.view2d)
-            self.mouse_pos = Vector(context.region.view2d.region_to_view(event.mouse_region_x, event.mouse_region_y))
+        if self.store_mouse_pose_on_uv_and_max_distance_if_allowed(event):
             return self.execute(context)
 
         self.addition = event.shift
         return self.execute(context)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.umeshes: UMeshes | None = None
-        self.max_distance: float = 0.0
-        self.mouse_pos: Vector | None = None
-
     def execute(self, context) -> set[str]:
-        self.umeshes = UMeshes(report=self.report)
-        self.umeshes.fix_context()
-        if self.unwrap == 'MINIMUM_STRETCH' and bpy.app.version < (4, 3, 0):
-            self.unwrap = 'ANGLE_BASED'
-            self.report({'WARNING'}, 'Organic Mode is not supported in Blender versions below 4.3')
+        umeshes = UMeshes(report=self.report)
+        umeshes.fix_context()
+        if self.unwrap == "MINIMUM_STRETCH" and bpy.app.version < (4, 3, 0):
+            self.unwrap = "ANGLE_BASED"
+            self.report({"WARNING"}, "Organic Mode is not supported in Blender versions below 4.3")
 
-        selected_umeshes, visible_umeshes = self.umeshes.filtered_by_selected_and_visible_uv_edges()
-        self.umeshes = selected_umeshes if selected_umeshes else visible_umeshes
+        selected_umeshes, visible_umeshes = umeshes.filtered_by_selected_and_visible_uv_edges()
+        umeshes = selected_umeshes if selected_umeshes else visible_umeshes
 
-        if not self.umeshes:
-            return self.umeshes.update()
-        if not selected_umeshes and self.mouse_pos:
-            return self.pick_cut()
+        if not umeshes:
+            return umeshes.update()
+        if not selected_umeshes and self.mouse_position:
+            return self.pick_cut(umeshes)
 
-        self.cut_uv_space()
-        if self.unwrap != 'NONE':
-            self.unwrap_after_cut()
-        self.umeshes.update()
+        self.cut_uv_space(umeshes)
+        if self.unwrap != "NONE":
+            self.unwrap_after_cut(umeshes)
+        umeshes.update()
 
         # Flush System
         from .. import draw
+
         if not draw.DrawCallSeams2D.is_enable():
             visible_umeshes.filter_by_visible_uv_faces()
-            self.umeshes.umeshes.extend(visible_umeshes.umeshes.copy())
-            coords = draw.mesh_extract.extract_seams_umeshes(self.umeshes)
+            umeshes.umeshes.extend(visible_umeshes.umeshes.copy())
+            coords = draw.mesh_extract.extract_seams_umeshes(umeshes)
             draw.LinesDrawSimple.draw_register(coords, draw.DrawCallSeams2D.get_color())
-        return {'FINISHED'}
+        return {"FINISHED"}
 
-    def cut_uv_space(self):
-        for umesh in self.umeshes:
+    def cut_uv_space(self, umeshes: UMeshes):
+        for umesh in umeshes:
             uv = umesh.uv
             face_select_get = utils.face_select_get_func(umesh)
             for crn in utils.calc_selected_uv_edge_iter(umesh):
@@ -363,14 +391,14 @@ class UNIV_OT_Cut_VIEW2D(Operator):
                 elif not self.addition:
                     crn.edge.seam = False
 
-    def unwrap_after_cut(self):
-        assert self.unwrap != 'NONE'
+    def unwrap_after_cut(self, umeshes: UMeshes):
+        assert self.unwrap != "NONE"
 
         save_transform_islands = []
-        for umesh in self.umeshes:
+        for umesh in umeshes:
             umesh.value = umesh.check_uniform_scale(report=self.report)
             umesh.aspect = utils.get_aspect_ratio() if self.use_correct_aspect else 1.0
-            islands = AdvIslands.calc_selected_with_mark_seam(umesh)
+            islands = Islands.calc_selected(umesh)
             for isl in islands:
                 isl.apply_aspect_ratio()
                 save_transform_islands.append(isl.save_transform(flip_if_needed=True))
@@ -384,14 +412,14 @@ class UNIV_OT_Cut_VIEW2D(Operator):
                 if isl.rotate:
                     utils.set_global_texel(isl.island)
 
-    def pick_cut(self):
-        hit = utypes.CrnEdgeHit(self.mouse_pos, self.max_distance)
-        for umesh in self.umeshes:
+    def pick_cut(self, umeshes: UMeshes):
+        hit = utypes.CrnEdgeHit(self.mouse_position, self.max_distance)
+        for umesh in umeshes:
             hit.find_nearest_crn_by_visible_faces(umesh)
 
         if not hit:
-            self.report({'WARNING'}, 'Edge not found within a given radius')
-            return {'CANCELLED'}
+            self.report({"WARNING"}, "Edge not found within a given radius")
+            return {"CANCELLED"}
         else:
             e = hit.crn.edge
             had_seam = e.seam
@@ -400,77 +428,76 @@ class UNIV_OT_Cut_VIEW2D(Operator):
                 hit.umesh.update()
 
             from .. import draw
+
             if not draw.DrawCallSeams2D.is_enable():
-                coords = draw.mesh_extract.extract_seams_umeshes(self.umeshes)
+                coords = draw.mesh_extract.extract_seams_umeshes(umeshes)
                 draw.LinesDrawSimple.draw_register(coords, draw.DrawCallSeams2D.get_color())
                 if coords:
                     bpy.context.area.tag_redraw()
-            return {'FINISHED'} if had_seam else {'FINISHED'}
+            return {"FINISHED"}
 
 
 # noinspection PyTypeHints
-class UNIV_OT_Cut_VIEW3D(Operator, utypes.RayCast):
+class UNIV_OT_Cut_VIEW3D(utypes.RayCastAndPick):
     bl_idname = "mesh.univ_cut"
     bl_label = "Cut"
     bl_description = "Cut selected"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {"REGISTER", "UNDO"}
 
-    addition: BoolProperty(name='Addition', default=True)
-    use_correct_aspect: bpy.props.BoolProperty(name='Correct Aspect', default=True)
-    unwrap: EnumProperty(name='Unwrap', default='ANGLE_BASED',
-                         items=(
-                             ('NONE', 'None', ''),
-                             ('ANGLE_BASED', 'Hard Surface', ''),
-                             ('CONFORMAL', 'Conformal', ''),
-                             ('MINIMUM_STRETCH', 'Organic', '')
-                         ))
+    addition: BoolProperty(name="Addition", default=True)
+    use_correct_aspect: bpy.props.BoolProperty(name="Correct Aspect", default=True)
+    unwrap: EnumProperty(
+        name="Unwrap",
+        default="ANGLE_BASED",
+        items=(
+            ("NONE", "None", ""),
+            ("ANGLE_BASED", "Hard Surface", ""),
+            ("CONFORMAL", "Conformal", ""),
+            ("MINIMUM_STRETCH", "Organic", ""),
+        ),
+    )
 
     @classmethod
     def poll(cls, context):
-        return context.mode == 'EDIT_MESH'
+        return context.mode == "EDIT_MESH"
 
     def draw(self, context):
         layout = self.layout
 
-        layout.prop(univ_settings(), 'use_texel')
-        layout.prop(self, 'addition')
-        layout.prop(self, 'use_correct_aspect')
-        layout.prop(self, 'unwrap')
-
+        layout.prop(univ_settings(), "use_texel")
+        layout.prop(self, "addition")
+        layout.prop(self, "use_correct_aspect")
+        layout.prop(self, "unwrap")
 
     def invoke(self, context, event):
-        if event.value == 'PRESS':
+        if event.value == "PRESS":
             self.init_data_for_ray_cast(event)
             return self.execute(context)
         self.addition = event.shift
         return self.execute(context)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.umeshes: UMeshes | None = None
-
     def execute(self, context) -> set[str]:
-        self.umeshes = UMeshes.calc(report=self.report, verify_uv=False)
-        self.umeshes.set_sync()
-        self.umeshes.sync_invalidate()
+        umeshes = UMeshes.calc_with_no_uv(report=self.report, verify_uv=False)
+        umeshes.set_sync()
+        umeshes.sync_invalidate()
 
-        selected, visible = self.umeshes.filtered_by_selected_and_visible_uv_edges()
-        self.umeshes = selected if selected else visible
+        selected, visible = umeshes.filtered_by_selected_and_visible_uv_edges()
+        umeshes = selected if selected else visible
 
-        if not self.umeshes:
-            return self.umeshes.update(info='No elements for manipulate')
+        if not umeshes:
+            return umeshes.update(info="No elements for manipulate")
 
         if not selected and self.mouse_pos_from_3d:
-            return self.pick_cut()
+            return self.pick_cut(umeshes)
         else:
-            self.cut_view_3d()
-            self.umeshes.update()
-            return {'FINISHED'}
+            self.cut_view_3d(umeshes)
+            umeshes.update()
+            return {"FINISHED"}
 
-    def cut_view_3d(self):
+    def cut_view_3d(self, umeshes: UMeshes):
         umeshes_without_uv = []
         save_transform_islands = []
-        for umesh in self.umeshes:
+        for umesh in umeshes:
             umesh.aspect = utils.get_aspect_ratio(umesh) if self.use_correct_aspect else 1.0
             # TODO: Skip updates, if edges has seams
             for e in umesh.bm.edges:
@@ -486,7 +513,7 @@ class UNIV_OT_Cut_VIEW3D(Operator, utypes.RayCast):
                 elif not self.addition:
                     e.seam = False
 
-            if not umesh.total_face_sel or self.unwrap == 'NONE':
+            if not umesh.total_face_sel or self.unwrap == "NONE":
                 continue
 
             if not len(umesh.bm.loops.layers.uv):
@@ -494,7 +521,7 @@ class UNIV_OT_Cut_VIEW3D(Operator, utypes.RayCast):
                 continue
 
             umesh.verify_uv()
-            islands = utypes.MeshIslands.calc_selected_with_mark_seam(umesh)
+            islands = utypes.MeshIslands.calc_selected(umesh)
             adv_islands = islands.to_adv_islands()
             for isl in adv_islands:
                 isl.apply_aspect_ratio()
@@ -504,7 +531,7 @@ class UNIV_OT_Cut_VIEW3D(Operator, utypes.RayCast):
         if umeshes_without_uv or save_transform_islands:
             bpy.ops.uv.unwrap(method=self.unwrap, correct_aspect=False)
 
-            for umesh in self.umeshes:
+            for umesh in umeshes:
                 umesh.value = umesh.check_uniform_scale(report=self.report)
 
             for isl in save_transform_islands:
@@ -518,7 +545,7 @@ class UNIV_OT_Cut_VIEW3D(Operator, utypes.RayCast):
 
             for umesh in umeshes_without_uv:
                 umesh.verify_uv()
-                mesh_islands = utypes.MeshIslands.calc_selected_with_mark_seam(umesh)
+                mesh_islands = utypes.MeshIslands.calc_selected(umesh)
                 adv_islands = mesh_islands.to_adv_islands()
                 adv_islands.calc_area_uv()
                 adv_islands.calc_area_3d(scale=umesh.value)
@@ -535,15 +562,15 @@ class UNIV_OT_Cut_VIEW3D(Operator, utypes.RayCast):
 
                 umesh.update()
 
-    def pick_cut(self):
-        hit = self.ray_cast(prefs().max_pick_distance)
+    def pick_cut(self, umeshes: UMeshes):
+        hit = self.ray_cast(umeshes, prefs().max_pick_distance)
         if hit:
             if hit.crn.edge.seam:
-                return {'CANCELLED'}
+                return {"CANCELLED"}
             hit.crn.edge.seam = True
             hit.umesh.update()
-            return {'FINISHED'}
-        return {'CANCELLED'}
+            return {"FINISHED"}
+        return {"CANCELLED"}
 
 
 # noinspection PyTypeHints
@@ -551,45 +578,49 @@ class UNIV_OT_Angle(Operator):
     bl_idname = "mesh.univ_angle"
     bl_label = "Angle"
     bl_description = "Seams by angle, sharps, materials, borders"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {"REGISTER", "UNDO"}
 
-    selected: BoolProperty(name='Selected', default=False)
-    addition: BoolProperty(name='Addition', default=True)
-    borders: BoolProperty(name='Borders', default=False)
-    mtl: BoolProperty(name='Mtl', default=True)
-    by_weight: BoolProperty(name='By Weight', default=True)
-    by_sharps: BoolProperty(name='By Sharps', default=True)
-    seams_to_sharps: BoolProperty(name='Seams to Sharps', default=True)
-    obj_smooth: BoolProperty(name='Auto Smooth', default=True)
-    angle: FloatProperty(name='Smooth Angle', default=math.radians(66.0), subtype='ANGLE', min=math.radians(5.0), max=math.radians(180.0))
+    selected: BoolProperty(name="Selected", default=False)
+    addition: BoolProperty(name="Addition", default=True)
+    borders: BoolProperty(name="Borders", default=False)
+    mtl: BoolProperty(name="Mtl", default=True)
+    by_weight: BoolProperty(name="By Weight", default=True)
+    by_sharps: BoolProperty(name="By Sharps", default=True)
+    obj_smooth: BoolProperty(name="Angle from Auto Smooth", default=True)
+    angle: FloatProperty(
+        name="Smooth Angle",
+        default=math.radians(66.0),
+        subtype="ANGLE",
+        min=math.radians(5.0),
+        max=math.radians(180.0),
+    )
 
     @classmethod
     def poll(cls, context):
-        return context.mode == 'EDIT_MESH'
+        return context.mode == "EDIT_MESH"
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(self, 'selected')
-        layout.prop(self, 'addition')
+        layout.prop(self, "selected")
+        layout.prop(self, "addition")
         layout.separator()
-        layout.prop(self, 'borders')
+        layout.prop(self, "borders")
         layout.separator()
-        layout.prop(self, 'mtl')
-        layout.prop(self, 'by_weight')
-        layout.prop(self, 'by_sharps')
-        layout.prop(self, 'seams_to_sharps')
-        layout.prop(self, 'obj_smooth')
-        layout.prop(self, 'angle', slider=True)
+        layout.prop(self, "mtl")
+        layout.prop(self, "by_weight")
+        layout.prop(self, "by_sharps")
+        layout.prop(prefs(), "seams_to_sharps")
+        layout.prop(self, "obj_smooth")
+        layout.prop(self, "angle", slider=True)
 
     def invoke(self, context, event):
-        if event.value == 'PRESS':
+        if event.value == "PRESS":
             return self.execute(context)
         self.addition = event.shift
         return self.execute(context)
 
-
     def execute(self, context) -> set[str]:
-        umeshes = UMeshes.calc_any_unique(report=self.report, verify_uv=False)
+        umeshes = UMeshes.calc_with_no_uv_and_no_faces(report=self.report, verify_uv=False)
         if not umeshes:
             return umeshes.update()
 
@@ -610,7 +641,7 @@ class UNIV_OT_Angle(Operator):
                 angle = self.angle
 
             if bpy.app.version >= (4, 0, 0):
-                bevel_weight_key = umesh.bm.edges.layers.float.get('bevel_weight_edge')
+                bevel_weight_key = umesh.bm.edges.layers.float.get("bevel_weight_edge")
             else:
                 bevel_weight_key = umesh.bm.edges.layers.bevel_weight.active
             check_weights = self.by_weight and bevel_weight_key
@@ -622,6 +653,7 @@ class UNIV_OT_Angle(Operator):
             else:  # visible
                 faces = (_f for _f in umesh.bm.faces if not _f.hide)
 
+            seams_to_sharps = prefs().seams_to_sharps
             for f in faces:
                 for crn in f.loops:
                     crn_edge = crn.edge
@@ -632,54 +664,63 @@ class UNIV_OT_Angle(Operator):
                             crn_edge.seam = False
                     elif crn_edge.calc_face_angle() >= angle:  # Skip by angle
                         crn_edge.seam = True
-                        if self.seams_to_sharps:
+                        if seams_to_sharps:
                             crn_edge.smooth = False
                     elif self.borders and crn.link_loop_radial_prev.face.hide:
                         crn_edge.seam = True
                     elif self.by_sharps and not crn_edge.smooth:
                         crn_edge.seam = True
-                    elif self.mtl and f.material_index != crn.link_loop_radial_prev.face.material_index:
+                    elif (
+                        self.mtl
+                        and f.material_index != crn.link_loop_radial_prev.face.material_index
+                    ):
                         crn_edge.seam = True
                     elif check_weights and crn_edge[bevel_weight_key]:
                         crn_edge.seam = True
                     elif not self.addition:
                         crn_edge.seam = False
 
-        umeshes.update(info='Not found selected faces')
-        return {'FINISHED'}
+        umeshes.update(info="Not found selected faces")
+        return {"FINISHED"}
 
 
 # noinspection PyTypeHints
 class UNIV_OT_SeamBorder_VIEW3D(Operator):
     bl_idname = "mesh.univ_seam_border"
     bl_label = "Border"
-    bl_description = "Seams by borders\n\n" \
-                     "Default - Seams by borders\n" \
-                     "Shift - Additional\n" \
-                     "Alt - All Channels"
+    bl_description = (
+        "Seams by borders\n\n"
+        "Default - Seams by borders\n"
+        "Shift - Additional\n"
+        "Alt - All Channels"
+    )
 
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {"REGISTER", "UNDO"}
 
-    all_channels: BoolProperty(name='All Channels', default=False)
-    addition: BoolProperty(name='Addition', default=False)
-    selected: BoolProperty(name='Selected Faces', default=False)
-    mtl: BoolProperty(name='Mtl', default=True)
-    by_sharps: BoolProperty(name='By Sharps', default=False)
+    all_channels: BoolProperty(name="All Channels", default=False)
+    addition: BoolProperty(name="Addition", default=False)
+    selected: BoolProperty(name="Selected Faces", default=False)
+    mtl: BoolProperty(name="Mtl", default=True)
+    by_sharps: BoolProperty(name="By Sharps", default=False)
 
     @classmethod
     def poll(cls, context):
-        return context.mode == 'EDIT_MESH'
+        return context.mode == "EDIT_MESH"
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(self, 'all_channels')
-        layout.prop(self, 'addition')
-        layout.prop(self, 'selected')
-        layout.prop(self, 'mtl')
-        layout.prop(self, 'by_sharps')
+        layout.prop(self, "all_channels")
+        layout.prop(self, "addition")
+        layout.prop(self, "selected")
+        layout.prop(self, "mtl")
+        layout.prop(self, "by_sharps")
+
+        col = layout.column()
+        col.active = not self.all_channels
+        col.prop(prefs(), "seams_to_sharps")
 
     def invoke(self, context, event):
-        if event.value == 'PRESS':
+        if event.value == "PRESS":
             return self.execute(context)
         self.addition = event.shift
         self.all_channels = event.alt
@@ -688,7 +729,7 @@ class UNIV_OT_SeamBorder_VIEW3D(Operator):
     def execute(self, context) -> set[str]:
         umeshes = UMeshes(report=self.report)
 
-        if not self.bl_idname.startswith('UV'):
+        if not self.bl_idname.startswith("UV"):
             umeshes.set_sync()
             umeshes.sync_invalidate()
 
@@ -717,7 +758,11 @@ class UNIV_OT_SeamBorder_VIEW3D(Operator):
                                 seams[idx] = True
                             elif self.by_sharps and not crn.edge.smooth:
                                 seams[idx] = True
-                            elif self.mtl and crn.face.material_index != crn.link_loop_radial_prev.face.material_index:
+                            elif (
+                                self.mtl
+                                and crn.face.material_index
+                                != crn.link_loop_radial_prev.face.material_index
+                            ):
                                 seams[idx] = True
                     else:
                         for idx, crn in enumerate(corners):
@@ -732,33 +777,105 @@ class UNIV_OT_SeamBorder_VIEW3D(Operator):
                         has_update = True
 
             else:
+                seams_to_sharps = prefs().seams_to_sharps
                 is_boundary = utils.is_boundary_func(umesh, with_seam=self.addition)
+
                 for f in faces:
                     for crn in f.loops:
                         crn_edge = crn.edge
-                        if (is_boundary(crn) or
-                                (self.by_sharps and not crn_edge.smooth) or
-                                (self.mtl and f.material_index != crn.link_loop_radial_prev.face.material_index)):
+                        if is_boundary(crn):
+                            if not crn_edge.seam:
+                                has_update = True
+                                crn_edge.seam = True
+                                if seams_to_sharps:
+                                    crn_edge.smooth = False
+                        elif self.by_sharps and not crn_edge.smooth:
                             if not crn_edge.seam:
                                 crn_edge.seam = True
                                 has_update = True
-
-                        else:
-                            if crn_edge.seam:
-                                crn_edge.seam = False
+                        elif (
+                            self.mtl
+                            and f.material_index != crn.link_loop_radial_prev.face.material_index
+                        ):
+                            if not crn_edge.seam:
                                 has_update = True
+                                crn_edge.seam = True
+                                if seams_to_sharps:
+                                    crn_edge.smooth = False
+
+                        elif crn_edge.seam:  # Remove Seams and sharps non boundary (non-addition).
+                            crn_edge.seam = False
+                            if seams_to_sharps:
+                                crn_edge.smooth = False
+                            has_update = True
             umesh.update_tag = has_update
 
-        if self.bl_idname.startswith('UV'):
+        if self.bl_idname.startswith("UV"):
             # Flush System
             from .. import draw
+
             if not draw.DrawCallSeams2D.is_enable():
                 coords = draw.mesh_extract.extract_seams_umeshes(umeshes)
                 draw.LinesDrawSimple.draw_register(coords, draw.DrawCallSeams2D.get_color())
 
         umeshes.silent_update()
-        return {'FINISHED'}
+        return {"FINISHED"}
 
 
 class UNIV_OT_SeamBorder(UNIV_OT_SeamBorder_VIEW3D):
     bl_idname = "uv.univ_seam_border"
+
+
+# TODO: After running this operator from the UI, adjusting the properties of the next operator
+#  resets the UV Map Layout indices. Find a way to fix this.
+# NOTE: That duplicate need for avoid properties like seams_to_sharps, mtl and other.
+class UNIV_OT_SeamBorderSimple_VIEW3D(Operator):
+    bl_idname = "mesh.univ_seam_border_simple"
+    bl_label = "Border"
+    bl_description = "Seams by borders for UV Maps layout"
+    bl_options = {"REGISTER", "UNDO"}
+
+    @classmethod
+    def poll(cls, context):
+        return context.mode == "EDIT_MESH"
+
+    def execute(self, context) -> set[str]:
+        umeshes = UMeshes()
+
+        if not self.bl_idname.startswith("UV"):
+            umeshes.set_sync()
+            umeshes.sync_invalidate()
+
+        for umesh in umeshes:
+            has_update = False
+            is_boundary = utils.is_boundary_func(umesh, with_seam=False)
+
+            for f in utils.calc_visible_uv_faces_iter(umesh):
+                for crn in f.loops:
+                    crn_edge = crn.edge
+                    if is_boundary(crn):
+                        if not crn_edge.seam:
+                            has_update = True
+                            crn_edge.seam = True
+                    else:
+                        # Remove Seam for non boundary.
+                        if crn_edge.seam:
+                            has_update = True
+                            crn_edge.seam = False
+
+            umesh.update_tag = has_update
+
+        if self.bl_idname.startswith("UV"):
+            # Flush System
+            from .. import draw
+
+            if not draw.DrawCallSeams2D.is_enable():
+                coords = draw.mesh_extract.extract_seams_umeshes(umeshes)
+                draw.LinesDrawSimple.draw_register(coords, draw.DrawCallSeams2D.get_color())
+
+        umeshes.silent_update()
+        return {"FINISHED"}
+
+
+class UNIV_OT_SeamBorderSimple_VIEW2D(UNIV_OT_SeamBorderSimple_VIEW3D):
+    bl_idname = "uv.univ_seam_border_simple"

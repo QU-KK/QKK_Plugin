@@ -1,9 +1,6 @@
-# SPDX-FileCopyrightText: 2024 Oxicid
+# SPDX-FileCopyrightText: 2026 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-if 'bpy' in locals():
-    from .. import reload
-    reload.reload(globals())
 
 import bpy  # noqa
 import bmesh
@@ -12,8 +9,7 @@ import mathutils
 import typing
 import itertools
 import numpy as np
-import numpy.typing as npt
-import collections
+import contextlib
 from collections import defaultdict
 
 from mathutils import Vector, Matrix
@@ -27,10 +23,11 @@ from ..utils import umath
 from . import umesh as _umesh
 from . import BBox
 
-USE_GENERIC_UV_SYNC = hasattr(bmesh.types.BMesh, 'uv_select_sync_valid')
+USE_GENERIC_UV_SYNC = hasattr(bmesh.types.BMesh, "uv_select_sync_valid")
+
 
 class SaveTransform:
-    def __init__(self, island: 'FaceIsland | AdvIsland | AdvIslands', flip_if_needed=False):
+    def __init__(self, island: "AdvIsland | Islands", flip_if_needed=False):
         self.island = island
         self.old_crn_pos: list[Vector | float] = []  # need for mix co
         self.is_full_selected = False
@@ -39,7 +36,7 @@ class SaveTransform:
         self.rotate = True
         self.is_flipped_to_preserve_flip = False
 
-        if isinstance(island, AdvIslands):
+        if isinstance(island, Islands):
             # Used for Unwrap 3D
             if flip_if_needed:
                 if island.should_flip_after_unwrap():
@@ -59,7 +56,7 @@ class SaveTransform:
 
     def calc_target_rotate_corner(self):
         uv = self.island.umesh.uv
-        if isinstance(self.island, AdvIslands):
+        if isinstance(self.island, Islands):
             corners = []
             pinned_corners = []
             for isl in self.island:
@@ -88,19 +85,27 @@ class SaveTransform:
                         max_length_crn = crn_
 
                 self.target_crn = max_length_crn  # TODO: Get neutral stretched corner
-                self.old_coords = [max_length_crn[uv].uv.copy(), max_length_crn.link_loop_next[uv].uv.copy()]
+                self.old_coords = [
+                    max_length_crn[uv].uv.copy(),
+                    max_length_crn.link_loop_next[uv].uv.copy(),
+                ]
 
         else:
             self.is_full_selected = True
-            if isinstance(self.island, AdvIslands):
+            if isinstance(self.island, Islands):
                 max_uv_area_face = self.target_subisland.calc_max_uv_area_face()
             else:
                 max_uv_area_face = self.island.calc_max_uv_area_face()
 
-            max_length_crn = utils.calc_max_length_uv_crn_for_save_transform(max_uv_area_face.loops, uv)
+            max_length_crn = utils.calc_max_length_uv_crn_for_save_transform(
+                max_uv_area_face.loops, uv
+            )
             max_length_crn[uv].pin_uv = True
             self.target_crn = max_length_crn
-            self.old_coords = [max_length_crn[uv].uv.copy(), max_length_crn.link_loop_next[uv].uv.copy()]
+            self.old_coords = [
+                max_length_crn[uv].uv.copy(),
+                max_length_crn.link_loop_next[uv].uv.copy(),
+            ]
 
     @staticmethod
     def calc_static_corners(island, uv) -> tuple[list[BMLoop], list[BMLoop]]:
@@ -109,7 +114,7 @@ class SaveTransform:
         vert_select_get = utils.vert_select_get_func(island.umesh)
 
         if island.umesh.sync:
-            if island.umesh.elem_mode == 'FACE':
+            if island.umesh.elem_mode == "FACE":
                 face_select_get = utils.face_select_get_func(island.umesh)
                 for f in island:
                     if face_select_get(f):
@@ -124,7 +129,7 @@ class SaveTransform:
                             else:
                                 # crn_uv.pin_uv = True
                                 corners.append(crn)
-            elif island.umesh.elem_mode == 'EDGE':
+            elif island.umesh.elem_mode == "EDGE":
                 edge_select_get = utils.edge_select_get_func(island.umesh)
                 for f in island:
                     for crn in f.loops:
@@ -166,7 +171,6 @@ class SaveTransform:
             crn_co = Vector((0.0, 0.0))
             crn_next_co = Vector((0.0, 0.0))
 
-
         old_dir = self.old_coords[0] - self.old_coords[1]
         new_dir = crn_co - crn_next_co
 
@@ -174,6 +178,7 @@ class SaveTransform:
             self.island.calc_area_uv()
             self.island.calc_area_3d(scale=self.island.umesh.value)
             from ..preferences import univ_settings
+
             texel = univ_settings().texel_density
             texture_size = (int(univ_settings().size_x) + int(univ_settings().size_y)) / 2
             status = self.island.set_texel(texel, texture_size)
@@ -186,7 +191,7 @@ class SaveTransform:
             pivot = new_bbox.center
             if new_bbox.max_length != 0:
                 self.island.rotate(old_dir.angle_signed(new_dir, 0), pivot)
-                if hasattr(self.island, 'calc_area_uv'):
+                if hasattr(self.island, "calc_area_uv"):
                     set_texel()
                 else:
                     scale = 0.15 / new_bbox.max_length
@@ -246,6 +251,7 @@ class SaveTransform:
             self.island.calc_area_uv()
             self.island.calc_area_3d(scale=self.island.umesh.value)
             from ..preferences import univ_settings
+
             texel = univ_settings().texel_density
             texture_size = (int(univ_settings().size_x) + int(univ_settings().size_y)) / 2
             union_islands = UnionIslands(self.island.islands)
@@ -312,11 +318,33 @@ class SaveTransform:
             self.island.scale_simple(Vector((-1.0, 1.0)))
 
 
-class FaceIsland:
-    def __init__(self, faces: list[BMFace] | typing.Iterable[BMFace], umesh: _umesh.UMesh):
+class AdvIsland:
+    def __init__(
+        self,
+        faces: list[BMFace] | tuple | typing.Iterable[BMFace] = (),
+        umesh: _umesh.UMesh | None = None,
+    ):
         self.faces: list[BMFace] | typing.Iterable[BMFace] = faces
         self.umesh: _umesh.UMesh = umesh
         self.value: float | int | Vector = -1  # value for different purposes
+
+        self.tris: list[tuple[BMLoop, BMLoop, BMLoop]] = []
+        self.flat_unique_uv_coords: list[Vector] = []
+        self.flat_coords: list[Vector] | list[tuple[Vector, Vector, Vector]] = (
+            []
+        )  # rename to flat_uv_coords
+        self.flat_3d_coords: list[Vector] | list[tuple[Vector, Vector, Vector]] = []
+        self.is_flat_3d_coords_scaled: bool = False
+
+        self.weights: list[float] = []
+        # self.custom_value_2: int | float | Vector = -1
+        self.convex_coords = []
+        self._bbox: BBox | None = None
+        self.tag = True
+        self.select_state = None
+        self.area_3d: float = -1.0
+        self.area_uv: float = -1.0
+        self.sequence = []
 
     def move(self, delta: Vector) -> bool:
         if umath.vec_isclose_to_zero(delta):
@@ -330,25 +358,34 @@ class FaceIsland:
 
     def set_position(self, to: Vector, _from: Vector = None):
         if _from is None:
-            _from = self.calc_bbox().min
+            _from = self.bbox.min
         return self.move(to - _from)
 
-    def save_transform(self, flip_if_needed=False):
-        return SaveTransform(self, flip_if_needed)
+    def scale(self, scale: Vector, pivot: Vector) -> bool:
+        """Scale a list of faces by pivot"""
+        if umath.vec_isclose_to_uniform(scale):
+            return False
+        diff = pivot - pivot * scale
 
-    def apply_aspect_ratio(self):
-        scale = Vector((self.umesh.aspect, 1))
-        return self.scale_simple(scale)
+        uv = self.umesh.uv
+        for face in self.faces:
+            for crn in face.loops:
+                crn_co = crn[uv].uv
+                crn_co *= scale
+                crn_co += diff
+        return True
 
-    def reset_aspect_ratio(self):
-        scale = Vector((1/self.umesh.aspect, 1))
-        return self.scale_simple(scale)
+    def set_texel(self, texel: float, texture_size: float | int):
+        """Warning: Need calc uv and 3d area"""
+        assert self.area_3d != -1.0 and self.area_uv != -1.0, "Need calculate uv and 3d area"
+        area_3d = math.sqrt(self.area_3d)
+        area_uv = math.sqrt(self.area_uv) * texture_size
+        if math.isclose(area_3d, 0.0, abs_tol=1e-6) or math.isclose(area_uv, 0.0, abs_tol=1e-6):
+            return None  # TODO: Highlight islands with zero area
+        scale = texel / (area_uv / area_3d)
+        return self.scale(Vector((scale, scale)), self.bbox.center)
 
-    def should_flip_after_unwrap(self) -> bool:
-        # TODO: It is necessary to determine the need for flipping based on how the parametrizer decides it
-        #  (using pinned triangles and their weighted area), and use that to control flipping.
-        return self.calc_signed_area() < 0.0
-
+    # TODO: Implement Rotate 90 degrees and aspect ratio for bbox
     def rotate(self, angle: float, pivot: Vector, aspect: float = 1.0) -> bool:
         """Rotate a list of faces by angle (in radians) around a pivot
         :param angle: Angle in radians
@@ -403,21 +440,236 @@ class FaceIsland:
                     vec_rotate(crn[uv].uv, rot_matrix)
         return True
 
-    def scale(self, scale: Vector, pivot: Vector) -> bool:
-        """Scale a list of faces by pivot"""
-        if umath.vec_isclose_to_uniform(scale):
-            return False
-        diff = pivot - pivot * scale
+    def apply_aspect_ratio(self):
+        scale = Vector((self.umesh.aspect, 1))
+        return self.scale_simple(scale)
+
+    def reset_aspect_ratio(self):
+        scale = Vector((1 / self.umesh.aspect, 1))
+        return self.scale_simple(scale)
+
+    @contextlib.contextmanager
+    def temp_aspect(self):
+        self.apply_aspect_ratio()
+        prev_aspect = self.umesh.aspect
+        self.umesh.aspect = 1.0
+        yield
+        self.umesh.aspect = prev_aspect
+        self.reset_aspect_ratio()
+
+    def save_transform(self, flip_if_needed=False):
+        return SaveTransform(self, flip_if_needed)
+
+    def calc_flat_coords(self, save_triplet=False):
+        assert self.tris, "Calculate tris"
 
         uv = self.umesh.uv
-        for face in self.faces:
-            for crn in face.loops:
-                crn_co = crn[uv].uv
-                crn_co *= scale
-                crn_co += diff
-        return True
+        if save_triplet:
+            self.flat_coords = [(t[0][uv].uv, t[1][uv].uv, t[2][uv].uv) for t in self.tris]
+        else:
+            extend = self.flat_coords.extend
+            for t in self.tris:
+                extend(t_crn[uv].uv for t_crn in t)
 
-    def scale_with_move(self, scale: Vector, delta: Vector,  pivot: Vector) -> bool:
+    def calc_flat_uv_coords(self, save_triplet_=False):
+        self.calc_flat_coords(save_triplet_)
+
+    def calc_tris_simple(self):
+        tris_isl: list[tuple[BMLoop, BMLoop, BMLoop]] = []
+        tris_isl_append = tris_isl.append
+        for f in self:
+            corners = f.loops
+            n = len(corners)
+            if n == 4:
+                l1, l2, l3, l4 = corners
+                tris_isl_append((l1, l2, l3))
+                tris_isl_append((l3, l4, l1))
+            elif n == 3:
+                tris_isl_append(tuple(corners))
+            else:
+                first_crn = corners[0]
+                for i in range(1, n - 1):
+                    tris_isl_append((first_crn, corners[i], corners[i + 1]))
+
+        self.tris = tris_isl
+        return bool(tris_isl)
+
+    def calc_flat_unique_uv_coords(self):
+        uv = self.umesh.uv
+        self.flat_unique_uv_coords = [crn[uv].uv for f in self for crn in f.loops]
+
+    def calc_flat_3d_coords(self, save_triplet=False, scale_=None):
+        assert self.tris, "Calculate tris"
+        self.is_flat_3d_coords_scaled = bool(scale_)
+        if save_triplet:
+            if scale_:
+                self.flat_3d_coords = [
+                    (t[0].vert.co * scale_, t[1].vert.co * scale_, t[2].vert.co * scale_)
+                    for t in self.tris
+                ]
+            else:
+                self.flat_3d_coords = [
+                    (t[0].vert.co, t[1].vert.co, t[2].vert.co) for t in self.tris
+                ]
+        else:
+            extend = self.flat_3d_coords.extend
+            if scale_:
+                for t in self.tris:
+                    extend([t_crn.vert.co * scale_ for t_crn in t])
+            else:
+                for t in self.tris:
+                    extend([t_crn.vert.co for t_crn in t])
+
+    def is_overlap(self, other: "AdvIsland"):
+        assert self.flat_coords and other.flat_coords, "Calculate flat coordinates"
+        if not self.bbox.is_isect(other.bbox):
+            return False
+        if isinstance(self.flat_coords[0], tuple):
+            for a0, a1, a2 in self.flat_coords:
+                for b0, b1, b2 in other.flat_coords:
+                    if isect_tris_2d(a0, a1, a2, b0, b1, b2):
+                        return True
+        else:
+            for i in range(0, len(self.flat_coords), 3):
+                a0, a1, a2 = self.flat_coords[i], self.flat_coords[i + 1], self.flat_coords[i + 2]
+                for j in range(0, len(other.flat_coords), 3):
+                    if isect_tris_2d(
+                        a0,
+                        a1,
+                        a2,
+                        other.flat_coords[j],
+                        other.flat_coords[j + 1],
+                        other.flat_coords[j + 2],
+                    ):
+                        return True
+        return False
+
+    def calc_bbox(self) -> BBox:
+        if self.convex_coords:
+            self._bbox = BBox.calc_bbox(self.convex_coords)
+        elif self.flat_coords:
+            if isinstance(self.flat_coords[0], tuple):
+                self._bbox = BBox.calc_bbox(itertools.chain.from_iterable(self.flat_coords))
+            else:
+                self._bbox = BBox.calc_bbox(self.flat_coords)
+        else:
+            self._bbox = BBox.calc_bbox_uv(self.faces, self.umesh.uv)
+        return self._bbox
+
+    @property
+    def bbox(self) -> BBox:
+        if self._bbox is None:
+            self.calc_bbox()
+        return self._bbox
+
+    def calc_convex_points(self):
+        if self.flat_coords:
+            self.convex_coords = [
+                self.flat_coords[i] for i in mathutils.geometry.convex_hull_2d(self.flat_coords)
+            ]
+        else:
+            uv = self.umesh.uv
+            points = [
+                crn[uv].uv for f in self.faces for crn in f.loops
+            ]  # Warning: points referenced to uv
+            self.convex_coords = [points[i] for i in mathutils.geometry.convex_hull_2d(points)]
+        return self.convex_coords
+
+    def calc_area_3d(self, scale=None, areas_to_weight=False):
+        area = 0.0
+        # self.weights = []
+        if self.flat_3d_coords and scale:
+            if self.is_flat_3d_coords_scaled:
+                scale = None
+
+        weight_append = self.weights.append
+        it = (
+            self.flat_3d_coords
+            if self.flat_3d_coords
+            else (
+                (crn_a.vert.co, crn_b.vert.co, crn_c.vert.co) for crn_a, crn_b, crn_c in self.tris
+            )
+        )
+        if areas_to_weight:
+            assert self.tris, "Calculate tris"
+            if scale:
+                if utils.vec_isclose(scale, scale.xxx):
+                    x_component = abs(scale.x)
+                    for va, vb, vc in it:
+                        ar = area_tri(va, vb, vc) * x_component
+                        weight_append(ar)
+                        area += ar
+                else:
+                    for va, vb, vc in it:
+                        ar = area_tri(va * scale, vb * scale, vc * scale)
+                        weight_append(ar)
+                        area += ar
+            else:
+                for va, vb, vc in it:
+                    ar = area_tri(va, vb, vc)
+                    weight_append(ar)
+                    area += ar
+        elif scale:
+            if self.tris:
+                if utils.vec_isclose(scale, scale.xxx):  # Uniform Scale
+                    for va, vb, vc in it:
+                        area += area_tri(va, vb, vc)
+                    area *= abs(scale.x) ** 2
+                else:
+                    for va, vb, vc in it:
+                        area += area_tri(va * scale, vb * scale, vc * scale)
+            else:
+                if utils.vec_isclose(scale, scale.xxx):  # Uniform Scale
+                    for f in self:
+                        area += f.calc_area()
+                    area *= abs(scale.z) ** 2
+                else:
+                    from ..utils import calc_face_area_3d
+
+                    for f in self:
+                        area += calc_face_area_3d(f, scale)
+                    area *= 0.5
+        else:
+            for f in self:
+                area += f.calc_area()
+
+        self.area_3d = area
+        return area
+
+    def calc_area_uv(self):
+        area = 0.0
+        uv = self.umesh.uv
+        if self.flat_coords:
+            flat_coords = self.flat_coords
+            if isinstance(flat_coords[0], tuple):
+                for triplet in flat_coords:
+                    area += area_tri(*triplet)
+            else:
+                for i in range(0, len(flat_coords), 3):
+                    area += area_tri(flat_coords[i], flat_coords[i + 1], flat_coords[i + 2])
+        elif self.tris:
+            for crn_a, crn_b, crn_c in self.tris:
+                area += area_tri(crn_a[uv].uv, crn_b[uv].uv, crn_c[uv].uv)
+        else:
+            from ..utils import calc_face_area_uv
+
+            for f in self:
+                area += calc_face_area_uv(f, uv)
+
+        self.area_uv = area
+        return area
+
+    def calc_sub_islands_all(self) -> "Islands":
+        self.set_tag()
+        islands = [AdvIsland(i, self.umesh) for i in IslandsBase.calc_all_ex(self.umesh)]
+        return Islands(islands, self.umesh)
+
+    def should_flip_after_unwrap(self) -> bool:
+        # TODO: It is necessary to determine the need for flipping based on how the parametrizer decides it
+        #  (using pinned triangles and their weighted area), and use that to control flipping.
+        return self.calc_signed_area() < 0.0
+
+    def scale_with_move(self, scale: Vector, delta: Vector, pivot: Vector) -> bool:
         """Scale a list of faces by pivot"""
         if umath.vec_isclose_to_uniform(scale) and umath.vec_isclose_to_zero(delta):
             return False
@@ -474,6 +726,7 @@ class FaceIsland:
                     crn.tag = is_boundary(crn)
 
     if USE_GENERIC_UV_SYNC:
+
         def set_selected_crn_edge_tag(self):
             if self.umesh.sync and not self.umesh.sync_valid:
                 for f in self:
@@ -483,7 +736,9 @@ class FaceIsland:
                 for f in self:
                     for crn in f.loops:
                         crn.tag = crn.uv_select_edge
+
     else:
+
         def set_selected_crn_edge_tag(self):
             if self.umesh.sync:
                 for f in self:
@@ -521,12 +776,15 @@ class FaceIsland:
             return None
 
     if USE_GENERIC_UV_SYNC:
+
         def calc_selected_edge_corners_iter(self):
             if self.umesh.sync and not self.umesh.sync_valid:
                 return (crn for f in self for crn in f.loops if crn.edge.select)
             else:
                 return (crn for f in self for crn in f.loops if crn.uv_select_edge)
+
     else:
+
         def calc_selected_edge_corners_iter(self):
             if self.umesh.sync:
                 return (crn for f in self for crn in f.loops if crn.edge.select)
@@ -570,29 +828,25 @@ class FaceIsland:
                 signed_area += uvs[i - 1].cross(uvs[i])
         return signed_area
 
-    def calc_bbox(self) -> BBox:
-        return BBox.calc_bbox_uv(self.faces, self.umesh.uv)
-
-    def calc_convex_points(self):
-        uv = self.umesh.uv
-        points = [crn[uv].uv for f in self.faces for crn in f.loops]  # Warning: points referenced to uv
-        return [points[i] for i in mathutils.geometry.convex_hull_2d(points)]
-
     @property
     def select(self):
         raise NotImplementedError()
 
     if USE_GENERIC_UV_SYNC:
+
         @select.setter
         def select(self, state: bool):
             # TODO: Use bm.foreach
             if self.umesh.sync:
                 if self.umesh.sync_valid:
-                    self.umesh.bm.uv_select_foreach_set_from_mesh(state, faces=self.faces, sticky_select_mode='DISABLED')
+                    self.umesh.bm.uv_select_foreach_set_from_mesh(
+                        state, faces=self.faces, sticky_select_mode="DISABLED"
+                    )
 
-                if state:  # FAST_LOAD
+                # Additional select in 3D.
+                if state:
                     for face in self.faces:
-                        face.select = True
+                        face.select = True  # FAST_LOAD
                 else:
                     for face in self.faces:
                         face.select = False
@@ -602,7 +856,9 @@ class FaceIsland:
                     for crn in face.loops:
                         crn.uv_select_vert = state
                         crn.uv_select_edge = state
+
     else:
+
         @select.setter
         def select(self, state: bool):
             if self.umesh.sync:
@@ -643,15 +899,23 @@ class FaceIsland:
     def hide_second(self):
         if self.umesh.sync:
             fast_find_faces = set(self.faces)
-            if self.umesh.elem_mode in ('FACE', 'EDGE'):
+            if self.umesh.elem_mode in ("FACE", "EDGE"):
                 for face in self.faces:
                     face.hide_set(True)
                     for e in face.edges:
                         e.select = False
-                        if all(f_from_e in fast_find_faces for f_from_e in e.link_faces if not f_from_e.hide):
+                        if all(
+                            f_from_e in fast_find_faces
+                            for f_from_e in e.link_faces
+                            if not f_from_e.hide
+                        ):
                             e.hide = True
                     for v in face.verts:
-                        if all(f_from_v in fast_find_faces for f_from_v in v.link_faces if not f_from_v.hide):
+                        if all(
+                            f_from_v in fast_find_faces
+                            for f_from_v in v.link_faces
+                            if not f_from_v.hide
+                        ):
                             v.hide = True
             else:
                 to_select_verts = []
@@ -667,12 +931,20 @@ class FaceIsland:
                     face.hide = True
                 for face in self.faces:
                     for e in face.edges:
-                        if all(f_from_e in fast_find_faces for f_from_e in e.link_faces if not f_from_e.hide):
+                        if all(
+                            f_from_e in fast_find_faces
+                            for f_from_e in e.link_faces
+                            if not f_from_e.hide
+                        ):
                             e.select = True
                             e.hide = True
                     for v in face.verts:
                         # Warning: This implementation hides one vertex of the wire edge
-                        if all(f_from_v in fast_find_faces for f_from_v in v.link_faces if not f_from_v.hide):
+                        if all(
+                            f_from_v in fast_find_faces
+                            for f_from_v in v.link_faces
+                            if not f_from_v.hide
+                        ):
                             # v.select = False
                             v.hide_set(True)
 
@@ -683,6 +955,7 @@ class FaceIsland:
                 face.select = False
 
     if USE_GENERIC_UV_SYNC:
+
         def is_full_face_selected(self):
             if self.umesh.sync and not self.umesh.sync_valid:
                 return all(f.select for f in self)
@@ -699,6 +972,7 @@ class FaceIsland:
             return not any(crn.uv_select_vert for f in self for crn in f.loops)
 
     else:
+
         def is_full_face_selected(self):
             if self.umesh.sync:
                 return all(f.select for f in self)
@@ -718,7 +992,7 @@ class FaceIsland:
             return not any(crn[uv].select for f in self for crn in f.loops)
 
     def is_full_deselected_by_context(self):
-        if self.umesh.elem_mode in ('VERT', 'EDGE'):
+        if self.umesh.elem_mode in ("VERT", "EDGE"):
             return self.is_full_vert_deselected()
         return self.is_full_face_deselected()
 
@@ -727,7 +1001,9 @@ class FaceIsland:
         indexes.sort()
 
         material_slots = self.umesh.obj.material_slots
-        return tuple(material_slots[idx].name if idx < len(material_slots) else '' for idx in indexes)
+        return tuple(
+            material_slots[idx].name if idx < len(material_slots) else "" for idx in indexes
+        )
 
     def mark_seam(self, additional=False):
         uv = self.umesh.uv
@@ -738,7 +1014,10 @@ class FaceIsland:
                     if crn == pair or pair.face.hide:
                         crn.edge.seam = True
                         continue
-                    seam = not (crn[uv].uv == pair.link_loop_next[uv].uv and crn.link_loop_next[uv].uv == pair[uv].uv)
+                    seam = not (
+                        crn[uv].uv == pair.link_loop_next[uv].uv
+                        and crn.link_loop_next[uv].uv == pair[uv].uv
+                    )
                     if additional:
                         crn.edge.seam |= seam
                     else:
@@ -750,16 +1029,18 @@ class FaceIsland:
                     if crn == pair or not pair.face.select:
                         crn.edge.seam = True
                         continue
-                    seam = not (crn[uv].uv == pair.link_loop_next[uv].uv and crn.link_loop_next[uv].uv == pair[uv].uv)
+                    seam = not (
+                        crn[uv].uv == pair.link_loop_next[uv].uv
+                        and crn.link_loop_next[uv].uv == pair[uv].uv
+                    )
                     if additional:
                         crn.edge.seam |= seam
                     else:
                         crn.edge.seam = seam
 
-    def mark_seam_by_index(self, additional: bool = False):
-        # assert (enum.INDEXING in self.tags)  # TODO: Uncomment after implement tags
-        index = self.faces[0].index
-
+    def mark_seams_only_with_other_islands(self):
+        """Adds additional seams on top of existing ones, on edges shared with other islands."""
+        self_faces = set(self.faces)
         for f in self.faces:
             for crn in f.loops:
                 shared_crn = crn.link_loop_radial_prev
@@ -767,10 +1048,7 @@ class FaceIsland:
                     crn.edge.seam = True
                     continue
 
-                if additional:
-                    crn.edge.seam |= shared_crn.face.index != index
-                else:
-                    crn.edge.seam = shared_crn.face.index != index
+                crn.edge.seam |= shared_crn.face not in self_faces
 
     # TODO: Add mark seam with index
     def calc_max_uv_area_face(self):
@@ -785,6 +1063,7 @@ class FaceIsland:
         return max_face
 
     if USE_GENERIC_UV_SYNC:
+
         def tag_selected_faces(self):
             if self.umesh.sync and not self.umesh.sync_valid:
                 for f in self:
@@ -792,22 +1071,27 @@ class FaceIsland:
             else:
                 for f in self:
                     f.tag = f.uv_select
+
     else:
+
         def tag_selected_faces(self):
             if self.umesh.sync:
                 for f in self:
                     f.tag = f.select
             else:
                 uv = self.umesh.uv
-                if self.umesh.elem_mode == 'EDGE':
+                if self.umesh.elem_mode == "EDGE":
                     for f in self:
-                        f.tag = f.select and all(crn[uv].select_edge or crn[uv].select for crn in f.loops)
+                        f.tag = f.select and all(
+                            crn[uv].select_edge or crn[uv].select for crn in f.loops
+                        )
                 else:
                     for f in self:
                         f.tag = f.select and all(crn[uv].select for crn in f.loops)
 
     def has_flip_with_noflip(self):
         from ..utils import is_flipped_uv
+
         uv = self.umesh.uv
         flip_state = is_flipped_uv(self[-1], uv)
         for f in self:
@@ -816,7 +1100,7 @@ class FaceIsland:
         return False
 
     def has_constraints_edge(self, selected=False):
-        constr_attr = self.umesh.bm.edges.layers.int.get('univ_constraints')
+        constr_attr = self.umesh.bm.edges.layers.int.get("univ_constraints")
         if constr_attr:
             if selected:
                 get_edge_select = utils.edge_select_get_func(self.umesh)
@@ -836,16 +1120,15 @@ class FaceIsland:
 
                             shift = i * 2
                             bits = (edge_bits >> shift) & 3
-                            if bits == 2:  # vertical
-                                return True
-                            elif bits == 3:  # horizontal
+                            if bits in (2, 3, 1):  # Diagonal/Vertical/Horizontal.
                                 return True
                             break
         return False
 
-    def calc_islands_by_flip_with_mark_seam(self) -> 'tuple[Islands | AdvIslands, Islands | AdvIslands]':
+    def calc_islands_by_flip_with_mark_seam(self) -> "tuple[Islands, Islands]":
         """Warning: All 'bm.faces' must be untagged"""
         from ..utils import is_flipped_uv
+
         uv = self.umesh.uv
         no_flipped_faces = []
         flipped_faces = []
@@ -857,19 +1140,22 @@ class FaceIsland:
                 no_flipped_faces.append(f)
 
         assert no_flipped_faces and flipped_faces
-        isl_type = type(self)
-        islands_type = Islands if (isl_type is FaceIsland) else AdvIslands
         fake_umesh = self.umesh.fake_umesh(no_flipped_faces)
-        no_flipped_islands = islands_type([isl_type(i, self.umesh)
-                                          for i in Islands.calc_with_markseam_iter_ex(fake_umesh)], self.umesh)
+        no_flipped_islands = Islands(
+            [AdvIsland(i, self.umesh) for i in Islands.calc_iter_ex(fake_umesh)], self.umesh
+        )
 
         fake_umesh.bm.faces = flipped_faces
         for flipped_f in flipped_faces:
             flipped_f.tag = True
-        flipped_islands = islands_type([isl_type(i, self.umesh)
-                                       for i in Islands.calc_with_markseam_iter_ex(fake_umesh)], self.umesh)
+        flipped_islands = Islands(
+            [AdvIsland(i, self.umesh) for i in Islands.calc_iter_ex(fake_umesh)], self.umesh
+        )
 
         return no_flipped_islands, flipped_islands
+
+    def __str__(self):
+        return f"Advanced Island. Faces count = {len(self.faces)}, Tris Count = {len(self.tris)}"
 
     def __iter__(self):
         return iter(self.faces)
@@ -883,245 +1169,12 @@ class FaceIsland:
     def __bool__(self):
         return bool(self.faces)
 
-    def __str__(self):
-        return f'Face Island. Faces count = {len(self.faces)}'
-
     def __hash__(self):
         return hash(self[0])
 
 
-class AdvIsland(FaceIsland):
-    def __init__(self, faces: list[BMFace] | tuple | typing.Iterable[BMFace] = (), umesh: _umesh.UMesh | None = None):
-        super().__init__(faces, umesh)
-        self.tris: list[tuple[BMLoop, BMLoop, BMLoop]] = []
-        self.flat_unique_uv_coords: list[Vector] = []
-        self.flat_coords: list[Vector] | list[tuple[Vector, Vector, Vector]] = []  # rename to flat_uv_coords
-        self.flat_3d_coords: list[Vector] | list[tuple[Vector, Vector, Vector]] = []
-        self.is_flat_3d_coords_scaled: bool = False
-        self.weights: list[float] = []
-        # self.custom_value_2: int | float | Vector = -1
-        self.convex_coords = []
-        self._bbox: BBox | None = None
-        self.tag = True
-        self.select_state = None
-        self.area_3d: float = -1.0
-        self.area_uv: float = -1.0
-        self.sequence = []
-
-    def move(self, delta: Vector) -> bool:
-        if self._bbox is not None:
-            self._bbox.move(delta)
-        return super().move(delta)
-
-    def scale(self, scale: Vector, pivot: Vector) -> bool:
-        if self._bbox is not None:
-            self._bbox.scale(scale, pivot)
-        return super().scale(scale, pivot)
-
-    def set_texel(self, texel: float, texture_size: float | int):
-        """Warning: Need calc uv and 3d area"""
-        assert self.area_3d != -1.0 and self.area_uv != -1.0, "Need calculate uv and 3d area"
-        area_3d = math.sqrt(self.area_3d)
-        area_uv = math.sqrt(self.area_uv) * texture_size
-        if math.isclose(area_3d, 0.0, abs_tol=1e-6) or math.isclose(area_uv, 0.0, abs_tol=1e-6):
-            return None  # TODO: Highlight islands with zero area
-        scale = (texel / (area_uv / area_3d))
-        return self.scale(Vector((scale, scale)), self.bbox.center)
-
-    def rotate(self, angle: float, pivot: Vector, aspect: float = 1.0) -> bool:
-        self._bbox = None  # TODO: Implement Rotate 90 degrees and aspect ratio for bbox
-        return super().rotate(angle, pivot, aspect)
-
-    def set_position(self, to: Vector, _from: Vector = None):
-        if _from is None:
-            _from = self.bbox.min
-        return self.move(to - _from)
-
-    def calc_flat_coords(self, save_triplet=False):
-        assert self.tris, 'Calculate tris'
-
-        uv = self.umesh.uv
-        if save_triplet:
-            self.flat_coords = [(t[0][uv].uv, t[1][uv].uv, t[2][uv].uv) for t in self.tris]
-        else:
-            extend = self.flat_coords.extend
-            for t in self.tris:
-                extend(t_crn[uv].uv for t_crn in t)
-
-    def calc_flat_uv_coords(self, save_triplet_=False):
-        self.calc_flat_coords(save_triplet_)
-
-    def calc_tris_simple(self):
-        tris_isl: list[tuple[BMLoop, BMLoop, BMLoop]] = []
-        tris_isl_append = tris_isl.append
-        for f in self:
-            corners = f.loops
-            n = len(corners)
-            if n == 4:
-                l1, l2, l3, l4 = corners
-                tris_isl_append((l1, l2, l3))
-                tris_isl_append((l3, l4, l1))
-            elif n == 3:
-                tris_isl_append(tuple(corners))
-            else:
-                first_crn = corners[0]
-                for i in range(1, n - 1):
-                    tris_isl_append((first_crn, corners[i], corners[i + 1]))
-
-        self.tris = tris_isl
-        return bool(tris_isl)
-
-    def calc_flat_unique_uv_coords(self):
-        uv = self.umesh.uv
-        self.flat_unique_uv_coords = [crn[uv].uv for f in self for crn in f.loops]
-
-    def calc_flat_3d_coords(self, save_triplet=False, scale_=None):
-        assert self.tris, 'Calculate tris'
-        self.is_flat_3d_coords_scaled = bool(scale_)
-        if save_triplet:
-            if scale_:
-                self.flat_3d_coords = [(t[0].vert.co * scale_, t[1].vert.co * scale_,
-                                        t[2].vert.co * scale_) for t in self.tris]
-            else:
-                self.flat_3d_coords = [(t[0].vert.co, t[1].vert.co, t[2].vert.co) for t in self.tris]
-        else:
-            extend = self.flat_3d_coords.extend
-            if scale_:
-                for t in self.tris:
-                    extend([t_crn.vert.co * scale_ for t_crn in t])
-            else:
-                for t in self.tris:
-                    extend([t_crn.vert.co for t_crn in t])
-
-    def is_overlap(self, other: 'AdvIsland'):
-        assert (self.flat_coords and other.flat_coords), 'Calculate flat coordinates'
-        if not self.bbox.is_isect(other.bbox):
-            return False
-        if isinstance(self.flat_coords[0], tuple):
-            for a0, a1, a2 in self.flat_coords:
-                for b0, b1, b2 in other.flat_coords:
-                    if isect_tris_2d(a0, a1, a2, b0, b1, b2):
-                        return True
-        else:
-            for i in range(0, len(self.flat_coords), 3):
-                a0, a1, a2 = self.flat_coords[i], self.flat_coords[i + 1], self.flat_coords[i + 2]
-                for j in range(0, len(other.flat_coords), 3):
-                    if isect_tris_2d(a0, a1, a2, other.flat_coords[j], other.flat_coords[j + 1], other.flat_coords[j + 2]):
-                        return True
-        return False
-
-    def calc_bbox(self) -> BBox:
-        if self.convex_coords:
-            self._bbox = BBox.calc_bbox(self.convex_coords)
-        elif self.flat_coords:
-            if isinstance(self.flat_coords[0], tuple):
-                self._bbox = BBox.calc_bbox(itertools.chain.from_iterable(self.flat_coords))
-            else:
-                self._bbox = BBox.calc_bbox(self.flat_coords)
-        else:
-            self._bbox = BBox.calc_bbox_uv(self.faces, self.umesh.uv)
-        return self._bbox
-
-    @property
-    def bbox(self) -> BBox:
-        if self._bbox is None:
-            self.calc_bbox()
-        return self._bbox
-
-    def calc_convex_points(self):
-        if self.flat_coords:
-            self.convex_coords = [self.flat_coords[i] for i in mathutils.geometry.convex_hull_2d(self.flat_coords)]
-        else:
-            self.convex_coords = super().calc_convex_points()
-        return self.convex_coords
-
-    def calc_area_3d(self, scale=None, areas_to_weight=False):
-        area = 0.0
-        # self.weights = []
-        if self.flat_3d_coords and scale:
-            if self.is_flat_3d_coords_scaled:
-                scale = None
-
-        weight_append = self.weights.append
-        it = self.flat_3d_coords if self.flat_3d_coords else (
-            (crn_a.vert.co, crn_b.vert.co, crn_c.vert.co) for crn_a, crn_b, crn_c in self.tris)
-        if areas_to_weight:
-            assert self.tris, 'Calculate tris'
-            if scale:
-                if utils.vec_isclose(scale, scale.xxx):
-                    x_component = abs(scale.x)
-                    for va, vb, vc in it:
-                        ar = area_tri(va, vb, vc) * x_component
-                        weight_append(ar)
-                        area += ar
-                else:
-                    for va, vb, vc in it:
-                        ar = area_tri(va * scale, vb * scale, vc * scale)
-                        weight_append(ar)
-                        area += ar
-            else:
-                for va, vb, vc in it:
-                    ar = area_tri(va, vb, vc)
-                    weight_append(ar)
-                    area += ar
-        elif scale:
-            if self.tris:
-                if utils.vec_isclose(scale, scale.xxx):  # Uniform Scale
-                    for va, vb, vc in it:
-                        area += area_tri(va, vb, vc)
-                    area *= (abs(scale.x) ** 2)
-                else:
-                    for va, vb, vc in it:
-                        area += area_tri(va * scale, vb * scale, vc * scale)
-            else:
-                if utils.vec_isclose(scale, scale.xxx):  # Uniform Scale
-                    for f in self:
-                        area += f.calc_area()
-                    area *= (abs(scale.z) ** 2)
-                else:
-                    from ..utils import calc_face_area_3d
-                    for f in self:
-                        area += calc_face_area_3d(f, scale)
-                    area *= 0.5
-        else:
-            for f in self:
-                area += f.calc_area()
-
-        self.area_3d = area
-        return area
-
-    def calc_area_uv(self):
-        area = 0.0
-        uv = self.umesh.uv
-        if self.flat_coords:
-            flat_coords = self.flat_coords
-            if isinstance(flat_coords[0], tuple):
-                for triplet in flat_coords:
-                    area += area_tri(*triplet)
-            else:
-                for i in range(0, len(flat_coords), 3):
-                    area += area_tri(flat_coords[i], flat_coords[i + 1], flat_coords[i + 2])
-        elif self.tris:
-            for crn_a, crn_b, crn_c in self.tris:
-                area += area_tri(crn_a[uv].uv, crn_b[uv].uv, crn_c[uv].uv)
-        else:
-            from ..utils import calc_face_area_uv
-            for f in self:
-                area += calc_face_area_uv(f, uv)
-
-        self.area_uv = area
-        return area
-
-    def calc_sub_islands_all(self) -> 'AdvIslands':
-        self.set_tag()
-        islands = [AdvIsland(i, self.umesh) for i in IslandsBase.calc_all_ex(self.umesh)]
-        return AdvIslands(islands, self.umesh)
-
-    def __str__(self):
-        return f'Advanced Island. Faces count = {len(self.faces)}, Tris Count = {len(self.tris)}'
-
-
 if USE_GENERIC_UV_SYNC:
+
     class IslandsBaseTagFilterPre:
         @staticmethod
         def tag_filter_all(umesh: _umesh.UMesh, tag=True):
@@ -1142,7 +1195,7 @@ if USE_GENERIC_UV_SYNC:
             if umesh.sync:
                 if umesh.sync_valid:
                     for face in umesh.bm.faces:
-                        face.tag = (face.uv_select and not face.hide)
+                        face.tag = face.uv_select and not face.hide
                 else:
                     for face in umesh.bm.faces:
                         face.tag = face.select
@@ -1181,7 +1234,9 @@ if USE_GENERIC_UV_SYNC:
             else:
                 for face in umesh.bm.faces:
                     face.tag = face.select
+
 else:
+
     class IslandsBaseTagFilterPre:
         @staticmethod
         def tag_filter_all(umesh: _umesh.UMesh, tag=True):
@@ -1196,7 +1251,7 @@ else:
                     for face in umesh.bm.faces:
                         face.tag = True
                     return
-                if umesh.elem_mode == 'VERT':
+                if umesh.elem_mode == "VERT":
                     for face in umesh.bm.faces:
                         face.tag = all(crn[uv].select for crn in face.loops)
                 else:
@@ -1208,7 +1263,7 @@ else:
                 for face in umesh.bm.faces:
                     face.tag = face.select
                 return
-            if umesh.elem_mode == 'VERT':
+            if umesh.elem_mode == "VERT":
                 for face in umesh.bm.faces:
                     face.tag = all(crn[uv].select for crn in face.loops) and face.select
             else:
@@ -1228,19 +1283,21 @@ else:
             else:
                 uv = umesh.uv
                 if umesh.is_full_face_selected:
-                    if umesh.elem_mode == 'VERT':
+                    if umesh.elem_mode == "VERT":
                         for face in umesh.bm.faces:
                             face.tag = not all(l[uv].select for l in face.loops)
                     else:
                         for face in umesh.bm.faces:
                             face.tag = not all(l[uv].select_edge for l in face.loops)
                 else:
-                    if umesh.elem_mode == 'VERT':
+                    if umesh.elem_mode == "VERT":
                         for face in umesh.bm.faces:
                             face.tag = not all(l[uv].select for l in face.loops) and face.select
                     else:
                         for face in umesh.bm.faces:
-                            face.tag = not all(l[uv].select_edge for l in face.loops) and face.select
+                            face.tag = (
+                                not all(l[uv].select_edge for l in face.loops) and face.select
+                            )
 
         @staticmethod
         def tag_filter_visible(umesh: _umesh.UMesh):
@@ -1257,6 +1314,7 @@ else:
 
 
 if USE_GENERIC_UV_SYNC:
+
     class IslandsBaseTagFilterPost:
         @staticmethod
         def island_filter_is_all_face_selected(island: list[BMFace], umesh: _umesh.UMesh) -> bool:
@@ -1287,27 +1345,38 @@ if USE_GENERIC_UV_SYNC:
                 return any(crn.uv_select_edge for face in island for crn in face.loops)
 
         @staticmethod
-        def island_filter_is_partial_vert_selected(island: list[BMFace], umesh: _umesh.UMesh) -> bool:
+        def island_filter_is_partial_vert_selected(
+            island: list[BMFace], umesh: _umesh.UMesh
+        ) -> bool:
             if umesh.sync and not umesh.sync_valid:
                 return not utils.all_equal(v.select for face in island for v in face.verts)
             else:
-                return not utils.all_equal(crn.uv_select_vert for face in island for crn in face.loops)
+                return not utils.all_equal(
+                    crn.uv_select_vert for face in island for crn in face.loops
+                )
 
         @staticmethod
-        def island_filter_is_partial_edge_selected(island: list[BMFace], umesh: _umesh.UMesh) -> bool:
+        def island_filter_is_partial_edge_selected(
+            island: list[BMFace], umesh: _umesh.UMesh
+        ) -> bool:
             if umesh.sync and not umesh.sync_valid:
                 return not utils.all_equal(e.select for face in island for e in face.edges)
             else:
-                return not utils.all_equal(crn.uv_select_edge for face in island for crn in face.loops)
+                return not utils.all_equal(
+                    crn.uv_select_edge for face in island for crn in face.loops
+                )
 
         @staticmethod
-        def island_filter_is_partial_face_selected(island: list[BMFace], umesh: _umesh.UMesh) -> bool:
+        def island_filter_is_partial_face_selected(
+            island: list[BMFace], umesh: _umesh.UMesh
+        ) -> bool:
             if umesh.sync and not umesh.sync_valid:
                 return not utils.all_equal(f.select for f in island)
             else:
                 return not utils.all_equal(f.uv_select for f in island)
 
 else:
+
     class IslandsBaseTagFilterPost:
 
         @staticmethod
@@ -1343,7 +1412,9 @@ else:
                 return any(crn[uv].select_edge for face in island for crn in face.loops)
 
         @staticmethod
-        def island_filter_is_partial_vert_selected(island: list[BMFace], umesh: _umesh.UMesh) -> bool:
+        def island_filter_is_partial_vert_selected(
+            island: list[BMFace], umesh: _umesh.UMesh
+        ) -> bool:
             if umesh.sync:
                 return not utils.all_equal(v.select for face in island for v in face.verts)
             else:
@@ -1351,25 +1422,38 @@ else:
                 return not utils.all_equal(crn[uv].select for face in island for crn in face.loops)
 
         @staticmethod
-        def island_filter_is_partial_edge_selected(island: list[BMFace], umesh: _umesh.UMesh) -> bool:
+        def island_filter_is_partial_edge_selected(
+            island: list[BMFace], umesh: _umesh.UMesh
+        ) -> bool:
             if umesh.sync:
                 return not utils.all_equal(e.select for face in island for e in face.edges)
             else:
                 uv = umesh.uv
-                return not utils.all_equal(crn[uv].select_edge for face in island for crn in face.loops)
+                return not utils.all_equal(
+                    crn[uv].select_edge for face in island for crn in face.loops
+                )
 
         @staticmethod
-        def island_filter_is_partial_face_selected(island: list[BMFace], umesh: _umesh.UMesh) -> bool:
+        def island_filter_is_partial_face_selected(
+            island: list[BMFace], umesh: _umesh.UMesh
+        ) -> bool:
             if umesh.sync:
                 return not utils.all_equal(face.select for face in island)
             else:
                 uv = umesh.uv
-                return not utils.all_equal(all(crn[uv].select_edge for crn in face.loops) for face in island)
+                return not utils.all_equal(
+                    all(crn[uv].select_edge for crn in face.loops) for face in island
+                )
 
 
 class IslandsBase(IslandsBaseTagFilterPre, IslandsBaseTagFilterPost):
+    def __init__(self, islands=(), umesh: _umesh.UMesh | utils.NoInit = utils.NoInit()):
+        self.islands: list[AdvIsland] | tuple = islands
+        self.umesh: _umesh.UMesh | utils.NoInit = umesh
+        self.value: float | int | Vector = -1  # value for different purposes
+
     @staticmethod
-    def calc_iter_ex(umesh: _umesh.UMesh):
+    def calc_iter_without_ms_ex(umesh: _umesh.UMesh):
         uv = umesh.uv
         island: list[BMFace] = []
 
@@ -1388,7 +1472,10 @@ class IslandsBase(IslandsBaseTagFilterPre, IslandsBaseTagFilterPost):
                         ff = shared_crn.face
                         if not ff.tag:
                             continue
-                        if l[uv].uv == shared_crn.link_loop_next[uv].uv and l.link_loop_next[uv].uv == shared_crn[uv].uv:
+                        if (
+                            l[uv].uv == shared_crn.link_loop_next[uv].uv
+                            and l.link_loop_next[uv].uv == shared_crn[uv].uv
+                        ):
                             temp.append(ff)
                             ff.tag = False
 
@@ -1419,7 +1506,12 @@ class IslandsBase(IslandsBaseTagFilterPre, IslandsBaseTagFilterPost):
                         ff = shared_crn.face
                         if not ff.tag:
                             continue
-                        if l[uv].uv == shared_crn.link_loop_next[uv].uv or l.link_loop_next[uv].uv == shared_crn[uv].uv:
+                        if l.edge.seam:  # Skip if seam
+                            continue
+                        if (
+                            l[uv].uv == shared_crn.link_loop_next[uv].uv
+                            or l.link_loop_next[uv].uv == shared_crn[uv].uv
+                        ):
                             temp.append(ff)
                             ff.tag = False
 
@@ -1431,7 +1523,41 @@ class IslandsBase(IslandsBaseTagFilterPre, IslandsBaseTagFilterPost):
             island = []
 
     @staticmethod
-    def calc_with_markseam_iter_ex(umesh: _umesh.UMesh):
+    def calc_iter_non_manifold_without_ms_ex(umesh: _umesh.UMesh):
+        uv = umesh.uv
+        island: list[BMFace] = []
+
+        for face in umesh.bm.faces:
+            if not face.tag:  # Skip unselected and appended faces
+                continue
+            face.tag = False  # Tag first element in island (don't add again)
+
+            parts_of_island = [face]  # Container collector of island elements
+            temp = []  # Container for get elements from loop from parts_of_island
+
+            while parts_of_island:  # Blank list == all faces of the island taken
+                for f in parts_of_island:
+                    for l in f.loops:  # Running through all the neighboring faces
+                        shared_crn = l.link_loop_radial_prev
+                        ff = shared_crn.face
+                        if not ff.tag:
+                            continue
+                        if (
+                            l[uv].uv == shared_crn.link_loop_next[uv].uv
+                            or l.link_loop_next[uv].uv == shared_crn[uv].uv
+                        ):
+                            temp.append(ff)
+                            ff.tag = False
+
+                island.extend(parts_of_island)
+                parts_of_island = temp
+                temp = []
+
+            yield island
+            island = []
+
+    @staticmethod
+    def calc_iter_ex(umesh: _umesh.UMesh):
         uv = umesh.uv
         island: list[BMFace] = []
 
@@ -1452,7 +1578,10 @@ class IslandsBase(IslandsBaseTagFilterPre, IslandsBaseTagFilterPost):
                             continue
                         if l.edge.seam:  # Skip if seam
                             continue
-                        if l[uv].uv == shared_crn.link_loop_next[uv].uv and l.link_loop_next[uv].uv == shared_crn[uv].uv:
+                        if (
+                            l[uv].uv == shared_crn.link_loop_next[uv].uv
+                            and l.link_loop_next[uv].uv == shared_crn[uv].uv
+                        ):
                             temp.append(ff)
                             ff.tag = False
 
@@ -1464,7 +1593,7 @@ class IslandsBase(IslandsBaseTagFilterPre, IslandsBaseTagFilterPost):
             island = []
 
     @staticmethod
-    def calc_with_markseam_material_iter_ex(umesh: _umesh.UMesh):
+    def calc_material_iter_ex(umesh: _umesh.UMesh):
         uv = umesh.uv
         island: list[BMFace] = []
 
@@ -1487,7 +1616,10 @@ class IslandsBase(IslandsBaseTagFilterPre, IslandsBaseTagFilterPost):
                             continue
                         if ff.material_index != f.material_index:  # Skip if other material
                             continue
-                        if l[uv].uv == shared_crn.link_loop_next[uv].uv and l.link_loop_next[uv].uv == shared_crn[uv].uv:
+                        if (
+                            l[uv].uv == shared_crn.link_loop_next[uv].uv
+                            and l.link_loop_next[uv].uv == shared_crn[uv].uv
+                        ):
                             temp.append(ff)
                             ff.tag = False
 
@@ -1527,7 +1659,10 @@ class IslandsBase(IslandsBaseTagFilterPre, IslandsBaseTagFilterPost):
                             continue
                         if ff.material_index != f.material_index:  # Skip if other material
                             continue
-                        if l[uv].uv == shared_crn.link_loop_next[uv].uv and l.link_loop_next[uv].uv == shared_crn[uv].uv:
+                        if (
+                            l[uv].uv == shared_crn.link_loop_next[uv].uv
+                            and l.link_loop_next[uv].uv == shared_crn[uv].uv
+                        ):
                             temp.append(ff)
                             ff.tag = False
 
@@ -1538,70 +1673,41 @@ class IslandsBase(IslandsBaseTagFilterPre, IslandsBaseTagFilterPost):
             yield island
             island = []
 
-
-class Islands(IslandsBase):
-    island_type = FaceIsland
-
-    def __init__(self, islands=(), umesh: _umesh.UMesh | utils.NoInit = utils.NoInit()):
-        self.islands: list[FaceIsland] | tuple = islands
-        self.umesh: _umesh.UMesh | utils.NoInit = umesh
-        self.value: float | int | Vector = -1  # value for different purposes
+    ########################################
+    # Calc Islands Start
+    ########################################
 
     @classmethod
-    def calc_selected(cls, umesh: _umesh.UMesh):
-        if umesh.is_full_face_deselected:
-            return cls()
-        cls.tag_filter_selected(umesh)
-        islands = [cls.island_type(i, umesh) for i in cls.calc_iter_ex(umesh)]
-        return cls(islands, umesh)
-
-    @classmethod
-    def calc_non_selected(cls, umesh: _umesh.UMesh):
-        if umesh.is_full_face_selected_for_avoid_force_explicit_check:
-            return cls()
-
-        cls.tag_filter_non_selected(umesh)
-        islands = [cls.island_type(i, umesh) for i in cls.calc_iter_ex(umesh)]
-        return cls(islands, umesh)
-
-    @classmethod
-    def calc_non_selected_with_mark_seam(cls, umesh: _umesh.UMesh):
+    def calc_non_selected(cls, umesh: _umesh.UMesh, *, with_seams: bool = True):
         """NOTE: Used in Stack"""
         if umesh.is_full_face_selected_for_avoid_force_explicit_check:
             return cls()
 
+        calc_iter_ex = cls.calc_iter_ex if with_seams else cls.calc_iter_without_ms_ex
         cls.tag_filter_non_selected(umesh)
-        islands = [cls.island_type(i, umesh) for i in cls.calc_with_markseam_iter_ex(umesh)]
+        islands = [AdvIsland(i, umesh) for i in calc_iter_ex(umesh)]
         return cls(islands, umesh)
 
     @classmethod
-    def calc_visible_with_mark_seam(cls, umesh: _umesh.UMesh):
+    def calc_visible(cls, umesh: _umesh.UMesh, *, with_seams: bool = True):
         cls.tag_filter_visible(umesh)
-        islands = [cls.island_type(i, umesh) for i in cls.calc_with_markseam_iter_ex(umesh)]
+
+        calc_iter_ex = cls.calc_iter_ex if with_seams else cls.calc_iter_without_ms_ex
+        islands = [AdvIsland(i, umesh) for i in calc_iter_ex(umesh)]
         return cls(islands, umesh)
 
     @classmethod
-    def calc_selected_with_mark_seam(cls, umesh: _umesh.UMesh):
+    def calc_selected(cls, umesh: _umesh.UMesh, *, with_seams: bool = True):
         if umesh.is_full_face_deselected:
             return cls()
         cls.tag_filter_selected(umesh)
-        islands = [cls.island_type(i, umesh) for i in cls.calc_with_markseam_iter_ex(umesh)]
+
+        calc_iter_ex = cls.calc_iter_ex if with_seams else cls.calc_iter_without_ms_ex
+        islands = [AdvIsland(i, umesh) for i in calc_iter_ex(umesh)]
         return cls(islands, umesh)
 
     @classmethod
-    def calc_extended_with_mark_seam(cls, umesh: _umesh.UMesh):
-        if umesh.is_full_face_deselected:
-            return cls()
-        cls.tag_filter_visible(umesh)
-        if umesh.sync and umesh.is_full_face_deselected:
-            islands = [cls.island_type(i, umesh) for i in cls.calc_with_markseam_iter_ex(umesh)]
-        else:
-            islands = [cls.island_type(i, umesh) for i in cls.calc_with_markseam_iter_ex(umesh)
-                       if cls.island_filter_is_any_face_selected(i, umesh)]
-        return cls(islands, umesh)
-
-    @classmethod
-    def calc_partial_selected(cls, umesh: _umesh.UMesh):
+    def calc_partial_selected(cls, umesh: _umesh.UMesh, *, with_seams: bool = True):
         if umesh.is_full_face_deselected:
             return cls()
 
@@ -1609,25 +1715,17 @@ class Islands(IslandsBase):
             return cls()
 
         cls.tag_filter_visible(umesh)
-        islands = [cls.island_type(i, umesh) for i in cls.calc_iter_ex(
-            umesh) if cls.island_filter_is_partial_face_selected(i, umesh)]
+
+        calc_iter_ex = cls.calc_iter_ex if with_seams else cls.calc_iter_without_ms_ex
+        islands = [
+            AdvIsland(i, umesh)
+            for i in calc_iter_ex(umesh)
+            if cls.island_filter_is_partial_face_selected(i, umesh)
+        ]
         return cls(islands, umesh)
 
     @classmethod
-    def calc_partial_selected_with_mark_seam(cls, umesh: _umesh.UMesh):
-        if umesh.is_full_face_deselected:
-            return cls()
-
-        if umesh.is_full_face_selected_for_avoid_force_explicit_check:
-            return cls()
-
-        cls.tag_filter_visible(umesh)
-        islands = [cls.island_type(i, umesh) for i in cls.calc_with_markseam_iter_ex(umesh)
-                   if cls.island_filter_is_partial_face_selected(i, umesh)]
-        return cls(islands, umesh)
-
-    @classmethod
-    def calc_partial_selected_by_context(cls, umesh: _umesh.UMesh):  # with ms
+    def calc_partial_selected_by_context(cls, umesh: _umesh.UMesh, *, with_seams: bool = True):
         if not umesh.sync:
             if umesh.is_full_face_deselected:
                 return cls()
@@ -1635,11 +1733,11 @@ class Islands(IslandsBase):
         if umesh.is_full_face_selected_for_avoid_force_explicit_check:
             return cls()
 
-        if umesh.elem_mode == 'VERT':
+        if umesh.elem_mode == "VERT":
             if umesh.is_full_vert_deselected:
                 return cls()
             isl_filter = cls.island_filter_is_partial_vert_selected
-        elif umesh.elem_mode == 'EDGE':
+        elif umesh.elem_mode == "EDGE":
             if umesh.is_full_edge_deselected:
                 return cls()
             isl_filter = cls.island_filter_is_partial_edge_selected
@@ -1648,55 +1746,35 @@ class Islands(IslandsBase):
 
         cls.tag_filter_visible(umesh)
 
-        islands = [cls.island_type(i, umesh) for i in cls.calc_with_markseam_iter_ex(umesh)
-                   if isl_filter(i, umesh)]
+        calc_iter_ex = cls.calc_iter_ex if with_seams else cls.calc_iter_without_ms_ex
+        islands = [AdvIsland(i, umesh) for i in calc_iter_ex(umesh) if isl_filter(i, umesh)]
         return cls(islands, umesh)
 
     @classmethod
-    def calc_extended(cls, umesh: _umesh.UMesh):
+    def calc_extended(cls, umesh: _umesh.UMesh, *, with_seams: bool = True) -> "IslandsBase | Islands":
         if umesh.is_full_face_deselected:
             return cls()
         cls.tag_filter_visible(umesh)
 
-        if umesh.is_full_face_selected_for_avoid_force_explicit_check:
-            islands = [cls.island_type(i, umesh) for i in cls.calc_iter_ex(umesh)]
+        calc_iter_ex = cls.calc_iter_ex if with_seams else cls.calc_iter_without_ms_ex
+        if umesh.sync and umesh.is_full_face_deselected:
+            islands = [AdvIsland(i, umesh) for i in calc_iter_ex(umesh)]
         else:
-            islands = [cls.island_type(i, umesh) for i in cls.calc_iter_ex(umesh)
-                       if cls.island_filter_is_any_face_selected(i, umesh)]
+            islands = [
+                AdvIsland(i, umesh)
+                for i in calc_iter_ex(umesh)
+                if cls.island_filter_is_any_face_selected(i, umesh)
+            ]
         return cls(islands, umesh)
 
     @classmethod
-    def calc_extended_any_elem(cls, umesh: _umesh.UMesh):
-        if not umesh.sync:
-            if umesh.is_full_face_deselected:
-                return cls()
-        else:
-            if umesh.elem_mode == 'FACE':
-                if umesh.is_full_face_deselected:
-                    return cls()
-            elif umesh.elem_mode == 'VERT':
-                if umesh.is_full_vert_deselected:
-                    return cls()
-            else:
-                if umesh.is_full_edge_deselected:
-                    return cls()
-
-        cls.tag_filter_visible(umesh)
-        if umesh.is_full_face_selected_for_avoid_force_explicit_check:
-            islands = [cls.island_type(i, umesh) for i in cls.calc_iter_ex(umesh)]
-        else:
-            islands = [cls.island_type(i, umesh) for i in cls.calc_iter_ex(umesh)
-                       if cls.island_filter_is_any_vert_selected(i, umesh)]
-        return cls(islands, umesh)
-
-    @classmethod
-    def calc_extended_any_elem_with_mark_seam(cls, umesh: _umesh.UMesh):
+    def calc_extended_any_elem(cls, umesh: _umesh.UMesh, *, with_seams: bool = True):
         """Get islands with vertex select."""
         if umesh.sync:
-            if umesh.elem_mode in ('FACE', 'ISLAND'):
+            if umesh.elem_mode in ("FACE", "ISLAND"):
                 if umesh.is_full_face_deselected:
                     return cls()
-            elif umesh.elem_mode == 'VERT':
+            elif umesh.elem_mode == "VERT":
                 if umesh.is_full_vert_deselected:
                     return cls()
             else:
@@ -1707,25 +1785,33 @@ class Islands(IslandsBase):
                 return cls()
 
         cls.tag_filter_visible(umesh)
+
+        calc_iter_ex = cls.calc_iter_ex if with_seams else cls.calc_iter_without_ms_ex
         if umesh.is_full_face_selected_for_avoid_force_explicit_check:
-            islands = [cls.island_type(i, umesh) for i in cls.calc_with_markseam_iter_ex(umesh)]
+            islands = [AdvIsland(i, umesh) for i in calc_iter_ex(umesh)]
         else:
-            if umesh.elem_mode in ('FACE', 'ISLAND'):
-                islands = [cls.island_type(i, umesh) for i in cls.calc_with_markseam_iter_ex(umesh)
-                           if cls.island_filter_is_any_face_selected(i, umesh)]
+            if umesh.elem_mode in ("FACE", "ISLAND"):
+                islands = [
+                    AdvIsland(i, umesh)
+                    for i in calc_iter_ex(umesh)
+                    if cls.island_filter_is_any_face_selected(i, umesh)
+                ]
             else:
-                islands = [cls.island_type(i, umesh) for i in cls.calc_with_markseam_iter_ex(umesh)
-                           if cls.island_filter_is_any_vert_selected(i, umesh)]
+                islands = [
+                    AdvIsland(i, umesh)
+                    for i in calc_iter_ex(umesh)
+                    if cls.island_filter_is_any_vert_selected(i, umesh)
+                ]
         return cls(islands, umesh)
 
     @classmethod
-    def calc_extended_by_context_with_mark_seam(cls, umesh: _umesh.UMesh):
+    def calc_extended_by_context(cls, umesh: _umesh.UMesh, *, with_seams: bool = True):
         """Get islands with vertex select."""
         if umesh.sync:
-            if umesh.elem_mode in ('FACE', 'ISLAND'):
+            if umesh.elem_mode in ("FACE", "ISLAND"):
                 if umesh.is_full_face_deselected:
                     return cls()
-            elif umesh.elem_mode == 'VERT':
+            elif umesh.elem_mode == "VERT":
                 if umesh.is_full_vert_deselected:
                     return cls()
             else:
@@ -1736,28 +1822,39 @@ class Islands(IslandsBase):
                 return cls()
 
         cls.tag_filter_visible(umesh)
+
+        calc_iter_ex = cls.calc_iter_ex if with_seams else cls.calc_iter_without_ms_ex
         if umesh.is_full_face_selected_for_avoid_force_explicit_check:
-            islands = [cls.island_type(i, umesh) for i in cls.calc_with_markseam_iter_ex(umesh)]
+            islands = [AdvIsland(i, umesh) for i in calc_iter_ex(umesh)]
         else:
-            if umesh.elem_mode in ('FACE', 'ISLAND'):
-                islands = [cls.island_type(i, umesh) for i in cls.calc_with_markseam_iter_ex(umesh)
-                           if cls.island_filter_is_any_face_selected(i, umesh)]
-            elif umesh.elem_mode == 'EDGE':
-                islands = [cls.island_type(i, umesh) for i in cls.calc_with_markseam_iter_ex(umesh)
-                           if cls.island_filter_is_any_edge_selected(i, umesh)]
+            if umesh.elem_mode in ("FACE", "ISLAND"):
+                islands = [
+                    AdvIsland(i, umesh)
+                    for i in calc_iter_ex(umesh)
+                    if cls.island_filter_is_any_face_selected(i, umesh)
+                ]
+            elif umesh.elem_mode == "EDGE":
+                islands = [
+                    AdvIsland(i, umesh)
+                    for i in calc_iter_ex(umesh)
+                    if cls.island_filter_is_any_edge_selected(i, umesh)
+                ]
             else:
-                islands = [cls.island_type(i, umesh) for i in cls.calc_with_markseam_iter_ex(umesh)
-                           if cls.island_filter_is_any_vert_selected(i, umesh)]
+                islands = [
+                    AdvIsland(i, umesh)
+                    for i in calc_iter_ex(umesh)
+                    if cls.island_filter_is_any_vert_selected(i, umesh)
+                ]
         return cls(islands, umesh)
 
     @classmethod
-    def calc_extended_any_vert_non_manifold(cls, umesh: _umesh.UMesh):
+    def calc_extended_any_vert_non_manifold(cls, umesh: _umesh.UMesh, *, with_seams: bool = True):
         """Calc any verts selected islands"""
         if umesh.sync:
-            if umesh.elem_mode == 'FACE':
+            if umesh.elem_mode == "FACE":
                 if umesh.is_full_face_deselected:
                     return cls()
-            elif umesh.elem_mode == 'VERT':
+            elif umesh.elem_mode == "VERT":
                 if umesh.is_full_vert_deselected:
                     return cls()
             else:
@@ -1768,21 +1865,30 @@ class Islands(IslandsBase):
                 return cls()
 
         cls.tag_filter_visible(umesh)
+
+        calc_iter_ex = (
+            cls.calc_iter_non_manifold_ex
+            if with_seams
+            else cls.calc_iter_non_manifold_without_ms_ex
+        )
         if umesh.is_full_face_selected_for_avoid_force_explicit_check:
-            islands = [cls.island_type(i, umesh) for i in cls.calc_iter_non_manifold_ex(umesh)]
+            islands = [AdvIsland(i, umesh) for i in calc_iter_ex(umesh)]
         else:
-            islands = [cls.island_type(i, umesh) for i in cls.calc_iter_non_manifold_ex(umesh)
-                       if cls.island_filter_is_any_vert_selected(i, umesh)]
+            islands = [
+                AdvIsland(i, umesh)
+                for i in calc_iter_ex(umesh)
+                if cls.island_filter_is_any_vert_selected(i, umesh)
+            ]
         return cls(islands, umesh)
 
     @classmethod
-    def calc_extended_any_edge_non_manifold(cls, umesh: _umesh.UMesh):
+    def calc_extended_any_edge_non_manifold(cls, umesh: _umesh.UMesh, *, with_seams: bool = True):
         """Calc any edges selected islands"""
         if umesh.sync:
-            if umesh.elem_mode == 'FACE':
+            if umesh.elem_mode == "FACE":
                 if umesh.is_full_face_deselected:
                     return cls()
-            elif umesh.elem_mode == 'VERT':
+            elif umesh.elem_mode == "VERT":
                 if umesh.is_full_vert_deselected:
                     return cls()
             else:
@@ -1793,40 +1899,26 @@ class Islands(IslandsBase):
                 return cls()
 
         cls.tag_filter_visible(umesh)
+        calc_iter_ex = (
+            cls.calc_iter_non_manifold_ex
+            if with_seams
+            else cls.calc_iter_non_manifold_without_ms_ex
+        )
         if umesh.is_full_face_selected_for_avoid_force_explicit_check:
-            islands = [cls.island_type(i, umesh) for i in cls.calc_iter_non_manifold_ex(umesh)]
+            islands = [AdvIsland(i, umesh) for i in calc_iter_ex(umesh)]
         else:
-            islands = [cls.island_type(i, umesh) for i in cls.calc_iter_non_manifold_ex(umesh)
-                       if cls.island_filter_is_any_edge_selected(i, umesh)]
+            islands = [
+                AdvIsland(i, umesh)
+                for i in calc_iter_ex(umesh)
+                if cls.island_filter_is_any_edge_selected(i, umesh)
+            ]
         return cls(islands, umesh)
 
     @classmethod
-    def calc_extended_any_edge(cls, umesh: _umesh.UMesh):
-        """Calc any edges selected islands"""
-        if umesh.sync:
-            if umesh.elem_mode == 'FACE':
-                if umesh.is_full_face_deselected:
-                    return cls()
-            else:
-                if umesh.is_full_edge_deselected:
-                    return cls()
-        else:
-            if umesh.is_full_face_deselected:
-                return cls()
-
-        cls.tag_filter_visible(umesh)
-        if umesh.is_full_face_selected_for_avoid_force_explicit_check:
-            islands = [cls.island_type(i, umesh) for i in cls.calc_iter_ex(umesh)]
-        else:
-            islands = [cls.island_type(i, umesh) for i in cls.calc_iter_ex(umesh)
-                       if cls.island_filter_is_any_edge_selected(i, umesh)]
-        return cls(islands, umesh)
-
-    @classmethod
-    def calc_extended_any_edge_with_markseam(cls, umesh: _umesh.UMesh):
+    def calc_extended_any_edge(cls, umesh: _umesh.UMesh, *, with_seams: bool = True):
         """Calc any edges selected islands, with markseam"""
         if umesh.sync:
-            if umesh.elem_mode == 'FACE':
+            if umesh.elem_mode == "FACE":
                 if umesh.is_full_face_deselected:
                     return cls()
             else:
@@ -1837,27 +1929,32 @@ class Islands(IslandsBase):
                 return cls()
 
         cls.tag_filter_visible(umesh)
+
+        calc_iter_ex = cls.calc_iter_ex if with_seams else cls.calc_iter_ex
         if umesh.is_full_face_selected_for_avoid_force_explicit_check:
-            islands = [cls.island_type(i, umesh) for i in cls.calc_with_markseam_iter_ex(umesh)]
+            islands = [AdvIsland(i, umesh) for i in calc_iter_ex(umesh)]
         else:
-            islands = [cls.island_type(i, umesh) for i in cls.calc_with_markseam_iter_ex(umesh)
-                       if cls.island_filter_is_any_edge_selected(i, umesh)]
+            islands = [
+                AdvIsland(i, umesh)
+                for i in calc_iter_ex(umesh)
+                if cls.island_filter_is_any_edge_selected(i, umesh)
+            ]
         return cls(islands, umesh)
 
     @classmethod
-    def calc_visible_non_manifold(cls, umesh: _umesh.UMesh):
+    def calc_visible_non_manifold(cls, umesh: _umesh.UMesh, with_seams: bool = True):
         cls.tag_filter_visible(umesh)
-        islands = [cls.island_type(i, umesh) for i in cls.calc_iter_non_manifold_ex(umesh)]
+
+        calc_iter_ex = (
+            cls.calc_iter_non_manifold_ex
+            if with_seams
+            else cls.calc_iter_non_manifold_without_ms_ex
+        )
+        islands = [AdvIsland(i, umesh) for i in calc_iter_ex(umesh)]
         return cls(islands, umesh)
 
     @classmethod
-    def calc_visible(cls, umesh: _umesh.UMesh):
-        cls.tag_filter_visible(umesh)
-        islands = [cls.island_type(i, umesh) for i in cls.calc_iter_ex(umesh)]
-        return cls(islands, umesh)
-
-    @classmethod
-    def calc_non_full_selected_with_mark_seam(cls, umesh: _umesh.UMesh):
+    def calc_non_full_selected(cls, umesh: _umesh.UMesh, *, with_seams: bool = True):
         if umesh.sync:
             if umesh.is_full_face_selected_for_avoid_force_explicit_check:
                 return cls()
@@ -1866,58 +1963,44 @@ class Islands(IslandsBase):
                 return cls()
 
         cls.tag_filter_visible(umesh)
-        islands = [cls.island_type(i, umesh) for i in cls.calc_with_markseam_iter_ex(umesh)
-                   if not cls.island_filter_is_all_face_selected(i, umesh)]
+
+        calc_iter_ex = cls.calc_iter_ex if with_seams else cls.calc_iter_without_ms_ex
+        islands = [
+            AdvIsland(i, umesh)
+            for i in calc_iter_ex(umesh)
+            if not cls.island_filter_is_all_face_selected(i, umesh)
+        ]
         return cls(islands, umesh)
 
     @classmethod
-    def calc_non_selected_extended(cls, umesh: _umesh.UMesh):
+    def calc_non_selected_extended(cls, umesh: _umesh.UMesh, *, with_seams: bool = True):
         cls.tag_filter_visible(umesh)
-        islands = [cls.island_type(i, umesh) for i in cls.calc_iter_ex(
-            umesh) if not cls.island_filter_is_any_face_selected(i, umesh)]
+        calc_iter_ex = cls.calc_iter_ex if with_seams else cls.calc_iter_without_ms_ex
+        islands = [
+            AdvIsland(i, umesh)
+            for i in calc_iter_ex(umesh)
+            if not cls.island_filter_is_any_face_selected(i, umesh)
+        ]
         return cls(islands, umesh)
 
     @classmethod
-    def calc_extended_or_visible(cls, umesh: _umesh.UMesh, *, extended) -> 'Islands':
+    def calc_extended_or_visible(
+        cls, umesh: _umesh.UMesh, *, extended, with_seams: bool = True
+    ) -> "typing.Self":
         if extended:
-            return cls.calc_extended(umesh)
-        return cls.calc_visible(umesh)
+            return cls.calc_extended(umesh, with_seams=with_seams)
+        return cls.calc_visible(umesh, with_seams=with_seams)
 
     @classmethod
-    def calc_extended_or_visible_with_mark_seam(cls, umesh: _umesh.UMesh, *, extended) -> 'Islands':
-        if extended:
-            return cls.calc_extended_with_mark_seam(umesh)
-        return cls.calc_visible_with_mark_seam(umesh)
-
-    @classmethod
-    def calc_any_extended_or_visible_non_manifold(cls, umesh: _umesh.UMesh, *, extended) -> 'Islands':
-        if extended:
-            return cls.calc_extended_any_vert_non_manifold(umesh)
-        return cls.calc_visible_non_manifold(umesh)
-
-    @classmethod
-    def calc_with_hidden(cls, umesh: _umesh.UMesh):
+    def calc_with_hidden(cls, umesh: _umesh.UMesh, *, with_seams: bool = True):
         cls.tag_filter_all(umesh)
-        islands = [cls.island_type(i, umesh) for i in cls.calc_iter_ex(umesh)]
+
+        calc_iter_ex = cls.calc_iter_ex if with_seams else cls.calc_iter_without_ms_ex
+        islands = [AdvIsland(i, umesh) for i in calc_iter_ex(umesh)]
         return cls(islands, umesh)
 
-    @classmethod
-    def calc_with_hidden_with_mark_seam(cls, umesh: _umesh.UMesh) -> 'typing.Self':
-        cls.tag_filter_all(umesh)
-        islands = [cls.island_type(i, umesh) for i in cls.calc_with_markseam_iter_ex(umesh)]
-        return cls(islands, umesh)
 
-    def calc_max_uv_area_face(self):
-        uv = self.umesh.uv
-        max_area = -1.0
-        max_face = None
-        for isl in self:
-            for f in isl:
-                new_area = utils.calc_face_area_uv(f, uv)
-                if new_area > max_area:
-                    max_area = new_area
-                    max_face = f
-        return max_face
+class Islands(IslandsBase):
 
     def move(self, delta: Vector) -> bool:
         return bool(sum(island.move(delta) for island in self.islands))
@@ -1925,14 +2008,22 @@ class Islands(IslandsBase):
     def set_position(self, to, _from):
         return bool(sum(island.set_position(to, _from) for island in self.islands))
 
-    def scale_with_move(self, scale: Vector, delta: Vector,  pivot: Vector) -> bool:
+    def scale(self, scale: Vector, pivot: Vector) -> bool:
+        return bool(sum(island.scale(scale, pivot) for island in self.islands))
+
+    def scale_with_move(self, scale: Vector, delta: Vector, pivot: Vector) -> bool:
         return bool(sum(island.scale_with_move(scale, delta, pivot) for island in self.islands))
 
     def scale_simple(self, scale: Vector):
         return bool(sum(island.scale_simple(scale) for island in self.islands))
 
-    def scale(self, scale: Vector, pivot: Vector) -> bool:
-        return bool(sum(island.scale(scale, pivot) for island in self.islands))
+    def apply_aspect_ratio(self):
+        scale = Vector((self.umesh.aspect, 1))
+        return self.scale_simple(scale)
+
+    def reset_aspect_ratio(self):
+        scale = Vector((1 / self.umesh.aspect, 1))
+        return self.scale_simple(scale)
 
     def rotate(self, angle: float, pivot: Vector, aspect: float = 1.0) -> bool:
         return bool(sum(island.rotate(angle, pivot, aspect) for island in self.islands))
@@ -1961,31 +2052,78 @@ class Islands(IslandsBase):
                 face.tag = True
                 face.index = idx
 
-    def apply_aspect_ratio(self):
-        scale = Vector((self.umesh.aspect, 1))
-        return self.scale_simple(scale)
-
-    def reset_aspect_ratio(self):
-        scale = Vector((1 / self.umesh.aspect, 1))
-        return self.scale_simple(scale)
-
     def should_flip_after_unwrap(self) -> bool:
         # TODO: It is necessary to determine the need for flipping based on how the parametrizer decides it
         #  (using pinned triangles and their weighted area), and use that to control flipping.
-        assert type(self) in (Islands, AdvIslands)
+        assert type(self) == Islands
 
         uv = self.umesh.uv
         get_area = utils.calc_signed_face_area_uv
-        signed_area = sum(get_area(f, uv) for f in self.faces_iter())
+        signed_area = sum(get_area(f, uv) for isl in self for f in isl)
         return signed_area < 0.0
 
-    def faces_iter(self):
-        return (f for isl in self for f in isl)
+    def triangulate_islands(self):
+        loop_triangles = self.umesh.bm.calc_loop_triangles()
+        self.indexing(force=False)
 
-    def __iter__(self) -> typing.Iterator[FaceIsland]:
+        islands_of_tris: list[list[tuple[BMLoop, BMLoop, BMLoop]]] = [
+            [] for _ in range(len(self.islands))
+        ]
+        for tris in loop_triangles:
+            face = tris[0].face
+            if face.tag:
+                islands_of_tris[face.index].append(tris)
+        return islands_of_tris
+
+    def calc_tris(self):
+        if not self.islands:
+            return False
+        # TODO: if len(corners) == len(faces)*3: full triangulated
+        triangulated_islands = self.triangulate_islands()
+        for isl, tris_isl in zip(self.islands, triangulated_islands):
+            isl.tris = tris_isl
+        return True
+
+    def calc_tris_simple(self):
+        return bool(sum(isl.calc_tris_simple() for isl in self.islands))
+
+    def calc_flat_coords(self, save_triplet=False):
+        for island in self.islands:
+            island.calc_flat_coords(save_triplet)
+
+    def calc_flat_uv_coords(self, save_triplet=False):
+        self.calc_flat_coords(save_triplet)
+
+    def calc_flat_unique_uv_coords(self):
+        for island in self.islands:
+            island.calc_flat_unique_uv_coords()
+
+    def calc_flat_3d_coords(self, save_triplet=False, scale=None):
+        for island in self.islands:
+            island.calc_flat_3d_coords(save_triplet, scale)
+
+    def calc_area_3d(self, scale=None, areas_to_weight=False):
+        return sum(isl.calc_area_3d(scale, areas_to_weight) for isl in self)
+
+    def calc_area_uv(self):
+        return sum(isl.calc_area_uv() for isl in self)
+
+    def calc_max_uv_area_face(self):
+        uv = self.umesh.uv
+        max_area = -1.0
+        max_face = None
+        for isl in self:
+            for f in isl:
+                new_area = utils.calc_face_area_uv(f, uv)
+                if new_area > max_area:
+                    max_area = new_area
+                    max_face = f
+        return max_face
+
+    def __iter__(self) -> typing.Iterator[AdvIsland]:
         return iter(self.islands)
 
-    def __getitem__(self, idx) -> FaceIsland:  # TODO: Add type[typing.Self].island_type
+    def __getitem__(self, idx) -> AdvIsland:
         return self.islands[idx]
 
     def __bool__(self):
@@ -1995,7 +2133,7 @@ class Islands(IslandsBase):
         return len(self.islands)
 
     def __str__(self):
-        return f'Islands count = {len(self.islands)}'
+        return f"Islands count = {len(self.islands)}"
 
 
 class UnionIslandsController:
@@ -2055,12 +2193,14 @@ class UnionIslands(Islands):
 
     def set_texel(self, texel: float, texture_size: float | int):
         """Warning: Need calc uv and 3d area"""
-        assert self.islands[0].area_3d != -1.0 and self.islands[0].area_uv != -1.0, "Need calculate uv and 3d area"
+        assert (
+            self.islands[0].area_3d != -1.0 and self.islands[0].area_uv != -1.0
+        ), "Need calculate uv and 3d area"
         area_3d = math.sqrt(self.area_3d)
         area_uv = math.sqrt(self.area_uv) * texture_size
         if math.isclose(area_3d, 0.0, abs_tol=1e-6) or math.isclose(area_uv, 0.0, abs_tol=1e-6):
             return None
-        scale = (texel / (area_uv / area_3d))
+        scale = texel / (area_uv / area_3d)
         return self.scale(Vector((scale, scale)), self.bbox.center)
 
     @property
@@ -2110,136 +2250,25 @@ class UnionIslands(Islands):
         else:
             for island in self:
                 uv = island.umesh.uv
-                points.extend([l[uv].uv for f in island for l in f.loops])  # Warning: points referenced to uv
+                points.extend(
+                    [l[uv].uv for f in island for l in f.loops]
+                )  # Warning: points referenced to uv
             self.convex_coords = [points[i] for i in mathutils.geometry.convex_hull_2d(points)]
             return self.convex_coords
 
     @staticmethod
-    def calc_overlapped_island_groups(adv_islands: list[AdvIsland], threshold=None) -> list['UnionIslands | AdvIsland']:
+    def calc_overlapped_island_groups(
+        adv_islands: list[AdvIsland], threshold=None
+    ) -> list["UnionIslands | AdvIsland"]:
         """Warning: Tags should be the default. Optimal Threshold = 0.0005"""
         if not adv_islands:
             return []
         islands_group = []
         union_islands = []
         single_islands = []
-        if threshold is not None:
-            if threshold == 0:
-                threshold_to_precision = 20
-            else:
-                threshold_to_precision = max(0, int(-math.log10(threshold)))
 
-            class ExactOverlap:
-                def __init__(self, island):
-                    self.island = island
-                    self.coords: npt.NDArray = np.array([])
-
-                def calc_coords(self):
-                    uv = self.island.umesh.uv
-                    self.coords = np.array([crn[uv].uv.to_tuple() for f in self.island for crn in f.loops], dtype='float32')
-
-                def compare(self, other, threshold_):
-                    distances = np.linalg.norm(self.coords[:, None] - other.coords, axis=2)
-                    a_matches = np.any(distances < threshold_, axis=1)
-                    b_matches = np.any(distances < threshold_, axis=0)
-                    return np.all(a_matches) and np.all(b_matches)
-
-            # reduce islands by len
-            islands_by_len: defaultdict[int, list[AdvIsland]] = defaultdict(list)
-            for isl in adv_islands:
-                islands_by_len[len(isl)].append(isl)
-
-            islands_by_len_ = islands_by_len.copy()
-            for size, list_of_isl in islands_by_len.items():
-                if len(list_of_isl) == 1:
-                    single_island = islands_by_len_.pop(size)[0]
-                    single_islands.append(single_island)
-
-            # reduce islands by bbox
-            islands_by_bbox: defaultdict[tuple[float | int, ...], list[AdvIsland]] = defaultdict(list)
-            for size, list_of_isl in islands_by_len_.items():
-                for isl in list_of_isl:
-                    bbox = isl.bbox
-                    bbox_key: list[float | int] = list((round(minmax, threshold_to_precision)
-                                                       for minmax in (bbox.xmin, bbox.xmax, bbox.ymin, bbox.ymax)))
-                    bbox_key.append(size)
-                    islands_by_bbox[tuple(bbox_key)].append(isl)
-
-            islands_by_bbox_ = islands_by_bbox.copy()
-            for size, list_of_isl in islands_by_bbox.items():
-                if len(list_of_isl) == 1:
-                    single_island = islands_by_bbox_.pop(size)[0]
-                    single_islands.append(single_island)
-            islands_by_len_ = islands_by_bbox_
-
-            # reduce by area_uv
-            islands_by_ngons: defaultdict[typing.Any, list[AdvIsland]] = defaultdict(list)
-            if adv_islands[0].area_uv != -1.0:
-                for list_of_isl in islands_by_len_.values():
-                    islands_by_area_uv: defaultdict[float, list[AdvIsland]] = defaultdict(list)
-                    for isl in list_of_isl:
-                        islands_by_area_uv[round(isl.area_uv, threshold_to_precision)].append(isl)
-
-                    islands_by_area_uv_ = islands_by_area_uv.copy()
-                    for area, list_of_isl_by_area in islands_by_area_uv_.items():
-                        if len(list_of_isl_by_area) == 1:
-                            single_island = islands_by_area_uv_.pop(area)[0]
-                            single_islands.append(single_island)
-                        else:
-                            # reduce by ngons
-                            for isl__ in list_of_isl_by_area:
-                                ngons_sizes: collections.Counter = collections.Counter(len(f.loops) for f in isl__)
-                                ngons_sizes: list[tuple[int, int] | float] = sorted(ngons_sizes.items(), key=lambda a: a[0])
-                                ngons_sizes.sort(key=lambda a: a[0])
-                                ngons_sizes.append(area)
-                                islands_by_ngons[tuple(ngons_sizes)].append(isl__)
-            else:
-                # reduce by ngons
-                for size, list_of_isl_by_size in islands_by_len_.items():
-                    for isl__ in list_of_isl_by_size:
-                        ngons_sizes: collections.Counter = collections.Counter(len(f.loops) for f in isl__)
-                        ngons_sizes: list[tuple[int, int] | int] = sorted(ngons_sizes.items(), key=lambda a: a[0])
-                        # PyCharm Moment...
-                        ngons_sizes.append(size)  # noqa
-                        islands_by_ngons[tuple(ngons_sizes)].append(isl__)
-
-            islands_by_ngons_ = islands_by_ngons.copy()
-            for key, list_of_isl in islands_by_ngons.items():
-                if len(list_of_isl) == 1:
-                    single_island = islands_by_ngons_.pop(key)[0]
-                    single_islands.append(single_island)
-
-            for finished_reduced_islands in islands_by_ngons_.values():
-                exact_islands = []
-                for fin_isl in finished_reduced_islands:
-                    exact_isl = ExactOverlap(fin_isl)
-                    exact_isl.calc_coords()
-                    exact_islands.append(exact_isl)
-
-                for island_first in exact_islands:
-                    if not island_first.island.tag:
-                        continue
-                    island_first.island.tag = False
-
-                    union_islands.append(island_first)
-                    compare_index = 0
-                    while True:
-                        if compare_index > len(union_islands) - 1:
-                            if len(union_islands) == 1:
-                                single_islands.append(union_islands[0].island)
-                            else:
-                                islands_group.append(UnionIslands([exact_.island for exact_ in union_islands]))
-                            union_islands = []
-                            break
-
-                        for isl in exact_islands:
-                            if not isl.island.tag:
-                                continue
-                            if union_islands[compare_index].compare(isl, threshold):
-                                isl.island.tag = False
-                                union_islands.append(isl)
-                        compare_index += 1
-
-        else:
+        # Overlap any parts.
+        if threshold is None:
             for island_first in adv_islands:
                 if not island_first.tag:
                     continue
@@ -2260,6 +2289,83 @@ class UnionIslands(Islands):
                             isl.tag = False
                             union_islands.append(isl)
                     compare_index += 1
+
+        # Exact overlap, by threshold.
+        else:
+            class ExactOverlap:
+                def __init__(self, island):
+                    from mathutils.kdtree import KDTree
+
+                    self.island = island
+                    self.coords: list | None = None
+                    self.kdtree: KDTree | None = None
+
+                def calc_data(self):
+                    uv = self.island.umesh.uv
+                    self.coords = [crn[uv].uv for f in self.island for crn in f.loops]
+                    self.kdtree = utils.KDTree_from_coords(self.coords, dimensions=2)
+
+                def compare(self, other, threshold_):
+                    if self.coords is None:
+                        self.calc_data()
+                    if other.coords is None:
+                        other.calc_data()
+
+                    k = self.kdtree
+                    for co in other.coords:
+                        if k.find(co)[2] > threshold_:
+                            return False
+
+                    k = other.kdtree
+                    for co in self.coords:
+                        if k.find(co)[2] > threshold_:
+                            return False
+
+                    return True
+
+            # Reduce islands by len.
+            islands_by_len: defaultdict[int, list[AdvIsland]] = defaultdict(list)
+            for isl in adv_islands:
+                islands_by_len[len(isl)].append(isl)
+
+            islands_by_len_ = islands_by_len.copy()
+            for size, list_of_isl in islands_by_len.items():
+                if len(list_of_isl) == 1:
+                    single_island = islands_by_len_.pop(size)[0]
+                    single_islands.append(single_island)
+
+            # Reduce by KDTree.
+            for finished_reduced_islands in islands_by_len_.values():
+                exact_islands: list[ExactOverlap] = []
+                for fin_isl in finished_reduced_islands:
+                    exact_isl = ExactOverlap(fin_isl)
+                    exact_islands.append(exact_isl)
+
+                for island_first in exact_islands:
+                    if not island_first.island.tag:
+                        continue
+                    island_first.island.tag = False
+
+                    union_islands.append(island_first)
+                    compare_index = 0
+                    while True:
+                        if compare_index > len(union_islands) - 1:
+                            if len(union_islands) == 1:
+                                single_islands.append(union_islands[0].island)
+                            else:
+                                islands_group.append(
+                                    UnionIslands([exact_.island for exact_ in union_islands])
+                                )
+                            union_islands = []
+                            break
+
+                        for isl in exact_islands:
+                            if not isl.island.tag:
+                                continue
+                            if union_islands[compare_index].compare(isl, threshold):
+                                isl.island.tag = False
+                                union_islands.append(isl)
+                        compare_index += 1
         islands_group.extend(single_islands)
         return islands_group
 
@@ -2273,62 +2379,4 @@ class UnionIslands(Islands):
         return iter(self.islands)
 
     def __getitem__(self, idx) -> AdvIsland:  # TODO: Add type[typing.Self].island_type
-        return self.islands[idx]
-
-
-class AdvIslands(Islands):
-    island_type = AdvIsland
-
-    def __init__(self, islands: list[AdvIsland] | tuple = (), umesh: _umesh.UMesh | utils.NoInit = utils.NoInit()):
-        super().__init__([], umesh)
-        self.islands: list[AdvIsland] = islands
-
-    def triangulate_islands(self):
-        loop_triangles = self.umesh.bm.calc_loop_triangles()
-        self.indexing(force=False)
-
-        islands_of_tris: list[list[tuple[BMLoop, BMLoop, BMLoop]]] = [[] for _ in range(len(self.islands))]
-        for tris in loop_triangles:
-            face = tris[0].face
-            if face.tag:
-                islands_of_tris[face.index].append(tris)
-        return islands_of_tris
-
-    def calc_tris(self):
-        if not self.islands:
-            return False
-        # TODO: if len(corners) == len(faces)*3: full triangulated
-        triangulated_islands = self.triangulate_islands()
-        for isl, tris_isl in zip(self.islands, triangulated_islands):
-            isl.tris = tris_isl
-        return True
-
-    def calc_tris_simple(self):
-        return bool(sum(isl.calc_tris_simple() for isl in self.islands))
-
-    def calc_flat_coords(self, save_triplet=False):
-        for island in self.islands:
-            island.calc_flat_coords(save_triplet)
-
-    def calc_flat_uv_coords(self, save_triplet=False):
-        self.calc_flat_coords(save_triplet)
-
-    def calc_flat_unique_uv_coords(self):
-        for island in self.islands:
-            island.calc_flat_unique_uv_coords()
-
-    def calc_flat_3d_coords(self, save_triplet=False, scale=None):
-        for island in self.islands:
-            island.calc_flat_3d_coords(save_triplet, scale)
-
-    def calc_area_3d(self, scale=None, areas_to_weight=False):
-        return sum(isl.calc_area_3d(scale, areas_to_weight) for isl in self)
-
-    def calc_area_uv(self):
-        return sum(isl.calc_area_uv() for isl in self)
-
-    def __iter__(self) -> typing.Iterator[AdvIsland]:
-        return iter(self.islands)
-
-    def __getitem__(self, idx) -> AdvIsland:
         return self.islands[idx]

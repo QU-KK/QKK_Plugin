@@ -1,13 +1,7 @@
-# SPDX-FileCopyrightText: 2024 Oxicid
+# SPDX-FileCopyrightText: 2026 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-if 'bpy' in locals():
-    from .. import reload
-    reload.reload(globals())
 
-import bpy  # noqa
-import sys
-import subprocess
 import typing  # noqa
 
 import numpy as np  # noqa
@@ -15,6 +9,7 @@ from math import pi
 
 from .bench import timer, profile
 from .draw import *
+from . import gn
 from .other import *
 from .shapes import *
 from .ubm import *
@@ -29,147 +24,140 @@ from .. import utypes
 
 from mathutils import Vector, Matrix
 
-resolutions = (('128', '128', ''), ('256', '256', ''), ('512', '512', ''), ('1024', '1024', ''),
-               ('2048', '2048', ''), ('4096', '4096', ''), ('8192', '8192', ''))
-resolution_name_to_value = {'128': 128, '256': 256, '512': 512, '1K': 1024, '2K': 2048, '4K': 4096, '8K': 8192}
-resolution_value_to_name = {128: '128', 256: '256', 512: '512', 1024: '1K', 2048: '2K', 4096: '4K', 8192: '8K'}
+resolutions = (
+    ("128", "128", ""),
+    ("256", "256", ""),
+    ("512", "512", ""),
+    ("1024", "1024", ""),
+    ("2048", "2048", ""),
+    ("4096", "4096", ""),
+    ("8192", "8192", ""),
+)
+resolution_name_to_value = {
+    "128": 128,
+    "256": 256,
+    "512": 512,
+    "1K": 1024,
+    "2K": 2048,
+    "4K": 4096,
+    "8K": 8192,
+}
+resolution_value_to_name = {
+    128: "128",
+    256: "256",
+    512: "512",
+    1024: "1K",
+    2048: "2K",
+    4096: "4K",
+    8192: "8K",
+}
+
+univ_root_path = __package__.rsplit(".", 1)[0]
+
+if bpy.app.version >= (4, 2, 0):
+    extension_path_user = bpy.utils.extension_path_user
+else:
+
+    def extension_path_user(package, *, path="", create=False):
+        import os
+        import _bpy  # noqa
+
+        if bpy.app.version >= (4, 2, 0):
+            from addon_utils import _extension_module_name_decompose  # noqa
+
+            # Handles own errors.
+            repo_module, pkg_idname = _extension_module_name_decompose(package)
+        else:
+            repo_module = "UniV"
+            pkg_idname = ""
+
+        target_path = _bpy.user_resource("DATAFILES")
+        # Should always be true.
+        if target_path:
+            if bpy.app.version >= (4, 0, 0):
+                if path:
+                    target_path = os.path.join(target_path, ".user", repo_module, pkg_idname, path)
+                else:
+                    target_path = os.path.join(target_path, ".user", repo_module, pkg_idname)
+            else:
+                if path:
+                    target_path = os.path.join(target_path, ".user", repo_module, path)
+                else:
+                    target_path = os.path.join(target_path, ".user", repo_module)
+            if create:
+                # create path if not existing.
+                if not os.path.exists(target_path):
+                    try:
+                        os.makedirs(target_path)
+                    except Exception:  # noqa
+                        import traceback
+
+                        traceback.print_exc()
+                        target_path = ""
+                elif not os.path.isdir(target_path):
+                    print("Path {!r} found but isn't a directory!".format(target_path))
+                    target_path = ""
+
+        return target_path
 
 
 def glob_resolutions_to_name():
     from ..preferences import prefs
+
     xsize = int(prefs().size_x)
     ysize = int(prefs().size_y)
 
     x_size_name = resolution_value_to_name[xsize]
     y_size_name = resolution_value_to_name[ysize]
-    return f'{x_size_name}x{y_size_name}' if xsize != ysize else x_size_name
+    return f"{x_size_name}x{y_size_name}" if xsize != ysize else x_size_name
+
 
 def resolutions_to_name(xsize, ysize):
     x_size_name = resolution_value_to_name[xsize]
     y_size_name = resolution_value_to_name[ysize]
-    return f'{x_size_name}x{y_size_name}' if xsize != ysize else x_size_name
+    return f"{x_size_name}x{y_size_name}" if xsize != ysize else x_size_name
 
 
 class NoInit:
     def __getattribute__(self, item):
-        raise AttributeError(f'Object not initialized')
+        raise AttributeError(f"Object not initialized")
 
     def __bool__(self):
-        raise AttributeError(f'Object not initialized')
+        raise AttributeError(f"Object not initialized")
 
     def __len__(self):
-        raise AttributeError(f'Object not initialized')
-
-
-class Pip:
-    """
-    The code was taken and modified from: https://github.com/s-leger/blender-pip/blob/master/blender_pip.py
-    Necessary to convert svg to png, used during addon development.
-    """
-
-    def __init__(self):
-        self._ensure_user_site_package()
-        self._ensure_pip()
-
-    @staticmethod
-    def _ensure_user_site_package():
-        import os
-        import site
-        site_package = site.getusersitepackages()
-        if not os.path.exists(site_package):
-            site_package = bpy.utils.user_resource('SCRIPTS', path="site_package", create=True)
-            site.addsitedir(site_package)
-        if site_package not in sys.path:
-            sys.path.append(site_package)
-
-    def _cmd(self, action, options, module):
-        if options is not None and "--user" in options:
-            self._ensure_user_site_package()
-
-        cmd = [sys.executable, "-m", "pip", action]
-
-        if options is not None:
-            cmd.extend(options.split(" "))
-
-        cmd.append(module)
-        return self._run(cmd)
-
-    @staticmethod
-    def _popen(cmd):
-        popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
-        for stdout_line in iter(popen.stdout.readline, ""):
-            yield stdout_line
-        popen.stdout.close()
-        popen.wait()
-
-    def _run(self, cmd):
-        res = False
-        status = ""
-        for line in self._popen(cmd):
-            if "ERROR:" in line:
-                status = line.strip()
-            if "Error:" in line:
-                status = line.strip()
-            if "Successfully" in line:
-                status = line.strip()
-                res = True
-        return res, status
-
-    def _ensure_pip(self):
-        pip_not_found = False
-        try:
-            import pip
-        except ImportError:
-            pip_not_found = True
-            pass
-        if pip_not_found:
-            self._run([sys.executable, "-m", "ensurepip", "--default-pip"])
-
-    @staticmethod
-    def upgrade_pip():
-        return Pip()._cmd("install", "--upgrade", "pip")
-
-    @staticmethod
-    def upgrade(module):
-        return Pip()._cmd("install", "--upgrade", module)
-
-    @staticmethod
-    def uninstall(module, options=None):
-        if options is None or options.strip() == "":
-            # force confirm
-            options = "-y"
-        return Pip()._cmd("uninstall", options, module)
-
-    @staticmethod
-    def install(module):
-        return Pip()._cmd('install', '-U', module)
+        raise AttributeError(f"Object not initialized")
 
 
 # noinspection PyTypeHints
 class OverlapHelper:
-    lock_overlap: bpy.props.BoolProperty(name='Lock Overlaps', default=False)
+    lock_overlap: bpy.props.BoolProperty(name="Lock Overlaps", default=False)
     lock_overlap_mode: bpy.props.EnumProperty(
-        name='Lock Overlaps Mode', default='ANY', items=(('ANY', 'Any', ''), ('EXACT', 'Exact', '')))
-    threshold: bpy.props.FloatProperty(name='Distance', default=0.001, min=0.0, soft_min=0.00005, soft_max=0.00999)
+        name="Lock Overlaps Mode", default="ANY", items=(("ANY", "Any", ""), ("EXACT", "Exact", ""))
+    )
+    threshold: bpy.props.FloatProperty(
+        name="Distance", default=0.001, min=0.0, soft_min=0.00005, soft_max=0.00999
+    )
 
     def draw_overlap(self, toggle=True):
         layout = self.layout  # noqa
         if self.lock_overlap:
-            if self.lock_overlap_mode == 'EXACT':
-                layout.prop(self, 'threshold', slider=True)
-            layout.row().prop(self, 'lock_overlap_mode', expand=True)
-        layout.prop(self, 'lock_overlap', toggle=toggle)
+            if self.lock_overlap_mode == "EXACT":
+                layout.prop(self, "threshold", slider=True)
+            layout.row().prop(self, "lock_overlap_mode", expand=True)
+        layout.prop(self, "lock_overlap", toggle=toggle)
 
     def calc_overlapped_island_groups(self, all_islands):
-        assert self.lock_overlap, 'Enable Lock Overlap option'
-        threshold = None if self.lock_overlap_mode == 'ANY' else self.threshold
+        assert self.lock_overlap, "Enable Lock Overlap option"
+        threshold = None if self.lock_overlap_mode == "ANY" else self.threshold
         return utypes.UnionIslands.calc_overlapped_island_groups(all_islands, threshold)
 
 
 class PaddingHelper:
     # noinspection PyTypeHints
     padding_multiplayer: bpy.props.FloatProperty(
-        name='Padding Multiplayer', default=1, min=-32, soft_min=0, soft_max=4, max=32)
+        name="Padding Multiplayer", default=1, min=-32, soft_min=0, soft_max=4, max=32
+    )
 
     def __init__(self):
         self.padding = 0.0
@@ -178,28 +166,37 @@ class PaddingHelper:
         layout = self.layout  # noqa
         if self.padding_multiplayer:
             from .. import preferences
+
             pref = preferences.prefs()
             layout.separator(factor=0.35)
             layout.label(text=f"Global Texture Size = {min(int(pref.size_x), int(pref.size_y))}")
-            layout.label(text=f"Padding = {pref.padding}({int(pref.padding * self.padding_multiplayer)})px")
+            layout.label(
+                text=f"Padding = {pref.padding}({int(pref.padding * self.padding_multiplayer)})px"
+            )
 
         layout.prop(self, "padding_multiplayer", slider=True)
 
     def calc_padding(self):
         from .. import preferences
+
         pref = preferences.prefs()
-        self.padding = int(pref.padding * self.padding_multiplayer) / \
-            min(int(pref.size_x), int(pref.size_y))
+        self.padding = int(pref.padding * self.padding_multiplayer) / min(
+            int(pref.size_x), int(pref.size_y)
+        )
 
     def report_padding(self):
         if self.padding:
             img_size = get_active_image_size()
             if img_size:  # TODO: Get active image size from material id
                 from .. import preferences
+
                 pref = preferences.prefs()
                 if min(int(pref.size_x), int(pref.size_y)) != min(img_size):
-                    self.report({'WARNING'}, 'Global and Active texture sizes have different values, '  # noqa
-                                             'which will result in incorrect padding.')
+                    self.report(  # noqa
+                        {"WARNING"},
+                        "Global and Active texture sizes have different values, "
+                        "which will result in incorrect padding.",
+                    )
 
     @staticmethod
     def get_padding_multiplayer_from_aspect_by_axis(aspect, is_horizontal):
@@ -208,21 +205,24 @@ class PaddingHelper:
         else:
             return max(1.0, aspect)
 
+
 class ViewBoxSyncBlock:
     def __init__(self, bbox):
         from ..utypes import BBox
+
         self.view_box: BBox = bbox
         self.has_blocked = False
         self.skip = True
 
     @classmethod
     def from_area(cls, area):
-        if area and area.ui_type == 'UV' and not USE_GENERIC_UV_SYNC:
+        if area and area.ui_type == "UV" and not USE_GENERIC_UV_SYNC:
             reg = area.regions[-1]
-            if reg.type == 'WINDOW':
+            if reg.type == "WINDOW":
                 from ..utypes import BBox
-                n_panel_width = next(r.width for r in area.regions if r.type == 'UI')
-                tools_width = next(r.width for r in area.regions if r.type == 'TOOLS')
+
+                n_panel_width = next(r.width for r in area.regions if r.type == "UI")
+                tools_width = next(r.width for r in area.regions if r.type == "TOOLS")
 
                 min_v = Vector(reg.view2d.region_to_view(tools_width, 0))
                 max_v = Vector(reg.view2d.region_to_view(reg.width - n_panel_width, reg.height))
@@ -237,16 +237,17 @@ class ViewBoxSyncBlock:
 
     def draw_if_blocked(self):
         if self.has_blocked:
-            update_area_by_type('IMAGE_EDITOR')
+            update_area_by_type("IMAGE_EDITOR")
             from ..draw import LinesDrawSimple
-            LinesDrawSimple.draw_register(self.view_box.draw_data_lines(), (.1,1,1,0.5))
 
-    def skip_from_param(self, umesh: 'utypes.UMesh', select: bool):
+            LinesDrawSimple.draw_register(self.view_box.draw_data_lines(), (0.1, 1, 1, 0.5))
+
+    def skip_from_param(self, umesh: "utypes.UMesh", select: bool):
         self.skip = True
         if not USE_GENERIC_UV_SYNC:
             if select and umesh.sync:
                 if self.view_box and umesh.is_edit_bm:
-                    if umesh.elem_mode in ('VERT', 'EDGE'):
+                    if umesh.elem_mode in ("VERT", "EDGE"):
                         if not umesh.has_full_selected_uv_faces():
                             self.skip = False
 
@@ -255,10 +256,10 @@ class ViewBoxSyncBlock:
             islands.islands = [isl for isl in islands if self.isect_island(isl)]
 
     @staticmethod
-    def _isl_has_inner_elem(island: 'utypes.FaceIsland | utypes.AdvIsland'):
+    def _isl_has_inner_elem(island: "utypes.AdvIsland"):
         uv = island.umesh.uv
 
-        if island.umesh.elem_mode == 'VERT':
+        if island.umesh.elem_mode == "VERT":
             for crn in island.corners_iter():
                 if not crn.vert.select:
                     continue
@@ -280,15 +281,19 @@ class ViewBoxSyncBlock:
                     # If there is no pair crn, or it is hidden, then this edge is chosen deliberately.
                     return True
 
-                if crn.link_loop_next[uv].uv == pair[uv].uv or \
-                    crn[uv].uv == pair.link_loop_next[uv].uv:
+                if (
+                    crn.link_loop_next[uv].uv == pair[uv].uv
+                    or crn[uv].uv == pair.link_loop_next[uv].uv
+                ):
                     return True
             return None
 
     def isect_island(self, island):
-        """ NOTE: For the intersection check (isect) to work correctly,
-        all islands must be sorted by their intersection data first, before applying any transformations."""
-        from ..utypes import BBox, FaceIsland, AdvIsland
+        """NOTE: For the intersection check (isect) to work correctly,
+        all islands must be sorted by their intersection data first, before applying any transformations.
+        """
+        from ..utypes import BBox, AdvIsland
+
         if self.skip:
             return True
 
@@ -310,9 +315,6 @@ class ViewBoxSyncBlock:
         if view.isect_y(isl_bbox.ymin) and view.isect_y(isl_bbox.ymax):
             return True
 
-        if type(island) == FaceIsland:
-            island = AdvIsland(island.faces, island.umesh)
-
         if not island.flat_coords:
             island.calc_tris_simple()
             island.calc_flat_coords(save_triplet=True)
@@ -326,11 +328,13 @@ class ViewBoxSyncBlock:
         return False
 
     @staticmethod
-    def _lg_has_inner_elem(lg: 'utypes.LoopGroup'):
-        uv = lg.umesh.uv
+    def _segment_has_inner_elem(seg: "utypes.Segment"):
+        uv = seg.umesh.uv
+        if any(adv_crn.is_pair for adv_crn in seg):
+            return True
 
-        if lg.umesh.elem_mode == 'VERT':
-            for crn in lg:
+        if seg.umesh.elem_mode == "VERT":
+            for crn in seg:
                 assert crn.vert.select
                 uv_co = crn[uv].uv
                 for l_crn in crn.vert.link_loops:
@@ -341,69 +345,63 @@ class ViewBoxSyncBlock:
                 else:
                     return True
 
-        else:
-            for crn in lg:
-                if not crn.edge.select:
-                    continue
-                pair = crn.link_loop_radial_prev
-                if pair == crn or pair.face.hide:
-                    # If there is no pair crn, or it is hidden, then this edge is chosen deliberately.
-                    return True
-
-                if crn.link_loop_next[uv].uv == pair[uv].uv or \
-                    crn[uv].uv == pair.link_loop_next[uv].uv:
-                    return True
         return False
 
-    def isect_lg(self, lg):
+    # TODO: Test view_box on old versions (Individual Align OT)
+    def isect_segment(self, seg):
+        # TODO: Skip blocking when segment one.
         from ..utypes import BBox
 
         if self.skip:
             return True
 
         view: BBox = self.view_box
-        lg_bbox: BBox = lg.calc_bbox()
+        seg_bbox: BBox = seg.calc_bbox()
 
-        if not view.isect(lg_bbox):
-            if self._lg_has_inner_elem(lg):
+        if not view.isect(seg_bbox):
+            if self._segment_has_inner_elem(seg):
                 return True
             self.has_blocked = True
             return False
-        elif view.isect_x(lg_bbox.xmin) and view.isect_x(lg_bbox.xmax):
+        elif view.isect_x(seg_bbox.xmin) and view.isect_x(seg_bbox.xmax):
             return True
-        elif view.isect_y(lg_bbox.ymin) and view.isect_y(lg_bbox.ymax):
-            return True
-
-        if self._lg_has_inner_elem(lg):
+        elif view.isect_y(seg_bbox.ymin) and view.isect_y(seg_bbox.ymax):
             return True
 
+        if self._segment_has_inner_elem(seg):
+            return True
+
+        # TODO: Add checking by containing in view box.
         self.has_blocked = True
         return False
 
     def has_inner_selection(self, island):
         if self.skip:
             return True
-        if not (island.umesh.elem_mode in ('VERT', 'EDGE')):
+        if not (island.umesh.elem_mode in ("VERT", "EDGE")):
             return True
 
         assert island.umesh.sync
 
         uv = island.umesh.uv
-        if island.umesh.elem_mode == 'VERT':
+        if island.umesh.elem_mode == "VERT":
+
             def vert_has_unpair_select(crn_: BMLoop):
                 if not crn_.vert.select:
                     return False
                 # If the number of all visible faces and the number of linked corners are the same,
                 # then they belong to the same island, and this is not a random selection.
                 count_visible_faces = sum(not f_.hide for f_ in crn_.vert.link_faces)
-                count_linked_corners = len(linked_crn_to_vert_pair_with_seam(crn_, uv, True)) + 1
+                count_linked_corners = len(get_linked(crn_)) + 1
                 return count_visible_faces == count_linked_corners
 
+            get_linked = get_linked_crn_fn(island.umesh)  # TODO: Replace with simple linked check (without pair)
             for f in island:
                 for crn in f.loops:
                     if vert_has_unpair_select(crn):
                         return True
         else:
+
             def edge_has_unpair_select(crn_: BMLoop):
                 if not crn_.edge.select:
                     return False
@@ -422,10 +420,12 @@ class ViewBoxSyncBlock:
                         return True
         return False
 
-    def filter_verts(self, corners, uv):
+    def filter_verts(self, corners, umesh):
         if self.skip:
             return corners
 
+        get_linked_it_inc = get_linked_crn_iter_fn(umesh, included=True, with_seam=False)
+        uv = umesh.uv
         xmin = self.view_box.xmin
         xmax = self.view_box.xmax
         ymin = self.view_box.ymin
@@ -438,8 +438,7 @@ class ViewBoxSyncBlock:
 
             x, y = crn[uv].uv
             if xmin <= x <= xmax and ymin <= y <= ymax:
-                filtered_corners.add(crn)
-                filtered_corners.update(linked_crn_to_vert_pair_iter(crn, uv, True))
+                filtered_corners.update(get_linked_it_inc(crn))
                 continue
 
             # Add outside unpair vertices
@@ -488,15 +487,18 @@ class ViewBoxSyncBlock:
 
             pt_1 = crn[uv].uv
             pt_2 = crn.link_loop_next[uv].uv
-            if (xmin <= pt_1.x <= xmax and ymin <= pt_1.y <= ymax or
-                xmin <= pt_2.x <= xmax and ymin <= pt_2.y <= ymax):
+            if (
+                xmin <= pt_1.x <= xmax and ymin <= pt_1.y <= ymax
+                or xmin <= pt_2.x <= xmax and ymin <= pt_2.y <= ymax
+            ):  # fmt: skip
                 filtered_corners.add(crn)
                 continue
 
-            if (intersect_line_line_2d(pt_1, pt_2, l1_a, l1_b) or
-                intersect_line_line_2d(pt_1, pt_2, l2_a, l2_b) or
-                intersect_line_line_2d(pt_1, pt_2, l3_a, l3_b) or
-                intersect_line_line_2d(pt_1, pt_2, l4_a, l4_b)
+            if (
+                intersect_line_line_2d(pt_1, pt_2, l1_a, l1_b)
+                or intersect_line_line_2d(pt_1, pt_2, l2_a, l2_b)
+                or intersect_line_line_2d(pt_1, pt_2, l3_a, l3_b)
+                or intersect_line_line_2d(pt_1, pt_2, l4_a, l4_b)
             ):
                 filtered_corners.add(crn)
 
@@ -505,14 +507,15 @@ class ViewBoxSyncBlock:
             self.has_blocked = True
         return filtered_corners
 
-
     def flush_if_blocked(self):
         if self.has_blocked:
             from ..draw import LinesDrawSimple
+
             LinesDrawSimple.draw_register(self.view_box.draw_data_lines(), (0.05, 0.2, 0.9, 0.1))
 
     def __str__(self):
         return f"View Box={self.view_box}, Skip={self.skip}, Has Blocked={self.has_blocked}"
+
 
 class SVG:
 
@@ -526,8 +529,9 @@ class SVG:
         try:
             from io_curve_svg import import_svg  # type: ignore[import-untyped]
         except ImportError:
-            raise ImportError("UniV: Failed to generate icons, possibly the svg module was rewritten in C++")
-
+            raise ImportError(
+                "UniV: Failed to generate icons, possibly the svg module was rewritten in C++"
+            )
 
         # import os
         # svg_name = os.path.basename(filepath)
@@ -540,33 +544,38 @@ class SVG:
 
         rect = (0, 0)
 
-        self._context = {'defines': {},
-                         'rects': [rect],
-                         'rect': rect,
-                         'matrix_stack': [],
-                         'matrix': m,
-                         'materials': {},
-                         'styles': [None],
-                         'style': None,
-                         'do_colormanage': False}
+        self._context = {
+            "defines": {},
+            "rects": [rect],
+            "rect": rect,
+            "matrix_stack": [],
+            "matrix": m,
+            "materials": {},
+            "styles": [None],
+            "style": None,
+            "do_colormanage": False,
+        }
 
         self.loader = import_svg.SVGGeometryContainer(node, self._context)
         self.loader.parse()
 
-
     @classmethod
     def load(cls, filepath, report=None):
         import xml
+
         # error in code should raise exceptions but loading
         # non SVG files can give useful messages.
         try:
             return cls(filepath)
         except (xml.parsers.expat.ExpatError, UnicodeEncodeError) as e:
             import traceback
+
             traceback.print_exc()
-            error_message = f"UniV: Unable to parse XML, {type(e).__name__}:{e} for file {filepath!r}"
+            error_message = (
+                f"UniV: Unable to parse XML, {type(e).__name__}:{e} for file {filepath!r}"
+            )
             if report:
-                report({'ERROR'}, error_message)
+                report({"ERROR"}, error_message)
             else:
                 print(error_message)
             return None
@@ -580,12 +589,13 @@ class SVG:
             tree = ElementTree.parse(filepath)
             firs_line = tree.getroot()
 
-            w = firs_line.get('width', '2048').replace('pt', '')
-            h = firs_line.get('height', '2048').replace('pt', '')
+            w = firs_line.get("width", "2048").replace("pt", "")
+            h = firs_line.get("height", "2048").replace("pt", "")
             return int(w), int(h)
 
         except (xml.parsers.expat.ExpatError, UnicodeEncodeError):
             import traceback
+
             traceback.print_exc()
 
             # TODO: Fill to 0..1 box by general boundary box and try get by view box
@@ -601,18 +611,18 @@ class SVG:
             tree = ElementTree.parse(filepath)
             firs_line = tree.getroot()
 
-            view_box = firs_line.get('viewBox', '0 0 32 32')
+            view_box = firs_line.get("viewBox", "0 0 32 32")
             xmin, ymin, xmax, ymax = view_box.split()
 
             return utypes.BBox(float(xmin), float(xmax), float(ymin), float(ymax))
 
         except (xml.parsers.expat.ExpatError, UnicodeEncodeError):
             import traceback
+
             traceback.print_exc()
 
             print(f"UniV: SVG: Unable to retrieve view box, so default values are used. ")
             return utypes.BBox(0.0, 32.0, 0.0, 32.0)
-
 
     def to_bboxes(self) -> "list[tuple[utypes.BBox, Vector]]":
         bboxes_with_color_and_mtx = []
@@ -625,19 +635,22 @@ class SVG:
     @classmethod
     def _geom_to_box(cls, geo, bboxes_with_color_and_mtx):
         from io_curve_svg import import_svg
+
         if type(geo) == import_svg.SVGGeometryG:
             for g in geo._geometries:  # noqa # pylint: disable=W0212
                 cls._geom_to_box(g, bboxes_with_color_and_mtx)
             return
 
         elif type(geo) == import_svg.SVGGeometryRECT:
-            x, y, w, h = [float(rect_data) for rect_data in geo._rect]  # noqa # pylint: disable=W0212
+            x, y, w, h = [
+                float(rect_data) for rect_data in geo._rect  # noqa # pylint: disable=W0212
+            ]
             bb = utypes.BBox(x, x + w, y, y + h)
         elif type(geo) == import_svg.SVGGeometryPATH:
             bb = utypes.BBox()
             for spline in geo._splines:  # noqa # pylint: disable=W0212
-                for pt in (spline['points']):
-                    xy = pt['x'], pt['y']
+                for pt in spline["points"]:
+                    xy = pt["x"], pt["y"]
                     bb.add(xy)
         elif type(geo) in (import_svg.SVGGeometryCIRCLE, import_svg.SVGGeometryELLIPSE):
             cx = float(geo._cx)  # noqa # pylint: disable=W0212
@@ -655,7 +668,7 @@ class SVG:
         if not mtx:
             mtx = Matrix.Identity(4)
         color = Vector((1, 1, 1, 0))
-        mtl = geo._styles.get('fill')  # noqa # pylint: disable=W0212
+        mtl = geo._styles.get("fill")  # noqa # pylint: disable=W0212
         if mtl:
             color = Vector(mtl.diffuse_color)
 
@@ -666,7 +679,53 @@ class SVG:
         bboxes_with_color_and_mtx.append((bb, color))
 
 
+class KDTree:  # For 2D.
+    def __init__(self, size):
+        self.kdtree2d = mathutils.kdtree.KDTree(size)
+
+    def find(self, co) -> tuple[Vector, int, float] | tuple[None, None, None]:
+        res = self.kdtree2d.find(co.to_3d())
+        find_co = res[0]
+        if find_co:
+            return find_co.to_2d(), res[1], res[2]
+        return res
+
+    def find_range(self, co: Vector, radius: float) -> list[tuple[Vector, int, float]]:
+        return [(res[0].to_2d(), res[1], res[2]) for res in self.kdtree2d.find_range(co.to_3d(), radius)]
+
+
+    def find_n(self, co: Vector, n: int) -> list[tuple[Vector, int, float]]:
+        return [(res[0].to_2d(), res[1], res[2]) for res in self.kdtree2d.find_n(co.to_3d(), n)]
+
+
+
+def KDTree_from_coords(coords: typing.Sequence[Vector], dimensions: int=3) -> mathutils.kdtree.KDTree:
+
+    if dimensions == 3:
+        kdtree = mathutils.kdtree.KDTree(len(coords))
+    elif bpy.app.version >= (5, 3, 0):
+        kdtree = mathutils.kdtree.KDTree(len(coords), dimensions=dimensions)  # noqa
+    else:
+        assert dimensions == 2
+        u_kdtree = KDTree(len(coords))
+        kdtree = u_kdtree.kdtree2d
+
+        kdtree_insert = kdtree.insert
+        for i, co in enumerate(coords):
+            kdtree_insert(co.to_3d(), i)
+        kdtree.balance()
+        return u_kdtree
+
+    kdtree_insert = kdtree.insert
+    for i, co in enumerate(coords):
+        kdtree_insert(co, i)
+    kdtree.balance()
+    return kdtree
+
+
 store_for_avoid_gc: list[list[tuple[str, ...] | None]] = []
+
+
 def ENUM(*items: str | None | tuple[str, ...] | tuple[tuple[str, str] | tuple[str, str, str]]):
     """Convert str and tuple to items for bpy.props.EnumProperty
     Examples:
@@ -683,8 +742,9 @@ def ENUM(*items: str | None | tuple[str, ...] | tuple[tuple[str, str] | tuple[st
         # None used like separator
         ENUM('WHITE', None, ...)                                            # (('WHITE', 'White', 'White'), None, ...)
     """
+
     def idname_to_name(s) -> str:
-        return ' '.join(x.capitalize() for x in s.split('_'))
+        return " ".join(x.capitalize() for x in s.split("_"))
 
     ret_enum = []
     for i, v in enumerate(items):
@@ -695,8 +755,10 @@ def ENUM(*items: str | None | tuple[str, ...] | tuple[tuple[str, str] | tuple[st
 
             case str(), str():
                 idname, name = v
-                assert name, "UniV: Expected a non-empty name when two arguments are passed to EnumProperty"
-                ret_enum.append((*v, ''))
+                assert (
+                    name
+                ), "UniV: Expected a non-empty name when two arguments are passed to EnumProperty"
+                ret_enum.append((*v, ""))
 
             case str(), str(), str():
                 idname, name, descr = v  # Default behavior.
@@ -709,7 +771,9 @@ def ENUM(*items: str | None | tuple[str, ...] | tuple[tuple[str, str] | tuple[st
             case None:
                 ret_enum.append(None)  # Separator
             case _:
-                raise NotImplementedError(f"Type {type(v).__qualname__} not implement for enum, items: {v}")
+                raise NotImplementedError(
+                    f"Type {type(v).__qualname__} not implement for enum, items: {v}"
+                )
 
     global store_for_avoid_gc
     store_for_avoid_gc.append(ret_enum)
@@ -718,11 +782,14 @@ def ENUM(*items: str | None | tuple[str, ...] | tuple[tuple[str, str] | tuple[st
 
 def get_pad():
     from .. import preferences
+
     pref = preferences.prefs()
     return int(pref.padding) / min(int(pref.size_x), int(pref.size_y))
 
-def set_global_texel(isl: 'utypes.AdvIsland', calc_bbox=True):
+
+def set_global_texel(isl: "utypes.AdvIsland", calc_bbox=True):
     from ..preferences import univ_settings
+
     if not univ_settings().use_texel:
         return False
 
@@ -743,8 +810,10 @@ def set_global_texel(isl: 'utypes.AdvIsland', calc_bbox=True):
     res = isl.set_texel(univ_settings().texel_density, texture_size)
     return bool(res)
 
+
 def get_scale_from_texel() -> float:
     from ..preferences import prefs
+
     if prefs().use_texel:
         size_x = int(prefs().size_x)
         size_y = int(prefs().size_y)
@@ -752,12 +821,12 @@ def get_scale_from_texel() -> float:
         return prefs().texel_density / target_texel
     return 1.0
 
+
 def sync():
     return bpy.context.scene.tool_settings.use_uv_select_sync
 
 
-def calc_avg_normal():
-    umeshes = utypes.UMeshes.sel_ob_with_uv()
+def calc_avg_normal(umeshes):
     size = sum(len(umesh.bm.faces) for umesh in umeshes)
 
     normals = np.empty(3 * size).reshape((-1, 3))
@@ -787,7 +856,7 @@ def calc_convex_points(points_append):
 def calc_min_align_angle(points, aspect=1.0):
     if aspect != 1.0:
         vec_aspect = Vector((aspect, 1.0))
-        points = [pt*vec_aspect for pt in points]
+        points = [pt * vec_aspect for pt in points]
     align_angle_pre = mathutils.geometry.box_fit_2d(points)
     return find_min_rotate_angle(align_angle_pre)
 
@@ -798,14 +867,14 @@ def calc_min_align_angle_pt(points):
 
 
 def get_cursor_location() -> Vector:
-    if bpy.context.area.ui_type == 'UV':
+    if bpy.context.area.ui_type == "UV":
         return bpy.context.space_data.cursor_location.copy()
     for window in bpy.context.window_manager.windows:
         screen = window.screen
         for area in screen.areas:
-            if area.ui_type == 'UV':
+            if area.ui_type == "UV":
                 return area.spaces.active.cursor_location.copy()
-    print('UniV: Not found cursor location, used zero coordinates.')  # TODO: Replace with log
+    print("UniV: Not found cursor location, used zero coordinates.")  # TODO: Replace with log
     return Vector((0.0, 0.0))
 
 
@@ -818,17 +887,17 @@ def get_tile_from_cursor() -> Vector | None:
 
 
 def set_cursor_location(loc):
-    if bpy.context.area.ui_type == 'UV':
+    if bpy.context.area.ui_type == "UV":
         bpy.context.space_data.cursor_location = loc
     for window in bpy.context.window_manager.windows:
         screen = window.screen
         for area in screen.areas:
-            if area.ui_type == 'UV':
+            if area.ui_type == "UV":
                 area.spaces.active.cursor_location = loc
                 return
 
 
-def update_area_by_type(area_type: "typing.Literal['VIEW_3D', 'IMAGE_EDITOR']" = 'VIEW_3D'):
+def update_area_by_type(area_type: "typing.Literal['VIEW_3D', 'IMAGE_EDITOR']" = "VIEW_3D"):
     for window in bpy.context.window_manager.windows:
         screen = window.screen
         for area in screen.areas:
@@ -839,7 +908,7 @@ def update_area_by_type(area_type: "typing.Literal['VIEW_3D', 'IMAGE_EDITOR']" =
 def get_view3d_camera_data(v3d: bpy.types.SpaceView3D, rv3d: bpy.types.RegionView3D):
     #  establish the camera object,
     #  so we can default to view mapping if anything is wrong with it
-    if rv3d.view_perspective == 'CAMERA' and v3d.camera and v3d.camera.type == 'CAMERA':
+    if rv3d.view_perspective == "CAMERA" and v3d.camera and v3d.camera.type == "CAMERA":
         return v3d.camera.data
     return None
 
@@ -847,15 +916,16 @@ def get_view3d_camera_data(v3d: bpy.types.SpaceView3D, rv3d: bpy.types.RegionVie
 def calc_any_unique_obj() -> list[bpy.types.Object]:
     # Get unique umeshes without uv
 
-    if bpy.context.mode == 'EDIT_MESH':
+    if bpy.context.mode == "EDIT_MESH":
         return list(bpy.context.objects_in_mode_unique_data)
     else:
         from collections import defaultdict
+
         objects = []
         data_and_objects: defaultdict[bpy.types.Mesh, list[bpy.types.Object]] = defaultdict(list)
 
         for obj in bpy.context.selected_objects:
-            if obj.type == 'MESH':
+            if obj.type == "MESH":
                 data_and_objects[obj.data].append(obj)
 
         for data, objs in data_and_objects.items():
@@ -864,13 +934,41 @@ def calc_any_unique_obj() -> list[bpy.types.Object]:
         return objects
 
 
-def get_selected_object_with_instances() -> list[tuple[bpy.types.Object, list[bpy.types.Object]]]:
-    """ Get unique selected meshes with/without uv and get selected/visible/hidden instances (non-included) """
+def get_hv_constraints(corners, attr) -> tuple[list[BMLoop], list[BMLoop]]:
+    h_corners = []
+    v_corners = []
+
+    for crn in corners:
+        crn_e = crn.edge
+        edge_bits: int = crn_e[attr]
+
+        if edge_bits:
+            for i, crn_l in enumerate(crn_e.link_loops):
+                if crn == crn_l:
+                    if i == 16:
+                        break
+
+                    shift = i * 2
+                    bits = (edge_bits >> shift) & 3
+                    if bits == 2:  # vertical
+                        v_corners.append(crn)
+                    elif bits == 3:  # horizontal
+                        h_corners.append(crn)
+                    break
+
+    return h_corners, v_corners
+
+
+def get_selected_object_with_instances(*, only_uv=False, with_faces=False) -> list[tuple[bpy.types.Object, list[bpy.types.Object]]]:
+    """Get unique selected meshes with/without uv and get selected/visible/hidden instances (non-included)"""
 
     objects = []
-    if bpy.context.mode == 'EDIT_MESH':
-        for obj in bpy.context.objects_in_mode_unique_data:
-            objects.append(obj)
+    if bpy.context.mode == "EDIT_MESH":
+        objects.extend(bpy.context.objects_in_mode_unique_data)
+        if bpy.context.active_object in bpy.context.objects_in_mode_unique_data:
+            objects.remove(bpy.context.active_object)
+            objects.insert(0, bpy.context.active_object)
+
     else:
         from collections import defaultdict
 
@@ -881,17 +979,23 @@ def get_selected_object_with_instances() -> list[tuple[bpy.types.Object, list[bp
 
         data_and_objects: defaultdict[bpy.types.Mesh, list[bpy.types.Object]] = defaultdict(list)
         for obj in selected:
-            if obj.type == 'MESH':
+            if obj.type == "MESH":
                 data_and_objects[obj.data].append(obj)
 
         for data, objs in data_and_objects.items():
             objects.append(objs[0])
 
+
+    if only_uv:
+        objects = [obj for obj in objects if obj.data.uv_layers]
+    if with_faces:
+        objects = [obj for obj in objects if obj.data.polygons]
+
     ret = []
     for tar_obj in objects:
         instances = []
         for inst_obj in bpy.data.objects:
-            if inst_obj.type != 'MESH':
+            if inst_obj.type != "MESH":
                 continue
 
             if tar_obj.data != inst_obj.data or tar_obj == inst_obj:
@@ -903,24 +1007,64 @@ def get_selected_object_with_instances() -> list[tuple[bpy.types.Object, list[bp
     return ret
 
 
+def get_selected_object(*, only_uv=False, with_faces=False) -> list[bpy.types.Object]:
+    """Get unique selected meshes"""
+
+    objects = []
+    if bpy.context.mode == "EDIT_MESH":
+        objects.extend(bpy.context.objects_in_mode_unique_data)
+        if bpy.context.active_object in bpy.context.objects_in_mode_unique_data:
+            objects.remove(bpy.context.active_object)
+            objects.insert(0, bpy.context.active_object)
+
+    else:
+        from collections import defaultdict
+
+        selected = bpy.context.selected_objects[:]
+        active = bpy.context.active_object
+        if active:
+            selected.insert(0, active)  # Set active to first
+
+        data_and_objects: defaultdict[bpy.types.Mesh, list[bpy.types.Object]] = defaultdict(list)
+        for obj in selected:
+            if obj.type == "MESH":
+                data_and_objects[obj.data].append(obj)
+
+        for data, objs in data_and_objects.items():
+            objects.append(objs[0])
+
+    if only_uv:
+        objects = [obj for obj in objects if obj.data.uv_layers]
+    if with_faces:
+        objects = [obj for obj in objects if obj.data.polygons]
+
+    return objects
+
+
 def get_trim_bboxes():
     from .. import preferences
+
     trim_slot = preferences.prefs().get_active_trim_slot()
     return [trim.to_bbox() for trim in trim_slot.trims_preset if trim.visible]
 
 
 def has_visible_trim_bboxes():
     from .. import preferences
+
     pref = preferences.prefs()
     if not pref.trims_presets_slots:
         return False
     return any(trim.visible for trim in pref.get_active_trim_slot().trims_preset)
 
+
 def has_visible_active_trim(report=None):
     from .. import preferences
+
     pref = preferences.prefs()
 
     if not pref.trims_presets_slots:
+        if report:
+            report({"WARNING"}, "Trims slots is empty")
         return False
 
     trim_slot = pref.get_active_trim_slot()
@@ -928,48 +1072,54 @@ def has_visible_active_trim(report=None):
     trim_preset = trim_slot.trims_preset
     if not trim_preset:
         if report:
-            report({'WARNING'}, 'Trims preset is empty')
+            report({"WARNING"}, "Trims preset is empty")
         return False
 
-    idx = trim_slot.active_trim_index + 1
-    if len(trim_preset) >= idx:
+    idx = trim_slot.active_trim_index
+    if len(trim_preset) >= idx + 1:
         if trim_preset[idx].visible:
             return True
         if report:
-            report({'WARNING'}, 'Active trim is invisible')
+            report({"WARNING"}, "Active trim is invisible")
         return False
 
     if report:
-        report({'WARNING'}, 'Active trim index out of range')
+        report({"WARNING"}, "Active trim index out of range")
     return False
+
 
 def get_active_trim():
     from .. import preferences
+
     slot = preferences.prefs().get_active_trim_slot()
     trim: preferences.UNIV_TrimPreset = slot.trims_preset[slot.active_trim_index]
     return trim
+
 
 def is_pro_version_support():
     """Check Pro version support and sanitize Trim System"""
     try:
         from .. import univ_pro
+
         return True
     except ImportError:
         from .. import preferences
+
         if preferences.prefs().use_trims:
             preferences.prefs().use_trims = False
         return False
+
 
 def get_inplace_trim_by_isl(bboxes, isl):
     isl_bbox = isl.bbox
     isl_center = isl_bbox.center
 
     idx = -1
-    min_dist = float('inf')
+    min_dist = float("inf")
 
     for i, bb in enumerate(bboxes):
         if isl_center in bb:
-            for (l_a, l_b) in reshape_to_pair(bb.draw_data_lines()):
+            for l_a, l_b in reshape_to_pair(bb.draw_data_lines()):
                 _, dist = intersect_point_line_segment(isl_center, l_a, l_b)
                 if dist < min_dist:
                     min_dist = dist
@@ -978,7 +1128,7 @@ def get_inplace_trim_by_isl(bboxes, isl):
     # TODO: Get by BBox.isect (by area coverage) ???
     if idx == -1:
         for i, bb in enumerate(bboxes):
-            for (l_a, l_b) in reshape_to_pair(bb.draw_data_lines()):
+            for l_a, l_b in reshape_to_pair(bb.draw_data_lines()):
                 _, dist = intersect_point_line_segment(isl_center, l_a, l_b)
                 if dist < min_dist:
                     min_dist = dist
@@ -986,12 +1136,13 @@ def get_inplace_trim_by_isl(bboxes, isl):
 
     return idx
 
+
 def get_nearest_contained_bbox_idx(bboxes, pt):
     """NOTE: The bbox index needs to be checked for the value -1."""
     isl_center = pt
 
     idx = -1
-    min_dist = float('inf')
+    min_dist = float("inf")
 
     for i, bb in enumerate(bboxes):
         if isl_center in bb:
@@ -1002,12 +1153,14 @@ def get_nearest_contained_bbox_idx(bboxes, pt):
 
     return idx
 
-def get_transform_from_box(src: 'utypes.BBox',
-                           tar: 'utypes.BBox',
-                           axis: str = 'XY',
-                           pad: float = 0.0,
-                           use_crop: bool = True
-                           ) -> tuple[Vector, Vector, Vector]:
+
+def get_transform_from_box(
+    src: "utypes.BBox",
+    tar: "utypes.BBox",
+    axis: str = "XY",
+    pad: float = 0.0,
+    use_crop: bool = True,
+) -> tuple[Vector, Vector, Vector]:
     # Padding may be too large for small trims, and if the length is exceeded, it causes negative scaling.
     # Therefore, attenuate the padding.
     pad_x = attenuate_padding(pad, tar.width)
@@ -1019,16 +1172,16 @@ def get_transform_from_box(src: 'utypes.BBox',
     scale_y = ((tar.height - pad_y) / h) if h else 1
 
     if use_crop:
-        if axis == 'XY':
+        if axis == "XY":
             scale_x = scale_y = min(scale_x, scale_y)
-        elif axis == 'X':
+        elif axis == "X":
             scale_x = scale_y = scale_x
         else:
             scale_x = scale_y = scale_y
     else:
-        if axis == 'X':
+        if axis == "X":
             scale_y = 1.0
-        elif axis == 'Y':
+        elif axis == "Y":
             scale_x = 1.0
 
     pivot = src.center
@@ -1045,14 +1198,14 @@ def get_transform_from_box(src: 'utypes.BBox',
     pos_y = wrap_line_nearest(src.min.y, src.height, tar.ymin + pad_y, tar.ymax - pad_y)
     set_pos = Vector((pos_x, pos_y))
 
-
     delta = set_pos - src.min
-    if axis == 'X':
+    if axis == "X":
         delta.y = 0
-    elif axis == 'Y':
+    elif axis == "Y":
         delta.x = 0
 
     return scale, delta, pivot
+
 
 def wrap_box(src: utypes.BBox, tar: utypes.BBox = utypes.BBox(0.0, 1.0, 0.0, 1.0)) -> Vector:
 
@@ -1063,3 +1216,19 @@ def wrap_box(src: utypes.BBox, tar: utypes.BBox = utypes.BBox(0.0, 1.0, 0.0, 1.0
     delta = set_pos - src.min
 
     return delta
+
+
+def list_discard(lst, elem):
+    try:
+        idx = lst.idx(elem)
+    except ValueError:
+        return  # Not found, nothing to do
+    end = len(lst) - 1
+    if idx != end:
+        lst[idx] = lst[end]
+    lst.pop()
+
+def list_rotate(seq: list, n: int):
+    if n:
+        n = -n % len(seq)
+        seq[:] = seq[n:] + seq[:n]

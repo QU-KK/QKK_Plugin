@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 Oxicid
+# SPDX-FileCopyrightText: 2026 Oxicid
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 # The icons were created by Vitaly Zhdanov https://www.youtube.com/@diffusecolor , for which he is very thankful!
@@ -6,7 +6,6 @@
 # Excellent detailing and stylish design made the interface more convenient and pleasant.
 # Thank you for the work done!
 
-import os
 import gpu
 import bpy
 import traceback
@@ -22,6 +21,7 @@ class icons:
     NOTE: Icon names must match the names of the corresponding PNG files.
     NOTE: For properties, methods, and other attributes that don’t contain an icon value, names must start with an underscore.
     """
+
     _icons_ = None
     adjust = 0
     area = 0
@@ -45,6 +45,7 @@ class icons:
     crop = 0
     cursor = 0
     cut = 0
+    d_align = 0
     distribute = 0
     edge_grow = 0
     fill = 0
@@ -59,6 +60,7 @@ class icons:
     horizontal_c = 0
     large = 0
     linked = 0
+    local_invert = 0
     loop_select = 0
     medium = 0
     non_splitted = 0
@@ -103,76 +105,124 @@ class icons:
 
     @classmethod
     def register_icons_(cls):
+
+        from .. import utils
+        from ..preferences import prefs
         from bpy.utils import previews
+
         if cls._icons_:
             cls.unregister_icons_()
         cls._icons_ = previews.new()
 
-        from ..preferences import prefs
-        png_folder_name = 'png_mono/' if prefs().color_mode == 'MONO' else 'png/'
-        png_file_path = __file__.replace('__init__.py', png_folder_name)
+        is_mono = prefs().color_mode == "MONO"
+        addon_icons = Path(__file__).parent / ("png_mono" if is_mono else "png")
+        extension_icons = None
+
+        extension_path = utils.extension_path_user(
+            utils.univ_root_path, path=f"icons/{addon_icons.name}", create=False
+        )
+        if extension_path:
+            extension_icons = Path(extension_path)
 
         for attr in dir(cls):
-            if not attr.endswith('_'):
-                if not isinstance(getattr(cls, attr), int):
-                    print(f"UniV: Attribute {attr} not icon_id")
-                    continue
+            if attr.endswith("_"):
+                continue
 
-                full_path = png_file_path + attr + ".png"
-                if not os.path.exists(full_path):
-                    print(f"UniV: File {full_path} for {attr} icon not found")
-                    continue
+            if not isinstance(getattr(cls, attr), int):
+                print(f"UniV: Attribute '{attr}' is not an icon id")
+                continue
 
-                icon = cls._icons_.load(attr, full_path, 'IMAGE')
-                _ = icon.icon_pixels[0]  # Need to force load icons, bugreport?
-                setattr(cls, attr, icon.icon_id)
+            candidates = []
+            if extension_icons:
+                candidates.append(extension_icons / f"{attr}.png")
+            candidates.append(addon_icons / f"{attr}.png")
+
+            for full_path in candidates:
+                if full_path.exists():
+                    break
+            else:
+                print(f"UniV: Icon '{attr}' not found")
+                continue
+
+            icon = cls._icons_.load(attr, str(full_path), "IMAGE")
+            # Force Blender to load the icon immediately (workaround for Blender bug)
+            _ = icon.icon_pixels[0]
+            setattr(cls, attr, icon.icon_id)
 
         # Register category icons
         cls.update_general_panels_icon_()
 
-        # Register icons for workspaces
-        from pathlib import Path
-        from .. import ui
+    @staticmethod
+    def register_ws_icons_():
+        from .. import classes_workspace
 
-        panels = [ui.UNIV_WT_edit_VIEW3D, ui.UNIV_WT_object_VIEW3D]
-
-        icon_path = Path(panels[0].bl_icon)
-        expected_icon = 'univ_mono' if prefs().color_mode == 'MONO' else 'univ'
-
-        if icon_path.parts[-1] != expected_icon:
-            from .. import keymaps
-            keymaps.remove_keymaps_ws()
-            new_path = icon_path.parent / expected_icon
-            for p in panels:
+        expected_path = icons.get_expected_filepath_for_dat_()
+        # Skip updating if every workspace already uses the expected icon
+        if any(Path(panel.bl_icon) != expected_path for panel in classes_workspace):
+            for panel in reversed(classes_workspace):
                 try:
-                    bpy.utils.unregister_tool(p)
-                    p.bl_icon = str(new_path)
-                    bpy.utils.register_tool(p)
-                except:  # noqa
-                    print(f"UniV: Updating icons for workspaces has failed:\n")
-                    import traceback
+                    bpy.utils.unregister_tool(panel)
+                    panel.bl_icon = str(expected_path)
+                    bpy.utils.register_tool(panel)
+                except Exception:  # noqa
+                    print(f"UniV: Failed to update workspace icon for {panel.__name__}")
                     traceback.print_exc()
+            return True
+        return False
 
-            keymaps.add_keymaps_ws()
+    @staticmethod
+    def get_expected_filepath_for_dat_():
+        from .. import utils
+        from ..preferences import prefs
+
+        # Default icon path inside the add-on
+        is_mono = prefs().color_mode == "MONO"
+        expected_icon = "univ_mono" if is_mono else "univ"
+        expected_path = Path(__file__).with_name(expected_icon)
+
+        # Use the extension icon if it exists
+        extension_icons = utils.extension_path_user(
+            utils.univ_root_path, path="icons", create=False
+        )
+
+        if extension_icons:
+            extension_icon = Path(extension_icons) / f"{expected_icon}.dat"
+            if extension_icon.exists():
+                expected_path = extension_icon.with_suffix("")
+        return expected_path
 
     @classmethod
     def reset_icon_value_(cls):
         for attr in dir(cls):
-            if not attr.endswith('_'):
+            if not attr.endswith("_"):
                 setattr(cls, attr, 0)
 
     @classmethod
     def unregister_icons_(cls):
         from bpy.utils import previews
+
         try:
             previews.remove(cls._icons_)
         except KeyError:
             from ..preferences import debug
+
             if debug():
                 print("UniV: Can't unregister icons.")
                 traceback.print_exc()
 
         cls.reset_icon_value_()
+
+    # @staticmethod
+    # def unregister_ws_icons_():
+    #     from .. import ui
+    #     from bl_ui.space_toolsystem_common import _icon_cache as wst_icons_cache  # noqa
+    #
+    #     icon_name = ui.UNIV_WT_object_VIEW3D.bl_icon
+    #     if icon_name in wst_icons_cache:
+    #         if wst_icons_cache[icon_name] != 0:
+    #             bpy.app.icons.release(wst_icons_cache[icon_name])
+    #     ui.UNIV_WT_edit_VIEW3D.bl_icon = ""
+    #     ui.UNIV_WT_object_VIEW3D.bl_icon = ""
 
     @classmethod
     def update_general_panels_icon_(cls):
@@ -180,6 +230,7 @@ class icons:
             # Set icons to general panel.
             try:
                 from .. import classes
+
                 # For the property to apply to the panel, it must be applied to all panels in use.
                 all_panels = [c for c in classes if issubclass(c, bpy.types.Panel)]
                 if not len(all_panels):
@@ -224,8 +275,8 @@ class PreviousData:
             obj.select_set(True)
         bpy.context.view_layer.objects.active = self.prev_active_obj
         if bpy.ops.object.mode_set.poll():
-            if self.prev_mode == 'EDIT_MESH':
-                bpy.ops.object.mode_set(mode='EDIT')
+            if self.prev_mode == "EDIT_MESH":
+                bpy.ops.object.mode_set(mode="EDIT")
             else:
                 bpy.ops.object.mode_set(mode=self.prev_mode)
 
@@ -248,10 +299,12 @@ class WSToolIconsGenerator:
     the operator UNIV_OT_IconsGenerator and the related properties in AddonPreferences,
     such as color_mode and others tied to icon handling.
     """
+
     @classmethod
     def pprint(cls):
         """Extracts the triangle coordinates and indices.
-        The coordinates are remapped to a more optimized version -1..1 -> 0..255 (float16 to uint8)."""
+        The coordinates are remapped to a more optimized version -1..1 -> 0..255 (float16 to uint8).
+        """
         obj = bpy.context.object
         mesh = obj.data
 
@@ -263,12 +316,12 @@ class WSToolIconsGenerator:
         verts_2d = cls.convert_3d_to_2d(verts_np)
         res = cls.remap_f16_to_uint8(verts_2d)
 
-        pretty = 'coords = np.array(['
+        pretty = "coords = np.array(["
         for v in res.reshape(-1):
             pretty += str(v)
-            pretty += ', '
+            pretty += ", "
 
-        pretty = pretty[:-2] + '], dtype=np.uint8).reshape(-1, 2)\n'
+        pretty = pretty[:-2] + "], dtype=np.uint8).reshape(-1, 2)\n"
         print(pretty)
 
         # print flat indexes
@@ -276,12 +329,12 @@ class WSToolIconsGenerator:
         indexes_np = np.empty(len(mesh.loop_triangles) * 3, dtype=np.int32)
         mesh.loop_triangles.foreach_get("vertices", indexes_np)
 
-        pretty = 'indexes =  np.array(['
+        pretty = "indexes =  np.array(["
         for v in indexes_np:
             pretty += str(v)
-            pretty += ', '
+            pretty += ", "
 
-        pretty = pretty[:-2] + '], dtype=np.uint8).reshape(-1, 3)'
+        pretty = pretty[:-2] + "], dtype=np.uint8).reshape(-1, 3)"
         print(pretty)
 
     @staticmethod
@@ -303,14 +356,15 @@ class WSToolIconsGenerator:
     def convert_3d_to_2d(arr):
         return arr.reshape(-1, 3)[:, :2].reshape(-1, 2)
 
+
     @classmethod
     def get_u_tris(cls):
         """Returns an array of triangles - [[(10, 20), (40, 80), (60, 20)], ...]"""
         coords = np.array([111, 159, 95, 159, 95, 107, 96, 101, 99, 95, 105, 92, 111, 91, 147, 91, 153, 92, 159,
-                           95, 162, 101, 163, 107, 163, 159, 147, 159, 147, 107, 111, 107], dtype=np.uint8).reshape(-1, 2)
+                           95, 162, 101, 163, 107, 163, 159, 147, 159, 147, 107, 111, 107], dtype=np.uint8).reshape(-1, 2)  # fmt: skip
 
         indexes = np.array([2, 0, 1, 14, 12, 13, 2, 15, 0, 14, 11, 12, 3, 15, 2, 14, 10, 11, 15, 3, 4, 15, 4, 5,
-                            15, 5, 6, 9, 14, 8, 9, 10, 14, 8, 14, 7, 14, 6, 7, 14, 15, 6], dtype=np.uint8).reshape(-1, 3)
+                            15, 5, 6, 9, 14, 8, 9, 10, 14, 8, 14, 7, 14, 6, 7, 14, 15, 6], dtype=np.uint8).reshape(-1, 3)  # fmt: skip
         return coords[indexes]
 
     @classmethod
@@ -322,12 +376,12 @@ class WSToolIconsGenerator:
         coords = np.array(
             [143, 198, 149, 200, 155, 204, 160, 209, 176, 225, 225, 176, 209, 160, 204, 155, 201, 149, 198, 143, 183,
              143, 185, 150, 189, 157, 193, 164, 199, 170, 204, 176, 176, 204, 171, 198, 164, 193, 158, 188, 151, 185,
-             143, 183], dtype=np.uint8).reshape(-1, 2)
+             143, 183], dtype=np.uint8).reshape(-1, 2)  # fmt: skip
 
         indexes = np.array(
             [15, 4, 16, 16, 3, 17, 17, 2, 18, 1, 19, 2, 9, 8, 10, 0, 21, 1, 12, 8, 7, 7, 14, 13, 18, 2, 19, 7, 13, 12,
              6, 15, 14, 15, 5, 4, 16, 4, 3, 17, 3, 2, 1, 20, 19, 21, 20, 1, 12, 11, 8, 7, 6, 14, 6, 5, 15, 8, 11, 10],
-            dtype=np.uint8).reshape(-1, 3)
+            dtype=np.uint8).reshape(-1, 3)  # fmt: skip
 
         flipped_indexes = indexes[:, ::-1]
 
@@ -362,16 +416,17 @@ class WSToolIconsGenerator:
             color_srgb = col.from_scene_linear_to_srgb()
             return tuple(round(c * 255) for c in (*color_srgb, alpha))
 
-        if prefs().color_mode == 'MONO':
+        if prefs().color_mode == "MONO":
             u_col = [convert_float_to_srgb_int(prefs().icon_mono_gray)]
             leaf_col = [convert_float_to_srgb_int(prefs().icon_mono_green) for _ in range(4)]
         else:
-            u_col = [int(v*255) for v in prefs().icon_white_color]
-            leaf_col = [convert_float_to_srgb_int(prefs().icon_colored_pink),
-                        convert_float_to_srgb_int(prefs().icon_colored_purple),
-                        convert_float_to_srgb_int(prefs().icon_colored_violet),
-                        convert_float_to_srgb_int(prefs().icon_colored_cian),
-                        ]
+            u_col = [int(v * 255) for v in prefs().icon_common_white]
+            leaf_col = [
+                convert_float_to_srgb_int(prefs().icon_colored_pink),
+                convert_float_to_srgb_int(prefs().icon_colored_purple),
+                convert_float_to_srgb_int(prefs().icon_colored_violet),
+                convert_float_to_srgb_int(prefs().icon_colored_cian),
+            ]
 
         u_shape = cls.get_u_tris()
         # Create a color for each vertex (duplicate one color)
@@ -392,25 +447,58 @@ class WSToolIconsGenerator:
 
     @classmethod
     def create_dat_icons(cls):
-        from ..preferences import prefs
-        base_path = Path(__file__).resolve().parent
-        filename = base_path / ('univ_mono.dat' if prefs().color_mode == 'MONO' else 'univ.dat')
-        with open(filename, 'wb') as file:
-            fw = file.write
-            # Header (version 0).
-            fw(b'VCO\x00')
-            # Width, Height
-            fw(bytes((255, 255)))
-            # X, Y
-            fw(bytes((0, 0)))
-            icon_flat_data = cls.create_batch_from_tris_and_colors()
-            fw(icon_flat_data)
+        from .. import preferences
+        from .. import utils
 
-        cls.update_wst_icon(str(filename))
+        is_mono = preferences.prefs().color_mode == "MONO"
+
+        icon_name = "univ_mono" if is_mono else "univ"
+        dat_filename = f"{icon_name}.dat"
+
+        addon_icon = Path(__file__).resolve().parent / dat_filename
+
+        use_default_icons = IconsCreator.is_default_icons_colors(is_mono)
+        create_directory = not use_default_icons
+
+        output_path = addon_icon
+        extension_icons = utils.extension_path_user(
+            utils.univ_root_path, path="icons", create=create_directory
+        )
+
+        if extension_icons:
+            extension_icon = Path(extension_icons) / dat_filename
+            if use_default_icons:
+                # Remove previously generated custom icon.
+                if extension_icon.exists():
+                    extension_icon.unlink()
+                    print(f"UniV: Removed custom workspace icon: {extension_icon}")
+            else:
+                output_path = extension_icon
+        elif create_directory:
+            print(
+                "UniV: Failed to create the custom icon directory. "
+                "Using the bundled workspace icon instead."
+            )
+
+        # If the bundled icon already exists, reuse it.
+        if output_path == addon_icon and addon_icon.exists():
+            cls.update_wst_icon(str(addon_icon))
+            print(f"{addon_icon = }")
+            return
+
+        with output_path.open("wb") as file:
+            fw = file.write
+            fw(b"VCO\x00")  # Header (version 0).
+            fw(bytes((255, 255)))  # Width, Height.
+            fw(bytes((0, 0)))  # X, Y.
+            fw(cls.create_batch_from_tris_and_colors())
+
+        print(f"{output_path=}")
+        cls.update_wst_icon(str(output_path))
 
     @staticmethod
-    def update_wst_icon(filename: str):
-        """ Icons for WST are cached during class registration and remain even after unregister.
+    def update_wst_icon(filepath: str):
+        """Icons for WST are cached during class registration and remain even after unregister.
         To update an icon, the old one must be removed and the new one registered.
 
         This hack is used to avoid restarting Blender."""
@@ -425,14 +513,15 @@ class WSToolIconsGenerator:
                 bpy.app.icons.release(wst_icons_cache[icon_name])
 
             try:
-                icon_value = bpy.app.icons.new_triangles_from_file(filename)
+                icon_value = bpy.app.icons.new_triangles_from_file(filepath)
             except Exception as e:  # noqa
                 import traceback
+
                 traceback.print_exc()
-                print(f"UniV: WS Tool icon could not be reloaded from {filename!r}")
+                print(f"UniV: WS Tool icon could not be reloaded from {filepath!r}")
                 icon_value = 0
             wst_icons_cache[icon_name] = icon_value
-            utils.update_area_by_type('VIEW_3D')
+            utils.update_area_by_type("VIEW_3D")
 
 
 class IconsCreator:
@@ -451,24 +540,27 @@ class IconsCreator:
 
     @classmethod
     def convert_svg_to_png_builtin(cls, icon_size=32, mono=False, antialiasing=2, scale_mul=1.0):
-        base_path = Path(__file__).resolve().parent
-        svg_folder = base_path / ('svg_mono' if mono else 'svg')
-        png_folder = base_path / ('png_mono' if mono else 'png')
+        is_default = cls.is_default_icons_settings(mono)
+        png_folder, svg_folder = (
+            cls.get_png_and_svg_icon_paths_and_delete_extension_path_if_default(mono, is_default)
+        )
 
         prev_data = PreviousData()
         try:
             from io_curve_svg import import_svg  # type: ignore[import-untyped]
         except ImportError:
-            raise ImportError("UniV: Failed to generate icons, possibly the svg module was rewritten in C++")
+            raise ImportError(
+                "UniV: Failed to generate icons, possibly the svg module was rewritten in C++"
+            )
 
         if bpy.ops.object.mode_set.poll():
-            bpy.ops.object.mode_set(mode='OBJECT')
-        bpy.ops.object.select_all(action='DESELECT')
+            bpy.ops.object.mode_set(mode="OBJECT")
+        bpy.ops.object.select_all(action="DESELECT")
 
         for attr in dir(icons):
             # if attr != 'pack_others':
             #     continue
-            if not attr.endswith('_'):
+            if not attr.endswith("_"):
                 if not isinstance(getattr(icons, attr), int):
                     raise AttributeError(f"{attr!r} is not a valid icon attribute")
 
@@ -478,6 +570,13 @@ class IconsCreator:
                     continue
                 png_save_path = png_folder / f"{attr}.png"
 
+                if is_default:
+                    if png_save_path.exists():
+                        continue
+                    print(
+                        f"UniV: Icons: The {attr!r} icon not exist, and was saved to the add-on directory."
+                    )
+
                 import_svg.load(None, bpy.context, filepath=str(svg_file))
 
                 svg_objects = list(set(bpy.context.scene.objects) - prev_data.prev_objects)
@@ -486,14 +585,17 @@ class IconsCreator:
 
                 bpy.context.view_layer.objects.active = svg_objects[0]
                 for svg_obj in svg_objects:
-                    assert svg_obj.type == 'CURVE'
+                    assert svg_obj.type == "CURVE"
                     svg_obj.select_set(True)
-                bpy.ops.object.convert(target='MESH', keep_original=False)
+                bpy.ops.object.convert(target="MESH", keep_original=False)
 
+                # Draw to buffer.
                 mesh_objects = list(set(bpy.context.scene.objects) - prev_data.prev_objects)
                 tris, colors = cls.calc_tris_for_draw(mesh_objects, attr)  # extract draw data
 
-                offscreen = gpu.types.GPUOffScreen(icon_size * antialiasing, icon_size * antialiasing)  # noqa
+                offscreen = gpu.types.GPUOffScreen(
+                    icon_size * antialiasing, icon_size * antialiasing
+                )  # noqa
                 offscreen.bind()
 
                 try:
@@ -501,9 +603,15 @@ class IconsCreator:
                     fb.clear(color=(0.0, 0.0, 0.0, 0.0))
                     cls.draw_image(tris, colors, 32, 32, scale_mul)
 
-                    pixel_data = fb.read_color(0, 0, icon_size * antialiasing, icon_size * antialiasing, 4, 0, 'UBYTE')
-                    pixel_data.dimensions = (icon_size * antialiasing) * (icon_size * antialiasing) * 4
-                    cls.save_pixels(str(png_save_path), pixel_data, icon_size, icon_size, antialiasing)
+                    pixel_data = fb.read_color(
+                        0, 0, icon_size * antialiasing, icon_size * antialiasing, 4, 0, "UBYTE"
+                    )
+                    pixel_data.dimensions = (
+                        (icon_size * antialiasing) * (icon_size * antialiasing) * 4
+                    )
+                    cls.save_pixels(
+                        str(png_save_path), pixel_data, icon_size, icon_size, antialiasing
+                    )
                 finally:
                     offscreen.unbind()
                     offscreen.free()
@@ -512,6 +620,69 @@ class IconsCreator:
                     bpy.data.objects.remove(obj)
 
         prev_data.restore()
+
+    @classmethod
+    def get_png_and_svg_icon_paths_and_delete_extension_path_if_default(
+        cls, mono: bool, is_default_icons_settings: bool
+    ) -> tuple[Path, Path]:
+        """Returns the add-on's PNG path if the settings are the default ones."""
+        mono_suffix = "_mono" if mono else ""
+        create_folder_if_not_exist = not is_default_icons_settings
+        univ_icon_base_path = Path(__file__).resolve().parent
+        svg_folder = univ_icon_base_path / ("svg" + mono_suffix)
+
+        icons_subdirectory = "icons/" + ("png" + mono_suffix)
+        from .. import utils
+
+        path = utils.extension_path_user(
+            utils.univ_root_path, path=icons_subdirectory, create=create_folder_if_not_exist
+        )
+        if is_default_icons_settings and path:
+            import shutil
+
+            shutil.rmtree(path, ignore_errors=True)
+            print(f"UniV: Icons: Default settings is set, the {path} folder has been deleted.")
+            path = ""
+
+        if not path:
+            if create_folder_if_not_exist:
+                print(
+                    "UniV: Icons: Failed to create a directory for custom icons. "
+                    "The directory from the add-on will be used instead."
+                )
+            png_folder = univ_icon_base_path / ("png" + mono_suffix)
+        else:
+            png_folder = Path(path)
+        return png_folder, svg_folder
+
+    @classmethod
+    def is_default_icons_settings(cls, mono):
+        return cls.is_default_icon_scales() and cls.is_default_icons_colors(mono)
+
+    @staticmethod
+    def is_default_icons_colors(mono):
+        from .. import preferences
+
+        pref = preferences.prefs()
+        all_props = pref.bl_rna.properties
+
+        icon_prefix = "icon_mono_" if mono else "icon_colored_"
+        for prop in all_props:
+            idname: str = prop.identifier
+            if idname.startswith((icon_prefix, "icon_common_")):
+                if tuple(prop.default_array) != tuple(getattr(pref, idname)):  # noqa
+                    return False
+        return True
+
+    @staticmethod
+    def is_default_icon_scales():
+        from .. import preferences
+
+        pref = preferences.prefs()
+        all_props = pref.bl_rna.properties
+
+        attrs = ["icon_scale", "icon_size", "icon_antialiasing"]
+        return all(all_props[attr].default == getattr(pref, attr) for attr in attrs)
 
     # TODO: Implement flat vertices with indexes (with index offset)
     @classmethod
@@ -536,7 +707,7 @@ class IconsCreator:
             tris_np = tris_np.reshape(num_tris, 3)
 
             tri_coords = verts_np[tris_np][:, :, :2]
-            tri_coords = tri_coords.reshape(num_tris*3, 2)
+            tri_coords = tri_coords.reshape(num_tris * 3, 2)
             all_tris.append(tri_coords)
 
             all_colors.extend([cls.get_color(obj, icon_name)] * len(tri_coords))
@@ -550,17 +721,17 @@ class IconsCreator:
         from .. import draw
         from gpu_extras.batch import batch_for_shader
 
-        gpu.state.blend_set('ALPHA')
+        gpu.state.blend_set("ALPHA")
         with gpu.matrix.push_pop():
             mtx = cls.get_normalize_uvs_matrix(icon_size_x, icon_size_y, scale_mul)
             gpu.matrix.load_matrix(mtx)
             gpu.matrix.load_projection_matrix(Matrix.Identity(4))
 
-            shader = draw.shaders.POLYLINE_FLAT_COLOR_2D
-            batch = batch_for_shader(shader, 'TRIS', {"pos": coords, "color": colors})
+            shader = draw.shaders.SMOOTH_COLOR_2D
+            batch = batch_for_shader(shader, "TRIS", {"pos": coords, "color": colors})
             batch.draw(shader)
 
-        gpu.state.blend_set('NONE')
+        gpu.state.blend_set("NONE")
 
     @classmethod
     def get_normalize_uvs_matrix(cls, icon_size_x, icon_size_y, scale_mul=1.0):
@@ -574,8 +745,8 @@ class IconsCreator:
         # NOTE: The operation order is important to match the SVG converter's
         # float precision quirks - changing it would break proportions.
         svg_matrix = Matrix()
-        svg_matrix = svg_matrix @ Matrix.Scale(1.0 / 90.0 * 0.3048 / 12.0, 4, Vector((1.0, 0.0, 0.0)))
-        svg_matrix = svg_matrix @ Matrix.Scale(-1.0 / 90.0 * 0.3048 / 12.0, 4, Vector((0.0, 1.0, 0.0)))
+        svg_matrix = svg_matrix @ Matrix.Scale(1.0 / 90.0 * 0.3048 / 12.0, 4, Vector((1.0, 0.0, 0.0)))  # fmt: skip
+        svg_matrix = svg_matrix @ Matrix.Scale(-1.0 / 90.0 * 0.3048 / 12.0, 4, Vector((0.0, 1.0, 0.0)))  # fmt: skip
         svg_objects_dimension = svg_matrix @ Vector((icon_size_x, icon_size_y, 0))
 
         filled_scale = [1 / abs(component) for component in svg_objects_dimension.xy]
@@ -586,27 +757,30 @@ class IconsCreator:
         return center_scale @ matrix @ fit_matrix
 
     @classmethod
-    def save_pixels(cls, filepath, pixel_data, width: int, height: int, antialiasing: int=1):
+    def save_pixels(cls, filepath, pixel_data, width: int, height: int, antialiasing: int = 1):
         import OpenImageIO as oiio  # type: ignore[import-untyped]
-        spec = oiio.ImageSpec(width, height, 4, 'uint8')
+
+        spec = oiio.ImageSpec(width, height, 4, "uint8")
         # https://github.com/AcademySoftwareFoundation/OpenImageIO/blob/main/src/png.imageio/pngoutput.cpp
-        spec.attribute('png:compressionLevel', 9)
-        spec_aa = oiio.ImageSpec(width*antialiasing, height*antialiasing, 4, 'uint8')
+        spec.attribute("png:compressionLevel", 9)
+        spec_aa = oiio.ImageSpec(width * antialiasing, height * antialiasing, 4, "uint8")
 
         buf_extended = oiio.ImageBuf(spec_aa)
         buf_resized = oiio.ImageBuf(spec)
-        buf_extended.set_pixels(oiio.ROI(0, width*antialiasing, 0, height*antialiasing), pixel_data)
+        buf_extended.set_pixels(
+            oiio.ROI(0, width * antialiasing, 0, height * antialiasing), pixel_data
+        )
         # NOTE: Resize gives a better result than resample
         oiio.ImageBufAlgo.resize(buf_resized, buf_extended)
         buf_resized.write(filepath)
-
 
     @classmethod
     def draw_background_colors(cls, coords, colors):
         from .. import draw
         from gpu_extras.batch import batch_for_shader
+
         shader = draw.shaders.POLYLINE_FLAT_COLOR_2D
-        batch = batch_for_shader(shader, 'TRIS', {"pos": coords, "color": colors})
+        batch = batch_for_shader(shader, "TRIS", {"pos": coords, "color": colors})
         batch.draw(shader)
 
     @staticmethod
@@ -629,17 +803,17 @@ class IconsCreator:
 
         found_color = True
         if vec_isclose(srgb_color, hex_to_rgb("#ffffff"), 0.001):  # White
-            linear_white = prefs().icon_white_color
+            linear_white = prefs().icon_common_white
             ret_color = linear_to_ret_color(linear_white)
-        elif vec_isclose(srgb_color, hex_to_rgb('#ececec'), 0.001):  # Select Arrow
-            linear_select_arrow = prefs().icon_select_arrow_color
+        elif vec_isclose(srgb_color, hex_to_rgb("#ececec"), 0.001):  # Select Arrow
+            linear_select_arrow = prefs().icon_common_select_arrow
             ret_color = linear_to_ret_color(linear_select_arrow)
 
-        elif prefs().color_mode == 'MONO':
-            if vec_isclose(srgb_color, hex_to_rgb('#8bc6a1'), 0.001):  # Green
+        elif prefs().color_mode == "MONO":
+            if vec_isclose(srgb_color, hex_to_rgb("#8bc6a1"), 0.001):  # Green
                 linear_green = prefs().icon_mono_green
                 ret_color = linear_to_ret_color(linear_green)
-            elif vec_isclose(srgb_color, hex_to_rgb('#c7c7c7'), 0.001):  # Grey
+            elif vec_isclose(srgb_color, hex_to_rgb("#c7c7c7"), 0.001):  # Grey
                 linear_gray = prefs().icon_mono_gray
                 ret_color = linear_to_ret_color(linear_gray)
             else:
@@ -648,14 +822,14 @@ class IconsCreator:
             if vec_isclose(srgb_color, hex_to_rgb("#7d87ff"), 0.001):  # Violet
                 linear_violet = prefs().icon_colored_violet
                 ret_color = linear_to_ret_color(linear_violet)
-            elif vec_isclose(srgb_color, hex_to_rgb('#62cdf9'), 0.001):  # Cian
+            elif vec_isclose(srgb_color, hex_to_rgb("#62cdf9"), 0.001):  # Cian
                 linear_cian = prefs().icon_colored_cian
                 ret_color = linear_to_ret_color(linear_cian)
 
             elif vec_isclose(srgb_color, hex_to_rgb("#dc87ff"), 0.001):  # Purple
                 linear_purple = prefs().icon_colored_purple
                 ret_color = linear_to_ret_color(linear_purple)
-            elif vec_isclose(srgb_color, hex_to_rgb('#ff87a9'), 0.001):  # Pink
+            elif vec_isclose(srgb_color, hex_to_rgb("#ff87a9"), 0.001):  # Pink
                 linear_pink = prefs().icon_colored_pink
                 ret_color = linear_to_ret_color(linear_pink)
             else:
@@ -663,33 +837,40 @@ class IconsCreator:
 
         if not found_color:
             from ..utils import rgb_to_hex
-            print(f"UniV: Generate Icons: Not found color {rgb_to_hex(srgb_color)!r} for icon {icon_name!r}")
+
+            print(
+                f"UniV: Generate Icons: Not found color {rgb_to_hex(srgb_color)!r} for icon {icon_name!r}"
+            )
 
         return ret_color
 
 
 class UNIV_OT_IconsGenerator(bpy.types.Operator):
-    bl_idname = 'wm.univ_icons_generator'
-    bl_label = 'Generate'
-    bl_options = {'REGISTER', 'UNDO'}
-    bl_description = ("The Workspace Tool shader uses slightly different parameters, so colors may vary. "
-                      "It's recommended to adjust them manually for best results.")
+    bl_idname = "wm.univ_icons_generator"
+    bl_label = "Generate"
+    bl_options = {"REGISTER", "UNDO"}
+    bl_description = (
+        "The Workspace Tool shader uses slightly different parameters, so colors may vary. "
+        "It's recommended to adjust them manually for best results."
+    )
 
     # noinspection PyTypeHints
-    generate_only_ws_tool_icon: bpy.props.BoolProperty(name='Tool Icons', default=False)
+    generate_only_ws_tool_icon: bpy.props.BoolProperty(name="Tool Icons", default=False)
 
     def execute(self, context):
         if self.generate_only_ws_tool_icon:
             WSToolIconsGenerator.create_dat_icons()
         else:
             from ..preferences import prefs
+
             IconsCreator.convert_svg_to_png_builtin(
                 icon_size=int(prefs().icon_size),
-                mono=prefs().color_mode == 'MONO',
+                mono=prefs().color_mode == "MONO",
                 antialiasing=int(prefs().icon_antialiasing),
-                scale_mul=prefs().icon_scale
+                scale_mul=prefs().icon_scale,
             )
             icons.unregister_icons_()
             icons.register_icons_()
+
             WSToolIconsGenerator.create_dat_icons()
-        return {'FINISHED'}
+        return {"FINISHED"}
