@@ -198,7 +198,13 @@ class SNA_OT_Shader_649Db(bpy.types.Operator):
         tex_img_list = []
         # 设置模型UV名称
         for obj in bpy.context.blend_data.objects:
-            if obj.type == 'MESH':    
+            if obj.type == 'MESH':   
+                
+                # 激活UV 0为渲染输出
+                if len(obj.data.uv_layers) > 0:
+                    obj.data.uv_layers[0].active = True
+                    obj.data.uv_layers[0].active_render = True
+                 
                 # 遍历该对象的所有 UV 通道（按通道顺序索引）
                 for index, uv_layer in enumerate(obj.data.uv_layers):
                     # 生成新的名称，例如：1U, 2U, 3U...
@@ -358,7 +364,13 @@ class SNA_OT_Input_Shader_21057(bpy.types.Operator):
         tex_img_list = []
         # 设置模型UV名称
         for obj in bpy.context.blend_data.objects:
-            if obj.type == 'MESH':    
+            if obj.type == 'MESH':
+                
+                # 激活UV 0为渲染输出
+                if len(obj.data.uv_layers) > 0:
+                    obj.data.uv_layers[0].active = True
+                    obj.data.uv_layers[0].active_render = True
+                 
                 # 遍历该对象的所有 UV 通道（按通道顺序索引）
                 for index, uv_layer in enumerate(obj.data.uv_layers):
                     # 生成新的名称，例如：1U, 2U, 3U...
@@ -933,6 +945,12 @@ class SNA_OT_My_Generic_Operator_6F86E(bpy.types.Operator, ImportHelper):
                 print(f"贴图 [{img.name}] 已直接设置为: sRGB")
             #模型UV名称命名
             obj = bpy.context.active_object
+            
+            # 激活UV 0为渲染输出
+            if len(obj.data.uv_layers) > 0:
+                obj.data.uv_layers[0].active = True
+                obj.data.uv_layers[0].active_render = True
+            
             # 遍历该对象的所有 UV 通道（按通道顺序索引）
             for index, uv_layer in enumerate(obj.data.uv_layers):
                 # 生成新的名称，例如：1U, 2U, 3U...
@@ -1003,6 +1021,12 @@ class SNA_OT_Uv_Name_Set_3Ead6(bpy.types.Operator):
             # 遍历每个选中的对象
             for obj in selected_objects:
                 print(f"正在处理对象: {obj.name}")
+                
+                # 激活UV 0为渲染输出
+                if len(obj.data.uv_layers) > 0:
+                    obj.data.uv_layers[0].active = True
+                    obj.data.uv_layers[0].active_render = True
+                
                 # 遍历该对象的所有 UV 通道（按通道顺序索引）
                 for index, uv_layer in enumerate(obj.data.uv_layers):
                     # 生成新的名称，例如：1U, 2U, 3U...
