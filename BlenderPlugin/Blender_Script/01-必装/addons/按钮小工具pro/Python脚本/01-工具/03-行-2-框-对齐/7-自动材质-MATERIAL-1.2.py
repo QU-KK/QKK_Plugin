@@ -87,8 +87,8 @@ for obj in bpy.context.blend_data.objects:
         
         # 激活UV 0为渲染输出
         if len(obj.data.uv_layers) > 0:
-            obj.data.uv_layers[0].active = True
-            obj.data.uv_layers[0].active_render = True
+            obj.data.uv_layers.active_index = 0
+            obj.data.uv_layers.active_render_index = 0
 
         # 遍历该对象的所有 UV 通道（按通道顺序索引）
         for index, uv_layer in enumerate(obj.data.uv_layers):

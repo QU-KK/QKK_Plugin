@@ -202,8 +202,8 @@ class SNA_OT_Shader_649Db(bpy.types.Operator):
                 
                 # 激活UV 0为渲染输出
                 if len(obj.data.uv_layers) > 0:
-                    obj.data.uv_layers[0].active = True
-                    obj.data.uv_layers[0].active_render = True
+                    obj.data.uv_layers.active_index = 0
+                    obj.data.uv_layers.active_render_index = 0
                  
                 # 遍历该对象的所有 UV 通道（按通道顺序索引）
                 for index, uv_layer in enumerate(obj.data.uv_layers):
@@ -368,8 +368,8 @@ class SNA_OT_Input_Shader_21057(bpy.types.Operator):
                 
                 # 激活UV 0为渲染输出
                 if len(obj.data.uv_layers) > 0:
-                    obj.data.uv_layers[0].active = True
-                    obj.data.uv_layers[0].active_render = True
+                    obj.data.uv_layers.active_index = 0
+                    obj.data.uv_layers.active_render_index = 0
                  
                 # 遍历该对象的所有 UV 通道（按通道顺序索引）
                 for index, uv_layer in enumerate(obj.data.uv_layers):
@@ -947,9 +947,9 @@ class SNA_OT_My_Generic_Operator_6F86E(bpy.types.Operator, ImportHelper):
             obj = bpy.context.active_object
             
             # 激活UV 0为渲染输出
-            if len(obj.data.uv_layers) > 0:
-                obj.data.uv_layers[0].active = True
-                obj.data.uv_layers[0].active_render = True
+            if len(obj.data.uv_layers) > 0: 
+                obj.data.uv_layers.active_index = 0
+                obj.data.uv_layers.active_render_index = 0
             
             # 遍历该对象的所有 UV 通道（按通道顺序索引）
             for index, uv_layer in enumerate(obj.data.uv_layers):
@@ -1024,8 +1024,8 @@ class SNA_OT_Uv_Name_Set_3Ead6(bpy.types.Operator):
                 
                 # 激活UV 0为渲染输出
                 if len(obj.data.uv_layers) > 0:
-                    obj.data.uv_layers[0].active = True
-                    obj.data.uv_layers[0].active_render = True
+                    obj.data.uv_layers.active_index = 0
+                    obj.data.uv_layers.active_render_index = 0
                 
                 # 遍历该对象的所有 UV 通道（按通道顺序索引）
                 for index, uv_layer in enumerate(obj.data.uv_layers):
